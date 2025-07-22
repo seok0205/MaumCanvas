@@ -1,9 +1,13 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://43.202.67.10:33068/tetonam?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    url: jdbc:mysql://43.202.67.10:33068/${MYSQL_DATABASE}?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: ${MYSQL_USER}
-    password: ${MYSQL_PASSWORD}
+    password: ${MYSQL_ROOT_PASSWORD}
+
+  redis:
+    host: redis
+    port: 6379
 
   jpa:
     database-platform: org.hibernate.dialect.MySQL8Dialect
