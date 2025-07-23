@@ -5,7 +5,6 @@ import com.example.tetonam.exception.handler.UserHandler;
 import com.example.tetonam.exception.handler.TokenHandler;
 import com.example.tetonam.user.domain.JwtToken;
 import com.example.tetonam.user.domain.User;
-import com.example.tetonam.user.domain.enums.Role;
 import com.example.tetonam.user.dto.UserDto;
 import com.example.tetonam.user.dto.ReissueDto;
 import com.example.tetonam.user.dto.SignUpDto;
@@ -14,6 +13,7 @@ import com.example.tetonam.user.token.JwtTokenProvider;
 import com.example.tetonam.response.code.status.ErrorStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -22,8 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +33,7 @@ public class UserService {
   private final AuthenticationManagerBuilder authenticationManagerBuilder;
   private final JwtTokenProvider jwtTokenProvider;
   private final PasswordEncoder passwordEncoder;
-//  private final RedisTemplate<String, String> redisTemplate;
+  private final RedisTemplate<String, String> redisTemplate;
 
   @Transactional
   public JwtToken signIn(String username, String password) {
@@ -49,8 +48,8 @@ public class UserService {
       JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
 
       // Refresh Token을 Redis에 저장
-//      redisTemplate.opsForValue()
-//              .set("RT:" + authentication.getName(), jwtToken.getRefreshToken(), jwtToken.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);
+      redisTemplate.opsForValue()
+              .set("RT:" + authentication.getName(), jwtToken.getRefreshToken(), jwtToken.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);
 
       log.info("[signIn] 로그인 성공: username = {}", username);
       return jwtToken;
@@ -80,11 +79,11 @@ public class UserService {
 
     // Password 암호화
     String encodedPassword = passwordEncoder.encode(signUpDto.getPassword());
-    List<Role> roles = new ArrayList<>();
-    roles.add(Role.USER);  // USER 권한 부여
+//    List<Role> roles = new ArrayList<>();
+//    roles.add(Role.USER);  // USER 권한 부여
 
     // 회원가입 성공 처리
-    UserDto userDto = UserDto.toDto(userRepository.save(signUpDto.toEntity(encodedPassword, roles)));
+    UserDto userDto = UserDto.toDto(userRepository.save(signUpDto.toEntity(signUpDto,encodedPassword)));
     log.info("[signUp] 회원가입 성공: username = {}", signUpDto.getEmail());
 
     return userDto;
@@ -93,6 +92,7 @@ public class UserService {
   public JwtToken reissue(ReissueDto reissueDto) {
     log.info("[reissue] 토큰 갱신 요청: accessToken = {}", reissueDto.getAccessToken());
 
+
     // RefreshToken 검증
     if (!jwtTokenProvider.validateToken(reissueDto.getRefreshToken())) {
       log.warn("[reissue] RefreshToken 유효하지 않음: refreshToken = {}", reissueDto.getRefreshToken());
@@ -100,21 +100,25 @@ public class UserService {
     }
 
     Authentication authentication = jwtTokenProvider.getAuthentication(reissueDto.getAccessToken());
-//    String refreshToken = (String) redisTemplate.opsForValue().get("RT:" + authentication.getName());
-//
-//    if (!refreshToken.equals(reissueDto.getRefreshToken())) {
-//      log.warn("[reissue] RefreshToken 불일치: username = {}", authentication.getName());
-//      throw new TokenHandler(ErrorStatus.REFRESH_TOKEN_NOT_MATCH);
-//    }
+    String refreshToken = (String) redisTemplate.opsForValue().get("RT:" + authentication.getName());
+
+    if(refreshToken==null){
+      throw new TokenHandler(ErrorStatus.REFRESH_TOKEN_EXPIRED);
+    }
+
+    if (!refreshToken.equals(reissueDto.getRefreshToken())) {
+      log.warn("[reissue] RefreshToken 불일치: username = {}", authentication.getName());
+      throw new TokenHandler(ErrorStatus.REFRESH_TOKEN_NOT_MATCH);
+    }
 
     // 새 JWT 토큰 생성
     JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
 
     // RefreshToken Redis 업데이트
-//    redisTemplate.opsForValue()
-//            .set("RT:" + authentication.getName(), jwtToken.getRefreshToken(), jwtToken.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);
-//
-//    log.info("[reissue] 토큰 갱신 성공: username = {}", authentication.getName());
+    redisTemplate.opsForValue()
+            .set("RT:" + authentication.getName(), jwtToken.getRefreshToken(), jwtToken.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);
+
+    log.info("[reissue] 토큰 갱신 성공: username = {}", authentication.getName());
     return jwtToken;
   }
 

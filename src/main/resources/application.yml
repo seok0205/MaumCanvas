@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://43.202.67.10:33068/tetonam?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    url: jdbc:mysql://43.202.67.10:3307/tetonam?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: "root"
     password: "ssafy108"
 
@@ -14,6 +14,9 @@ spring:
     properties:
       hibernate:
         globally_quoted_identifiers: true
+mail:
+  username: jj99526@gmail.com
+  password: iiyw avuq cqms ezwp
 
 jwt:
   secret : upRb3244Zp+WmAEt/qCnLnhBEvIu4xc3u+nqF/KdjiJ/dImoYrOfd7GYSy0L3o6zWnz+9BgcjjhiN5mw9Y241A==
