@@ -34,8 +34,8 @@ public enum ErrorStatus implements BaseErrorCode {
     USER_ID_IN_USE(HttpStatus.BAD_REQUEST, "USER4000", "사용중인 이메일 입니다."),
     USER_ID_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER4004", "아이디를 잘못 입력했습니다"),
     USER_NICKNAME_IN_USE(HttpStatus.BAD_REQUEST, "USER4001", "사용중인 닉네임 입니다"),
-    MASTER_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER4002", "해당 유저가 없습니다"),
-    MASTER_NOT_AUTHORITY(HttpStatus.UNAUTHORIZED, "USER4002", "권한이 없습니다"),
+    USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER4002", "해당 유저가 없습니다"),
+    USER_NOT_AUTHORITY(HttpStatus.UNAUTHORIZED, "USER4002", "권한이 없습니다"),
     USER_INVALID_CREDENTIALS(HttpStatus.BAD_REQUEST, "USER4003", "로그인 정보가 일치하지 않습니다."),
 
     // mail 응답
