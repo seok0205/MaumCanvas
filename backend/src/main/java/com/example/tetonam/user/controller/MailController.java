@@ -11,8 +11,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
-@RestController("/mail")
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("/mail")
+
 public class MailController {
     private final MailSendService mailService;
 

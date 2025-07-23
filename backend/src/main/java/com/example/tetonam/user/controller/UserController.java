@@ -32,6 +32,18 @@ public class UserController {
     return ResponseEntity.ok().body(ApiResponse.onSuccess(nickname));
   }
 
+  @PostMapping("/email-duplicate-check")
+  public ResponseEntity<?> checkEmailDuplicate(@RequestParam("email") String email) {
+    String result=userService.checkEmailDuplicate(email);
+    return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
+  }
+
+  @PostMapping("/nickname-duplicate-check")
+  public ResponseEntity<?> checknicknameDuplicate(@RequestParam("nickname") String nickname) {
+    String result=userService.checknicknameDuplicate(nickname);
+    return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
+  }
+
   @PostMapping("/sign-in")
   public ResponseEntity<?> signIn(@RequestBody SignInDto signInDto) {
     String email = signInDto.getEmail();
