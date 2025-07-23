@@ -6,7 +6,7 @@ services:
     container_name: mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
     ports:
       - "3307:3306"
@@ -21,9 +21,15 @@ services:
   redis:
     image: redis:7
     container_name: redis
+    # localhost로 연결할 경우
+    # ports:
+    #   - "6379:6379"
+    # redis 포트 외부 노출 방지
+    expose:
+      - "6379"
+    volumes:
+      - redis_data:/data
     restart: always
-    ports:
-      - "6379:6379"
 
   app:
     build:
@@ -46,3 +52,4 @@ services:
 
 volumes:
   mysql_data:
+  redis_data:
