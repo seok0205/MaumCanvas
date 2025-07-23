@@ -27,6 +27,8 @@ services:
     # redis 포트 외부 노출 방지
     expose:
       - "6379"
+    volumes:
+      - redis_data:/data
     restart: always
 
   app:
