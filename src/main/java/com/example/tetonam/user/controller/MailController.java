@@ -11,19 +11,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
-@RestController
+@RestController("/mail")
 @RequiredArgsConstructor
 public class MailController {
     private final MailSendService mailService;
 
-    @PostMapping("/mail-send")
+    @PostMapping("/send")
     public ResponseEntity<?> mailSend(@RequestBody @Valid EmailRequestDto emailDto) {
         String code=mailService.joinEmail(emailDto.getEmail());
 
         return ResponseEntity.ok().body(ApiResponse.onSuccess(code));
     }
 
-    @PostMapping("/mail-auth-check")
+    @PostMapping("/auth-check")
     public ResponseEntity<?> AuthCheck(@RequestBody @Valid EmailCheckDto emailCheckDto){
         String Checked=mailService.CheckAuthNum(emailCheckDto.getEmail(),emailCheckDto.getAuthNum());
         return ResponseEntity.ok().body(ApiResponse.onSuccess(Checked));
