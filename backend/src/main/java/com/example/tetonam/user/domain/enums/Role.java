@@ -2,7 +2,8 @@ package com.example.tetonam.user.domain.enums;
 
 public enum Role {
   ADMIN("ROLE_ADMIN"),
-  USER("ROLE_USER");
+  USER("ROLE_USER"),
+  COUNSELOR("ROLE_COUNSELOR");
 
   private final String roleName;
 

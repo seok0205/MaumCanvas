@@ -18,6 +18,9 @@ spring:
     properties:
       hibernate:
         globally_quoted_identifiers: true
+mail:
+  username: jj99526@gmail.com
+  password: iiyw avuq cqms ezwp
 
 jwt:
   secret : ${JWT_SECRET}

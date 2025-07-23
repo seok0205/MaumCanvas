@@ -1,6 +1,7 @@
 package com.example.tetonam.user.domain;
 
 
+import com.example.tetonam.user.domain.enums.Gender;
 import com.example.tetonam.user.domain.enums.Role;
 import com.example.tetonam.util.BaseTime;
 import jakarta.persistence.*;
@@ -35,7 +36,20 @@ public class User extends BaseTime implements UserDetails {
   @Column(nullable = false)
   private String nickname;
 
+  @Column(nullable = false)
+  private String name;
 
+  @Column(nullable = false)
+  private Gender gender; // 성별
+
+  @Column(nullable = false)
+  private String phone; // 휴대폰
+
+  @Column(nullable = false)
+  private String school; // 학교
+
+  @Column(nullable = false)
+  private String birthday; // 생일
 
   @ElementCollection(fetch = FetchType.EAGER)
   @Builder.Default
