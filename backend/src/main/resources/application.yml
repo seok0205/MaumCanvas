@@ -1,0 +1,29 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://43.202.67.10:33068/${MYSQL_DATABASE}?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: ${MYSQL_USER}
+    password: ${MYSQL_ROOT_PASSWORD}
+
+  redis:
+    host: redis
+    port: 6379
+
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    show-sql: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        globally_quoted_identifiers: true
+mail:
+  username: jj99526@gmail.com
+  password: iiyw avuq cqms ezwp
+
+jwt:
+  secret : ${JWT_SECRET}
+server:
+  address: 0.0.0.0
+  port: 8080
