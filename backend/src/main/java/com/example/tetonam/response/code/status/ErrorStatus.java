@@ -31,7 +31,7 @@ public enum ErrorStatus implements BaseErrorCode {
     NO_AUTHENTICATION_INFORMATION(HttpStatus.UNAUTHORIZED,"TOKEN4008","인증 정보가 없는 토큰입니다."),
 
     // user 응답
-    USER_ID_IN_USE(HttpStatus.BAD_REQUEST, "USER4000", "사용중인 유저아이디 입니다."),
+    USER_ID_IN_USE(HttpStatus.BAD_REQUEST, "USER4000", "사용중인 이메일 입니다."),
     USER_ID_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER4004", "아이디를 잘못 입력했습니다"),
     USER_NICKNAME_IN_USE(HttpStatus.BAD_REQUEST, "USER4001", "사용중인 닉네임 입니다"),
     MASTER_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER4002", "해당 유저가 없습니다"),
@@ -41,7 +41,11 @@ public enum ErrorStatus implements BaseErrorCode {
     // mail 응답
     MAIL_SEND_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "MAIL5000", "이메일 전송에 에러가 발생했습니다."),
     MAIL_NUMBER_IS_NULL(HttpStatus.BAD_REQUEST,"MAIL4000","인증번호를 입력해주세요"),
-    MAIL_NUMBER_IS_NOT_MATCH(HttpStatus.BAD_REQUEST,"MAIL4000","인증번호가 틀렸습니다")
+    MAIL_NUMBER_IS_NOT_MATCH(HttpStatus.BAD_REQUEST,"MAIL4000","인증번호가 틀렸습니다"),
+
+    // school 응답
+    SCHOOL_NOT_FOUND(HttpStatus.BAD_REQUEST,"SCHOOL4000","해당 학교가 없습니다.")
+
     ;
 
 

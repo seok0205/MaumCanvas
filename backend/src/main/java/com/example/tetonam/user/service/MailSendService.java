@@ -62,8 +62,12 @@ public class MailSendService {
     }
 
 
-
-    // 메일확인
+    /**
+     * 메일 확인
+     * @param email
+     * @param authNum
+     * @return
+     */
     public String CheckAuthNum(String email, String authNum) {
         String code = (String) redisTemplate.opsForValue().get("MAIL:" + authNum);
         if (code == null) {

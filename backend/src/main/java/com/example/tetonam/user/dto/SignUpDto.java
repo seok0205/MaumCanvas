@@ -1,6 +1,7 @@
 package com.example.tetonam.user.dto;
 
 
+import com.example.tetonam.user.domain.School;
 import com.example.tetonam.user.domain.User;
 import com.example.tetonam.user.domain.enums.Gender;
 import com.example.tetonam.user.domain.enums.Role;
@@ -24,11 +25,11 @@ public class SignUpDto {
     private String name; // 이름
     private Gender gender; // 성별
     private String phone; // 휴대폰
-    private String school; // 학교
+    private School school; // 학교
     private String birthday; // 생일
     private List<Role> roles;
 
-    public User toEntity(SignUpDto signUpDto,String encodedPassword) {
+    public User toEntity(SignUpDto signUpDto,String encodedPassword,School school) {
 
         return User.builder()
                 .email(signUpDto.getEmail())
@@ -37,7 +38,7 @@ public class SignUpDto {
                 .name(signUpDto.getName())
                 .birthday(signUpDto.getBirthday())
                 .gender(signUpDto.getGender())
-                .school(signUpDto.getSchool())
+                .school(school)
                 .phone(signUpDto.getPhone())
                 .roles(signUpDto.getRoles())
                 .build();

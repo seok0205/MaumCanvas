@@ -45,8 +45,9 @@ public class User extends BaseTime implements UserDetails {
   @Column(nullable = false)
   private String phone; // 휴대폰
 
-  @Column(nullable = false)
-  private String school; // 학교
+  @JoinColumn(name="school_name")
+  @ManyToOne
+  private School school; // 학교
 
   @Column(nullable = false)
   private String birthday; // 생일

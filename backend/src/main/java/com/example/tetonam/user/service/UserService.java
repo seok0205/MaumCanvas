@@ -4,10 +4,12 @@ package com.example.tetonam.user.service;
 import com.example.tetonam.exception.handler.UserHandler;
 import com.example.tetonam.exception.handler.TokenHandler;
 import com.example.tetonam.user.domain.JwtToken;
+import com.example.tetonam.user.domain.School;
 import com.example.tetonam.user.domain.User;
 import com.example.tetonam.user.dto.UserDto;
 import com.example.tetonam.user.dto.ReissueDto;
 import com.example.tetonam.user.dto.SignUpDto;
+import com.example.tetonam.user.repository.SchoolRepository;
 import com.example.tetonam.user.repository.UserRepository;
 import com.example.tetonam.user.token.JwtTokenProvider;
 import com.example.tetonam.response.code.status.ErrorStatus;
@@ -34,6 +36,8 @@ public class UserService {
   private final JwtTokenProvider jwtTokenProvider;
   private final PasswordEncoder passwordEncoder;
   private final RedisTemplate<String, String> redisTemplate;
+  private final SchoolRepository schoolRepository;
+
 
   @Transactional
   public JwtToken signIn(String username, String password) {
@@ -66,24 +70,19 @@ public class UserService {
   public UserDto signUp(SignUpDto signUpDto) {
     log.info("[signUp] 회원가입 요청: username = {}", signUpDto.getEmail());
 
-    // 중복된 사용자명 및 닉네임 체크
-    if (userRepository.existsByEmail(signUpDto.getEmail())) {
-      log.warn("[signUp] 사용자명 중복: username = {}", signUpDto.getEmail());
-      throw new UserHandler(ErrorStatus.USER_ID_IN_USE);
-    }
-
-    if (userRepository.existsByNickname(signUpDto.getNickname())) {
-      log.warn("[signUp] 닉네임 중복: nickname = {}", signUpDto.getNickname());
-      throw new UserHandler(ErrorStatus.USER_NICKNAME_IN_USE);
-    }
-
     // Password 암호화
     String encodedPassword = passwordEncoder.encode(signUpDto.getPassword());
 //    List<Role> roles = new ArrayList<>();
 //    roles.add(Role.USER);  // USER 권한 부여
 
+    System.out.println(signUpDto.getSchool().getName()+"dto ");
+
+    School s=schoolRepository.findById(signUpDto.getSchool().getName())
+            .orElseThrow(()-> new UserHandler(ErrorStatus.SCHOOL_NOT_FOUND));
+
+    System.out.println(s.getName()+"DB");
     // 회원가입 성공 처리
-    UserDto userDto = UserDto.toDto(userRepository.save(signUpDto.toEntity(signUpDto,encodedPassword)));
+    UserDto userDto = UserDto.toDto(userRepository.save(signUpDto.toEntity(signUpDto,encodedPassword,s)));
     log.info("[signUp] 회원가입 성공: username = {}", signUpDto.getEmail());
 
     return userDto;
@@ -126,5 +125,22 @@ public class UserService {
     User user = userRepository.findByEmail(email)
             .orElseThrow(()-> new UserHandler(ErrorStatus.MASTER_NOT_FOUND));
     return user.getNickname();
+  }
+
+  public String checkEmailDuplicate(String email) {
+    // 이메일 중복체크
+    if (userRepository.existsByEmail(email)) {
+      throw new UserHandler(ErrorStatus.USER_ID_IN_USE);
+    }
+    return "사용가능한 이메일입니다";
+
+  }
+
+  public String checknicknameDuplicate(String nickname) {
+    // 닉네임 중복체크
+    if (userRepository.existsByNickname(nickname)) {
+      throw new UserHandler(ErrorStatus.USER_NICKNAME_IN_USE);
+    }
+    return "사용가능한 닉네임입니다";
   }
 }
