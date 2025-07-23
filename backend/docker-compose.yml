@@ -21,6 +21,9 @@ services:
   redis:
     image: redis:7
     container_name: redis
+    # localhost로 연결할 경우
+    # ports:
+    #   - "6379:6379"
     # redis 포트 외부 노출 방지
     expose:
       - "6379"
