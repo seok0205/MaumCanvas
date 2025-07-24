@@ -2,10 +2,7 @@ package com.example.tetonam.user.controller;
 
 
 import com.example.tetonam.user.domain.JwtToken;
-import com.example.tetonam.user.dto.UserDto;
-import com.example.tetonam.user.dto.ReissueDto;
-import com.example.tetonam.user.dto.SignInDto;
-import com.example.tetonam.user.dto.SignUpDto;
+import com.example.tetonam.user.dto.*;
 import com.example.tetonam.user.service.UserService;
 import com.example.tetonam.user.token.JwtTokenProvider;
 import com.example.tetonam.response.ApiResponse;
@@ -100,11 +97,10 @@ public class UserController {
         JwtToken jwtToken = userService.reissue(reissueDto);
         return ResponseEntity.ok().body(ApiResponse.onSuccess(jwtToken));
     }
-//    @PatchMapping("/password")
-//    public ResponseEntity<?> resetPassword(@RequestBody SignInDto signInDto) {
-//        // 토큰 재발급 처리
-//        JwtToken jwtToken = userService.reissue(reissueDto);
-//        return ResponseEntity.ok().body(ApiResponse.onSuccess(jwtToken));
-//    }
+    @PatchMapping("/password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordDto resetPasswordDto) {
+        String result=userService.resetPassword(resetPasswordDto);
+        return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
+    }
 
 }

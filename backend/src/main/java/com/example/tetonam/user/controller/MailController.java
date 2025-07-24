@@ -20,9 +20,10 @@ public class MailController {
 
     @PostMapping("/send")
     public ResponseEntity<?> mailSend(@RequestBody @Valid EmailRequestDto emailDto) {
-        String code=mailService.joinEmail(emailDto.getEmail());
+//        String code=mailService.joinEmail(emailDto.getEmail());
+        mailService.joinEmail(emailDto.getEmail());
 
-        return ResponseEntity.ok().body(ApiResponse.onSuccess(code));
+        return ResponseEntity.ok().body(ApiResponse.onSuccess("메일이 전송되었습니다"));
     }
 
     @PostMapping("/auth-check")

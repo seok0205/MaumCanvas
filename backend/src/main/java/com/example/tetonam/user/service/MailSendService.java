@@ -1,18 +1,18 @@
 package com.example.tetonam.user.service;
 
-import com.example.tetonam.config.RedisRepositoryConfig;
 import com.example.tetonam.exception.handler.MailHandler;
 import com.example.tetonam.response.code.status.ErrorStatus;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -42,7 +42,8 @@ public class MailSendService {
      * @return
      */
     //mail을 어디서 보내는지, 어디로 보내는지 , 인증 번호를 html 형식으로 어떻게 보내는지 작성합니다.
-    public String joinEmail(String email) {
+    @Async
+    public void joinEmail(String email) {
         makeRandomNumber();
         String setFrom = "jj99526@naver.com"; // email-config에 설정한 자신의 이메일 주소를 입력
         String toMail = email;
@@ -53,17 +54,18 @@ public class MailSendService {
                         "인증 번호는 " + authNumber + "입니다." +
                         "<br>" +
                         "인증번호를 제대로 입력해주세요"; //이메일 내용 삽입
+
         // 이메일보내기
         mailSend(setFrom, toMail, title, content);
         // 레디스 저장
         redisTemplate.opsForValue().set("MAIL:" + authNumber, toMail, 3, TimeUnit.MINUTES);
 
-        return Integer.toString(authNumber);
     }
 
 
     /**
      * 메일 확인
+     *
      * @param email
      * @param authNum
      * @return
@@ -71,9 +73,15 @@ public class MailSendService {
     public String CheckAuthNum(String email, String authNum) {
         String code = (String) redisTemplate.opsForValue().get("MAIL:" + authNum);
         if (code == null) {
-            throw new MailHandler(ErrorStatus.MAIL_NUMBER_IS_NULL);
+            throw new MailHandler(ErrorStatus.MAIL_NUMBER_IS_NOT_MATCH);
         } else if (code.equals(email)) {
-            return "인증 되었습니다.";
+            String uuid=UUID.randomUUID().toString();
+            // 5분안에 안할시 세션종료
+            redisTemplate.opsForValue().set("UUID:" + uuid, email, 5, TimeUnit.MINUTES);
+            redisTemplate.delete("MAIL:" + authNum);
+
+            return uuid;
+
         } else {
             throw new MailHandler(ErrorStatus.MAIL_NUMBER_IS_NOT_MATCH);
         }
@@ -89,6 +97,7 @@ public class MailSendService {
     public void mailSend(String setFrom, String toMail, String title, String content) {
         MimeMessage message = mailSender.createMimeMessage();//JavaMailSender 객체를 사용하여 MimeMessage 객체를 생성
         try {
+
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "utf-8");//이메일 메시지와 관련된 설정을 수행합니다.
             // true를 전달하여 multipart 형식의 메시지를 지원하고, "utf-8"을 전달하여 문자 인코딩을 설정
             helper.setFrom(setFrom);//이메일의 발신자 주소 설정

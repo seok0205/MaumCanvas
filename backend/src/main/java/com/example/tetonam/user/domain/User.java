@@ -63,6 +63,10 @@ public class User extends BaseTime implements UserDetails {
         .collect(Collectors.toList());
   }
 
+  public void setPassword(String password) {
+    this.password = password;
+  }
+
   @Override
   public String getUsername() {
     return this.email;

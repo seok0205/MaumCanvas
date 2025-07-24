@@ -1,4 +1,4 @@
-package com.example.tetonam.user.config;
+package com.example.tetonam.config;
 
 
 import com.example.tetonam.user.filter.JwtAuthenticationFilter;
