@@ -35,8 +35,8 @@ import java.util.stream.Collectors;
 public class JwtTokenProvider {
     private final Key key;
     private static final long REFRESH_TOKEN_EXPIRE_TIME = 7 * 24 * 60 * 60 * 1000L;
-//    private static final long ACCESS_TOKEN_EXPIRE_TIME = 30 * 60 * 1000L;
-    private static final long ACCESS_TOKEN_EXPIRE_TIME = 30 * 10 ;
+    private static final long ACCESS_TOKEN_EXPIRE_TIME = 30 * 60 * 1000L;
+//    private static final long ACCESS_TOKEN_EXPIRE_TIME = 30 * 10 ;
 
     // application.yml에서 secret 값 가져와서 key에 저장
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey) {
@@ -139,7 +139,7 @@ public class JwtTokenProvider {
         }
     }
 
-    public String getUserName(String token) {
+    public String getEmail(String token) {
 
         return Jwts.parserBuilder()
                 .setSigningKey(key)

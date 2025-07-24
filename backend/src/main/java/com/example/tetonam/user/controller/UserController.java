@@ -29,7 +29,7 @@ public class UserController {
      */
     @GetMapping("/my-nickname")
     public ResponseEntity<?> findNickname(@RequestHeader("Authorization") String token) {
-        String email = jwtTokenProvider.getUserName(token.substring(7));
+        String email = jwtTokenProvider.getEmail(token.substring(7));
         String nickname = userService.findByNickname(email);
         return ResponseEntity.ok().body(ApiResponse.onSuccess(nickname));
     }
