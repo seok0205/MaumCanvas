@@ -22,6 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+secrets
 
 ### macOS ###
 # General
@@ -116,3 +117,8 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# Environment files (모든 환경변수 파일 제외)
+.env
+.env.*
+env.*
