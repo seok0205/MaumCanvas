@@ -6,12 +6,12 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: true,
-    port: 8080,
+    port: parseInt(process.env.VITE_DEV_PORT || "3000"),
     strictPort: true,
   },
   preview: {
     host: true,
-    port: 8080,
+    port: parseInt(process.env.VITE_DEV_PORT || "3000"),
     strictPort: true,
   },
 });
