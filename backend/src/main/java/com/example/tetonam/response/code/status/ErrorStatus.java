@@ -44,8 +44,12 @@ public enum ErrorStatus implements BaseErrorCode {
     MAIL_NUMBER_IS_NOT_MATCH(HttpStatus.BAD_REQUEST,"MAIL4000","인증번호가 틀렸습니다"),
 
     // school 응답
-    SCHOOL_NOT_FOUND(HttpStatus.BAD_REQUEST,"SCHOOL4000","해당 학교가 없습니다.")
+    SCHOOL_NOT_FOUND(HttpStatus.BAD_REQUEST,"SCHOOL4000","해당 학교가 없습니다."),
 
+
+    //AWS 응답
+    IMAGE_NOT_SAVE(HttpStatus.INTERNAL_SERVER_ERROR,"IMAGE5000","이미지를 저장할 수 없습니다 (S3 에러)"),
+    FILE_NOT_VALID(HttpStatus.BAD_REQUEST,"IMAGE4000","잘못된 형식의 파일 입니다")
     ;
 
 
