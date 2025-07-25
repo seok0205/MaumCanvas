@@ -1,0 +1,99 @@
+services:
+  # 프로덕션 환경 (Nginx + React)
+  web:
+    build:
+      context: .
+      target: production
+      dockerfile: ${DOCKERFILE}
+      args:
+        - "PORT=${PROD_PORT}"
+        - "SERVER_NAME=${PROD_SERVER_NAME}"
+        - "CSP_POLICY=${PROD_CSP_POLICY}"
+        - "USER_ID=${USER_ID}"
+        - "GROUP_ID=${GROUP_ID}"
+        - "USERNAME=${USERNAME}"
+        - "VITE_API_URL=${PROD_VITE_API_URL}"
+        - "VITE_ENV=${PROD_VITE_ENV}"
+        - "VITE_NODE_ENV=${PROD_VITE_NODE_ENV}"
+        - "VITE_APP_PORT=${PROD_VITE_APP_PORT}"
+        - "VITE_APP_NAME=${PROD_VITE_APP_NAME}"
+        - "VITE_APP_VERSION=${PROD_VITE_APP_VERSION}"
+    ports:
+      - "${PROD_EXPOSE_PORT}:${PROD_PORT}"
+    env_file:
+      - ${PROD_ENV_FILE}
+    environment:
+      - NODE_ENV=${PROD_NODE_ENV}
+      - VITE_NODE_ENV=${PROD_VITE_NODE_ENV}
+    networks:
+      - ${NETWORK_NAME}
+    restart: ${RESTART_POLICY}
+    container_name: ${PROD_CONTAINER_NAME}
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:${PROD_PORT}/",
+        ]
+      interval: ${HEALTHCHECK_INTERVAL}
+      timeout: ${HEALTHCHECK_TIMEOUT}
+      retries: ${HEALTHCHECK_RETRIES}
+      start_period: ${HEALTHCHECK_START_PERIOD}
+
+  # 개발 환경 (Vite Dev Server)
+  dev:
+    build:
+      context: .
+      target: development
+      dockerfile: ${DOCKERFILE}
+      args:
+        - "USER_ID=${USER_ID}"
+        - "GROUP_ID=${GROUP_ID}"
+        - "USERNAME=${USERNAME}"
+        - "VITE_API_URL=${DEV_VITE_API_URL}"
+        - "VITE_ENV=${DEV_VITE_ENV}"
+        - "VITE_NODE_ENV=${DEV_VITE_NODE_ENV}"
+        - "VITE_APP_PORT=${DEV_VITE_APP_PORT}"
+        - "VITE_APP_NAME=${DEV_VITE_APP_NAME}"
+        - "VITE_APP_VERSION=${DEV_VITE_APP_VERSION}"
+    ports:
+      - "${DEV_EXPOSE_PORT}:${DEV_PORT}"
+    env_file:
+      - ${DEV_ENV_FILE}
+    environment:
+      - NODE_ENV=${DEV_NODE_ENV}
+      - VITE_NODE_ENV=${DEV_VITE_NODE_ENV}
+      - VITE_DEV_PORT=${DEV_PORT}
+    volumes:
+      - ${SOURCE_PATH}:/app # 소스코드 실시간 반영
+      - ${NODE_MODULES_VOLUME} # node_modules 보호
+      - ${DIST_VOLUME} # 빌드 결과 보호
+    networks:
+      - ${NETWORK_NAME}
+    restart: ${RESTART_POLICY}
+    container_name: ${DEV_CONTAINER_NAME}
+    stdin_open: true # Docker compose up -d 시에도 개발 서버 유지
+    tty: true
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:${DEV_PORT}/",
+        ]
+      interval: ${HEALTHCHECK_INTERVAL}
+      timeout: ${HEALTHCHECK_TIMEOUT}
+      retries: ${HEALTHCHECK_RETRIES}
+      start_period: ${HEALTHCHECK_START_PERIOD}
+
+networks:
+  tetonam-network:
+    driver: ${NETWORK_DRIVER}
+    name: ${NETWORK_NAME}
