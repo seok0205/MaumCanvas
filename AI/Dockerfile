@@ -2,13 +2,17 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# 시스템 패키지 설치 (matplotlib 등 빌드용)
+# 시스템 패키지 설치 (matplotlib/openCV등 빌드용 -> GUI의존에서 리눅스기반에서 사용하려면 필요)
 RUN apt-get update && apt-get install -y \
     gcc \
     libfreetype6-dev \
     libpng-dev \
     pkg-config \
+    libgl1 \
+    libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
+
+
 
 COPY requirements.txt .
 RUN pip install --upgrade pip
