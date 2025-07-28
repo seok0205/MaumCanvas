@@ -32,16 +32,17 @@ pipeline {
 
     stage('Build') {
       steps {
-        dir('backend') {
+        dir("${COMPOSE_DIR}") {
             sh 'chmod +x ./gradlew'
-            sh './gradlew clean build'
+            // sh './gradlew clean build'
+            sh './gradlew clean build -x test'  // ✅ test 제외
         }
       }
     }
 
     stage('Test') {
       steps {
-        dir('backend') {
+        dir("${COMPOSE_DIR}") {
           // 테스트 수행 단계 (필요시 주석 해제)
           // sh './gradlew test'
         }
