@@ -4,6 +4,7 @@ package com.example.tetonam.counseling.service;
 import com.example.tetonam.counseling.domain.Counseling;
 import com.example.tetonam.counseling.domain.enums.Status;
 import com.example.tetonam.counseling.dto.CounselingPossibleCounselorResponseDto;
+import com.example.tetonam.counseling.dto.CounselingReserveRequestDto;
 import com.example.tetonam.counseling.repository.CounselingRepository;
 import com.example.tetonam.exception.handler.UserHandler;
 import com.example.tetonam.response.code.status.ErrorStatus;
@@ -35,18 +36,16 @@ public class CounselingService {
         return counselorList.stream().map(CounselingPossibleCounselorResponseDto::toDto).collect(Collectors.toList());
     }
 
-    public String createCounseling(String email, LocalDateTime time, Long userId) {
+    public String createCounseling(String email, CounselingReserveRequestDto counselingReserveRequestDto) {
+        // 예외처리 필요할 수도 있음
+
+
         User student=userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
-        User counselor=userRepository.findById(userId)
+        User counselor=userRepository.findById(counselingReserveRequestDto.getCounselorId())
                 .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
 
-        Counseling counseling= Counseling.builder()
-                .counselor(counselor)
-                .student(student)
-                .reservationTime(time)
-                .status(Status.OPEN)
-                .build();
+        Counseling counseling=CounselingReserveRequestDto.toEntity(student,counselor,counselingReserveRequestDto);
         counselingRepository.save(counseling);
         return "상담이 예약 되었습니다";
     }

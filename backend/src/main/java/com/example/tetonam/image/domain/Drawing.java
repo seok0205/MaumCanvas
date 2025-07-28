@@ -35,7 +35,7 @@ public class Drawing extends BaseTime {
     private String humanImageSecondUrl;
 
     @JoinColumn(name="user_id")
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
 
