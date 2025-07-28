@@ -1,11 +1,8 @@
 package com.example.tetonam.counseling.controller;
 
-import com.example.tetonam.counseling.dto.CounselorResponseDto;
+import com.example.tetonam.counseling.dto.CounselingPossibleCounselorResponseDto;
+import com.example.tetonam.counseling.dto.CounselingReserveRequestDto;
 import com.example.tetonam.counseling.service.CounselingService;
-import com.example.tetonam.diagnosis.domain.enums.Category;
-import com.example.tetonam.diagnosis.dto.ShowAllQuestionnaireDto;
-import com.example.tetonam.diagnosis.dto.ShowCategoryQuestionnaireDto;
-import com.example.tetonam.diagnosis.service.SurveyService;
 import com.example.tetonam.response.ApiResponse;
 import com.example.tetonam.user.token.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +22,14 @@ public class CounselingController {
     @GetMapping("")
     public ResponseEntity<?> showPossibleCounselor(@RequestHeader("Authorization") String token, @RequestParam LocalDateTime time) {
         String email = jwtTokenProvider.getEmail(token.substring(7));
-        List<CounselorResponseDto> result=counselingService.showPossibleCounselor(email,time);
+        List<CounselingPossibleCounselorResponseDto> result=counselingService.showPossibleCounselor(email,time);
+        return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
+    }
+
+    @PostMapping("")
+    public ResponseEntity<?> createCounseling(@RequestHeader("Authorization") String token, @RequestBody CounselingReserveRequestDto counselingReserveRequestDto) {
+        String email = jwtTokenProvider.getEmail(token.substring(7));
+        String result=counselingService.createCounseling(email,counselingReserveRequestDto);
         return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
     }
 

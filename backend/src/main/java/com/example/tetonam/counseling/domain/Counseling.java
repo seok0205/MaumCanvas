@@ -27,12 +27,15 @@ public class Counseling extends BaseTime {
     private LocalDateTime reservationTime;
 
     @JoinColumn(name="student_id")
-    @ManyToOne
-    private User student; // 학교
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User student; // 학생
 
     @JoinColumn(name="counselor_id")
-    @ManyToOne
-    private User counselor; // 학교
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User counselor; // 상담사
+
+    @Column(nullable = false)
+    private String types;
 
     @Column
     @Enumerated(EnumType.STRING)

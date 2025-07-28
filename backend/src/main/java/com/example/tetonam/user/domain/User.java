@@ -46,7 +46,7 @@ public class User extends BaseTime implements UserDetails {
   private String phone; // 휴대폰
 
   @JoinColumn(name="school_name")
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   private School school; // 학교
 
   @Column(nullable = false)
