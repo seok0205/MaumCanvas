@@ -102,7 +102,7 @@ pipeline {
       echo "✅ 배포 성공: $IMAGE_NAME has been built and deployed."
     }
     failure {
-      echo "❌ 배포 실패: 오류가 발생했습니다!"
+      echo "배포 실패: 오류가 발생했습니다!"
     }
   }
 }
