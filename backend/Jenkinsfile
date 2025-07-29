@@ -32,7 +32,7 @@ pipeline {
 
     stage('Build') {
       steps {
-        dir("${COMPOSE_DIR}") {
+        dir("backend") {
             sh 'chmod +x ./gradlew'
             // sh './gradlew clean build'
             sh './gradlew clean build -x test'  // ✅ test 제외
@@ -42,7 +42,7 @@ pipeline {
 
     stage('Test') {
       steps {
-        dir("${COMPOSE_DIR}") {
+        dir("backend") {
           // 테스트 수행 단계 (필요시 주석 해제)
           // sh './gradlew test'
         }
@@ -51,7 +51,7 @@ pipeline {
 
     stage('Docker Compose Rebuild') {
       steps {
-        dir("${COMPOSE_DIR}") {
+        dir("backend") {
           withCredentials([
             string(credentialsId: 'DB_USER', variable: 'DB_USER'),
             string(credentialsId: 'DB_PASS', variable: 'DB_PASS'),
@@ -73,7 +73,7 @@ pipeline {
 
     stage('Docker Image Push') {
       steps {
-        dir("${COMPOSE_DIR}") {
+        dir("backend") {
           withCredentials([
             usernamePassword(
               credentialsId: 'dockerhub-creds',
