@@ -49,7 +49,11 @@ public enum ErrorStatus implements BaseErrorCode {
 
     //AWS 응답
     IMAGE_NOT_SAVE(HttpStatus.INTERNAL_SERVER_ERROR,"IMAGE5000","이미지를 저장할 수 없습니다 (S3 에러)"),
-    FILE_NOT_VALID(HttpStatus.BAD_REQUEST,"IMAGE4000","잘못된 형식의 파일 입니다")
+    FILE_NOT_VALID(HttpStatus.BAD_REQUEST,"IMAGE4000","잘못된 형식의 파일 입니다"),
+
+    //상담 예약 응답
+    ALREADY_RESERVED(HttpStatus.BAD_REQUEST,"COUNSELING4000","이미 예약된 시간입니다.")
+
     ;
 
 

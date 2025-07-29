@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -19,6 +20,9 @@ public class CounselingController {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final CounselingService counselingService;
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
+
+
     @GetMapping("")
     public ResponseEntity<?> showPossibleCounselor(@RequestHeader("Authorization") String token, @RequestParam LocalDateTime time) {
         String email = jwtTokenProvider.getEmail(token.substring(7));
@@ -29,7 +33,9 @@ public class CounselingController {
     @PostMapping("")
     public ResponseEntity<?> createCounseling(@RequestHeader("Authorization") String token, @RequestBody CounselingReserveRequestDto counselingReserveRequestDto) {
         String email = jwtTokenProvider.getEmail(token.substring(7));
-        String result=counselingService.createCounseling(email,counselingReserveRequestDto);
+//        String result=counselingService.createCounseling(email,counselingReserveRequestDto);
+        String lockKey="counselor:" + counselingReserveRequestDto.getCounselorId() + ":time:" + counselingReserveRequestDto.getTime().format(FORMATTER);
+        String result=counselingService.createCounselingWithLock(email,counselingReserveRequestDto,lockKey);
         return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
     }
 

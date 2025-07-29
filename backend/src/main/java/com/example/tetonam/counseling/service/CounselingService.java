@@ -6,16 +6,20 @@ import com.example.tetonam.counseling.domain.enums.Status;
 import com.example.tetonam.counseling.dto.CounselingPossibleCounselorResponseDto;
 import com.example.tetonam.counseling.dto.CounselingReserveRequestDto;
 import com.example.tetonam.counseling.repository.CounselingRepository;
+import com.example.tetonam.exception.handler.CounselingHandler;
 import com.example.tetonam.exception.handler.UserHandler;
 import com.example.tetonam.response.code.status.ErrorStatus;
 import com.example.tetonam.user.domain.School;
 import com.example.tetonam.user.domain.User;
 import com.example.tetonam.user.domain.enums.Role;
 import com.example.tetonam.user.repository.UserRepository;
+import com.example.tetonam.util.aop.DistributedLock;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,17 +40,45 @@ public class CounselingService {
         return counselorList.stream().map(CounselingPossibleCounselorResponseDto::toDto).collect(Collectors.toList());
     }
 
-    public String createCounseling(String email, CounselingReserveRequestDto counselingReserveRequestDto) {
-        // 예외처리 필요할 수도 있음 상담가능한 상담사가 없을시 예외처리
 
-
-        User student=userRepository.findByEmail(email)
+    @DistributedLock(key = "#lockKey")
+    public String createCounselingWithLock(String email, CounselingReserveRequestDto dto,String lockKey) {
+        User student = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
-        User counselor=userRepository.findById(counselingReserveRequestDto.getCounselorId())
+        User counselor = userRepository.findById(dto.getCounselorId())
                 .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
 
-        Counseling counseling=CounselingReserveRequestDto.toEntity(student,counselor,counselingReserveRequestDto);
+        // 락 키를 상담사ID + 예약시간(분단위로 포맷팅)으로 생성
+
+        // 락 키를 메서드 파라미터로 넘겨서 DistributedLock이 적용되게 함
+        return this.createCounselingInternal(lockKey, student, counselor, dto);
+    }
+
+    // 실제 예약 로직 분리
+    @Transactional
+    public String createCounselingInternal(String lockKey, User student, User counselor, CounselingReserveRequestDto dto) {
+        // 이미 예약 여부 체크
+        boolean isReserved = counselingRepository.existsByCounselorAndCounselingTime(counselor, dto.getTime());
+        if (isReserved) {
+            throw new CounselingHandler(ErrorStatus.ALREADY_RESERVED);
+        }
+
+        Counseling counseling = CounselingReserveRequestDto.toEntity(student, counselor, dto);
         counselingRepository.save(counseling);
         return "상담이 예약 되었습니다";
     }
+
+
+//    public String createCounseling(String email, CounselingReserveRequestDto counselingReserveRequestDto) {
+//        // 예외처리 필요할 수도 있음 상담가능한 상담사가 없을시 예외처리
+//
+//        User student=userRepository.findByEmail(email)
+//                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+//        User counselor=userRepository.findById(counselingReserveRequestDto.getCounselorId())
+//                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+//
+//        Counseling counseling=CounselingReserveRequestDto.toEntity(student,counselor,counselingReserveRequestDto);
+//        counselingRepository.save(counseling);
+//        return "상담이 예약 되었습니다";
+//    }
 }
