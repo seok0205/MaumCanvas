@@ -25,6 +25,20 @@ mail:
 
 jwt:
   secret : ${JWT_SECRET}
+
 server:
   address: 0.0.0.0
   port: 8080
+
+cloud:
+  aws:
+    credentials:
+      access-key: ${CLOUD_AWS_CREDENTIALS_ACCESS_KEY}
+      secret-key: ${CLOUD_AWS_CREDENTIALS_SECRET_KEY}
+    region:
+      static: ${CLOUD_AWS_REGION_STATIC}  # 버킷의 리전
+    s3:
+      bucket: tetonam  # 버킷 이름
+    stack:
+      auto: false
+    url: ${S3_URL}
