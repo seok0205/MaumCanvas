@@ -26,7 +26,7 @@ public class Survey extends BaseTime {
     private int score;
 
     @JoinColumn(name="user_id")
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private User user; // 학교
 
     @Column

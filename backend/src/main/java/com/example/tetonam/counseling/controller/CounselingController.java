@@ -1,6 +1,7 @@
 package com.example.tetonam.counseling.controller;
 
 import com.example.tetonam.counseling.dto.CounselingPossibleCounselorResponseDto;
+import com.example.tetonam.counseling.dto.CounselingReserveRequestDto;
 import com.example.tetonam.counseling.service.CounselingService;
 import com.example.tetonam.response.ApiResponse;
 import com.example.tetonam.user.token.JwtTokenProvider;
@@ -26,9 +27,9 @@ public class CounselingController {
     }
 
     @PostMapping("")
-    public ResponseEntity<?> createCounseling(@RequestHeader("Authorization") String token, @RequestParam("time") LocalDateTime time,@RequestParam("userId") Long userId) {
+    public ResponseEntity<?> createCounseling(@RequestHeader("Authorization") String token, @RequestBody CounselingReserveRequestDto counselingReserveRequestDto) {
         String email = jwtTokenProvider.getEmail(token.substring(7));
-        String result=counselingService.createCounseling(email,time,userId);
+        String result=counselingService.createCounseling(email,counselingReserveRequestDto);
         return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
     }
 
