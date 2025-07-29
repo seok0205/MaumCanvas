@@ -4,7 +4,7 @@ pipeline {
   environment {
     IMAGE_NAME = "backend_app"
     COMPOSE_DIR = "S13P11E108/backend"
-    JAVA_HOME = "/usr/lib/jvm/java-17-openjdk-amd64"
+    JAVA_HOME = "/usr/lib/jvm/java-17-openjdk-amd64"    // Java 17 경로 설정
     PATH = "/usr/lib/jvm/java-17-openjdk-amd64/bin:$PATH"
   }
 
