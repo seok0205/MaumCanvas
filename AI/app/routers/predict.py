@@ -9,7 +9,18 @@ router = APIRouter(prefix="/predict", tags=["Prediction"])
 
 # 미리 로드된 전역 모델 및 클래스
 from app.core.model_loader import model, class_names
+from app.utils.s3imageLoader import s3imageLoader
 
+#이미지 s3로 받을 때
+@router.post("/json")
+async def predict_json_s3(url):
+    img_np = s3imageLoader(url)
+    _, results = run_inference(img_np, model, class_names, visualize=False)
+    return {"num_detections": len(results), "detections": results}
+
+###########################################################################
+
+#이미지 업로드로 받을 때
 @router.post("/json")
 async def predict_json(file: UploadFile = File(...)):
     image_bytes = await file.read()
