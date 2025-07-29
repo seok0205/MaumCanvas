@@ -17,7 +17,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/iamge")
+@RequestMapping("/image")
 public class DrawingController {
     private final DrawingService drawingService;
     private final JwtTokenProvider jwtTokenProvider;
