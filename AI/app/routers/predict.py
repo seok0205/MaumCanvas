@@ -12,7 +12,7 @@ from app.core.model_loader import model, class_names
 from app.utils.s3imageLoader import s3imageLoader
 
 #이미지 s3로 받을 때
-@router.post("/json")
+@router.post("/json_s3")
 async def predict_json_s3(url):
     img_np = s3imageLoader(url)
     _, results = run_inference(img_np, model, class_names, visualize=False)
