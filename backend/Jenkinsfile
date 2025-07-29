@@ -1,12 +1,9 @@
 pipeline {
   agent any
+
   environment {
     IMAGE_NAME = "backend_app"
-    COMPOSE_DIR = "backend" // docker-compose.yml 경로
-  }
-
-  options {
-    // skipDefaultCheckout(true)
+    COMPOSE_DIR = "S13P11E108/backend"
   }
 
   triggers {
@@ -26,24 +23,26 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        checkout scm
+        sshagent (credentials: ['gerrit_jenkins_key']) {
+          sh 'rm -rf S13P11E108 || true'
+          sh 'git clone ssh://ssafy07@i13e108.p.ssafy.io:29418/S13P11E108.git'
+        }
       }
     }
 
     stage('Build') {
       steps {
-        dir("backend") {
-            sh 'chmod +x ./gradlew'
-            // sh './gradlew clean build'
-            sh './gradlew clean build -x test'  // ✅ test 제외
+        dir("${COMPOSE_DIR}") {
+          sh 'chmod +x ./gradlew'
+          sh './gradlew clean build -x test'
         }
       }
     }
 
     stage('Test') {
       steps {
-        dir("backend") {
-          // 테스트 수행 단계 (필요시 주석 해제)
+        dir("${COMPOSE_DIR}") {
+          // 테스트 수행 (필요시 주석 해제)
           // sh './gradlew test'
         }
       }
@@ -51,7 +50,7 @@ pipeline {
 
     stage('Docker Compose Rebuild') {
       steps {
-        dir("backend") {
+        dir("${COMPOSE_DIR}") {
           withCredentials([
             string(credentialsId: 'DB_USER', variable: 'DB_USER'),
             string(credentialsId: 'DB_PASS', variable: 'DB_PASS'),
@@ -73,7 +72,7 @@ pipeline {
 
     stage('Docker Image Push') {
       steps {
-        dir("backend") {
+        dir("${COMPOSE_DIR}") {
           withCredentials([
             usernamePassword(
               credentialsId: 'dockerhub-creds',
@@ -85,7 +84,6 @@ pipeline {
               def imageName = "${IMAGE_NAME}:latest"
               def dockerHubRepo = "${DOCKER_USER}/${IMAGE_NAME}:latest"
 
-              // 빌드 및 DockerHub로 푸시
               sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
               sh "docker build -t ${imageName} ."
               sh "docker tag ${imageName} ${dockerHubRepo}"
@@ -102,7 +100,7 @@ pipeline {
       echo "✅ 배포 성공: $IMAGE_NAME has been built and deployed."
     }
     failure {
-      echo "배포 실패: 오류가 발생했습니다!"
+      echo "❌ 배포 실패: 오류가 발생했습니다."
     }
   }
 }
