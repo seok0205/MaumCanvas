@@ -23,14 +23,24 @@ RUN --mount=type=cache,id=build,target=/app/.cache \
 # Production stage
 FROM nginx:alpine AS production
 
+# Create SSL directories
+# RUN mkdir -p /etc/ssl/certs /etc/ssl/private
+
+# Copy SSL certificates (will be mounted at runtime)
+# COPY ssl/i13e108.p.ssafy.io.crt /etc/ssl/certs/
+# COPY ssl/i13e108.p.ssafy.io.key /etc/ssl/private/
+
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Validate nginx configuration syntax
+RUN nginx -t
 
 # Copy built assets from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Expose port 80
-EXPOSE 80
+# Expose ports
+EXPOSE 3000
 
 # Start nginx
 CMD ["nginx", "-g", "daemon off;"]
