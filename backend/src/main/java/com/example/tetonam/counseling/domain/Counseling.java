@@ -28,11 +28,11 @@ public class Counseling extends BaseTime {
 
     @JoinColumn(name="student_id")
     @ManyToOne
-    private User student; // 학교
+    private User student; // 학생
 
     @JoinColumn(name="counselor_id")
     @ManyToOne
-    private User counselor; // 학교
+    private User counselor; // 상담사
 
     @Column
     @Enumerated(EnumType.STRING)
