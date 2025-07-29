@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/iamge")
+@RequestMapping("/image")
 public class ImageController {
     private final AwsS3Service awsS3Service;
 //    @PostMapping()
