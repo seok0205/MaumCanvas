@@ -58,10 +58,10 @@ pipeline {
             string(credentialsId: 'JWT_SECRET', variable: 'JWT_SECRET')
           ]) {
             withEnv([
-              "SPRING_DATASOURCE_USERNAME=${env.DB_USER}",
-              "SPRING_DATASOURCE_PASSWORD=${env.DB_PASS}",
+              "SPRING_DATASOURCE_USERNAME=$DB_USER",
+              "SPRING_DATASOURCE_PASSWORD=$DB_PASS",
               "MYSQL_DATABASE=tetonam",
-              "JWT_SECRET=${env.JWT_SECRET}"
+              "JWT_SECRET=$JWT_SECRET"
             ]) {
               sh 'docker-compose down'
               sh 'docker-compose up -d --build'
