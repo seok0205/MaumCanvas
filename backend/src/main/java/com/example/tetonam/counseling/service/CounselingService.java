@@ -37,7 +37,7 @@ public class CounselingService {
     }
 
     public String createCounseling(String email, CounselingReserveRequestDto counselingReserveRequestDto) {
-        // 예외처리 필요할 수도 있음
+        // 예외처리 필요할 수도 있음 상담가능한 상담사가 없을시 예외처리
 
 
         User student=userRepository.findByEmail(email)
