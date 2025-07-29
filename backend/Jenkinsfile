@@ -52,9 +52,46 @@ pipeline {
     stage('Docker Compose Rebuild') {
       steps {
         dir("${COMPOSE_DIR}") {
-          sh 'docker-compose down'
-          sh 'docker-compose build'
-          sh 'docker-compose up -d'
+          withCredentials([
+            string(credentialsId: 'DB_USER', variable: 'DB_USER'),
+            string(credentialsId: 'DB_PASS', variable: 'DB_PASS'),
+            string(credentialsId: 'JWT_SECRET', variable: 'JWT_SECRET')
+          ]) {
+            withEnv([
+              "SPRING_DATASOURCE_USERNAME=${env.DB_USER}",
+              "SPRING_DATASOURCE_PASSWORD=${env.DB_PASS}",
+              "MYSQL_DATABASE=tetonam",
+              "JWT_SECRET=${env.JWT_SECRET}"
+            ]) {
+              sh 'docker-compose down'
+              sh 'docker-compose up -d --build'
+            }
+          }
+        }
+      }
+    }
+
+    stage('Docker Image Push') {
+      steps {
+        dir("${COMPOSE_DIR}") {
+          withCredentials([
+            usernamePassword(
+              credentialsId: 'dockerhub-creds',
+              usernameVariable: 'DOCKER_USER',
+              passwordVariable: 'DOCKER_PASS'
+            )
+          ]) {
+            script {
+              def imageName = "${IMAGE_NAME}:latest"
+              def dockerHubRepo = "${DOCKER_USER}/${IMAGE_NAME}:latest"
+
+              // 빌드 및 DockerHub로 푸시
+              sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
+              sh "docker build -t ${imageName} ."
+              sh "docker tag ${imageName} ${dockerHubRepo}"
+              sh "docker push ${dockerHubRepo}"
+            }
+          }
         }
       }
     }
