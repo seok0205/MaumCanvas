@@ -2,22 +2,21 @@ import { z } from 'zod';
 
 // 폼 스키마 정의
 export const emailSchema = z.object({
-  email: z.string().email('올바른 이메일 주소를 입력해주세요'),
+  email: z.email({ message: '올바른 이메일 주소를 입력해주세요' }),
 });
 
 export const verificationSchema = z.object({
-  code: z.string().length(6, '인증 코드는 6자리입니다'),
+  code: z.string().length(6, { message: '인증 코드는 6자리입니다' }),
 });
 
 export const resetPasswordSchema = z
   .object({
     password: z
       .string()
-      .min(8, '비밀번호는 8자 이상이어야 합니다')
-      .regex(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-        '영문 대소문자, 숫자를 포함해야 합니다'
-      ),
+      .min(8, { message: '비밀번호는 8자 이상이어야 합니다' })
+      .regex(/^(?=.*[a-z])(?=.*\d)/, {
+        message: '영문 대소문자, 숫자를 포함해야 합니다',
+      }),
     confirmPassword: z.string(),
   })
   .refine(data => data.password === data.confirmPassword, {

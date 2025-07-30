@@ -39,23 +39,23 @@ import { useAuthStore } from '@/stores/useAuthStore';
 
 const registerSchema = z
   .object({
-    name: z.string().min(2, '이름은 2자 이상 입력해주세요'),
-    organization: z.string().min(2, '소속을 입력해주세요'),
-    birthDate: z.string().min(1, '생년월일을 입력해주세요'),
-    email: z.string().email('올바른 이메일 주소를 입력해주세요'),
+    name: z.string().min(2, { message: '이름은 2자 이상 입력해주세요' }),
+    organization: z.string().min(2, { message: '소속을 입력해주세요' }),
+    birthDate: z.string().min(1, { message: '생년월일을 입력해주세요' }),
+    email: z.email({ message: '올바른 이메일 주소를 입력해주세요' }),
     emailVerificationCode: z.string().optional(),
-    phone: z.string().min(10, '올바른 휴대폰 번호를 입력해주세요'),
+    phone: z.string().min(10, { message: '올바른 휴대폰 번호를 입력해주세요' }),
     password: z
       .string()
-      .min(8, '비밀번호는 8자 이상이어야 합니다')
-      .max(15, '비밀번호는 15자 이하여야 합니다')
+      .min(8, { message: '비밀번호는 8자 이상이어야 합니다' })
+      .max(15, { message: '비밀번호는 15자 이하여야 합니다' })
       .regex(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/,
-        '영문, 숫자, 특수문자를 포함해야 합니다'
+        /^(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])/,
+        { message: '영문, 숫자, 특수문자를 포함해야 합니다' }
       ),
     confirmPassword: z.string(),
-    gender: z.string().min(1, '성별을 선택해주세요'),
-    nickname: z.string().min(2, '닉네임은 2자 이상 입력해주세요'),
+    gender: z.string().min(1, { message: '성별을 선택해주세요' }),
+    nickname: z.string().min(2, { message: '닉네임은 2자 이상 입력해주세요' }),
   })
   .refine(data => data.password === data.confirmPassword, {
     message: '비밀번호가 일치하지 않습니다',
