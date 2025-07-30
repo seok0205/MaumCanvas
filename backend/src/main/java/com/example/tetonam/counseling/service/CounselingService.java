@@ -2,7 +2,6 @@ package com.example.tetonam.counseling.service;
 
 
 import com.example.tetonam.counseling.domain.Counseling;
-import com.example.tetonam.counseling.domain.enums.Status;
 import com.example.tetonam.counseling.dto.CounselingPossibleCounselorResponseDto;
 import com.example.tetonam.counseling.dto.CounselingReserveRequestDto;
 import com.example.tetonam.counseling.dto.MyCounselingListResponseDto;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -72,7 +70,7 @@ public class CounselingService {
     public List<MyCounselingListResponseDto> showMyCounselingList(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
-      return counselingRepository.findByStudent(user).stream().map(MyCounselingListResponseDto::toDto).toList();
+      return counselingRepository.findByStudentOrderByReservationTimeAsc(user).stream().map(MyCounselingListResponseDto::toDto).toList();
 
 
     }
