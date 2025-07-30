@@ -19,7 +19,7 @@ import { useAuthActions } from '@/hooks/useAuthActions';
 // 상수 정의
 const LOGIN_MESSAGES = {
   EMAIL_REQUIRED: '올바른 이메일 주소를 입력해주세요',
-  PASSWORD_REQUIRED: '비밀번호를 입력해주세요',
+  PASSWORD_MIN_LENGTH: '비밀번호는 8자 이상이어야 합니다',
   LOGIN_SUCCESS: '마음 캔버스에 오신 것을 환영합니다!',
   LOGIN_FAILED: '이메일 또는 비밀번호를 확인해주세요.',
   LOGIN_ERROR: '로그인 중 문제가 발생했습니다.',
@@ -31,8 +31,8 @@ const LOGIN_MESSAGES = {
 } as const;
 
 const loginSchema = z.object({
-  email: z.string().email(LOGIN_MESSAGES.EMAIL_REQUIRED),
-  password: z.string().min(1, LOGIN_MESSAGES.PASSWORD_REQUIRED),
+  email: z.email({ message: LOGIN_MESSAGES.EMAIL_REQUIRED }),
+  password: z.string().min(8, { message: LOGIN_MESSAGES.PASSWORD_MIN_LENGTH }),
 });
 
 interface LoginFormData extends z.infer<typeof loginSchema> {}
