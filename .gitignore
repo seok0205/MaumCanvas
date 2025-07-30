@@ -39,3 +39,16 @@ out/
 .env
 .env.local
 *.log
+
+### Cursor ###
+.cursor
+
+### macOS ###
+.DS_Store
+
+### Node ###
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
