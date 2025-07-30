@@ -4,6 +4,7 @@ package com.example.tetonam.image.controller;
 import com.example.tetonam.image.service.DrawingService;
 import com.example.tetonam.response.ApiResponse;
 import com.example.tetonam.user.token.JwtTokenProvider;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,9 +22,10 @@ import java.util.List;
 public class DrawingController {
     private final DrawingService drawingService;
     private final JwtTokenProvider jwtTokenProvider;
+
+    @Operation(summary = "그림 저장 API", description = "4장의 그림을 저장합니다..")
     @PostMapping()
     public ResponseEntity<?> createDrawing(MultipartFile homeImageUrl,MultipartFile treeImageUrl,MultipartFile humanImageFirstUrl,MultipartFile humanImageSecondUrl,@RequestHeader("Authorization") String token){
-
 
         List<MultipartFile> multipartFileList=new ArrayList<>();
         multipartFileList.add(homeImageUrl); // 0은 home

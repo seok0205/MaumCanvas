@@ -5,6 +5,7 @@ import com.example.tetonam.counseling.domain.Counseling;
 import com.example.tetonam.counseling.domain.enums.Status;
 import com.example.tetonam.counseling.dto.CounselingPossibleCounselorResponseDto;
 import com.example.tetonam.counseling.dto.CounselingReserveRequestDto;
+import com.example.tetonam.counseling.dto.MyCounselingListResponseDto;
 import com.example.tetonam.counseling.repository.CounselingRepository;
 import com.example.tetonam.exception.handler.CounselingHandler;
 import com.example.tetonam.exception.handler.UserHandler;
@@ -66,6 +67,14 @@ public class CounselingService {
         Counseling counseling = CounselingReserveRequestDto.toEntity(student, counselor, dto);
         counselingRepository.save(counseling);
         return "상담이 예약 되었습니다";
+    }
+
+    public List<MyCounselingListResponseDto> showMyCounselingList(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+      return counselingRepository.findByStudent(user).stream().map(MyCounselingListResponseDto::toDto).toList();
+
+
     }
 
 
