@@ -1,6 +1,7 @@
 from fastapi import APIRouter, File, UploadFile
 from fastapi.responses import JSONResponse, StreamingResponse
 from app.core.yolo_predict import run_inference
+from app.utils.filtering import nms_filter
 import numpy as np
 import cv2
 import io
@@ -16,7 +17,8 @@ from app.utils.s3imageLoader import s3imageLoader
 async def predict_json_s3(url):
     img_np = s3imageLoader(url)
     _, results = run_inference(img_np, model, class_names, visualize=False)
-    return {"num_detections": len(results), "detections": results}
+    filtered_result = nms_filter(results)
+    return {"num_detections": len(filtered_result), "detections": filtered_result}
 
 ###########################################################################
 
@@ -26,7 +28,8 @@ async def predict_json(file: UploadFile = File(...)):
     image_bytes = await file.read()
     img_np = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), cv2.IMREAD_COLOR)
     _, results = run_inference(img_np, model, class_names, visualize=False)
-    return {"num_detections": len(results), "detections": results}
+    filtered_result = nms_filter(results)
+    return {"num_detections": len(filtered_result), "detections": filtered_result}
 
 @router.post("/image")
 async def predict_image(file: UploadFile = File(...)):
