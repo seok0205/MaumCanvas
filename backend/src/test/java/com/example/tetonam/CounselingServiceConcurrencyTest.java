@@ -46,7 +46,7 @@ class CounselingServiceConcurrencyTest {
         studentEmails = new ArrayList<>();
 
         // 100명의 테스트용 학생 계정 생성
-        for (int i = 0; i < 3000; i++) {
+        for (int i = 0; i < 100; i++) {
             String email = "student" + i + "@naver.com";
             studentEmails.add(email);
 
@@ -69,7 +69,7 @@ class CounselingServiceConcurrencyTest {
 
     @Test
     void 동시에_100명이_같은상담사를_같은시간에_예약하면_1명만_성공해야한다() throws InterruptedException {
-        int threadCount = 3000;
+        int threadCount = 100;
         ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
         CountDownLatch latch = new CountDownLatch(threadCount);
         List<Future<String>> results = new ArrayList<>();
