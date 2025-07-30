@@ -84,6 +84,7 @@ public class UserService {
         return userDto;
     }
 
+    @Transactional
     public JwtToken reissue(ReissueDto reissueDto) {
         log.info("[reissue] 토큰 갱신 요청: accessToken = {}", reissueDto.getAccessToken());
 
@@ -153,5 +154,14 @@ public class UserService {
 
         redisTemplate.delete("UUID:" + resetPasswordDto.getUuid());
       return "비밀번호가 변경되었습니다.";
+    }
+
+    @Transactional
+    public String mypageResetPassword(String email, String password) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+        String encodedPassword = passwordEncoder.encode(password);
+        user.setPassword(encodedPassword);
+        return "비밀번호가 변경되었습니다";
     }
 }
