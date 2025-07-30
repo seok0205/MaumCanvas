@@ -5,10 +5,10 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
 
-  redis:
-    # host: localhost       # localhost
-    host: redis           # EC2
-    port: 6379
+  data:
+    redis:
+      host: redis
+      port: 6379
 
   jpa:
     database-platform: org.hibernate.dialect.MySQL8Dialect
@@ -20,8 +20,8 @@ spring:
       hibernate:
         globally_quoted_identifiers: true
 mail:
-  username: jj99526@gmail.com
-  password: iiyw avuq cqms ezwp
+  username: ${MAIL_USERNAME}
+  password: ${MAIL_PASSWORD}
 
 jwt:
   secret : ${JWT_SECRET}
