@@ -4,10 +4,7 @@ import com.example.tetonam.counseling.domain.enums.Status;
 import com.example.tetonam.user.domain.User;
 import com.example.tetonam.util.BaseTime;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -16,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Setter
 public class Counseling extends BaseTime {
 
     @Column(name = "counseling_id", updatable = false, unique = true, nullable = false)
