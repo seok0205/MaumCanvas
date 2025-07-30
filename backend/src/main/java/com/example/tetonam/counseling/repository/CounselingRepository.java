@@ -17,6 +17,10 @@ public interface CounselingRepository extends JpaRepository<Counseling,Long> {
 
     @Query("SELECT COUNT(c) FROM Counseling c WHERE c.counselor = :counselor AND c.reservationTime = :counselingTime")
     long countByCounselorAndCounselingTime(User counselor, LocalDateTime counselingTime);
-
-    List<Counseling> findByStudent(User student);
+    @Query("SELECT c FROM Counseling c " +
+            "WHERE c.student = :student " +
+            "ORDER BY " +
+            "CASE WHEN c.status = 'OPEN' THEN 0 ELSE 1 END, " +
+            "c.reservationTime ASC")
+    List<Counseling> findByStudentOrderByReservationTimeAsc(User student);
 }
