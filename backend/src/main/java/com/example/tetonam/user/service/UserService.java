@@ -184,4 +184,10 @@ public class UserService {
 
         return "닉네임이 변경되었습니다";
     }
+
+    public MyInfoResponseDto myInfo(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+        return MyInfoResponseDto.toDto(user);
+    }
 }
