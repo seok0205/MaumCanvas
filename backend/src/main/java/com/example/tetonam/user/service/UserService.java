@@ -143,17 +143,17 @@ public class UserService {
 
     @Transactional
     public String resetPassword(ResetPasswordDto resetPasswordDto) {
-      User user=userRepository.findByEmail(resetPasswordDto.getEmail())
-              .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+        User user = userRepository.findByEmail(resetPasswordDto.getEmail())
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
         String uuid = (String) redisTemplate.opsForValue().get("UUID:" + resetPasswordDto.getUuid());
-        if(uuid==null||!uuid.equals(resetPasswordDto.getEmail())){
+        if (uuid == null || !uuid.equals(resetPasswordDto.getEmail())) {
             throw new UserHandler(ErrorStatus.USER_NOT_AUTHORITY);
         }
         String encodedPassword = passwordEncoder.encode(resetPasswordDto.getPassword());
         user.setPassword(encodedPassword);
 
         redisTemplate.delete("UUID:" + resetPasswordDto.getUuid());
-      return "비밀번호가 변경되었습니다.";
+        return "비밀번호가 변경되었습니다.";
     }
 
     @Transactional
@@ -163,5 +163,25 @@ public class UserService {
         String encodedPassword = passwordEncoder.encode(password);
         user.setPassword(encodedPassword);
         return "비밀번호가 변경되었습니다";
+    }
+
+    /**
+     * 닉네임 변경
+     *
+     * @param email
+     * @param nickname
+     * @return
+     */
+
+    @Transactional
+    public String mypageResetNickname(String email, String nickname) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+        if (userRepository.existsByNickname(nickname)) {
+            throw new UserHandler(ErrorStatus.USER_NICKNAME_IN_USE);
+        }
+        user.setNickname(nickname);
+
+        return "닉네임이 변경되었습니다";
     }
 }

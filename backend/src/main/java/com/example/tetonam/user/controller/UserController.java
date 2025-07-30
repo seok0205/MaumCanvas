@@ -106,6 +106,12 @@ public class UserController {
         return ResponseEntity.ok().body(ApiResponse.onSuccess(jwtToken));
     }
 
+    /**
+     * mypage에서 비밀번호 재설정
+     * @param token
+     * @param password
+     * @return
+     */
     @PatchMapping("/mypage-password")
     @Operation(summary = "비밀번호 재설정 API", description = "비밀번호를 재설정합니다.")
     public ResponseEntity<?> mypageResetPassword(@RequestHeader("Authorization") String token,@RequestParam("password") String password) {
@@ -123,9 +129,16 @@ public class UserController {
      */
     @PatchMapping("/password")
     @Operation(summary = "비밀번호 찾기 API", description = "비밀번호를 찾습니다.")
-
     public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordDto resetPasswordDto) {
         String result=userService.resetPassword(resetPasswordDto);
+        return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
+    }
+
+    @PatchMapping("/mypage-nickname")
+    @Operation(summary = "닉네임 재설정 API", description = "닉네임을 재설정합니다.")
+    public ResponseEntity<?> resetNickname(@RequestHeader("Authorization") String token,@RequestParam("nickname") String nickname) {
+        String email = jwtTokenProvider.getEmail(token.substring(7));
+        String result=userService.mypageResetNickname(email,nickname);
         return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
     }
 
