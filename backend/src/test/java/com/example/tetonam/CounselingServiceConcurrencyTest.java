@@ -58,7 +58,7 @@ class CounselingServiceConcurrencyTest {
                         .name("학생" + i)
                         .nickname("test"+i)
                         .phone("010-1234-1234")
-                        .gender(Gender.MAN)
+                        .gender(Gender.MALE)
                         .roles(Collections.singletonList(Role.USER))
                         .school(counselor.getSchool()) // 같은 학교로 설정
                         .build();

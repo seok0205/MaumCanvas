@@ -22,6 +22,15 @@ public class UserController {
 
     private final JwtTokenProvider jwtTokenProvider;
 
+
+    @GetMapping("/my-info")
+    @Operation(summary = "마이페이지 API", description = "마이페이지 정보를 반환합니다.")
+    public ResponseEntity<?> myInfo(@RequestHeader("Authorization") String token) {
+        String email = jwtTokenProvider.getEmail(token.substring(7));
+          MyInfoResponseDto myInfo= userService.myInfo(email);
+        return ResponseEntity.ok().body(ApiResponse.onSuccess(myInfo));
+    }
+
     /**
      * 내 닉네임 보기
      *
