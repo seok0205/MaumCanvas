@@ -63,6 +63,10 @@ public class User extends BaseTime implements UserDetails {
         .collect(Collectors.toList());
   }
 
+  public void setNickname(String nickname) {
+    this.nickname = nickname;
+  }
+
   public void setPassword(String password) {
     this.password = password;
   }
