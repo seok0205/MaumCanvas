@@ -8,7 +8,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./conf.d:/etc/nginx/conf.d
+      - ./conf.d:/etc/nginx/sites-available
       - ./ssl:/etc/letsencrypt
     depends_on:
       - dummy
