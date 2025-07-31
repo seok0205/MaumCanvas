@@ -18,8 +18,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      tetonam-network:
-        external: true
+      - tetonam-network    
 
   redis:
     image: redis:7
@@ -34,8 +33,7 @@ services:
       - redis_data:/data
     restart: always
     networks:
-      tetonam-network:
-        external: true
+      - tetonam-network    
 
   app:
     build:
@@ -65,9 +63,12 @@ services:
         condition: service_started
     
     networks:
-      tetonam-network:
-        external: true
+      - tetonam-network    
 
 volumes:
   mysql_data:
   redis_data:
+
+networks:
+  tetonam-network:
+    external: true
