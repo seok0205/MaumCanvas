@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface CounselingRepository extends JpaRepository<Counseling,Long> {
 
@@ -23,4 +24,7 @@ public interface CounselingRepository extends JpaRepository<Counseling,Long> {
             "CASE WHEN c.status = 'OPEN' THEN 0 ELSE 1 END, " +
             "c.reservationTime ASC")
     List<Counseling> findByStudentOrderByReservationTimeAsc(User student);
+
+    Optional<Counseling> findFirstByStudentOrderByReservationTimeDesc(User student);
+
 }
