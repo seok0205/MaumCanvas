@@ -6,6 +6,7 @@ export interface User {
   name: string;
   userType: UserType;
   profileImage?: string;
+  birthDate?: Date;
   readonly createdAt: string;
 }
 
