@@ -3,7 +3,7 @@ services:
     build: .
     container_name: tetonam-frontend
     ports:
-      - "3000:80"
+      - "3000:3000"
     # volumes:
     #   # SSL 인증서 마운트 (Let's Encrypt 사용 시)
     #   - /etc/letsencrypt/live/i13e108.p.ssafy.io/fullchain.pem:/etc/ssl/certs/i13e108.p.ssafy.io.crt:ro
