@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:stable
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./conf.d:/etc/nginx/conf.d
+      - ./ssl:/etc/letsencrypt
+    depends_on:
+      - dummy
+    networks:
+      - tetonam-network
+
+  dummy:
+    image: busybox
+    command: sleep 3600
+    networks:
+      - tetonam-network
+
+networks:
+  tetonam-network:
+    external: true
