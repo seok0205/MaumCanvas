@@ -1,4 +1,3 @@
-import { useToast } from '@/hooks/use-toast';
 import { useCallback, useState } from 'react';
 
 interface UseNicknameCheckReturn {
@@ -6,6 +5,7 @@ interface UseNicknameCheckReturn {
   isAvailable: boolean;
   isLoading: boolean;
   error: string | null;
+  successMessage: string | null;
   checkNickname: (nickname: string) => Promise<void>;
   resetState: () => void;
 }
@@ -20,7 +20,7 @@ export const useNicknameCheck = (): UseNicknameCheckReturn => {
   const [isAvailable, setIsAvailable] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // 단순한 유효성 검사 함수는 useCallback 불필요
   const validateNickname = (nickname: string): string | null => {
@@ -43,65 +43,51 @@ export const useNicknameCheck = (): UseNicknameCheckReturn => {
     return null;
   };
 
-  const checkNickname = useCallback(
-    async (nickname: string): Promise<void> => {
-      const validationError = validateNickname(nickname);
-      if (validationError) {
-        setError(validationError);
-        setIsNicknameChecked(false);
-        setIsAvailable(false);
-        return;
+  const checkNickname = useCallback(async (nickname: string): Promise<void> => {
+    const validationError = validateNickname(nickname);
+    if (validationError) {
+      setError(validationError);
+      setSuccessMessage(null);
+      setIsNicknameChecked(false);
+      setIsAvailable(false);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    setSuccessMessage(null);
+
+    try {
+      // TODO: 실제 닉네임 중복 체크 API 호출
+      // const isAvailable = await nicknameService.checkAvailability(nickname);
+
+      // 모의 API 호출
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // 모의 결과 (실제로는 API 응답에 따라 결정)
+      const mockIsAvailable = !['admin', 'test', 'user'].includes(
+        nickname.toLowerCase()
+      );
+
+      setIsNicknameChecked(true);
+      setIsAvailable(mockIsAvailable);
+
+      if (mockIsAvailable) {
+        setSuccessMessage('해당 닉네임을 사용할 수 있습니다.');
+      } else {
+        setError('이미 사용 중인 닉네임입니다.');
       }
-
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        // TODO: 실제 닉네임 중복 체크 API 호출
-        // const isAvailable = await nicknameService.checkAvailability(nickname);
-
-        // 모의 API 호출
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        // 모의 결과 (실제로는 API 응답에 따라 결정)
-        const mockIsAvailable = !['admin', 'test', 'user'].includes(
-          nickname.toLowerCase()
-        );
-
-        setIsNicknameChecked(true);
-        setIsAvailable(mockIsAvailable);
-
-        if (mockIsAvailable) {
-          toast({
-            title: '닉네임 사용 가능',
-            description: '해당 닉네임을 사용할 수 있습니다.',
-          });
-        } else {
-          toast({
-            title: '닉네임 사용 불가',
-            description: '이미 사용 중인 닉네임입니다.',
-            variant: 'destructive',
-          });
-        }
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : '닉네임 확인에 실패했습니다.';
-        setError(errorMessage);
-        setIsNicknameChecked(false);
-        setIsAvailable(false);
-        toast({
-          title: '닉네임 확인 실패',
-          description: errorMessage,
-          variant: 'destructive',
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [toast]
-  );
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : '닉네임 확인에 실패했습니다.';
+      setError(errorMessage);
+      setSuccessMessage(null);
+      setIsNicknameChecked(false);
+      setIsAvailable(false);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   // 단순한 상태 초기화 함수는 useCallback 불필요
   const resetState = () => {
@@ -109,6 +95,7 @@ export const useNicknameCheck = (): UseNicknameCheckReturn => {
     setIsAvailable(false);
     setIsLoading(false);
     setError(null);
+    setSuccessMessage(null);
   };
 
   return {
@@ -116,6 +103,7 @@ export const useNicknameCheck = (): UseNicknameCheckReturn => {
     isAvailable,
     isLoading,
     error,
+    successMessage,
     checkNickname,
     resetState,
   };
