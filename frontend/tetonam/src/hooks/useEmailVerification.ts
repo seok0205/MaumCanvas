@@ -1,4 +1,3 @@
-import { useToast } from '@/hooks/use-toast';
 import { useCallback, useState } from 'react';
 
 interface UseEmailVerificationReturn {
@@ -6,6 +5,7 @@ interface UseEmailVerificationReturn {
   isEmailVerified: boolean;
   isLoading: boolean;
   error: string | null;
+  successMessage: string | null;
   sendEmailVerification: (email: string) => Promise<void>;
   verifyEmail: (email: string, code: string) => Promise<void>;
   resetState: () => void;
@@ -16,17 +16,19 @@ export const useEmailVerification = (): UseEmailVerificationReturn => {
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const sendEmailVerification = useCallback(
     async (email: string): Promise<void> => {
       if (!email) {
         setError('이메일 주소를 입력해주세요.');
+        setSuccessMessage(null);
         return;
       }
 
       setIsLoading(true);
       setError(null);
+      setSuccessMessage(null);
 
       try {
         // TODO: 실제 이메일 인증 API 호출
@@ -36,37 +38,32 @@ export const useEmailVerification = (): UseEmailVerificationReturn => {
         await new Promise(resolve => setTimeout(resolve, 1000));
 
         setIsEmailSent(true);
-        toast({
-          title: '인증번호 발송',
-          description: '이메일로 인증번호가 발송되었습니다.',
-        });
+        setSuccessMessage('이메일로 인증번호가 발송되었습니다.');
       } catch (error) {
         const errorMessage =
           error instanceof Error
             ? error.message
             : '인증번호 발송에 실패했습니다.';
         setError(errorMessage);
-        toast({
-          title: '인증번호 발송 실패',
-          description: errorMessage,
-          variant: 'destructive',
-        });
+        setSuccessMessage(null);
       } finally {
         setIsLoading(false);
       }
     },
-    [toast]
+    []
   );
 
   const verifyEmail = useCallback(
     async (email: string, code: string): Promise<void> => {
       if (!email || !code) {
         setError('이메일과 인증번호를 모두 입력해주세요.');
+        setSuccessMessage(null);
         return;
       }
 
       setIsLoading(true);
       setError(null);
+      setSuccessMessage(null);
 
       try {
         // TODO: 실제 이메일 인증 API 호출
@@ -76,26 +73,19 @@ export const useEmailVerification = (): UseEmailVerificationReturn => {
         await new Promise(resolve => setTimeout(resolve, 1000));
 
         setIsEmailVerified(true);
-        toast({
-          title: '이메일 인증 완료',
-          description: '이메일 인증이 완료되었습니다.',
-        });
+        setSuccessMessage('이메일 인증이 완료되었습니다.');
       } catch (error) {
         const errorMessage =
           error instanceof Error
             ? error.message
             : '이메일 인증에 실패했습니다.';
         setError(errorMessage);
-        toast({
-          title: '이메일 인증 실패',
-          description: errorMessage,
-          variant: 'destructive',
-        });
+        setSuccessMessage(null);
       } finally {
         setIsLoading(false);
       }
     },
-    [toast]
+    []
   );
 
   // 단순한 상태 초기화 함수는 useCallback 불필요
@@ -104,6 +94,7 @@ export const useEmailVerification = (): UseEmailVerificationReturn => {
     setIsEmailVerified(false);
     setIsLoading(false);
     setError(null);
+    setSuccessMessage(null);
   };
 
   return {
@@ -111,6 +102,7 @@ export const useEmailVerification = (): UseEmailVerificationReturn => {
     isEmailVerified,
     isLoading,
     error,
+    successMessage,
     sendEmailVerification,
     verifyEmail,
     resetState,
