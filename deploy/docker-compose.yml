@@ -51,7 +51,7 @@ services:
       CLOUD_AWS_REGION_STATIC: ${CLOUD_AWS_REGION_STATIC}
       S3_URL: ${S3_URL}
     env_file:
-      - ../backend/.env
+      - ../deploy/.env
     depends_on:
       db:
         condition: service_healthy
@@ -68,6 +68,8 @@ services:
     restart: unless-stopped
     ports:
       - "3000:3000"  # Nginx 사용하는 경우 생략 가능
+    env_file:
+      - ../deploy/.env
     networks:
       - tetonam-network
 
