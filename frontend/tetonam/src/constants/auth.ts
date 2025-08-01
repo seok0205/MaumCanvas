@@ -6,16 +6,16 @@ export const AUTH_CONSTANTS = {
 
   // API 엔드포인트 - 실제 백엔드 엔드포인트
   ENDPOINTS: {
-    LOGIN: '/user/sign-in',
-    REGISTER: '/user/sign-up',
-    PASSWORD_RESET: '/user/password',
-    TOKEN_REISSUE: '/user/token/reissue',
-    EMAIL_DUPLICATE_CHECK: '/user/email-duplicate-check',
-    NICKNAME_DUPLICATE_CHECK: '/user/nickname-duplicate-check',
-    EMAIL_SEND: '/mail/send',
-    EMAIL_AUTH_CHECK: '/mail/auth-check',
-    MY_INFO: '/user/my-info',
-    MY_NICKNAME: '/user/my-nickname',
+    LOGIN: '/api/user/sign-in',
+    REGISTER: '/api/user/sign-up',
+    PASSWORD_RESET: '/api/user/password',
+    TOKEN_REISSUE: '/api/user/token/reissue',
+    EMAIL_DUPLICATE_CHECK: '/api/user/email-duplicate-check',
+    NICKNAME_DUPLICATE_CHECK: '/api/user/nickname-duplicate-check',
+    EMAIL_SEND: '/api/mail/send',
+    EMAIL_AUTH_CHECK: '/api/mail/auth-check',
+    MY_INFO: '/api/user/my-info',
+    MY_NICKNAME: '/api/user/my-nickname',
   },
 
   // 로컬 스토리지 키

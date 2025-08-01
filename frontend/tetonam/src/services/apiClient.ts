@@ -16,7 +16,7 @@ const API_CONSTANTS = {
   DEFAULT_TIMEOUT: 10000,
   ACCESS_TOKEN_KEY: 'accessToken',
   REFRESH_TOKEN_KEY: 'refreshToken',
-  TOKEN_REISSUE_ENDPOINT: '/user/token/reissue',
+  TOKEN_REISSUE_ENDPOINT: '/api/user/token/reissue',
 } as const;
 
 // 토큰 재발급 상태 관리

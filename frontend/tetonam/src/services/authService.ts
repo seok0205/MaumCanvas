@@ -23,7 +23,7 @@ export const authService = {
   ): Promise<JwtTokenResponse> => {
     try {
       const response = await apiClient.post<ApiResponse<JwtTokenResponse>>(
-        '/user/sign-in',
+        AUTH_CONSTANTS.ENDPOINTS.LOGIN,
         { email, password } as LoginCredentials,
         {
           headers: {
@@ -107,7 +107,7 @@ export const authService = {
   ): Promise<RegisterResponse> => {
     try {
       const response = await apiClient.post<ApiResponse<RegisterResponse>>(
-        '/user/sign-up',
+        AUTH_CONSTANTS.ENDPOINTS.REGISTER,
         userData,
         {
           headers: {
@@ -180,7 +180,7 @@ export const authService = {
   ): Promise<void> => {
     try {
       const response = await apiClient.patch<ApiResponse<string>>(
-        '/user/password',
+        AUTH_CONSTANTS.ENDPOINTS.PASSWORD_RESET,
         { email, newPassword } as ResetPasswordData,
         {
           headers: {
@@ -249,7 +249,7 @@ export const authService = {
   ): Promise<string> => {
     try {
       const response = await apiClient.post<ApiResponse<string>>(
-        '/mail/send',
+        AUTH_CONSTANTS.ENDPOINTS.EMAIL_SEND,
         { email },
         {
           headers: {
@@ -321,7 +321,7 @@ export const authService = {
   ): Promise<boolean> => {
     try {
       const response = await apiClient.post<ApiResponse<string>>(
-        '/mail/auth-check',
+        AUTH_CONSTANTS.ENDPOINTS.EMAIL_AUTH_CHECK,
         { email, authNum } as EmailVerificationData,
         {
           headers: {
@@ -385,7 +385,7 @@ export const authService = {
       formData.append('email', email);
 
       const response = await apiClient.post<ApiResponse<string>>(
-        '/user/email-duplicate-check',
+        AUTH_CONSTANTS.ENDPOINTS.EMAIL_DUPLICATE_CHECK,
         formData,
         {
           ...(signal && { signal }),
@@ -459,7 +459,7 @@ export const authService = {
       formData.append('nickname', nickname);
 
       const response = await apiClient.post<ApiResponse<string>>(
-        '/user/nickname-duplicate-check',
+        AUTH_CONSTANTS.ENDPOINTS.NICKNAME_DUPLICATE_CHECK,
         formData,
         {
           ...(signal && { signal }),
@@ -527,7 +527,7 @@ export const authService = {
   getMyInfo: async (signal?: AbortSignal): Promise<UserInfoResponse> => {
     try {
       const response = await apiClient.get<ApiResponse<UserInfoResponse>>(
-        '/user/my-info',
+        AUTH_CONSTANTS.ENDPOINTS.MY_INFO,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -594,7 +594,7 @@ export const authService = {
   getMyNickname: async (signal?: AbortSignal): Promise<string> => {
     try {
       const response = await apiClient.get<ApiResponse<string>>(
-        '/user/my-nickname',
+        AUTH_CONSTANTS.ENDPOINTS.MY_NICKNAME,
         {
           headers: {
             'Content-Type': 'application/json',
