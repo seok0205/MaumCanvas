@@ -1,9 +1,10 @@
 import { ROUTES } from '@/constants/routes';
+import type { UserRole } from '@/constants/userTypes';
 import { authService } from '@/services/authService';
 import type { AuthError } from '@/types/auth';
 import type { AuthState } from '@/types/store';
 import type { User } from '@/types/user';
-import { roleToUserType } from '@/utils/userTypeMapping';
+import { getPrimaryRole } from '@/utils/userTypeMapping';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
@@ -35,9 +36,9 @@ export const useAuthStore = create<AuthState>()(
           try {
             const tokenResponse = await authService.login(email, password);
 
-            // role 배열을 userType으로 변환
-            const userType =
-              get().selectedUserType || roleToUserType(tokenResponse.role);
+            // role 배열을 주요 역할로 변환
+            const primaryRole =
+              get().selectedUserType || getPrimaryRole(tokenResponse.roles);
 
             // 사용자 정보 조회 (JWT 토큰 필요)
             const userInfo = await authService.getMyInfo();
@@ -46,7 +47,12 @@ export const useAuthStore = create<AuthState>()(
               id: userInfo.id || `user-${Date.now()}`, // 백엔드에서 ID 제공하지 않는 경우 임시 ID
               email: userInfo.email,
               name: userInfo.name,
-              userType: userType,
+              nickname: userInfo.nickname,
+              gender: userInfo.gender,
+              phone: userInfo.phone,
+              school: userInfo.school,
+              birthday: userInfo.birthday,
+              roles: (userInfo.roles || [primaryRole]) as UserRole[], // 타입 캐스팅
               createdAt: new Date().toISOString(),
             };
 
@@ -78,7 +84,12 @@ export const useAuthStore = create<AuthState>()(
               id: response.id.toString(),
               email: userData.email,
               name: userData.name,
-              userType: userData.userType,
+              nickname: userData.nickname,
+              gender: userData.gender,
+              phone: userData.phone,
+              school: userData.school.name, // school 객체에서 name만 추출
+              birthday: userData.birthday,
+              roles: userData.roles as UserRole[], // 타입 캐스팅
               createdAt: new Date().toISOString(),
             };
 

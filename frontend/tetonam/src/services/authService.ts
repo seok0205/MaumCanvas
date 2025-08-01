@@ -10,7 +10,6 @@ import type {
   UserInfoResponse,
 } from '@/types/api';
 import { AuthenticationError } from '@/types/auth';
-import { userTypeToRoles } from '@/utils/userTypeMapping';
 import type { AxiosError } from 'axios';
 import { apiClient } from './apiClient';
 
@@ -107,17 +106,9 @@ export const authService = {
     signal?: AbortSignal
   ): Promise<RegisterResponse> => {
     try {
-      // userType을 roles 배열로 변환
-      const roles = userTypeToRoles(userData.userType);
-
-      const registerData = {
-        ...userData,
-        roles: roles, // 백엔드에 roles 배열로 전송
-      };
-
       const response = await apiClient.post<ApiResponse<RegisterResponse>>(
         AUTH_CONSTANTS.ENDPOINTS.REGISTER,
-        registerData,
+        userData, // 이미 roles 배열이 포함되어 있음
         {
           headers: {
             'Content-Type': 'application/json',

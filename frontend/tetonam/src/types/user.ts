@@ -1,14 +1,17 @@
-export type UserType = 'user' | 'counselor' | 'admin';
+import type { UserRole } from '@/constants/userTypes';
 
 export interface User {
   readonly id: string;
   email: string;
   name: string;
-  userType: UserType;
-  profileImage?: string;
-  birthDate?: Date;
+  nickname: string;
+  gender: string;
+  phone: string;
+  school: string;
+  birthday: string;
+  roles: UserRole[]; // 백엔드의 roles 배열에 맞춤
   readonly createdAt: string;
 }
 
 export type CreateUserRequest = Omit<User, 'id' | 'createdAt'>;
-export type UpdateUserRequest = Partial<Pick<User, 'name' | 'profileImage'>>;
+export type UpdateUserRequest = Partial<Pick<User, 'name' | 'nickname'>>;

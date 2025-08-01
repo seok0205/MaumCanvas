@@ -1,58 +1,58 @@
-// 사용자 타입 라벨 상수
-export const USER_TYPE_LABELS = {
-  user: '학생',
-  counselor: '상담사',
-  admin: '관리자',
+// 사용자 역할 라벨 상수
+export const USER_ROLE_LABELS = {
+  USER: '학생',
+  COUNSELOR: '상담사',
+  ADMIN: '관리자',
 } as const;
 
-export type UserType = keyof typeof USER_TYPE_LABELS;
+export type UserRole = keyof typeof USER_ROLE_LABELS;
 
 // 타입 가드 함수
-export const isValidUserType = (type: string): type is UserType => {
-  return type in USER_TYPE_LABELS;
+export const isValidUserRole = (role: string): role is UserRole => {
+  return role in USER_ROLE_LABELS;
 };
 
-// 사용자 타입 라벨 가져오기 함수 (타입 안전성 강화)
-export const getUserTypeLabel = (type: string): string => {
-  if (!type || typeof type !== 'string') {
+// 사용자 역할 라벨 가져오기 함수 (타입 안전성 강화)
+export const getUserRoleLabel = (role: string): string => {
+  if (!role || typeof role !== 'string') {
     if (import.meta.env.DEV) {
-      console.warn('getUserTypeLabel: 유효하지 않은 타입 입력:', type);
+      console.warn('getUserRoleLabel: 유효하지 않은 역할 입력:', role);
     }
     return '알 수 없음';
   }
 
-  if (isValidUserType(type)) {
-    return USER_TYPE_LABELS[type];
+  if (isValidUserRole(role)) {
+    return USER_ROLE_LABELS[role];
   }
 
   // 개발 환경에서 경고 로그
   if (import.meta.env.DEV) {
-    console.warn(`getUserTypeLabel: 알 수 없는 사용자 타입 "${type}"`);
+    console.warn(`getUserRoleLabel: 알 수 없는 사용자 역할 "${role}"`);
   }
 
-  return type; // 알 수 없는 타입인 경우 원본 값 반환
+  return role; // 알 수 없는 역할인 경우 원본 값 반환
 };
 
-// 사용자 타입 목록 가져오기 함수
-export const getUserTypes = (): UserType[] => {
-  return Object.keys(USER_TYPE_LABELS) as UserType[];
+// 사용자 역할 목록 가져오기 함수
+export const getUserRoles = (): UserRole[] => {
+  return Object.keys(USER_ROLE_LABELS) as UserRole[];
 };
 
-// 사용자 타입 검증 함수 (더 엄격한 검증)
-export const validateUserType = (type: unknown): UserType | null => {
-  if (typeof type !== 'string') {
+// 사용자 역할 검증 함수 (더 엄격한 검증)
+export const validateUserRole = (role: unknown): UserRole | null => {
+  if (typeof role !== 'string') {
     if (import.meta.env.DEV) {
-      console.warn('validateUserType: 문자열이 아닌 타입 입력:', type);
+      console.warn('validateUserRole: 문자열이 아닌 역할 입력:', role);
     }
     return null;
   }
 
-  if (isValidUserType(type)) {
-    return type;
+  if (isValidUserRole(role)) {
+    return role;
   }
 
   if (import.meta.env.DEV) {
-    console.warn(`validateUserType: 유효하지 않은 사용자 타입 "${type}"`);
+    console.warn(`validateUserRole: 유효하지 않은 사용자 역할 "${role}"`);
   }
 
   return null;

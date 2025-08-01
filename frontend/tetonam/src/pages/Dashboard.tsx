@@ -6,8 +6,9 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/navigation/sidebar';
-import { getUserTypeLabel } from '@/constants/userTypes';
+import { getUserRoleLabel } from '@/constants/userTypes';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { getPrimaryRole } from '@/utils/userTypeMapping';
 import { LogOut, Settings, User } from 'lucide-react';
 
 export const Dashboard = () => {
@@ -24,14 +25,17 @@ export const Dashboard = () => {
     );
   }
 
+  // roles 배열에서 주요 역할 결정
+  const primaryRole = getPrimaryRole(user.roles);
+
   // 단순한 조건부 렌더링 - useMemo 불필요
   const renderDashboardContent = () => {
-    switch (user.userType) {
-      case 'user':
+    switch (primaryRole) {
+      case 'USER':
         return <UserDashboard user={user} />;
-      case 'counselor':
+      case 'COUNSELOR':
         return <CounselorDashboard user={user} />;
-      case 'admin':
+      case 'ADMIN':
         return (
           <div className='p-6'>
             <h1 className='text-xl font-semibold text-foreground mb-4'>
@@ -46,7 +50,7 @@ export const Dashboard = () => {
         return (
           <div className='p-6'>
             <p className='text-muted-foreground'>
-              알 수 없는 사용자 타입입니다.
+              알 수 없는 사용자 역할입니다.
             </p>
           </div>
         );
@@ -68,7 +72,7 @@ export const Dashboard = () => {
                   <User className='w-5 h-5 text-muted-foreground' />
                   <span className='font-medium'>{user.name}</span>
                   <span className='text-muted-foreground'>
-                    ({getUserTypeLabel(user.userType)})
+                    ({getUserRoleLabel(primaryRole)})
                   </span>
                 </div>
               </div>

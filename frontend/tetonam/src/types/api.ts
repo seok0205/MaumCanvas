@@ -34,7 +34,7 @@ export interface RegisterCredentials {
     grade: number;
   };
   birthday: string;
-  userType: 'user' | 'counselor' | 'admin'; // roles 대신 userType 사용
+  roles: string[]; // 백엔드의 roles 배열에 맞춤
 }
 
 export interface ResetPasswordData {
@@ -58,7 +58,7 @@ export interface JwtTokenResponse {
   accessToken: string;
   refreshToken: string;
   refreshTokenExpirationTime: number;
-  role: string[]; // 백엔드에서 제공하는 role 배열
+  roles: string[]; // 백엔드에서 제공하는 roles 배열
 }
 
 // 사용자 정보 응답 타입
@@ -71,6 +71,7 @@ export interface UserInfoResponse {
   email: string;
   gender: string;
   nickname: string;
+  roles: string[]; // 백엔드에서 제공하는 roles 배열
 }
 
 // 회원가입 응답 타입

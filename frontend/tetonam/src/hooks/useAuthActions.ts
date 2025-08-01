@@ -1,13 +1,14 @@
+import type { UserRole } from '@/constants/userTypes';
 import { useToast } from '@/hooks/use-toast';
 import { useAuthStore } from '@/stores/useAuthStore';
-import type { CreateUserRequest, UserType } from '@/types/user';
+import type { RegisterCredentials } from '@/types/api';
 import { useCallback } from 'react';
 
 interface UseAuthActionsReturn {
   login: (email: string, password: string) => Promise<boolean>;
-  register: (userData: CreateUserRequest) => Promise<boolean>;
+  register: (userData: RegisterCredentials) => Promise<boolean>;
   logout: () => void;
-  selectUserType: (userType: UserType) => void;
+  selectUserType: (userRole: UserRole) => void;
 }
 
 // 인증 관련 비즈니스 로직을 분리한 커스텀 훅
@@ -42,7 +43,7 @@ export const useAuthActions = (): UseAuthActionsReturn => {
   );
 
   const handleRegister = useCallback(
-    async (userData: CreateUserRequest): Promise<boolean> => {
+    async (userData: RegisterCredentials): Promise<boolean> => {
       try {
         const success = await register(userData);
         if (success) {
@@ -77,8 +78,8 @@ export const useAuthActions = (): UseAuthActionsReturn => {
   };
 
   // 단순한 상태 설정 함수는 useCallback 불필요
-  const selectUserType = (userType: UserType) => {
-    setSelectedUserType(userType);
+  const selectUserType = (userRole: UserRole) => {
+    setSelectedUserType(userRole);
   };
 
   return {

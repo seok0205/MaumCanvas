@@ -75,7 +75,12 @@ export interface LoginResponse {
     id: string;
     email: string;
     name: string;
-    userType: string;
+    nickname: string;
+    gender: string;
+    phone: string;
+    school: string;
+    birthday: string;
+    roles: string[]; // 백엔드의 roles 배열에 맞춤
     createdAt: string;
   };
   token: string;
@@ -86,7 +91,12 @@ export interface RegisterResponse {
     id: string;
     email: string;
     name: string;
-    userType: string;
+    nickname: string;
+    gender: string;
+    phone: string;
+    school: string;
+    birthday: string;
+    roles: string[]; // 백엔드의 roles 배열에 맞춤
     createdAt: string;
   };
   token: string;
