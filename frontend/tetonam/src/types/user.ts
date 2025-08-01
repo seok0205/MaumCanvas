@@ -1,4 +1,4 @@
-export type UserType = 'student' | 'counselor' | 'admin';
+export type UserType = 'user' | 'counselor' | 'admin';
 
 export interface User {
   readonly id: string;

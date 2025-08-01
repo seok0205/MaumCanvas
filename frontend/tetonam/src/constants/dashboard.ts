@@ -1,11 +1,11 @@
 export const DASHBOARD_CONSTANTS = {
   WELCOME_MESSAGES: {
     COUNSELOR: '안녕하세요, {name} 상담사님! 👩‍⚕️',
-    STUDENT: '안녕하세요, {name}님! 👋',
+    USER: '안녕하세요, {name}님! 👋',
   },
   SUBTITLES: {
     COUNSELOR: '오늘도 따뜻한 마음으로 학생들과 함께해주세요.',
-    STUDENT: '오늘도 따뜻한 마음으로 함께하는 상담을 시작해보세요.',
+    USER: '오늘도 따뜻한 마음으로 함께하는 상담을 시작해보세요.',
   },
   QUICK_ACTIONS: {
     COUNSELOR: [
@@ -28,7 +28,7 @@ export const DASHBOARD_CONSTANTS = {
         variant: 'outline' as const,
       },
     ],
-    STUDENT: [
+    USER: [
       {
         title: '상담 예약하기',
         description: '전문 상담사와 1:1 상담을 예약하세요',
@@ -70,7 +70,7 @@ export const MOCK_APPOINTMENTS = {
       topic: '진로 고민 상담',
     },
   ],
-  STUDENT: [
+  USER: [
     {
       id: '1',
       date: '2024-01-15',
@@ -113,7 +113,7 @@ export const DAILY_TIPS = {
         '상담사도 마음의 건강을 챙겨야 합니다. 정기적인 휴식과 자기 돌봄을 통해 더 나은 상담을 제공할 수 있습니다.',
     },
   ],
-  STUDENT: [
+  USER: [
     {
       title: '스트레스 관리법',
       content:

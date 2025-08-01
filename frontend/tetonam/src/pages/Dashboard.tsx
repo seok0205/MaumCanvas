@@ -1,5 +1,5 @@
 import { CounselorDashboard } from '@/components/dashboard/CounselorDashboard';
-import { StudentDashboard } from '@/components/dashboard/StudentDashboard';
+import { UserDashboard } from '@/components/dashboard/UserDashboard';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { Button } from '@/components/ui/interactive/button';
 import {
@@ -27,8 +27,8 @@ export const Dashboard = () => {
   // 단순한 조건부 렌더링 - useMemo 불필요
   const renderDashboardContent = () => {
     switch (user.userType) {
-      case 'student':
-        return <StudentDashboard user={user} />;
+      case 'user':
+        return <UserDashboard user={user} />;
       case 'counselor':
         return <CounselorDashboard user={user} />;
       case 'admin':

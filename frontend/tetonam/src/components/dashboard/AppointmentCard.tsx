@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/interactive/button';
 import { Card } from '@/components/ui/layout/card';
 import type { Appointment } from '@/types/dashboard';
-import { Clock } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 
 interface AppointmentCardProps {
   appointments: readonly Appointment[];
-  userType: 'counselor' | 'student';
+  userType: 'counselor' | 'user';
 }
 
 export const AppointmentCard = ({
@@ -17,91 +17,83 @@ export const AppointmentCard = ({
     console.log(`Appointment action: ${appointment.id}`);
   };
 
+  const getTitle = () => {
+    if (userType === 'counselor') {
+      return '오늘의 상담 일정';
+    }
+    return '다가오는 상담';
+  };
+
+  const getEmptyMessage = () => {
+    if (userType === 'counselor') {
+      return '오늘 예정된 상담이 없습니다.';
+    }
+    return '예약된 상담이 없습니다.';
+  };
+
   const getAppointmentInfo = (appointment: Appointment) => {
     if (userType === 'counselor') {
-      return {
-        name: appointment.studentName,
-        detail: appointment.grade,
-        topic: appointment.topic,
-      };
-    } else {
-      return {
-        name: appointment.counselorName,
-        detail: '',
-        topic: '',
-      };
+      return (
+        <div className='space-y-1'>
+          <p className='font-medium text-foreground'>
+            {appointment.studentName}
+          </p>
+          <p className='text-sm text-muted-foreground'>
+            {appointment.grade} • {appointment.topic}
+          </p>
+        </div>
+      );
     }
+    return (
+      <div className='space-y-1'>
+        <p className='font-medium text-foreground'>
+          {appointment.counselorName}
+        </p>
+        <p className='text-sm text-muted-foreground'>전문 상담사</p>
+      </div>
+    );
   };
 
   return (
-    <Card
-      className='
-      p-6 shadow-card border border-border/50
-      bg-card/80 backdrop-blur-sm
-    '
-    >
+    <Card className='p-6'>
       <div className='flex items-center justify-between mb-4'>
-        <h3
-          className='
-          text-lg font-semibold text-foreground
-          flex items-center
-        '
+        <h3 className='text-lg font-semibold text-foreground'>{getTitle()}</h3>
+        <Button
+          variant={userType === 'counselor' ? 'default' : 'outline'}
+          size='sm'
+          className='text-xs'
         >
-          <Clock className='w-5 h-5 text-primary mr-2' />
-          다가오는 상담
-        </h3>
-        {userType === 'counselor' && (
-          <Button variant='ghost' size='sm' aria-label='전체 상담 일정 보기'>
-            전체보기
-          </Button>
-        )}
+          {userType === 'counselor' ? '상담하기' : '상세보기'}
+        </Button>
       </div>
-      <div className='space-y-3'>
-        {appointments.map((appointment, index) => {
-          const info = getAppointmentInfo(appointment);
-          const bgColor = index === 0 ? 'bg-primary/5' : 'bg-secondary/10';
 
-          return (
+      {appointments.length === 0 ? (
+        <div className='text-center py-8'>
+          <Calendar className='w-12 h-12 text-muted-foreground mx-auto mb-3' />
+          <p className='text-muted-foreground'>{getEmptyMessage()}</p>
+        </div>
+      ) : (
+        <div className='space-y-4'>
+          {appointments.map(appointment => (
             <div
               key={appointment.id}
-              className={`p-3 ${bgColor} rounded-lg`}
-              role='listitem'
-              aria-label={`상담 예약: ${appointment.date} ${appointment.time}`}
+              className='flex items-center justify-between p-3 bg-accent/50 rounded-lg'
             >
-              <div className='flex justify-between items-start'>
-                <div>
-                  <p className='font-medium text-foreground'>
-                    {appointment.date} {appointment.time}
+              <div className='flex items-center space-x-3'>
+                <div className='text-center'>
+                  <p className='text-sm font-medium text-foreground'>
+                    {appointment.date}
                   </p>
-                  <p className='text-sm text-muted-foreground'>{info.name}</p>
-                  {info.detail && (
-                    <p className='text-sm text-muted-foreground'>
-                      {info.detail}
-                    </p>
-                  )}
-                  {info.topic && (
-                    <p className='text-xs text-muted-foreground'>
-                      {info.topic}
-                    </p>
-                  )}
+                  <p className='text-xs text-muted-foreground'>
+                    {appointment.time}
+                  </p>
                 </div>
-                <Button
-                  size='sm'
-                  variant={userType === 'counselor' ? 'default' : 'outline'}
-                  onClick={() => handleAppointmentAction(appointment)}
-                  aria-label={
-                    userType === 'counselor'
-                      ? '상담 시작하기'
-                      : '상담 상세 정보 보기'
-                  }
-                >
-                  {userType === 'counselor' ? '상담하기' : '상세보기'}
-                </Button>
+                {getAppointmentInfo(appointment)}
               </div>
             </div>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      )}
     </Card>
   );
 };

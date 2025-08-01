@@ -10,7 +10,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/navigation/sidebar';
-import { COUNSELOR_MENU_ITEMS, STUDENT_MENU_ITEMS } from '@/constants/menu';
+import { COUNSELOR_MENU_ITEMS, USER_MENU_ITEMS } from '@/constants/menu';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { getNavLinkClassName } from '@/utils/navigation';
 import { Heart } from 'lucide-react';
@@ -21,7 +21,7 @@ export const AppSidebar = () => {
   const { user } = useAuthStore();
 
   const menuItems =
-    user?.userType === 'student' ? STUDENT_MENU_ITEMS : COUNSELOR_MENU_ITEMS;
+    user?.userType === 'user' ? USER_MENU_ITEMS : COUNSELOR_MENU_ITEMS;
 
   return (
     <Sidebar

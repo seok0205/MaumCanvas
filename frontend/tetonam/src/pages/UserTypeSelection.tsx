@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 // 상수 데이터 분리
 const USER_TYPES = [
   {
-    type: 'student' as const,
+    type: 'user' as const,
     title: '학생으로 시작하기',
     description: '상담을 받고 싶은 청소년',
     icon: GraduationCap,

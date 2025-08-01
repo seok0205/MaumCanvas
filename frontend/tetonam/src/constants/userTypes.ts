@@ -1,6 +1,6 @@
 // 사용자 타입 라벨 상수
 export const USER_TYPE_LABELS = {
-  student: '학생',
+  user: '학생',
   counselor: '상담사',
   admin: '관리자',
 } as const;

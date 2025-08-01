@@ -1,42 +1,48 @@
 import { Card } from '@/components/ui/layout/card';
 import type { DailyTip } from '@/types/dashboard';
+import { Lightbulb } from 'lucide-react';
 
 interface DailyTipsProps {
   tips: readonly DailyTip[];
-  userType: 'counselor' | 'student';
+  userType: 'counselor' | 'user';
 }
 
 export const DailyTips = ({ tips, userType }: DailyTipsProps) => {
+  const getTitle = () => {
+    return userType === 'user' ? '오늘의 마음 팁' : '상담사를 위한 팁';
+  };
+
   return (
     <Card
       className='
-      p-6 shadow-card border border-border/50
-      bg-card/80 backdrop-blur-sm
-    '
+        p-6 shadow-card border border-border/50
+        bg-card/80 backdrop-blur-sm
+      '
     >
-      <h3 className='text-lg font-semibold text-foreground mb-4'>오늘의 팁</h3>
-      <div
-        className={
-          userType === 'student'
-            ? 'grid grid-cols-1 md:grid-cols-2 gap-4'
-            : 'space-y-4'
-        }
-      >
-        {tips.map((tip, index) => {
-          const bgColor = index === 0 ? 'bg-primary/5' : 'bg-secondary/10';
+      <div className='flex items-center justify-between mb-4'>
+        <h3
+          className='
+            text-lg font-semibold text-foreground
+            flex items-center
+          '
+        >
+          <Lightbulb className='w-5 h-5 text-primary mr-2' />
+          {getTitle()}
+        </h3>
+      </div>
 
-          return (
-            <div
-              key={tip.title}
-              className={`p-4 ${bgColor} rounded-lg`}
-              role='article'
-              aria-label={`오늘의 팁: ${tip.title}`}
-            >
-              <h4 className='font-medium text-foreground mb-2'>{tip.title}</h4>
-              <p className='text-sm text-muted-foreground'>{tip.content}</p>
-            </div>
-          );
-        })}
+      <div className='space-y-4'>
+        {tips.map((tip, index) => (
+          <div
+            key={index}
+            className='p-4 bg-accent/30 rounded-lg border border-border/30'
+          >
+            <h4 className='font-medium text-foreground mb-2'>{tip.title}</h4>
+            <p className='text-sm text-muted-foreground leading-relaxed'>
+              {tip.content}
+            </p>
+          </div>
+        ))}
       </div>
     </Card>
   );

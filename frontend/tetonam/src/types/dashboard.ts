@@ -38,7 +38,7 @@ export interface CommunityActivity {
   type: 'contribution' | 'achievement';
 }
 
-export type UserType = 'counselor' | 'student';
+export type UserType = 'counselor' | 'user';
 
 // readonly 배열 타입을 위한 유틸리티 타입
 export type ReadonlyArray<T> = readonly T[];

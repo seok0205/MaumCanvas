@@ -14,28 +14,28 @@ import { MentalHealthStatus } from './MentalHealthStatus';
 import { QuickStartSection } from './QuickStartSection';
 import { WelcomeSection } from './WelcomeSection';
 
-interface StudentDashboardProps {
+interface UserDashboardProps {
   user: User;
 }
 
-export const StudentDashboard = ({ user }: StudentDashboardProps) => {
+export const UserDashboard = ({ user }: UserDashboardProps) => {
   return (
     <div className='p-6 space-y-6'>
       {/* 환영 메시지 */}
-      <WelcomeSection userName={user.name} userType='student' />
+      <WelcomeSection userName={user.name} userType='user' />
 
       {/* 퀵 시작 섹션 */}
       <QuickStartSection
-        actions={DASHBOARD_CONSTANTS.QUICK_ACTIONS.STUDENT}
-        userType='student'
+        actions={DASHBOARD_CONSTANTS.QUICK_ACTIONS.USER}
+        userType='user'
       />
 
       {/* 상담 관리 섹션 */}
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
         {/* 다가오는 상담 */}
         <AppointmentCard
-          appointments={MOCK_APPOINTMENTS.STUDENT}
-          userType='student'
+          appointments={MOCK_APPOINTMENTS.USER}
+          userType='user'
         />
 
         {/* 마음 주간 현황 */}
@@ -43,7 +43,7 @@ export const StudentDashboard = ({ user }: StudentDashboardProps) => {
       </div>
 
       {/* 오늘의 팁 */}
-      <DailyTips tips={DAILY_TIPS.STUDENT} userType='student' />
+      <DailyTips tips={DAILY_TIPS.USER} userType='user' />
     </div>
   );
 };

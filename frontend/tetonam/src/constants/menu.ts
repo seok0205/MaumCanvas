@@ -2,7 +2,7 @@ import { MenuItem } from '@/types/menu';
 import { BarChart3, Home, MessageCircle, User } from 'lucide-react';
 
 export const USER_TYPES = {
-  STUDENT: 'student',
+  USER: 'user',
   COUNSELOR: 'counselor',
   ADMIN: 'admin',
 } as const;
@@ -17,7 +17,7 @@ export const ROUTES = {
   USER_TYPE_SELECTION: '/user-type-selection',
 } as const;
 
-export const STUDENT_MENU_ITEMS: MenuItem[] = [
+export const USER_MENU_ITEMS: MenuItem[] = [
   { title: '홈', url: '/dashboard', icon: Home },
   { title: '내 마음 진단', url: '/progress', icon: BarChart3 },
   { title: '상담 내역', url: '/counseling-history', icon: MessageCircle },

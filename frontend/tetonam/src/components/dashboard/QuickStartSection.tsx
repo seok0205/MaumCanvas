@@ -4,7 +4,7 @@ import { QuickStartCard } from './QuickStartCard';
 
 interface QuickStartSectionProps {
   actions: readonly QuickAction[];
-  userType: 'counselor' | 'student';
+  userType: 'counselor' | 'user';
 }
 
 export const QuickStartSection = ({

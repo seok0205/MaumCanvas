@@ -9,17 +9,17 @@ export const WelcomeSection = ({ userName, userType }: WelcomeSectionProps) => {
   const getWelcomeMessage = (name: string, type: UserType) => {
     const messages = {
       counselor: `안녕하세요, ${name} 상담사님! 👩‍⚕️`,
-      student: `안녕하세요, ${name}님! 👋`,
+      user: `안녕하세요, ${name}님! 👋`,
     };
-    return messages[type];
+    return messages[type] || `안녕하세요, ${name}님!`;
   };
 
   const getSubtitle = (type: UserType) => {
     const subtitles = {
       counselor: '오늘도 따뜻한 마음으로 학생들과 함께해주세요.',
-      student: '오늘도 따뜻한 마음으로 함께하는 상담을 시작해보세요.',
+      user: '오늘도 따뜻한 마음으로 함께하는 상담을 시작해보세요.',
     };
-    return subtitles[type];
+    return subtitles[type] || '오늘도 좋은 하루 되세요.';
   };
 
   return (
