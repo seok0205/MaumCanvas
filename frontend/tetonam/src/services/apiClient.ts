@@ -1,3 +1,4 @@
+import { ROUTES } from '@/constants/routes';
 import type {
   ApiResponse,
   JwtTokenResponse,
@@ -13,7 +14,6 @@ import axios, {
 // 상수 정의
 const API_CONSTANTS = {
   DEFAULT_TIMEOUT: 10000,
-  LOGIN_PATH: '/login',
   ACCESS_TOKEN_KEY: 'accessToken',
   REFRESH_TOKEN_KEY: 'refreshToken',
   TOKEN_REISSUE_ENDPOINT: '/user/token/reissue',
@@ -77,7 +77,7 @@ const refreshToken = async (): Promise<string | null> => {
     // 토큰 재발급 실패 시 로그아웃 처리
     localStorage.removeItem(API_CONSTANTS.ACCESS_TOKEN_KEY);
     localStorage.removeItem(API_CONSTANTS.REFRESH_TOKEN_KEY);
-    window.location.href = API_CONSTANTS.LOGIN_PATH;
+    window.location.href = ROUTES.LOGIN;
     return null;
   }
 };
