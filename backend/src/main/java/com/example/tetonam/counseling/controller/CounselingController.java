@@ -51,6 +51,14 @@ public class CounselingController {
         return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
     }
 
+    @GetMapping("/my-counseling-recent")
+    @Operation(summary = "학생 메인 다가오는상담 조회 API", description = "나의 제일 가까운 상담내역을 반환합니다")
+    public ResponseEntity<?> showMyRecentCounseling(@RequestHeader("Authorization") String token) {
+        String email = jwtTokenProvider.getEmail(token.substring(7));
+        MyCounselingListResponseDto result=counselingService.showMyRecentCounseling(email);
+        return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
+    }
+
 
 
 }

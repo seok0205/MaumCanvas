@@ -52,7 +52,8 @@ public enum ErrorStatus implements BaseErrorCode {
     FILE_NOT_VALID(HttpStatus.BAD_REQUEST,"IMAGE4000","잘못된 형식의 파일 입니다"),
 
     //상담 예약 응답
-    ALREADY_RESERVED(HttpStatus.BAD_REQUEST,"COUNSELING4000","이미 예약된 시간입니다.")
+    ALREADY_RESERVED(HttpStatus.BAD_REQUEST,"COUNSELING4000","이미 예약된 시간입니다."),
+    NOTING_COUNSELING(HttpStatus.BAD_REQUEST,"COUNSELING4001","상담예약이 없습니다.")
 
     ;
 

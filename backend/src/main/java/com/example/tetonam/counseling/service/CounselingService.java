@@ -75,6 +75,16 @@ public class CounselingService {
 
     }
 
+    public MyCounselingListResponseDto showMyRecentCounseling(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+        Counseling counseling=counselingRepository.findFirstByStudentOrderByReservationTimeDesc(user)
+                .orElseThrow(()->new CounselingHandler(ErrorStatus.NOTING_COUNSELING));
+
+        return MyCounselingListResponseDto.toDto(counseling);
+
+    }
+
 
 //    public String createCounseling(String email, CounselingReserveRequestDto counselingReserveRequestDto) {
 //        // 예외처리 필요할 수도 있음 상담가능한 상담사가 없을시 예외처리
