@@ -2,6 +2,8 @@ import { ROUTES } from '@/constants/routes';
 import { authService } from '@/services/authService';
 import type { AuthError } from '@/types/auth';
 import type { AuthState } from '@/types/store';
+import type { User } from '@/types/user';
+import { roleToUserType } from '@/utils/userTypeMapping';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
@@ -31,14 +33,25 @@ export const useAuthStore = create<AuthState>()(
         login: async (email, password) => {
           set({ isLoading: true, error: null });
           try {
-            const user = await authService.login(email, password);
-            const userWithType = {
-              ...user,
-              userType: get().selectedUserType || user.userType,
+            const tokenResponse = await authService.login(email, password);
+
+            // role 배열을 userType으로 변환
+            const userType =
+              get().selectedUserType || roleToUserType(tokenResponse.role);
+
+            // 사용자 정보 조회 (JWT 토큰 필요)
+            const userInfo = await authService.getMyInfo();
+
+            const user: User = {
+              id: userInfo.id || `user-${Date.now()}`, // 백엔드에서 ID 제공하지 않는 경우 임시 ID
+              email: userInfo.email,
+              name: userInfo.name,
+              userType: userType,
+              createdAt: new Date().toISOString(),
             };
 
             set({
-              user: userWithType,
+              user,
               isAuthenticated: true,
               isLoading: false,
             });
@@ -58,7 +71,17 @@ export const useAuthStore = create<AuthState>()(
         register: async userData => {
           set({ isLoading: true, error: null });
           try {
-            const user = await authService.register(userData);
+            const response = await authService.register(userData);
+
+            // 회원가입 성공 시 사용자 정보 생성
+            const user: User = {
+              id: response.id.toString(),
+              email: userData.email,
+              name: userData.name,
+              userType: userData.userType,
+              createdAt: new Date().toISOString(),
+            };
+
             set({ user, isAuthenticated: true, isLoading: false });
             return true;
           } catch (error) {

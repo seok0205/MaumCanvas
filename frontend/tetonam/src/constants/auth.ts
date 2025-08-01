@@ -16,6 +16,8 @@ export const AUTH_CONSTANTS = {
     EMAIL_AUTH_CHECK: '/api/mail/auth-check',
     MY_INFO: '/api/user/my-info',
     MY_NICKNAME: '/api/user/my-nickname',
+    MY_PASSWORD_UPDATE: '/api/user/mypage-password',
+    MY_NICKNAME_UPDATE: '/api/user/mypage-nickname',
   },
 
   // 로컬 스토리지 키

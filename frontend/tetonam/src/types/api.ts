@@ -34,7 +34,7 @@ export interface RegisterCredentials {
     grade: number;
   };
   birthday: string;
-  roles: string[];
+  userType: 'user' | 'counselor' | 'admin'; // roles 대신 userType 사용
 }
 
 export interface ResetPasswordData {
@@ -52,17 +52,18 @@ export interface TokenReissueData {
   refreshToken: string;
 }
 
-// JWT 토큰 응답 타입
+// JWT 토큰 응답 타입 - 백엔드 API와 일치
 export interface JwtTokenResponse {
   grantType: string;
   accessToken: string;
   refreshToken: string;
   refreshTokenExpirationTime: number;
-  role: string[];
+  role: string[]; // 백엔드에서 제공하는 role 배열
 }
 
 // 사용자 정보 응답 타입
 export interface UserInfoResponse {
+  id?: string; // ID 필드 추가 (백엔드에서 제공하는 경우)
   name: string;
   birthday: string;
   phone: string;

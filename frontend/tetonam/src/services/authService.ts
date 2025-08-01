@@ -10,6 +10,7 @@ import type {
   UserInfoResponse,
 } from '@/types/api';
 import { AuthenticationError } from '@/types/auth';
+import { userTypeToRoles } from '@/utils/userTypeMapping';
 import type { AxiosError } from 'axios';
 import { apiClient } from './apiClient';
 
@@ -106,9 +107,17 @@ export const authService = {
     signal?: AbortSignal
   ): Promise<RegisterResponse> => {
     try {
+      // userType을 roles 배열로 변환
+      const roles = userTypeToRoles(userData.userType);
+
+      const registerData = {
+        ...userData,
+        roles: roles, // 백엔드에 roles 배열로 전송
+      };
+
       const response = await apiClient.post<ApiResponse<RegisterResponse>>(
         AUTH_CONSTANTS.ENDPOINTS.REGISTER,
-        userData,
+        registerData,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -680,6 +689,145 @@ export const authService = {
         throw error;
       }
       return null;
+    }
+  },
+
+  // 마이페이지 비밀번호 재설정
+  updateMyPassword: async (
+    newPassword: string,
+    signal?: AbortSignal
+  ): Promise<string> => {
+    try {
+      const response = await apiClient.patch<ApiResponse<string>>(
+        `${AUTH_CONSTANTS.ENDPOINTS.MY_PASSWORD_UPDATE}?password=${encodeURIComponent(newPassword)}`,
+        {},
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          ...(signal && { signal }),
+        }
+      );
+
+      if (!response.data.isSuccess || !response.data.result) {
+        throw new AuthenticationError(
+          response.data.code || 'PASSWORD_UPDATE_FAILED',
+          '비밀번호 변경에 실패했습니다. 다시 시도해주세요.'
+        );
+      }
+
+      return response.data.result;
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new AuthenticationError('ABORTED', '요청이 취소되었습니다.');
+      }
+
+      // 네트워크 에러 처리
+      const axiosError = error as AxiosError<ApiResponse<null>>;
+      if (
+        axiosError.code === 'NETWORK_ERROR' ||
+        axiosError.code === 'ERR_NETWORK'
+      ) {
+        throw new AuthenticationError(
+          'NETWORK_ERROR',
+          '네트워크 연결을 확인해주세요.'
+        );
+      }
+
+      // API 에러 처리
+      if (axiosError.response?.data) {
+        const apiError = axiosError.response.data;
+        switch (apiError.code) {
+          case 'USER4002': // 해당 유저가 없습니다
+          case 'COMMON400': // 잘못된 요청입니다
+          case 'COMMON401': // 인증이 필요합니다
+          case 'COMMON403': // 금지된 요청입니다
+          case 'COMMON500': // 서버 에러
+          default:
+            throw new AuthenticationError(
+              apiError.code || 'PASSWORD_UPDATE_FAILED',
+              '비밀번호 변경에 실패했습니다. 다시 시도해주세요.'
+            );
+        }
+      }
+
+      throw new AuthenticationError(
+        'PASSWORD_UPDATE_FAILED',
+        '비밀번호 변경에 실패했습니다. 다시 시도해주세요.'
+      );
+    }
+  },
+
+  // 마이페이지 닉네임 재설정
+  updateMyNickname: async (
+    newNickname: string,
+    signal?: AbortSignal
+  ): Promise<string> => {
+    try {
+      const response = await apiClient.patch<ApiResponse<string>>(
+        `${AUTH_CONSTANTS.ENDPOINTS.MY_NICKNAME_UPDATE}?nickname=${encodeURIComponent(newNickname)}`,
+        {},
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          ...(signal && { signal }),
+        }
+      );
+
+      if (!response.data.isSuccess || !response.data.result) {
+        throw new AuthenticationError(
+          response.data.code || 'NICKNAME_UPDATE_FAILED',
+          '닉네임 변경에 실패했습니다. 다시 시도해주세요.'
+        );
+      }
+
+      return response.data.result;
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new AuthenticationError('ABORTED', '요청이 취소되었습니다.');
+      }
+
+      // 네트워크 에러 처리
+      const axiosError = error as AxiosError<ApiResponse<null>>;
+      if (
+        axiosError.code === 'NETWORK_ERROR' ||
+        axiosError.code === 'ERR_NETWORK'
+      ) {
+        throw new AuthenticationError(
+          'NETWORK_ERROR',
+          '네트워크 연결을 확인해주세요.'
+        );
+      }
+
+      // API 에러 처리
+      if (axiosError.response?.data) {
+        const apiError = axiosError.response.data;
+        switch (apiError.code) {
+          case 'USER4001': // 사용중인 닉네임 입니다
+          case 'USER4002': // 해당 유저가 없습니다
+          case 'COMMON400': // 잘못된 요청입니다
+          case 'COMMON401': // 인증이 필요합니다
+          case 'COMMON403': // 금지된 요청입니다
+          case 'COMMON500': // 서버 에러
+          default:
+            throw new AuthenticationError(
+              apiError.code || 'NICKNAME_UPDATE_FAILED',
+              '닉네임 변경에 실패했습니다. 다시 시도해주세요.'
+            );
+        }
+      }
+
+      throw new AuthenticationError(
+        'NICKNAME_UPDATE_FAILED',
+        '닉네임 변경에 실패했습니다. 다시 시도해주세요.'
+      );
     }
   },
 };

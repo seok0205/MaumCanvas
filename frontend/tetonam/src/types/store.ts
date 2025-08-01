@@ -1,4 +1,5 @@
-import type { CreateUserRequest, User, UserType } from './user';
+import type { RegisterCredentials } from './api';
+import type { User, UserType } from './user';
 
 // Store 타입
 export interface AuthState {
@@ -16,6 +17,6 @@ export interface AuthState {
   setSelectedUserType: (type: UserType) => void;
   clearError: () => void;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (userData: CreateUserRequest) => Promise<boolean>;
+  register: (userData: RegisterCredentials) => Promise<boolean>;
   logout: () => void;
 }
