@@ -102,7 +102,9 @@ services:
 
 volumes:
   mysql_data:
+    external: true
   redis_data:
+    external: true
 
 networks:
   tetonam-network:
