@@ -12,7 +12,6 @@ import axios, {
 
 // 상수 정의
 const API_CONSTANTS = {
-  DEFAULT_BASE_URL: 'https://i13e108.p.ssafy.io',
   DEFAULT_TIMEOUT: 10000,
   LOGIN_PATH: '/login',
   ACCESS_TOKEN_KEY: 'accessToken',
@@ -50,7 +49,7 @@ const refreshToken = async (): Promise<string | null> => {
     }
 
     const response = await axios.post<ApiResponse<JwtTokenResponse>>(
-      `${API_CONSTANTS.DEFAULT_BASE_URL}${API_CONSTANTS.TOKEN_REISSUE_ENDPOINT}`,
+      `${import.meta.env.VITE_API_URL}${API_CONSTANTS.TOKEN_REISSUE_ENDPOINT}`,
       {
         accessToken,
         refreshToken,
@@ -86,7 +85,7 @@ const refreshToken = async (): Promise<string | null> => {
 // API 클라이언트 기본 설정
 const createApiClient = (): AxiosInstance => {
   const client = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || API_CONSTANTS.DEFAULT_BASE_URL,
+    baseURL: import.meta.env.VITE_API_URL,
     timeout: API_CONSTANTS.DEFAULT_TIMEOUT,
     headers: {
       'Content-Type': 'application/json',
