@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 
 // 2. 외부 라이브러리
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -98,7 +99,7 @@ export const LoginForm = () => {
           disabled={isLoading}
           className='w-full bg-primary hover:bg-primary-dark text-primary-foreground py-3 rounded-full shadow-soft font-medium text-lg'
         >
-          {isLoading ? '로그인 중...' : '로그인'}
+          {isLoading ? <Loader2 className='w-5 h-5 animate-spin' /> : '로그인'}
         </Button>
 
         <div className='text-center space-y-2'>

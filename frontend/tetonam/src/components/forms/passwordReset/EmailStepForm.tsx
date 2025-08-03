@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/interactive/button';
 import { Label } from '@/components/ui/primitives/label';
 import { emailSchema, type EmailFormData } from '@/types/passwordReset';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Mail } from 'lucide-react';
+import { Loader2, Mail } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
 interface EmailStepFormProps {
@@ -52,7 +52,11 @@ export const EmailStepForm = ({ onSubmit, isLoading }: EmailStepFormProps) => {
         disabled={isLoading}
         className='w-full bg-primary hover:bg-primary-dark text-primary-foreground py-3 rounded-full shadow-soft font-medium'
       >
-        {isLoading ? '전송 중...' : '인증 코드 전송'}
+        {isLoading ? (
+          <Loader2 className='w-5 h-5 animate-spin' />
+        ) : (
+          '인증 코드 전송'
+        )}
       </Button>
     </form>
   );

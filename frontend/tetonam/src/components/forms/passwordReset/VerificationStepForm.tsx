@@ -7,7 +7,7 @@ import {
   type VerificationFormData,
 } from '@/types/passwordReset';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Key } from 'lucide-react';
+import { Key, Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
 interface VerificationStepFormProps {
@@ -92,7 +92,11 @@ export const VerificationStepForm = ({
           disabled={isLoading}
           className='w-full bg-primary hover:bg-primary-dark text-primary-foreground py-3 rounded-full shadow-soft font-medium'
         >
-          {isLoading ? '인증 중...' : '인증 확인'}
+          {isLoading ? (
+            <Loader2 className='w-5 h-5 animate-spin' />
+          ) : (
+            '인증 확인'
+          )}
         </Button>
       </form>
     </div>

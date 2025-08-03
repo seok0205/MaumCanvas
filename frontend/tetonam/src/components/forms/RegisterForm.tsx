@@ -537,10 +537,7 @@ export const RegisterForm = () => {
           className='w-full bg-primary hover:bg-primary-dark text-primary-foreground py-3 rounded-full shadow-soft font-medium text-lg'
         >
           {isLoading ? (
-            <div className='flex items-center space-x-2'>
-              <Loader2 className='w-5 h-5 animate-spin' />
-              <span>가입 중...</span>
-            </div>
+            <Loader2 className='w-5 h-5 animate-spin' />
           ) : (
             '회원가입'
           )}

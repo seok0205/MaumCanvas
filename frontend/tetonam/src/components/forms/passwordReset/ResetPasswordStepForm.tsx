@@ -6,7 +6,7 @@ import {
   type ResetPasswordFormData,
 } from '@/types/passwordReset';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Eye, EyeOff, Key } from 'lucide-react';
+import { Eye, EyeOff, Key, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -149,7 +149,11 @@ export const ResetPasswordStepForm = ({
         disabled={isLoading}
         className='w-full bg-primary hover:bg-primary-dark text-primary-foreground py-3 rounded-full shadow-soft font-medium'
       >
-        {isLoading ? '변경 중...' : '비밀번호 재설정'}
+        {isLoading ? (
+          <Loader2 className='w-5 h-5 animate-spin' />
+        ) : (
+          '비밀번호 재설정'
+        )}
       </Button>
     </form>
   );
