@@ -4,7 +4,6 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -13,7 +12,6 @@ import {
 import { COUNSELOR_MENU_ITEMS, USER_MENU_ITEMS } from '@/constants/menu';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { getNavLinkClassName } from '@/utils/navigation';
-import { Heart } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
 export const AppSidebar = () => {
@@ -26,25 +24,10 @@ export const AppSidebar = () => {
 
   return (
     <Sidebar
-      className={state === 'collapsed' ? 'w-14' : 'w-40'}
+      className={`${state === 'collapsed' ? 'w-14' : 'w-40'} pr-2`}
       collapsible='icon'
     >
-      <SidebarHeader
-        className={`border-b border-border/50 ${state === 'collapsed' ? 'p-2' : 'p-4'}`}
-      >
-        <div className='flex items-center justify-center'>
-          <Heart
-            className={`w-4 h-4 text-primary ${state === 'collapsed' ? '' : 'mr-2'}`}
-          />
-          {state !== 'collapsed' && (
-            <span className='font-bold text-lg text-foreground'>
-              마음 캔버스
-            </span>
-          )}
-        </div>
-      </SidebarHeader>
-
-      <SidebarContent>
+      <SidebarContent className='pt-4'>
         <SidebarGroup>
           <SidebarGroupLabel className={state === 'collapsed' ? 'sr-only' : ''}>
             메뉴
