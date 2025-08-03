@@ -5,12 +5,12 @@ import { Calendar } from 'lucide-react';
 
 interface AppointmentCardProps {
   appointments: readonly Appointment[];
-  userType: 'counselor' | 'user';
+  userRole: 'COUNSELOR' | 'USER';
 }
 
 export const AppointmentCard = ({
   appointments,
-  userType,
+  userRole,
 }: AppointmentCardProps) => {
   const handleAppointmentAction = (appointment: Appointment) => {
     // TODO: 실제 상담 액션 구현
@@ -18,21 +18,21 @@ export const AppointmentCard = ({
   };
 
   const getTitle = () => {
-    if (userType === 'counselor') {
+    if (userRole === 'COUNSELOR') {
       return '오늘의 상담 일정';
     }
     return '다가오는 상담';
   };
 
   const getEmptyMessage = () => {
-    if (userType === 'counselor') {
+    if (userRole === 'COUNSELOR') {
       return '오늘 예정된 상담이 없습니다.';
     }
     return '예약된 상담이 없습니다.';
   };
 
   const getAppointmentInfo = (appointment: Appointment) => {
-    if (userType === 'counselor') {
+    if (userRole === 'COUNSELOR') {
       return (
         <div className='space-y-1'>
           <p className='font-medium text-foreground'>
@@ -59,11 +59,11 @@ export const AppointmentCard = ({
       <div className='flex items-center justify-between mb-4'>
         <h3 className='text-lg font-semibold text-foreground'>{getTitle()}</h3>
         <Button
-          variant={userType === 'counselor' ? 'default' : 'outline'}
+          variant={userRole === 'COUNSELOR' ? 'default' : 'outline'}
           size='sm'
           className='text-xs'
         >
-          {userType === 'counselor' ? '상담하기' : '상세보기'}
+          {userRole === 'COUNSELOR' ? '상담하기' : '상세보기'}
         </Button>
       </div>
 

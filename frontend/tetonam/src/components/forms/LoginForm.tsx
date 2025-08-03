@@ -97,7 +97,7 @@ export const LoginForm = () => {
           {/* 헤더 */}
           <div className='flex items-center justify-between mb-6'>
             <Link
-              to='/user-type-selection'
+              to='/user-role-selection'
               className='text-muted-foreground hover:text-foreground transition-colors'
             >
               <ArrowLeft className='w-5 h-5' />
@@ -199,7 +199,7 @@ export const LoginForm = () => {
               <p className='text-muted-foreground text-sm'>
                 계정이 없으신가요?{' '}
                 <Link
-                  to='/user-type-selection'
+                  to='/user-role-selection'
                   className='text-primary hover:text-primary-dark font-medium'
                 >
                   회원가입
