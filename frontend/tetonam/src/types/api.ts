@@ -31,7 +31,6 @@ export interface RegisterCredentials {
   phone: string;
   school: {
     name: string;
-    grade: number;
   };
   birthday: string;
   roles: string[]; // 백엔드의 roles 배열에 맞춤

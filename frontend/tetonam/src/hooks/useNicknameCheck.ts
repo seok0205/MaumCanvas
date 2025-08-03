@@ -1,3 +1,4 @@
+import { authService } from '@/services/authService';
 import { useCallback, useState } from 'react';
 
 interface UseNicknameCheckReturn {
@@ -6,7 +7,7 @@ interface UseNicknameCheckReturn {
   isLoading: boolean;
   error: string | null;
   successMessage: string | null;
-  checkNickname: (nickname: string) => Promise<void>;
+  checkNickname: (nickname: string, signal?: AbortSignal) => Promise<void>;
   resetState: () => void;
 }
 
@@ -22,8 +23,8 @@ export const useNicknameCheck = (): UseNicknameCheckReturn => {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // 단순한 유효성 검사 함수는 useCallback 불필요
-  const validateNickname = (nickname: string): string | null => {
+  // 유효성 검사 함수를 useCallback으로 최적화
+  const validateNickname = useCallback((nickname: string): string | null => {
     if (!nickname.trim()) {
       return '닉네임을 입력해주세요.';
     }
@@ -41,62 +42,59 @@ export const useNicknameCheck = (): UseNicknameCheckReturn => {
     }
 
     return null;
-  };
-
-  const checkNickname = useCallback(async (nickname: string): Promise<void> => {
-    const validationError = validateNickname(nickname);
-    if (validationError) {
-      setError(validationError);
-      setSuccessMessage(null);
-      setIsNicknameChecked(false);
-      setIsAvailable(false);
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-    setSuccessMessage(null);
-
-    try {
-      // TODO: 실제 닉네임 중복 체크 API 호출
-      // const isAvailable = await nicknameService.checkAvailability(nickname);
-
-      // 모의 API 호출
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // 모의 결과 (실제로는 API 응답에 따라 결정)
-      const mockIsAvailable = !['admin', 'test', 'user'].includes(
-        nickname.toLowerCase()
-      );
-
-      setIsNicknameChecked(true);
-      setIsAvailable(mockIsAvailable);
-
-      if (mockIsAvailable) {
-        setSuccessMessage('해당 닉네임을 사용할 수 있습니다.');
-      } else {
-        setError('이미 사용 중인 닉네임입니다.');
-      }
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : '닉네임 확인에 실패했습니다.';
-      setError(errorMessage);
-      setSuccessMessage(null);
-      setIsNicknameChecked(false);
-      setIsAvailable(false);
-    } finally {
-      setIsLoading(false);
-    }
   }, []);
 
-  // 단순한 상태 초기화 함수는 useCallback 불필요
-  const resetState = () => {
+  const checkNickname = useCallback(
+    async (nickname: string, signal?: AbortSignal): Promise<void> => {
+      const validationError = validateNickname(nickname);
+      if (validationError) {
+        setError(validationError);
+        setSuccessMessage(null);
+        setIsNicknameChecked(false);
+        setIsAvailable(false);
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+      setSuccessMessage(null);
+
+      try {
+        // 실제 닉네임 중복 체크 API 호출
+        await authService.checkNicknameDuplicate(nickname, signal);
+
+        setIsNicknameChecked(true);
+        setIsAvailable(true);
+        setSuccessMessage('해당 닉네임을 사용할 수 있습니다.');
+      } catch (error) {
+        // AbortError는 사용자에게 표시하지 않음
+        if (error instanceof Error && error.name === 'AbortError') {
+          return;
+        }
+
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : '닉네임 확인에 실패했습니다.';
+        setError(errorMessage);
+        setSuccessMessage(null);
+        setIsNicknameChecked(false);
+        setIsAvailable(false);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [validateNickname]
+  );
+
+  // 상태 초기화 함수도 useCallback으로 최적화
+  const resetState = useCallback(() => {
     setIsNicknameChecked(false);
     setIsAvailable(false);
     setIsLoading(false);
     setError(null);
     setSuccessMessage(null);
-  };
+  }, []);
 
   return {
     isNicknameChecked,
