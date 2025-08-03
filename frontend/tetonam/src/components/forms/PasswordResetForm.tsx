@@ -1,4 +1,5 @@
-import { Card } from '@/components/ui/layout/card';
+import { FormLayout } from '@/components/ui/forms/FormLayout';
+import { PrivacyNotice } from '@/components/ui/forms/PrivacyNotice';
 import { PASSWORD_RESET_CONSTANTS } from '@/constants/passwordReset';
 import { useToast } from '@/hooks/use-toast';
 import { usePasswordReset } from '@/hooks/usePasswordReset';
@@ -11,7 +12,6 @@ import type {
 } from '@/types/passwordReset';
 import React, { useCallback } from 'react';
 import { EmailStepForm } from './passwordReset/EmailStepForm';
-import { FormHeader } from './passwordReset/FormHeader';
 import { ProgressIndicator } from './passwordReset/ProgressIndicator';
 import { ResetPasswordStepForm } from './passwordReset/ResetPasswordStepForm';
 import { VerificationStepForm } from './passwordReset/VerificationStepForm';
@@ -133,48 +133,40 @@ export const PasswordResetForm = React.memo(() => {
   }, [resendCode, toast]);
 
   return (
-    <div className='min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-warm'>
-      <div className='w-full max-w-md mx-auto'>
-        <Card className='p-8 bg-card/80 border border-border/50 shadow-card backdrop-blur-sm animate-scale-in'>
-          <FormHeader title={stepTitle} />
+    <FormLayout title={stepTitle} showBackButton={false}>
+      <PrivacyNotice message={stepDescription} className='mb-6' />
 
-          <div className='bg-orange-50 border border-orange-200 rounded-md p-3 mb-6'>
-            <p className='text-sm text-orange-800'>{stepDescription}</p>
-          </div>
+      <ProgressIndicator
+        currentStep={currentStep as PasswordResetStep}
+        getStepProgress={getStepProgress}
+      />
 
-          <ProgressIndicator
-            currentStep={currentStep as PasswordResetStep}
-            getStepProgress={getStepProgress}
-          />
+      {/* 1단계: 이메일 입력 */}
+      {currentStep === 1 && (
+        <EmailStepForm
+          onSubmit={handleEmailSubmit}
+          isLoading={emailStep.isLoading}
+        />
+      )}
 
-          {/* 1단계: 이메일 입력 */}
-          {currentStep === 1 && (
-            <EmailStepForm
-              onSubmit={handleEmailSubmit}
-              isLoading={emailStep.isLoading}
-            />
-          )}
+      {/* 2단계: 인증 코드 입력 */}
+      {currentStep === 2 && (
+        <VerificationStepForm
+          email={email}
+          onSubmit={handleVerificationSubmit}
+          onResendCode={handleResendCode}
+          isLoading={verificationStep.isLoading}
+        />
+      )}
 
-          {/* 2단계: 인증 코드 입력 */}
-          {currentStep === 2 && (
-            <VerificationStepForm
-              email={email}
-              onSubmit={handleVerificationSubmit}
-              onResendCode={handleResendCode}
-              isLoading={verificationStep.isLoading}
-            />
-          )}
-
-          {/* 3단계: 새 비밀번호 설정 */}
-          {currentStep === 3 && (
-            <ResetPasswordStepForm
-              onSubmit={handleResetPasswordSubmit}
-              isLoading={resetStep.isLoading}
-            />
-          )}
-        </Card>
-      </div>
-    </div>
+      {/* 3단계: 새 비밀번호 설정 */}
+      {currentStep === 3 && (
+        <ResetPasswordStepForm
+          onSubmit={handleResetPasswordSubmit}
+          isLoading={resetStep.isLoading}
+        />
+      )}
+    </FormLayout>
   );
 });
 
