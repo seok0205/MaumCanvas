@@ -53,7 +53,7 @@ export const MentalHealthStatus = ({ metrics }: MentalHealthStatusProps) => {
         '
         >
           <TrendingUp className='w-5 h-5 text-primary mr-2' />
-          자기 진단 결과
+          자가 진단 결과
         </h3>
       </div>
       <div className='space-y-4'>

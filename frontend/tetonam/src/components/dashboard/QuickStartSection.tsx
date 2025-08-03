@@ -39,7 +39,7 @@ export const QuickStartSection = ({
   return (
     <div>
       <h2 className='text-xl font-semibold text-foreground mb-4'>
-        {userRole === 'COUNSELOR' ? '퀵 시작' : '빠른 시작'}
+        {userRole === 'COUNSELOR' ? '퀵 시작' : '바로가기'}
       </h2>
       <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
         {actions.map((action, index) => {
