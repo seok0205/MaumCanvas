@@ -1,21 +1,21 @@
 import { Button } from '@/components/ui/interactive/button';
-import { UserTypeCard } from '@/components/ui/UserTypeCard';
+import { UserRoleCard } from '@/components/ui/UserRoleCard';
+import type { UserRole } from '@/constants/userRoles';
 import { useAuthStore } from '@/stores/useAuthStore';
-import type { UserType } from '@/types/user';
-import { GraduationCap, Heart } from 'lucide-react';
+import { GraduationCap, Heart, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // 상수 데이터 분리
 const USER_TYPES = [
   {
-    type: 'user' as const,
+    type: 'USER' as const,
     title: '학생으로 시작하기',
     description: '상담을 받고 싶은 청소년',
     icon: GraduationCap,
   },
   {
-    type: 'counselor' as const,
+    type: 'COUNSELOR' as const,
     title: '상담사로 시작하기',
     description: '전문 그림 상담사',
     icon: Heart,
@@ -40,15 +40,20 @@ const styles = {
   linkButton: 'text-primary hover:text-primary-dark p-0 h-auto font-normal',
 } as const;
 
-export const UserTypeSelection = () => {
-  const [selectedType, setSelectedType] = useState<UserType | null>(null);
-  const { setSelectedUserType } = useAuthStore();
+export const UserRoleSelection = () => {
+  const [selectedType, setSelectedType] = useState<UserRole | null>(null);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const { setSelectedUserRole } = useAuthStore();
   const navigate = useNavigate();
 
   const handleContinue = () => {
     if (selectedType) {
-      setSelectedUserType(selectedType);
+      setIsNavigating(true);
+      setSelectedUserRole(selectedType);
       navigate('/register');
+    } else {
+      // 사용자에게 선택하라는 안내 메시지 표시
+      console.warn('사용자 타입을 선택해주세요');
     }
   };
 
@@ -74,15 +79,15 @@ export const UserTypeSelection = () => {
         </div>
 
         <div className={styles.grid}>
-          {USER_TYPES.map(userType => (
-            <UserTypeCard
-              key={userType.type}
-              userType={userType.type}
-              title={userType.title}
-              description={userType.description}
-              icon={userType.icon}
+          {USER_TYPES.map(userRole => (
+            <UserRoleCard
+              key={userRole.type}
+              userRole={userRole.type}
+              title={userRole.title}
+              description={userRole.description}
+              icon={userRole.icon}
               onSelect={setSelectedType}
-              isSelected={selectedType === userType.type}
+              isSelected={selectedType === userRole.type}
             />
           ))}
         </div>
@@ -90,10 +95,17 @@ export const UserTypeSelection = () => {
         <div className={styles.buttonContainer}>
           <Button
             onClick={handleContinue}
-            disabled={!selectedType}
+            disabled={!selectedType || isNavigating}
             className={styles.primaryButton}
           >
-            회원가입하기
+            {isNavigating ? (
+              <div className='flex items-center space-x-2'>
+                <Loader2 className='w-5 h-5 animate-spin' />
+                <span>이동 중...</span>
+              </div>
+            ) : (
+              '회원가입하기'
+            )}
           </Button>
 
           <p className={styles.linkText}>
