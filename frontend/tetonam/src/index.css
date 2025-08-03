@@ -2,166 +2,194 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 청소년 친화적 온라인 그림 상담 서비스 디자인 시스템
-따뜻하고 안전한 파스텔톤 컬러 팔레트와 부드러운 둥근 디자인 */
+/* 청소년 친화적 디자인 시스템 */
 
 @layer base {
   :root {
-    /* 메인 배경 - 부드러운 크림 */
-    --background: 60 9% 98%;
-    --foreground: 220 15% 25%;
-
-    /* 카드 및 컨테이너 - 순백 */
-    --card: 0 0% 100%;
-    --card-foreground: 220 15% 25%;
-
-    /* 팝오버 */
+    /* 기본 색상 팔레트 - 더 깊이감 있는 톤으로 조정 */
+    --background: 0 0% 98%; /* 매우 밝은 회색 */
+    --foreground: 220 10% 15%; /* 진한 회색 */
+    --card: 0 0% 100%; /* 순백 */
+    --card-foreground: 220 10% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 15% 25%;
-
-    /* 프라이머리 - 따뜻한 민트 */
-    --primary: 160 84% 39%;
-    --primary-foreground: 0 0% 100%;
-    --primary-light: 160 84% 65%;
-    --primary-dark: 160 84% 25%;
-
-    /* 세컨더리 - 부드러운 옐로우 */
-    --secondary: 45 93% 47%;
-    --secondary-foreground: 220 15% 25%;
-
-    /* 뮤트 톤 - 연한 그레이 */
+    --popover-foreground: 220 10% 15%;
+    --primary: 160 84% 39%; /* 민트 그린 - 더 진한 톤 */
+    --primary-foreground: 0 0% 98%;
+    --primary-light: 160 84% 45%; /* 밝은 민트 */
+    --primary-dark: 160 84% 32%; /* 어두운 민트 */
+    --secondary: 220 14% 96%; /* 연한 회색 */
+    --secondary-foreground: 220 10% 15%;
     --muted: 220 14% 96%;
     --muted-foreground: 220 9% 46%;
-
-    /* 액센트 - 라이트 블루 */
-    --accent: 199 89% 48%;
-    --accent-foreground: 0 0% 100%;
-
-    /* 위험/에러 - 부드러운 레드 */
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-
-    /* 보더 및 입력 - 연한 그레이 */
-    --border: 220 13% 91%;
+    --accent: 220 14% 96%;
+    --accent-foreground: 220 10% 15%;
+    --destructive: 0 84% 60%; /* 빨간색 */
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 13% 91%; /* 테두리 색상 */
     --input: 220 13% 91%;
-    --ring: 160 84% 39%;
+    --ring: 160 84% 39%; /* 민트 그린 */
+    --radius: 1.25rem; /* 더 둥근 모서리 */
+    --radius-lg: 1.5rem;
+    --radius-xl: 2rem;
 
-    /* 청소년 친화적 컬러 팔레트 */
-    --mint: 160 84% 39%;
-    --mint-light: 160 84% 65%;
-    --mint-dark: 160 84% 25%;
+    /* 청소년 친화적 파스텔 컬러 팔레트 */
+    --mint: 160 84% 39%; /* 민트 그린 */
+    --mint-light: 160 84% 45%;
+    --mint-dark: 160 84% 32%;
+    --yellow: 45 93% 47%; /* 밝은 노란색 */
+    --yellow-light: 45 93% 55%;
+    --yellow-dark: 45 93% 40%;
+    --light-blue: 199 89% 48%; /* 밝은 파란색 */
+    --light-blue-light: 199 89% 55%;
+    --light-blue-dark: 199 89% 40%;
+    --lilac: 262 83% 58%; /* 라일락 */
+    --lilac-light: 262 83% 65%;
+    --lilac-dark: 262 83% 50%;
+    --peach: 25 95% 53%; /* 복숭아색 */
+    --peach-light: 25 95% 60%;
+    --peach-dark: 25 95% 45%;
 
-    --yellow: 45 93% 47%;
-    --yellow-light: 45 93% 65%;
-    --yellow-dark: 45 93% 35%;
-
-    --light-blue: 199 89% 48%;
-    --light-blue-light: 199 89% 65%;
-    --light-blue-dark: 199 89% 35%;
-
-    --lilac: 280 65% 81%;
-    --lilac-light: 280 65% 90%;
-    --lilac-dark: 280 65% 70%;
-
-    --peach: 15 100% 70%;
-    --peach-light: 15 100% 85%;
-    --peach-dark: 15 100% 55%;
-
-    /* 부드러운 그라디언트 */
-    --gradient-warm: linear-gradient(135deg, hsl(60 9% 98%), hsl(45 93% 95%));
+    /* 그라디언트 정의 */
+    --gradient-warm: linear-gradient(
+      135deg,
+      hsl(160 84% 39% / 0.1),
+      hsl(45 93% 47% / 0.1),
+      hsl(25 95% 53% / 0.1)
+    );
     --gradient-primary: linear-gradient(
       135deg,
-      hsl(160 84% 39%),
-      hsl(160 84% 65%)
+      hsl(160 84% 39% / 0.2),
+      hsl(199 89% 48% / 0.2)
     );
     --gradient-subtle: linear-gradient(
-      180deg,
-      hsl(60 9% 98%),
-      hsl(220 14% 96%)
+      135deg,
+      hsl(220 14% 96%),
+      hsl(0 0% 100%)
     );
     --gradient-mint: linear-gradient(
       135deg,
       hsl(160 84% 39%),
-      hsl(160 84% 65%)
+      hsl(160 84% 45%)
     );
     --gradient-yellow: linear-gradient(
       135deg,
       hsl(45 93% 47%),
-      hsl(45 93% 65%)
+      hsl(45 93% 55%)
     );
     --gradient-blue: linear-gradient(
       135deg,
       hsl(199 89% 48%),
-      hsl(199 89% 65%)
+      hsl(199 89% 55%)
     );
 
-    /* 부드러운 그림자 */
-    --shadow-soft: 0 4px 20px -2px hsl(160 84% 39% / 0.08);
-    --shadow-medium: 0 8px 30px -5px hsl(160 84% 39% / 0.12);
-    --shadow-card: 0 2px 15px -3px hsl(220 15% 25% / 0.06);
-    --shadow-hover: 0 10px 40px -8px hsl(160 84% 39% / 0.15);
+    /* 그림자 시스템 */
+    --shadow-soft: 0 2px 8px hsl(220 10% 15% / 0.08);
+    --shadow-medium: 0 4px 16px hsl(220 10% 15% / 0.12);
+    --shadow-card: 0 2px 12px hsl(220 10% 15% / 0.06);
+    --shadow-hover: 0 8px 24px hsl(220 10% 15% / 0.15);
 
-    /* 애니메이션 */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* 전환 효과 */
+    --transition-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
-    /* 둥근 모서리 */
-    --radius: 1.25rem;
-    --radius-lg: 1.5rem;
-    --radius-xl: 2rem;
-
-    /* 사이드바 */
-    --sidebar-background: 220 14% 96%;
-    --sidebar-foreground: 220 15% 25%;
+    /* 사이드바 색상 */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 10% 15%;
     --sidebar-primary: 160 84% 39%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 13% 91%;
-    --sidebar-accent-foreground: 220 15% 25%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 220 14% 96%;
+    --sidebar-accent-foreground: 220 10% 15%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 160 84% 39%;
   }
 
   .dark {
-    /* 다크모드 - 부드러운 다크 톤 */
-    --background: 220 15% 12%;
-    --foreground: 60 9% 98%;
-
-    --card: 220 15% 15%;
-    --card-foreground: 60 9% 98%;
-
-    --popover: 220 15% 15%;
-    --popover-foreground: 60 9% 98%;
-
-    --primary: 160 84% 39%;
-    --primary-foreground: 220 15% 12%;
-    --primary-light: 160 84% 25%;
-    --primary-dark: 160 84% 15%;
-
-    --secondary: 45 93% 47%;
-    --secondary-foreground: 220 15% 12%;
-
-    --muted: 220 12% 18%;
+    --background: 220 10% 8%; /* 어두운 배경 */
+    --foreground: 0 0% 98%; /* 밝은 텍스트 */
+    --card: 220 10% 12%; /* 어두운 카드 */
+    --card-foreground: 0 0% 98%;
+    --popover: 220 10% 12%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 160 84% 45%; /* 밝은 민트 */
+    --primary-foreground: 220 10% 8%;
+    --primary-light: 160 84% 50%;
+    --primary-dark: 160 84% 39%;
+    --secondary: 220 10% 15%; /* 어두운 보조 색상 */
+    --secondary-foreground: 0 0% 98%;
+    --muted: 220 10% 15%;
     --muted-foreground: 220 9% 65%;
-
-    --accent: 199 89% 48%;
-    --accent-foreground: 220 15% 12%;
-
+    --accent: 220 10% 15%;
+    --accent-foreground: 0 0% 98%;
     --destructive: 0 84% 60%;
-    --destructive-foreground: 60 9% 98%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 10% 18%; /* 어두운 테두리 */
+    --input: 220 10% 18%;
+    --ring: 160 84% 45%;
 
-    --border: 220 12% 22%;
-    --input: 220 12% 22%;
-    --ring: 160 84% 39%;
+    /* 다크 모드 파스텔 컬러 */
+    --mint: 160 84% 45%;
+    --mint-light: 160 84% 50%;
+    --mint-dark: 160 84% 39%;
+    --yellow: 45 93% 55%;
+    --yellow-light: 45 93% 62%;
+    --yellow-dark: 45 93% 47%;
+    --light-blue: 199 89% 55%;
+    --light-blue-light: 199 89% 62%;
+    --light-blue-dark: 199 89% 47%;
+    --lilac: 262 83% 65%;
+    --lilac-light: 262 83% 72%;
+    --lilac-dark: 262 83% 58%;
+    --peach: 25 95% 60%;
+    --peach-light: 25 95% 67%;
+    --peach-dark: 25 95% 53%;
 
-    --sidebar-background: 220 15% 10%;
-    --sidebar-foreground: 60 9% 98%;
-    --sidebar-primary: 160 84% 39%;
-    --sidebar-primary-foreground: 220 15% 12%;
-    --sidebar-accent: 220 12% 18%;
-    --sidebar-accent-foreground: 60 9% 98%;
-    --sidebar-border: 220 12% 18%;
-    --sidebar-ring: 160 84% 39%;
+    /* 다크 모드 그라디언트 */
+    --gradient-warm: linear-gradient(
+      135deg,
+      hsl(160 84% 45% / 0.15),
+      hsl(45 93% 55% / 0.15),
+      hsl(25 95% 60% / 0.15)
+    );
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(160 84% 45% / 0.25),
+      hsl(199 89% 55% / 0.25)
+    );
+    --gradient-subtle: linear-gradient(
+      135deg,
+      hsl(220 10% 15%),
+      hsl(220 10% 12%)
+    );
+    --gradient-mint: linear-gradient(
+      135deg,
+      hsl(160 84% 45%),
+      hsl(160 84% 50%)
+    );
+    --gradient-yellow: linear-gradient(
+      135deg,
+      hsl(45 93% 55%),
+      hsl(45 93% 62%)
+    );
+    --gradient-blue: linear-gradient(
+      135deg,
+      hsl(199 89% 55%),
+      hsl(199 89% 62%)
+    );
+
+    /* 다크 모드 그림자 */
+    --shadow-soft: 0 2px 8px hsl(0 0% 0% / 0.3);
+    --shadow-medium: 0 4px 16px hsl(0 0% 0% / 0.4);
+    --shadow-card: 0 2px 12px hsl(0 0% 0% / 0.25);
+    --shadow-hover: 0 8px 24px hsl(0 0% 0% / 0.5);
+
+    /* 다크 모드 사이드바 */
+    --sidebar-background: 220 10% 12%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 160 84% 45%;
+    --sidebar-primary-foreground: 220 10% 8%;
+    --sidebar-accent: 220 10% 15%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 220 10% 18%;
+    --sidebar-ring: 160 84% 45%;
   }
 }
 
@@ -184,56 +212,67 @@
 
   /* 포커스 스타일 */
   *:focus-visible {
-    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
 
-  /* 선택 텍스트 스타일 */
+  /* 텍스트 선택 스타일 */
   ::selection {
-    @apply bg-primary/20 text-primary-foreground;
+    @apply bg-primary/20 text-foreground;
+  }
+
+  /* 접근성: 애니메이션 감소 선호 설정 */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* GPU 가속 클래스 */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform;
   }
 }
 
 @layer components {
   /* 청소년 친화적 버튼 스타일 */
   .btn-youth {
-    @apply inline-flex items-center justify-center rounded-2xl px-6 py-3 text-sm font-medium transition-all duration-300;
-    @apply min-h-[44px] min-w-[44px];
-    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
-    @apply active:scale-95 hover:scale-105;
+    @apply rounded-2xl transition-all duration-300 active:scale-95 hover:scale-105 min-h-[44px] min-w-[44px] font-medium;
   }
 
   .btn-youth-primary {
-    @apply btn-youth bg-primary text-primary-foreground shadow-soft;
-    @apply hover:shadow-medium hover:bg-primary-dark;
+    @apply btn-youth bg-gradient-mint hover:bg-mint-dark text-white shadow-soft hover:shadow-medium;
   }
 
   .btn-youth-secondary {
-    @apply btn-youth bg-secondary text-secondary-foreground shadow-soft;
-    @apply hover:shadow-medium hover:bg-secondary-dark;
+    @apply btn-youth bg-secondary hover:bg-secondary/80 text-secondary-foreground shadow-soft hover:shadow-medium;
   }
 
   .btn-youth-accent {
-    @apply btn-youth bg-accent text-accent-foreground shadow-soft;
-    @apply hover:shadow-medium hover:bg-accent-dark;
+    @apply btn-youth bg-accent hover:bg-accent/80 text-accent-foreground shadow-soft hover:shadow-medium;
   }
 
   /* 청소년 친화적 카드 스타일 */
   .card-youth {
-    @apply rounded-2xl bg-card p-6 shadow-card transition-all duration-300;
-    @apply hover:shadow-hover hover:scale-[1.02];
-    @apply border border-border/50;
+    @apply rounded-2xl border border-border/50 bg-card text-card-foreground shadow-card transition-all duration-300 hover:shadow-hover;
   }
 
   /* 청소년 친화적 입력 스타일 */
   .input-youth {
-    @apply rounded-xl border border-input bg-background px-4 py-3 text-sm;
-    @apply transition-all duration-300;
-    @apply focus:border-primary focus:ring-2 focus:ring-primary/20;
-    @apply placeholder:text-muted-foreground;
-    @apply min-h-[44px];
+    @apply h-12 rounded-xl border border-input bg-background px-4 py-3 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[44px];
   }
 
-  /* 부드러운 애니메이션 */
+  /* 마이크로 인터랙션 */
+  .micro-interaction {
+    @apply transition-all duration-200 ease-out;
+  }
+
+  /* 애니메이션 유틸리티 */
   .animate-float {
     animation: float 3s ease-in-out infinite;
   }
@@ -246,56 +285,17 @@
     animation: scale-gentle 0.3s ease-out;
   }
 
-  /* 마이크로 인터랙션 */
-  .micro-interaction {
-    @apply transition-all duration-200 ease-out;
+  .animate-pulse-gentle {
+    animation: pulse-gentle 2s ease-in-out infinite;
   }
 
-  .micro-interaction:hover {
-    @apply transform scale-105;
-  }
-
-  .micro-interaction:active {
-    @apply transform scale-95;
+  .animate-wiggle {
+    animation: wiggle 1s ease-in-out infinite;
   }
 }
 
 @layer utilities {
-  /* 커스텀 애니메이션 */
-  @keyframes float {
-    0%,
-    100% {
-      transform: translateY(0px);
-    }
-    50% {
-      transform: translateY(-8px);
-    }
-  }
-
-  @keyframes bounce-gentle {
-    0% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(1.05);
-    }
-    100% {
-      transform: scale(1);
-    }
-  }
-
-  @keyframes scale-gentle {
-    0% {
-      transform: scale(0.95);
-      opacity: 0;
-    }
-    100% {
-      transform: scale(1);
-      opacity: 1;
-    }
-  }
-
-  /* 그라디언트 유틸리티 */
+  /* 새로운 그라디언트 유틸리티 */
   .bg-gradient-mint {
     background: var(--gradient-mint);
   }
@@ -308,12 +308,72 @@
     background: var(--gradient-blue);
   }
 
-  /* 그림자 유틸리티 */
+  /* 새로운 그림자 유틸리티 */
   .shadow-youth {
     box-shadow: var(--shadow-soft);
   }
 
   .shadow-youth-hover {
     box-shadow: var(--shadow-hover);
+  }
+
+  /* GPU 가속 유틸리티 */
+  .transform-gpu {
+    transform: translateZ(0);
+    will-change: transform;
+  }
+}
+
+/* 키프레임 애니메이션 */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes bounce-gentle {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes scale-gentle {
+  0% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-gentle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
   }
 }
