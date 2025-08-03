@@ -35,10 +35,13 @@ export const PasswordResetForm = React.memo(() => {
     emailStep,
     verificationStep,
     resetStep,
+    verificationAttempts,
+    isBlocked,
     requestPasswordReset,
     verifyResetCode,
     resetPassword,
     resendCode,
+    resetVerificationState,
   } = usePasswordReset();
 
   const { stepTitle, stepDescription, getStepProgress } = usePasswordResetSteps(
@@ -180,6 +183,9 @@ export const PasswordResetForm = React.memo(() => {
             onResendCode={handleResendCode}
             isLoading={verificationStep.isLoading}
             message={verificationMessage}
+            verificationAttempts={verificationAttempts}
+            isBlocked={isBlocked}
+            onResetState={resetVerificationState}
           />
         </div>
       )}

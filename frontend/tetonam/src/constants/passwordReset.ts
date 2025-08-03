@@ -29,6 +29,7 @@ export const PASSWORD_RESET_ERROR_MESSAGES = {
   INVALID_VERIFICATION_CODE: '유효하지 않은 인증 코드입니다.',
   VERIFICATION_FAILED: '인증에 실패했습니다.',
   PASSWORD_RESET_FAILED: '비밀번호 재설정에 실패했습니다.',
+  MAX_ATTEMPTS: '인증 시도 횟수를 초과했습니다. 처음부터 다시 시도해주세요.',
   UNKNOWN_ERROR: '알 수 없는 오류가 발생했습니다.',
 } as const;
 

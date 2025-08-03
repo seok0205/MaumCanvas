@@ -7,7 +7,7 @@ import {
   type VerificationFormData,
 } from '@/types/passwordReset';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Key, Loader2 } from 'lucide-react';
+import { AlertTriangle, Key, Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
 interface VerificationStepFormProps {
@@ -16,6 +16,10 @@ interface VerificationStepFormProps {
   onResendCode: () => Promise<void>;
   isLoading: boolean;
   message?: { type: 'success' | 'error'; message: string } | null;
+  // 인증 시도 제한 관련 props 추가
+  verificationAttempts?: number;
+  isBlocked?: boolean;
+  onResetState?: () => void;
 }
 
 export const VerificationStepForm = ({
@@ -24,6 +28,9 @@ export const VerificationStepForm = ({
   onResendCode,
   isLoading,
   message,
+  verificationAttempts = 0,
+  isBlocked = false,
+  onResetState,
 }: VerificationStepFormProps) => {
   const form = useForm<VerificationFormData>({
     resolver: zodResolver(verificationSchema),
@@ -31,11 +38,20 @@ export const VerificationStepForm = ({
   });
 
   const handleSubmit = async (data: VerificationFormData) => {
+    if (isBlocked) return; // 차단된 상태에서는 제출 방지
     await onSubmit(data);
   };
 
   const handleResendCode = async () => {
+    if (isBlocked) return; // 차단된 상태에서는 재전송 방지
     await onResendCode();
+  };
+
+  const handleResetState = () => {
+    if (onResetState) {
+      onResetState();
+      form.reset(); // 폼도 초기화
+    }
   };
 
   return (
@@ -45,6 +61,42 @@ export const VerificationStepForm = ({
           {email}로 인증 코드를 발송했습니다.
         </p>
       </div>
+
+      {/* 인증 시도 제한 알림 */}
+      {verificationAttempts > 0 && (
+        <div className='bg-amber-50 border border-amber-200 rounded-lg p-3'>
+          <div className='flex items-center space-x-2'>
+            <AlertTriangle className='w-4 h-4 text-amber-600' />
+            <p className='text-sm text-amber-800'>
+              인증 시도: {verificationAttempts}/3회
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* 차단 상태 알림 */}
+      {isBlocked && (
+        <div className='bg-red-50 border border-red-200 rounded-lg p-4'>
+          <div className='flex items-center space-x-2 mb-2'>
+            <AlertTriangle className='w-4 h-4 text-red-600' />
+            <p className='text-sm font-medium text-red-800'>
+              인증이 차단되었습니다
+            </p>
+          </div>
+          <p className='text-sm text-red-700 mb-3'>
+            인증 시도 횟수를 초과했습니다. 처음부터 다시 시도해주세요.
+          </p>
+          <Button
+            type='button'
+            onClick={handleResetState}
+            variant='outline'
+            size='sm'
+            className='text-red-700 border-red-300 hover:bg-red-50'
+          >
+            다시 시도
+          </Button>
+        </div>
+      )}
 
       <form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-6'>
         <div className='space-y-2'>
@@ -62,6 +114,8 @@ export const VerificationStepForm = ({
               className='pl-10 bg-background/50 border-border focus:border-primary focus:ring-2 focus:ring-primary/20 text-center text-lg tracking-wider'
               maxLength={PASSWORD_RESET_CONSTANTS.VERIFICATION_CODE_LENGTH}
               aria-describedby='code-error'
+              disabled={isBlocked} // 차단된 상태에서는 입력 비활성화
+              aria-invalid={verificationAttempts > 0} // 접근성 개선
             />
           </div>
           {form.formState.errors.code && (
@@ -98,25 +152,39 @@ export const VerificationStepForm = ({
 
         <div className='text-center'>
           <p className='text-muted-foreground text-sm mb-2'>
-            이메일을 받지 못하셨나요?
+            인증 코드를 받지 못하셨나요?
           </p>
           <Button
             type='button'
-            variant='link'
             onClick={handleResendCode}
-            className='text-primary hover:text-primary-dark p-0 h-auto font-medium'
+            variant='outline'
+            size='sm'
+            disabled={isLoading || isBlocked} // 차단된 상태에서는 재전송 비활성화
+            className='text-primary hover:bg-primary/10'
           >
-            인증 코드 재전송
+            {isLoading ? (
+              <>
+                <Loader2 className='w-4 h-4 mr-2 animate-spin' />
+                발송 중...
+              </>
+            ) : (
+              '인증 코드 재발송'
+            )}
           </Button>
         </div>
 
         <Button
           type='submit'
-          disabled={isLoading}
-          className='w-full bg-primary hover:bg-primary-dark text-primary-foreground py-3 rounded-full shadow-soft font-medium'
+          className='w-full bg-primary hover:bg-primary-dark text-primary-foreground'
+          disabled={isLoading || isBlocked} // 차단된 상태에서는 제출 비활성화
         >
           {isLoading ? (
-            <Loader2 className='w-5 h-5 animate-spin' />
+            <>
+              <Loader2 className='w-4 h-4 mr-2 animate-spin' />
+              인증 중...
+            </>
+          ) : isBlocked ? (
+            '인증 차단됨'
           ) : (
             '인증 확인'
           )}
