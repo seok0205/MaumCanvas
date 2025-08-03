@@ -4,15 +4,14 @@
 import {
   DAILY_TIPS,
   DASHBOARD_CONSTANTS,
-  MOCK_APPOINTMENTS,
   MOCK_MENTAL_HEALTH,
 } from '@/constants/dashboard';
 import type { User } from '@/types/user';
 import { getPrimaryRole } from '@/utils/userRoleMapping';
-import { AppointmentCard } from './AppointmentCard';
 import { DailyTips } from './DailyTips';
 import { MentalHealthStatus } from './MentalHealthStatus';
 import { QuickStartSection } from './QuickStartSection';
+import { UpcomingCounselingCard } from './UpcomingCounselingCard';
 import { WelcomeSection } from './WelcomeSection';
 
 interface UserDashboardProps {
@@ -34,10 +33,7 @@ export const UserDashboard = ({ user }: UserDashboardProps) => {
       {/* 상담 관리 섹션 */}
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
         {/* 다가오는 상담 */}
-        <AppointmentCard
-          appointments={MOCK_APPOINTMENTS.USER}
-          userRole='USER' // 임시로 기존 값 사용
-        />
+        <UpcomingCounselingCard />
 
         {/* 마음 주간 현황 */}
         <MentalHealthStatus metrics={MOCK_MENTAL_HEALTH} />

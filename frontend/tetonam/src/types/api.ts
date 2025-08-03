@@ -101,3 +101,27 @@ export interface CounselingHistory {
   type: string;
   status: string;
 }
+
+// 상담 상태 enum - 백엔드와 일치
+export type CounselingStatus = 'OPEN' | 'CLOSE' | 'CANCEL';
+
+// 다가오는 상담 타입 (my-counseling-recent API 응답)
+export interface UpcomingCounseling {
+  readonly id: number;
+  readonly counselor: string;
+  readonly time: string; // ISO 8601 형식의 날짜 문자열
+  readonly type: string;
+  readonly status: CounselingStatus;
+}
+
+// 상담 유형 타입 (확장 가능)
+export type CounselingType =
+  | '학업'
+  | '진로'
+  | '인간관계'
+  | '가족'
+  | '정서'
+  | '기타';
+
+// 상담 정보 유효성 검사 함수 타입
+export type CounselingValidator = (counseling: UpcomingCounseling) => boolean;
