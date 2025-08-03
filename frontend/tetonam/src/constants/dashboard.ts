@@ -126,3 +126,10 @@ export const DAILY_TIPS = {
     },
   ],
 } as const;
+
+export const QUESTIONNAIRE_CATEGORIES = {
+  스트레스: '스트레스',
+  우울: '우울',
+  불안: '불안',
+  자살: '자살',
+} as const;

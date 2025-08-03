@@ -12,6 +12,7 @@ import { getPrimaryRole } from '@/utils/userRoleMapping';
 import { DailyTips } from './DailyTips';
 import { MentalHealthStatus } from './MentalHealthStatus';
 import { QuickStartSection } from './QuickStartSection';
+import { SelfDiagnosisCard } from './SelfDiagnosisCard';
 import { UpcomingCounselingCard } from './UpcomingCounselingCard';
 import { WelcomeSection } from './WelcomeSection';
 
@@ -43,6 +44,8 @@ export const UserDashboard = ({ user }: UserDashboardProps) => {
         {/* 마음 주간 현황 */}
         <MentalHealthStatus metrics={MOCK_MENTAL_HEALTH} />
       </div>
+      {/* 자가 진단 결과 섹션 */}
+      <SelfDiagnosisCard />
       {/* 오늘의 팁 */}
       <DailyTips tips={DAILY_TIPS.USER} userRole='USER' />{' '}
       {/* 임시로 기존 값 사용 */}

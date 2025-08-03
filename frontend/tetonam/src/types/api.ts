@@ -125,3 +125,28 @@ export type CounselingType =
 
 // 상담 정보 유효성 검사 함수 타입
 export type CounselingValidator = (counseling: UpcomingCounseling) => boolean;
+
+// 설문 카테고리 enum (API 문서와 일치)
+export type QuestionnaireCategory = '스트레스' | '우울' | '불안' | '자살';
+
+// 설문 결과 타입
+export interface QuestionnaireResult {
+  category: string;
+  score: number;
+  createdDate: string; // ISO 8601 형식의 날짜 문자열
+}
+
+// 차트 데이터 타입
+export interface ChartDataPoint {
+  date: string;
+  score: number;
+  category: string;
+}
+
+// 카테고리별 설문 결과 타입
+export interface CategoryQuestionnaireResults {
+  category: QuestionnaireCategory;
+  results: QuestionnaireResult[];
+  isLoading: boolean;
+  error: string | null;
+}

@@ -1,14 +1,11 @@
-import type { ApiResponse } from '@/types/api';
+import type {
+  ApiResponse,
+  QuestionnaireCategory,
+  QuestionnaireResult,
+} from '@/types/api';
 import { AuthenticationError } from '@/types/auth';
 import type { AxiosError } from 'axios';
 import { apiClient } from './apiClient';
-
-// 설문 결과 타입
-export interface QuestionnaireResult {
-  category: string;
-  score: number;
-  createdDate?: string;
-}
 
 // 설문 관련 API 엔드포인트
 const QUESTIONNAIRE_ENDPOINTS = {
@@ -217,6 +214,48 @@ export const questionnaireService = {
       throw new AuthenticationError(
         'QUESTIONNAIRE_CATEGORY_FETCH_FAILED',
         '카테고리별 설문 결과 조회에 실패했습니다. 다시 시도해주세요.'
+      );
+    }
+  },
+
+  // 모든 카테고리의 설문 결과를 병렬로 조회
+  getAllCategoriesQuestionnaireResults: async (
+    categories: QuestionnaireCategory[],
+    signal?: AbortSignal
+  ): Promise<Record<QuestionnaireCategory, QuestionnaireResult[]>> => {
+    try {
+      const promises = categories.map(category =>
+        questionnaireService.getQuestionnaireResultsByCategory(category, signal)
+      );
+
+      const results = await Promise.allSettled(promises);
+
+      const categoryResults: Record<
+        QuestionnaireCategory,
+        QuestionnaireResult[]
+      > = {} as Record<QuestionnaireCategory, QuestionnaireResult[]>;
+
+      categories.forEach((category, index) => {
+        const result = results[index];
+        if (result.status === 'fulfilled') {
+          categoryResults[category] = result.value;
+        } else {
+          categoryResults[category] = [];
+        }
+      });
+
+      return categoryResults;
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new AuthenticationError('ABORTED', '요청이 취소되었습니다.');
+      }
+
+      throw new AuthenticationError(
+        'QUESTIONNAIRE_PARALLEL_FETCH_FAILED',
+        '설문 결과 조회에 실패했습니다. 다시 시도해주세요.'
       );
     }
   },
