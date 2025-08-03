@@ -24,9 +24,11 @@ export const QuickStartSection = ({
 
   const getIconStyles = (index: number) => {
     const styles = [
-      { bg: 'bg-primary/10', color: 'text-primary' },
-      { bg: 'bg-secondary/20', color: 'text-secondary-foreground' },
-      { bg: 'bg-accent/50', color: 'text-accent-foreground' },
+      { bg: 'bg-mint/20', color: 'text-mint-dark' },
+      { bg: 'bg-yellow/20', color: 'text-yellow-dark' },
+      { bg: 'bg-light-blue/20', color: 'text-light-blue-dark' },
+      { bg: 'bg-lilac/20', color: 'text-lilac-dark' },
+      { bg: 'bg-peach/20', color: 'text-peach-dark' },
     ] as const;
     return styles[index % styles.length]!;
   };
@@ -38,26 +40,31 @@ export const QuickStartSection = ({
 
   return (
     <div>
-      <h2 className='text-xl font-semibold text-foreground mb-4'>
+      <h2 className='text-2xl font-semibold text-foreground mb-6'>
         {userRole === 'COUNSELOR' ? '퀵 시작' : '바로가기'}
       </h2>
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+      <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
         {actions.map((action, index) => {
           const Icon = getIcon(action.title);
           const { bg, color } = getIconStyles(index);
 
           return (
-            <QuickStartCard
+            <div
               key={action.title}
-              title={action.title}
-              description={action.description}
-              icon={Icon}
-              actionText={action.actionText}
-              variant={action.variant}
-              onAction={() => handleAction(action)}
-              bgColor={bg}
-              iconColor={color}
-            />
+              className='animate-scale-gentle'
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              <QuickStartCard
+                title={action.title}
+                description={action.description}
+                icon={Icon}
+                actionText={action.actionText}
+                variant={action.variant}
+                onAction={() => handleAction(action)}
+                bgColor={bg}
+                iconColor={color}
+              />
+            </div>
           );
         })}
       </div>

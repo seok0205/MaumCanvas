@@ -74,49 +74,75 @@ export const LoginForm = () => {
 
   return (
     <FormLayout title='로그인'>
-      <PrivacyNotice message={FORM_MESSAGES.PRIVACY.LOGIN} className='mb-6' />
+      <PrivacyNotice message={FORM_MESSAGES.PRIVACY.LOGIN} className='mb-8' />
 
-      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
-        <EmailInput
-          label='이메일'
-          {...form.register('email')}
-          error={form.formState.errors.email?.message || undefined}
-        />
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className='space-y-8 animate-fade-in'
+      >
+        <div
+          className='animate-scale-gentle'
+          style={{ animationDelay: '0.1s' }}
+        >
+          <EmailInput
+            label='이메일'
+            {...form.register('email')}
+            error={form.formState.errors.email?.message || undefined}
+          />
+        </div>
 
-        <PasswordInput
-          label='비밀번호'
-          {...form.register('password')}
-          error={form.formState.errors.password?.message || undefined}
-        />
+        <div
+          className='animate-scale-gentle'
+          style={{ animationDelay: '0.2s' }}
+        >
+          <PasswordInput
+            label='비밀번호'
+            {...form.register('password')}
+            error={form.formState.errors.password?.message || undefined}
+          />
+        </div>
 
         {errorMessage && (
-          <div className='p-3 bg-destructive/10 border border-destructive/20 rounded-lg'>
-            <p className='text-destructive text-sm' role='alert'>
-              {errorMessage}
-            </p>
+          <div
+            className='animate-scale-gentle'
+            style={{ animationDelay: '0.3s' }}
+          >
+            <div className='p-4 bg-destructive/10 border border-destructive/20 rounded-xl'>
+              <p className='text-destructive text-sm' role='alert'>
+                {errorMessage}
+              </p>
+            </div>
           </div>
         )}
 
-        <Button
-          type='submit'
-          disabled={isLoading || isSuccess}
-          className='w-full bg-primary hover:bg-primary-dark text-primary-foreground py-3 rounded-full shadow-soft font-medium text-lg'
+        <div
+          className='animate-scale-gentle'
+          style={{ animationDelay: '0.4s' }}
         >
-          {isLoading ? (
-            <Loader2 className='w-5 h-5 animate-spin' />
-          ) : isSuccess ? (
-            <Check className='w-5 h-5' />
-          ) : (
-            '로그인'
-          )}
-        </Button>
+          <Button
+            type='submit'
+            disabled={isLoading || isSuccess}
+            className='w-full bg-gradient-mint hover:bg-mint-dark text-white py-4 rounded-2xl shadow-soft hover:shadow-medium font-medium text-lg transition-all duration-300'
+          >
+            {isLoading ? (
+              <Loader2 className='w-6 h-6 animate-spin' />
+            ) : isSuccess ? (
+              <Check className='w-6 h-6' />
+            ) : (
+              '로그인'
+            )}
+          </Button>
+        </div>
 
-        <div className='text-center space-y-2'>
+        <div
+          className='text-center space-y-4 animate-scale-gentle'
+          style={{ animationDelay: '0.5s' }}
+        >
           <p className='text-sm text-muted-foreground'>
             비밀번호를 잊어버리셨나요?{' '}
             <Link
               to='/forgot-password'
-              className='text-primary hover:text-primary-dark font-medium'
+              className='text-mint hover:text-mint-dark font-medium transition-colors duration-200'
             >
               비밀번호 찾기
             </Link>
@@ -126,7 +152,7 @@ export const LoginForm = () => {
             계정이 없으신가요?{' '}
             <Link
               to='/user-role-selection'
-              className='text-primary hover:text-primary-dark font-medium'
+              className='text-mint hover:text-mint-dark font-medium transition-colors duration-200'
             >
               회원가입
             </Link>

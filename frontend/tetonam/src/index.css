@@ -2,122 +2,166 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 청소년 온라인 그림 상담 서비스 디자인 시스템
-따뜻하고 안전한 느낌의 베이지/크림 색조와 부드러운 노란색 액센트 */
+/* 청소년 친화적 온라인 그림 상담 서비스 디자인 시스템
+따뜻하고 안전한 파스텔톤 컬러 팔레트와 부드러운 둥근 디자인 */
 
 @layer base {
   :root {
-    /* 메인 배경 - 따뜻한 베이지 */
-    --background: 42 45% 96%;
-    --foreground: 25 15% 25%;
+    /* 메인 배경 - 부드러운 크림 */
+    --background: 60 9% 98%;
+    --foreground: 220 15% 25%;
 
-    /* 카드 및 컨테이너 */
+    /* 카드 및 컨테이너 - 순백 */
     --card: 0 0% 100%;
-    --card-foreground: 25 15% 25%;
+    --card-foreground: 220 15% 25%;
 
     /* 팝오버 */
     --popover: 0 0% 100%;
-    --popover-foreground: 25 15% 25%;
+    --popover-foreground: 220 15% 25%;
 
-    /* 프라이머리 - 부드러운 골드/노란색 */
-    --primary: 45 85% 58%;
+    /* 프라이머리 - 따뜻한 민트 */
+    --primary: 160 84% 39%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 45 95% 75%;
-    --primary-dark: 42 70% 45%;
+    --primary-light: 160 84% 65%;
+    --primary-dark: 160 84% 25%;
 
-    /* 세컨더리 - 부드러운 민트/그린 */
-    --secondary: 150 25% 75%;
-    --secondary-foreground: 25 15% 25%;
+    /* 세컨더리 - 부드러운 옐로우 */
+    --secondary: 45 93% 47%;
+    --secondary-foreground: 220 15% 25%;
 
-    /* 뮤트 톤 */
-    --muted: 42 20% 92%;
-    --muted-foreground: 25 8% 45%;
+    /* 뮤트 톤 - 연한 그레이 */
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
 
-    /* 액센트 */
-    --accent: 42 35% 88%;
-    --accent-foreground: 25 15% 25%;
+    /* 액센트 - 라이트 블루 */
+    --accent: 199 89% 48%;
+    --accent-foreground: 0 0% 100%;
 
-    /* 위험/에러 */
-    --destructive: 0 75% 60%;
+    /* 위험/에러 - 부드러운 레드 */
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    /* 보더 및 입력 */
-    --border: 42 25% 85%;
-    --input: 42 25% 85%;
-    --ring: 45 85% 58%;
+    /* 보더 및 입력 - 연한 그레이 */
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 160 84% 39%;
 
-    /* 커스텀 그라디언트 */
-    --gradient-warm: linear-gradient(135deg, hsl(42 45% 96%), hsl(45 75% 92%));
-    --gradient-primary: linear-gradient(135deg, hsl(45 85% 58%), hsl(45 95% 75%));
-    --gradient-subtle: linear-gradient(180deg, hsl(42 45% 96%), hsl(42 35% 92%));
+    /* 청소년 친화적 컬러 팔레트 */
+    --mint: 160 84% 39%;
+    --mint-light: 160 84% 65%;
+    --mint-dark: 160 84% 25%;
 
-    /* 그림자 */
-    --shadow-soft: 0 4px 12px -2px hsl(45 85% 58% / 0.1);
-    --shadow-medium: 0 8px 25px -5px hsl(45 85% 58% / 0.15);
-    --shadow-card: 0 2px 10px -3px hsl(25 15% 25% / 0.08);
+    --yellow: 45 93% 47%;
+    --yellow-light: 45 93% 65%;
+    --yellow-dark: 45 93% 35%;
+
+    --light-blue: 199 89% 48%;
+    --light-blue-light: 199 89% 65%;
+    --light-blue-dark: 199 89% 35%;
+
+    --lilac: 280 65% 81%;
+    --lilac-light: 280 65% 90%;
+    --lilac-dark: 280 65% 70%;
+
+    --peach: 15 100% 70%;
+    --peach-light: 15 100% 85%;
+    --peach-dark: 15 100% 55%;
+
+    /* 부드러운 그라디언트 */
+    --gradient-warm: linear-gradient(135deg, hsl(60 9% 98%), hsl(45 93% 95%));
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(160 84% 39%),
+      hsl(160 84% 65%)
+    );
+    --gradient-subtle: linear-gradient(
+      180deg,
+      hsl(60 9% 98%),
+      hsl(220 14% 96%)
+    );
+    --gradient-mint: linear-gradient(
+      135deg,
+      hsl(160 84% 39%),
+      hsl(160 84% 65%)
+    );
+    --gradient-yellow: linear-gradient(
+      135deg,
+      hsl(45 93% 47%),
+      hsl(45 93% 65%)
+    );
+    --gradient-blue: linear-gradient(
+      135deg,
+      hsl(199 89% 48%),
+      hsl(199 89% 65%)
+    );
+
+    /* 부드러운 그림자 */
+    --shadow-soft: 0 4px 20px -2px hsl(160 84% 39% / 0.08);
+    --shadow-medium: 0 8px 30px -5px hsl(160 84% 39% / 0.12);
+    --shadow-card: 0 2px 15px -3px hsl(220 15% 25% / 0.06);
+    --shadow-hover: 0 10px 40px -8px hsl(160 84% 39% / 0.15);
 
     /* 애니메이션 */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
-    --radius: 1rem;
+    /* 둥근 모서리 */
+    --radius: 1.25rem;
+    --radius-lg: 1.5rem;
+    --radius-xl: 2rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
+    /* 사이드바 */
+    --sidebar-background: 220 14% 96%;
+    --sidebar-foreground: 220 15% 25%;
+    --sidebar-primary: 160 84% 39%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 13% 91%;
+    --sidebar-accent-foreground: 220 15% 25%;
     --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 160 84% 39%;
   }
 
   .dark {
-    /* 다크모드 배경 - 따뜻한 다크 베이지 */
-    --background: 25 15% 12%;
-    --foreground: 42 45% 96%;
+    /* 다크모드 - 부드러운 다크 톤 */
+    --background: 220 15% 12%;
+    --foreground: 60 9% 98%;
 
-    --card: 25 15% 15%;
-    --card-foreground: 42 45% 96%;
+    --card: 220 15% 15%;
+    --card-foreground: 60 9% 98%;
 
-    --popover: 25 15% 15%;
-    --popover-foreground: 42 45% 96%;
+    --popover: 220 15% 15%;
+    --popover-foreground: 60 9% 98%;
 
-    --primary: 45 85% 58%;
-    --primary-foreground: 25 15% 12%;
-    --primary-light: 45 75% 45%;
-    --primary-dark: 42 60% 35%;
+    --primary: 160 84% 39%;
+    --primary-foreground: 220 15% 12%;
+    --primary-light: 160 84% 25%;
+    --primary-dark: 160 84% 15%;
 
-    --secondary: 150 15% 25%;
-    --secondary-foreground: 42 45% 96%;
+    --secondary: 45 93% 47%;
+    --secondary-foreground: 220 15% 12%;
 
-    --muted: 25 12% 18%;
-    --muted-foreground: 42 20% 65%;
+    --muted: 220 12% 18%;
+    --muted-foreground: 220 9% 65%;
 
-    --accent: 25 15% 20%;
-    --accent-foreground: 42 45% 96%;
+    --accent: 199 89% 48%;
+    --accent-foreground: 220 15% 12%;
 
-    --destructive: 0 65% 55%;
-    --destructive-foreground: 42 45% 96%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 60 9% 98%;
 
-    --border: 25 12% 22%;
-    --input: 25 12% 22%;
-    --ring: 45 85% 58%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 220 12% 22%;
+    --input: 220 12% 22%;
+    --ring: 160 84% 39%;
+
+    --sidebar-background: 220 15% 10%;
+    --sidebar-foreground: 60 9% 98%;
+    --sidebar-primary: 160 84% 39%;
+    --sidebar-primary-foreground: 220 15% 12%;
+    --sidebar-accent: 220 12% 18%;
+    --sidebar-accent-foreground: 60 9% 98%;
+    --sidebar-border: 220 12% 18%;
+    --sidebar-ring: 160 84% 39%;
   }
 }
 
@@ -128,5 +172,148 @@
 
   body {
     @apply bg-background text-foreground;
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
+  }
+
+  /* 부드러운 스크롤 */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* 포커스 스타일 */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
+  }
+
+  /* 선택 텍스트 스타일 */
+  ::selection {
+    @apply bg-primary/20 text-primary-foreground;
+  }
+}
+
+@layer components {
+  /* 청소년 친화적 버튼 스타일 */
+  .btn-youth {
+    @apply inline-flex items-center justify-center rounded-2xl px-6 py-3 text-sm font-medium transition-all duration-300;
+    @apply min-h-[44px] min-w-[44px];
+    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+    @apply active:scale-95 hover:scale-105;
+  }
+
+  .btn-youth-primary {
+    @apply btn-youth bg-primary text-primary-foreground shadow-soft;
+    @apply hover:shadow-medium hover:bg-primary-dark;
+  }
+
+  .btn-youth-secondary {
+    @apply btn-youth bg-secondary text-secondary-foreground shadow-soft;
+    @apply hover:shadow-medium hover:bg-secondary-dark;
+  }
+
+  .btn-youth-accent {
+    @apply btn-youth bg-accent text-accent-foreground shadow-soft;
+    @apply hover:shadow-medium hover:bg-accent-dark;
+  }
+
+  /* 청소년 친화적 카드 스타일 */
+  .card-youth {
+    @apply rounded-2xl bg-card p-6 shadow-card transition-all duration-300;
+    @apply hover:shadow-hover hover:scale-[1.02];
+    @apply border border-border/50;
+  }
+
+  /* 청소년 친화적 입력 스타일 */
+  .input-youth {
+    @apply rounded-xl border border-input bg-background px-4 py-3 text-sm;
+    @apply transition-all duration-300;
+    @apply focus:border-primary focus:ring-2 focus:ring-primary/20;
+    @apply placeholder:text-muted-foreground;
+    @apply min-h-[44px];
+  }
+
+  /* 부드러운 애니메이션 */
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-bounce-gentle {
+    animation: bounce-gentle 0.6s ease-out;
+  }
+
+  .animate-scale-gentle {
+    animation: scale-gentle 0.3s ease-out;
+  }
+
+  /* 마이크로 인터랙션 */
+  .micro-interaction {
+    @apply transition-all duration-200 ease-out;
+  }
+
+  .micro-interaction:hover {
+    @apply transform scale-105;
+  }
+
+  .micro-interaction:active {
+    @apply transform scale-95;
+  }
+}
+
+@layer utilities {
+  /* 커스텀 애니메이션 */
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  @keyframes bounce-gentle {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes scale-gentle {
+    0% {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  /* 그라디언트 유틸리티 */
+  .bg-gradient-mint {
+    background: var(--gradient-mint);
+  }
+
+  .bg-gradient-yellow {
+    background: var(--gradient-yellow);
+  }
+
+  .bg-gradient-blue {
+    background: var(--gradient-blue);
+  }
+
+  /* 그림자 유틸리티 */
+  .shadow-youth {
+    box-shadow: var(--shadow-soft);
+  }
+
+  .shadow-youth-hover {
+    box-shadow: var(--shadow-hover);
   }
 }

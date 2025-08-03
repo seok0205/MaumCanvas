@@ -26,9 +26,10 @@ export const QuickStartCard = ({
   return (
     <Card
       className='
-        p-4 shadow-card border border-border/50
+        p-6 shadow-card border border-border/50
         bg-card/80 backdrop-blur-sm
-        hover:shadow-medium transition-all duration-300
+        hover:shadow-hover hover:scale-[1.02] transition-all duration-300
+        cursor-pointer micro-interaction
       '
       role='button'
       tabIndex={0}
@@ -41,20 +42,22 @@ export const QuickStartCard = ({
       }}
       aria-label={`${title} - ${description}`}
     >
-      <div className='text-center space-y-3'>
+      <div className='text-center space-y-4'>
         <div
-          className={`w-12 h-12 mx-auto ${bgColor} rounded-full flex items-center justify-center`}
+          className={`w-16 h-16 mx-auto ${bgColor} rounded-2xl flex items-center justify-center shadow-soft transition-all duration-300 hover:scale-110`}
           role='img'
           aria-label={`${title} 아이콘`}
         >
-          <Icon className={`w-6 h-6 ${iconColor}`} />
+          <Icon className={`w-8 h-8 ${iconColor}`} />
         </div>
-        <h3 className='font-semibold text-foreground'>{title}</h3>
-        <p className='text-sm text-muted-foreground'>{description}</p>
+        <h3 className='font-semibold text-foreground text-lg'>{title}</h3>
+        <p className='text-sm text-muted-foreground leading-relaxed'>
+          {description}
+        </p>
         <Button
           size='sm'
           variant={variant}
-          className='w-full'
+          className='w-full micro-interaction'
           onClick={e => {
             e.stopPropagation();
             onAction();

@@ -24,31 +24,31 @@ export const FormLayout = ({
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center min-h-screen p-6 bg-gradient-warm',
+        'flex flex-col items-center justify-center min-h-screen p-6 bg-gradient-to-br from-mint/10 via-yellow/5 to-light-blue/10',
         className
       )}
     >
       <div className='w-full max-w-md mx-auto'>
         <Card
           className={cn(
-            'p-8 shadow-card border border-border/50 bg-card/80 backdrop-blur-sm animate-scale-in',
+            'p-8 shadow-card border border-border/30 bg-card/90 backdrop-blur-sm animate-scale-gentle',
             cardClassName
           )}
         >
           {showBackButton && (
-            <div className='flex items-center justify-between mb-6'>
+            <div className='flex items-center justify-between mb-8'>
               <Link
                 to={backTo}
-                className='text-muted-foreground hover:text-foreground transition-colors'
+                className='text-muted-foreground hover:text-foreground transition-colors duration-200 p-2 rounded-xl hover:bg-muted/50'
                 aria-label='이전 페이지로 돌아가기'
               >
-                <ArrowLeft className='w-5 h-5' />
+                <ArrowLeft className='w-6 h-6' />
               </Link>
               <div className='flex items-center'>
-                <Heart className='w-5 h-5 text-primary mr-2' />
-                <h1 className='text-lg font-bold text-foreground'>{title}</h1>
+                <Heart className='w-6 h-6 text-mint mr-3' />
+                <h1 className='text-xl font-bold text-foreground'>{title}</h1>
               </div>
-              <div className='w-5' />
+              <div className='w-6' />
             </div>
           )}
           {children}
