@@ -24,6 +24,7 @@ export const ResetPasswordStepForm = ({
 
   const form = useForm<ResetPasswordFormData>({
     resolver: zodResolver(resetPasswordSchema),
+    mode: 'onBlur',
   });
 
   const handleSubmit = async (data: ResetPasswordFormData) => {

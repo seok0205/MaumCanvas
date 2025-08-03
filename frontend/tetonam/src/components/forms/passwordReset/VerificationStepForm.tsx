@@ -25,6 +25,7 @@ export const VerificationStepForm = ({
 }: VerificationStepFormProps) => {
   const form = useForm<VerificationFormData>({
     resolver: zodResolver(verificationSchema),
+    mode: 'onBlur',
   });
 
   const handleSubmit = async (data: VerificationFormData) => {

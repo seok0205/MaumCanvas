@@ -14,6 +14,7 @@ interface EmailStepFormProps {
 export const EmailStepForm = ({ onSubmit, isLoading }: EmailStepFormProps) => {
   const form = useForm<EmailFormData>({
     resolver: zodResolver(emailSchema),
+    mode: 'onBlur',
   });
 
   const handleSubmit = async (data: EmailFormData) => {

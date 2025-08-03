@@ -34,6 +34,7 @@ export const LoginForm = () => {
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
+    mode: 'onBlur',
     defaultValues: {
       email: '',
       password: '',
