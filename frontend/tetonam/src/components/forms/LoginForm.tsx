@@ -15,7 +15,6 @@ import { PasswordInput } from '@/components/ui/forms/PasswordInput';
 import { PrivacyNotice } from '@/components/ui/forms/PrivacyNotice';
 import { Button } from '@/components/ui/interactive/button';
 import { FORM_MESSAGES } from '@/constants/forms';
-import { useToast } from '@/hooks/use-toast';
 import { useAuthActions } from '@/hooks/useAuthActions';
 
 const loginSchema = z.object({
@@ -29,9 +28,9 @@ interface LoginFormData extends z.infer<typeof loginSchema> {}
 
 export const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { login } = useAuthActions();
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -45,36 +44,26 @@ export const LoginForm = () => {
   const onSubmit = useCallback(
     async (data: LoginFormData) => {
       setIsLoading(true);
+      setErrorMessage(null);
+
       try {
         const success = await login(data.email, data.password);
         if (success) {
-          toast({
-            title: '로그인 성공',
-            description: '마음 캔버스에 오신 것을 환영합니다!',
-          });
           navigate('/dashboard');
         } else {
-          toast({
-            title: '로그인 실패',
-            description: '이메일 또는 비밀번호를 확인해주세요.',
-            variant: 'destructive',
-          });
+          setErrorMessage('이메일 또는 비밀번호를 확인해주세요.');
         }
       } catch (error) {
         const errorMessage =
           error instanceof Error
             ? error.message
             : '로그인 중 문제가 발생했습니다.';
-        toast({
-          title: '오류 발생',
-          description: errorMessage,
-          variant: 'destructive',
-        });
+        setErrorMessage(errorMessage);
       } finally {
         setIsLoading(false);
       }
     },
-    [login, navigate, toast]
+    [login, navigate]
   );
 
   return (
@@ -93,6 +82,14 @@ export const LoginForm = () => {
           {...form.register('password')}
           error={form.formState.errors.password?.message || undefined}
         />
+
+        {errorMessage && (
+          <div className='p-3 bg-destructive/10 border border-destructive/20 rounded-lg'>
+            <p className='text-destructive text-sm' role='alert'>
+              {errorMessage}
+            </p>
+          </div>
+        )}
 
         <Button
           type='submit'

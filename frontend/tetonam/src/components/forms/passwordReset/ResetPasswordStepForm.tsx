@@ -13,11 +13,13 @@ import { useForm } from 'react-hook-form';
 interface ResetPasswordStepFormProps {
   onSubmit: (data: ResetPasswordFormData) => Promise<void>;
   isLoading: boolean;
+  message?: { type: 'success' | 'error'; message: string } | null;
 }
 
 export const ResetPasswordStepForm = ({
   onSubmit,
   isLoading,
+  message,
 }: ResetPasswordStepFormProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -143,6 +145,25 @@ export const ResetPasswordStepForm = ({
           </p>
         )}
       </div>
+
+      {message && (
+        <div
+          className={`p-3 border rounded-lg ${
+            message.type === 'success'
+              ? 'bg-green-50 border-green-200'
+              : 'bg-destructive/10 border-destructive/20'
+          }`}
+        >
+          <p
+            className={`text-sm ${
+              message.type === 'success' ? 'text-green-700' : 'text-destructive'
+            }`}
+            role='alert'
+          >
+            {message.message}
+          </p>
+        </div>
+      )}
 
       <Button
         type='submit'

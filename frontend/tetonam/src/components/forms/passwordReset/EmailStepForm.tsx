@@ -9,9 +9,14 @@ import { useForm } from 'react-hook-form';
 interface EmailStepFormProps {
   onSubmit: (data: EmailFormData) => Promise<void>;
   isLoading: boolean;
+  message?: { type: 'success' | 'error'; message: string } | null;
 }
 
-export const EmailStepForm = ({ onSubmit, isLoading }: EmailStepFormProps) => {
+export const EmailStepForm = ({
+  onSubmit,
+  isLoading,
+  message,
+}: EmailStepFormProps) => {
   const form = useForm<EmailFormData>({
     resolver: zodResolver(emailSchema),
     mode: 'onBlur',
@@ -46,6 +51,25 @@ export const EmailStepForm = ({ onSubmit, isLoading }: EmailStepFormProps) => {
           </p>
         )}
       </div>
+
+      {message && (
+        <div
+          className={`p-3 border rounded-lg ${
+            message.type === 'success'
+              ? 'bg-green-50 border-green-200'
+              : 'bg-destructive/10 border-destructive/20'
+          }`}
+        >
+          <p
+            className={`text-sm ${
+              message.type === 'success' ? 'text-green-700' : 'text-destructive'
+            }`}
+            role='alert'
+          >
+            {message.message}
+          </p>
+        </div>
+      )}
 
       <Button
         type='submit'

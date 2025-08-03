@@ -1,7 +1,6 @@
 import { FormLayout } from '@/components/ui/forms/FormLayout';
 import { PrivacyNotice } from '@/components/ui/forms/PrivacyNotice';
 import { PASSWORD_RESET_CONSTANTS } from '@/constants/passwordReset';
-import { useToast } from '@/hooks/use-toast';
 import { usePasswordReset } from '@/hooks/usePasswordReset';
 import { usePasswordResetSteps } from '@/hooks/usePasswordResetSteps';
 import type {
@@ -10,14 +9,25 @@ import type {
   ResetPasswordFormData,
   VerificationFormData,
 } from '@/types/passwordReset';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { EmailStepForm } from './passwordReset/EmailStepForm';
 import { ProgressIndicator } from './passwordReset/ProgressIndicator';
 import { ResetPasswordStepForm } from './passwordReset/ResetPasswordStepForm';
 import { VerificationStepForm } from './passwordReset/VerificationStepForm';
 
 export const PasswordResetForm = React.memo(() => {
-  const { toast } = useToast();
+  const [emailMessage, setEmailMessage] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
+  const [verificationMessage, setVerificationMessage] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
+  const [resetMessage, setResetMessage] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
 
   const {
     currentStep,
@@ -39,98 +49,101 @@ export const PasswordResetForm = React.memo(() => {
 
   const handleEmailSubmit = useCallback(
     async (data: EmailFormData) => {
+      setEmailMessage(null);
       try {
         await requestPasswordReset(data.email);
 
         if (!emailStep.error) {
-          toast({
-            title: '인증 코드 발송',
-            description: '입력하신 이메일로 인증 코드를 발송했습니다.',
+          setEmailMessage({
+            type: 'success',
+            message: '입력하신 이메일로 인증 코드를 발송했습니다.',
           });
         }
       } catch (error) {
-        toast({
-          title: '오류 발생',
-          description:
+        setEmailMessage({
+          type: 'error',
+          message:
             error instanceof Error
               ? error.message
               : '알 수 없는 오류가 발생했습니다',
-          variant: 'destructive',
         });
       }
     },
-    [requestPasswordReset, emailStep.error, toast]
+    [requestPasswordReset, emailStep.error]
   );
 
   const handleVerificationSubmit = useCallback(
     async (data: VerificationFormData) => {
+      setVerificationMessage(null);
       try {
         await verifyResetCode(data.code);
 
         if (verificationStep.data === true) {
-          toast({
-            title: '인증 완료',
-            description: '이제 새 비밀번호를 설정해주세요.',
+          setVerificationMessage({
+            type: 'success',
+            message: '이제 새 비밀번호를 설정해주세요.',
           });
         }
       } catch (error) {
-        toast({
-          title: '인증 실패',
-          description:
+        setVerificationMessage({
+          type: 'error',
+          message:
             error instanceof Error
               ? error.message
               : '인증 중 오류가 발생했습니다',
-          variant: 'destructive',
         });
       }
     },
-    [verifyResetCode, verificationStep.data, toast]
+    [verifyResetCode, verificationStep.data]
   );
 
   const handleResetPasswordSubmit = useCallback(
     async (data: ResetPasswordFormData) => {
+      setResetMessage(null);
       try {
         const success = await resetPassword(data.password);
 
         if (success) {
-          toast({
-            title: '비밀번호 변경 완료',
-            description: '새 비밀번호로 로그인해주세요.',
+          setResetMessage({
+            type: 'success',
+            message: '새 비밀번호로 로그인해주세요.',
           });
-          window.location.href = PASSWORD_RESET_CONSTANTS.ROUTES.LOGIN;
+          // 성공 메시지 표시 후 잠시 대기 후 로그인 페이지로 이동
+          setTimeout(() => {
+            window.location.href = PASSWORD_RESET_CONSTANTS.ROUTES.LOGIN;
+          }, 2000);
         }
       } catch (error) {
-        toast({
-          title: '오류 발생',
-          description:
+        setResetMessage({
+          type: 'error',
+          message:
             error instanceof Error
               ? error.message
               : '비밀번호 변경 중 오류가 발생했습니다',
-          variant: 'destructive',
         });
       }
     },
-    [resetPassword, toast]
+    [resetPassword]
   );
 
   const handleResendCode = useCallback(async () => {
+    setVerificationMessage(null);
     try {
       await resendCode();
-      toast({
-        title: '인증 코드 재발송',
-        description: '새로운 인증 코드를 발송했습니다.',
+      setVerificationMessage({
+        type: 'success',
+        message: '새로운 인증 코드를 발송했습니다.',
       });
     } catch (error) {
-      toast({
-        title: '재발송 실패',
-        description:
+      setVerificationMessage({
+        type: 'error',
+        message:
           error instanceof Error
             ? error.message
             : '인증 코드 재발송 중 오류가 발생했습니다',
-        variant: 'destructive',
       });
     }
-  }, [resendCode, toast]);
+  }, [resendCode]);
 
   return (
     <FormLayout title={stepTitle} showBackButton={false}>
@@ -146,6 +159,7 @@ export const PasswordResetForm = React.memo(() => {
         <EmailStepForm
           onSubmit={handleEmailSubmit}
           isLoading={emailStep.isLoading}
+          message={emailMessage}
         />
       )}
 
@@ -156,6 +170,7 @@ export const PasswordResetForm = React.memo(() => {
           onSubmit={handleVerificationSubmit}
           onResendCode={handleResendCode}
           isLoading={verificationStep.isLoading}
+          message={verificationMessage}
         />
       )}
 
@@ -164,6 +179,7 @@ export const PasswordResetForm = React.memo(() => {
         <ResetPasswordStepForm
           onSubmit={handleResetPasswordSubmit}
           isLoading={resetStep.isLoading}
+          message={resetMessage}
         />
       )}
     </FormLayout>

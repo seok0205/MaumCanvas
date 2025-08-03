@@ -15,6 +15,7 @@ interface VerificationStepFormProps {
   onSubmit: (data: VerificationFormData) => Promise<void>;
   onResendCode: () => Promise<void>;
   isLoading: boolean;
+  message?: { type: 'success' | 'error'; message: string } | null;
 }
 
 export const VerificationStepForm = ({
@@ -22,6 +23,7 @@ export const VerificationStepForm = ({
   onSubmit,
   onResendCode,
   isLoading,
+  message,
 }: VerificationStepFormProps) => {
   const form = useForm<VerificationFormData>({
     resolver: zodResolver(verificationSchema),
@@ -72,6 +74,27 @@ export const VerificationStepForm = ({
             </p>
           )}
         </div>
+
+        {message && (
+          <div
+            className={`p-3 border rounded-lg ${
+              message.type === 'success'
+                ? 'bg-green-50 border-green-200'
+                : 'bg-destructive/10 border-destructive/20'
+            }`}
+          >
+            <p
+              className={`text-sm ${
+                message.type === 'success'
+                  ? 'text-green-700'
+                  : 'text-destructive'
+              }`}
+              role='alert'
+            >
+              {message.message}
+            </p>
+          </div>
+        )}
 
         <div className='text-center'>
           <p className='text-muted-foreground text-sm mb-2'>
