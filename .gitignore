@@ -45,6 +45,7 @@ out/
 
 ### macOS ###
 .DS_Store
+api.md
 
 ### Node ###
 node_modules/
