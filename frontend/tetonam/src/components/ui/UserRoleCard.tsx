@@ -1,25 +1,25 @@
 import { Card } from '@/components/ui/layout/card';
-import type { UserType } from '@/types/user';
+import type { UserRole } from '@/constants/userRoles';
 import { cn } from '@/utils/cn';
 import { LucideIcon } from 'lucide-react';
 
-interface UserTypeCardProps {
-  userType: UserType;
+interface UserRoleCardProps {
+  userRole: UserRole;
   title: string;
   description: string;
   icon: LucideIcon;
-  onSelect: (type: UserType) => void;
+  onSelect: (type: UserRole) => void;
   isSelected: boolean;
 }
 
-export function UserTypeCard({
-  userType,
+export function UserRoleCard({
+  userRole,
   title,
   description,
   icon: Icon,
   onSelect,
   isSelected,
-}: UserTypeCardProps) {
+}: UserRoleCardProps) {
   return (
     <Card
       className={cn(
@@ -28,7 +28,7 @@ export function UserTypeCard({
           ? 'border-primary bg-primary/5 shadow-medium'
           : 'border-border hover:border-primary/50'
       )}
-      onClick={() => onSelect(userType)}
+      onClick={() => onSelect(userRole)}
     >
       <div className='text-center space-y-4'>
         <div

@@ -1,4 +1,4 @@
-import type { UserRole } from '@/constants/userTypes';
+import type { UserRole } from '@/constants/userRoles';
 
 /**
  * 백엔드 role 배열을 프론트엔드 UserRole로 변환
