@@ -1,3 +1,4 @@
+import { FORM_CONSTANTS } from '@/constants/forms';
 import { authService } from '@/services/authService';
 import { useCallback, useState } from 'react';
 
@@ -10,11 +11,6 @@ interface UseNicknameCheckReturn {
   checkNickname: (nickname: string, signal?: AbortSignal) => Promise<void>;
   resetState: () => void;
 }
-
-// 닉네임 유효성 검사 규칙
-const NICKNAME_REGEX = /^[가-힣a-zA-Z0-9]{2,10}$/;
-const NICKNAME_MIN_LENGTH = 2;
-const NICKNAME_MAX_LENGTH = 10;
 
 export const useNicknameCheck = (): UseNicknameCheckReturn => {
   const [isNicknameChecked, setIsNicknameChecked] = useState(false);
@@ -29,16 +25,16 @@ export const useNicknameCheck = (): UseNicknameCheckReturn => {
       return '닉네임을 입력해주세요.';
     }
 
-    if (nickname.length < NICKNAME_MIN_LENGTH) {
-      return `닉네임은 최소 ${NICKNAME_MIN_LENGTH}자 이상이어야 합니다.`;
+    if (nickname.length < FORM_CONSTANTS.VALIDATION.NICKNAME_MIN_LENGTH) {
+      return `닉네임은 최소 ${FORM_CONSTANTS.VALIDATION.NICKNAME_MIN_LENGTH}자 이상이어야 합니다.`;
     }
 
-    if (nickname.length > NICKNAME_MAX_LENGTH) {
-      return `닉네임은 최대 ${NICKNAME_MAX_LENGTH}자까지 가능합니다.`;
+    if (nickname.length > FORM_CONSTANTS.VALIDATION.NICKNAME_MAX_LENGTH) {
+      return `닉네임은 최대 ${FORM_CONSTANTS.VALIDATION.NICKNAME_MAX_LENGTH}자까지 가능합니다.`;
     }
 
-    if (!NICKNAME_REGEX.test(nickname)) {
-      return '닉네임은 한글, 영문, 숫자만 사용 가능합니다.';
+    if (!FORM_CONSTANTS.VALIDATION.NICKNAME_PATTERN.test(nickname)) {
+      return '닉네임은 한글(완성형), 영문, 숫자만 사용 가능합니다.';
     }
 
     return null;
