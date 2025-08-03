@@ -31,7 +31,7 @@ export const FormLayout = ({
       <div className='w-full max-w-md mx-auto'>
         <Card
           className={cn(
-            'p-8 shadow-card border border-border/30 bg-card/90 backdrop-blur-sm animate-scale-gentle',
+            'p-8 shadow-card border border-border/30 bg-card/90 backdrop-blur-sm',
             cardClassName
           )}
         >

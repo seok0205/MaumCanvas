@@ -76,14 +76,8 @@ export const LoginForm = () => {
     <FormLayout title='로그인'>
       <PrivacyNotice message={FORM_MESSAGES.PRIVACY.LOGIN} className='mb-8' />
 
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className='space-y-8 animate-fade-in'
-      >
-        <div
-          className='animate-scale-gentle'
-          style={{ animationDelay: '0.1s' }}
-        >
+      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+        <div>
           <EmailInput
             label='이메일'
             {...form.register('email')}
@@ -91,10 +85,7 @@ export const LoginForm = () => {
           />
         </div>
 
-        <div
-          className='animate-scale-gentle'
-          style={{ animationDelay: '0.2s' }}
-        >
+        <div>
           <PasswordInput
             label='비밀번호'
             {...form.register('password')}
@@ -103,10 +94,7 @@ export const LoginForm = () => {
         </div>
 
         {errorMessage && (
-          <div
-            className='animate-scale-gentle'
-            style={{ animationDelay: '0.3s' }}
-          >
+          <div>
             <div className='p-4 bg-destructive/10 border border-destructive/20 rounded-xl'>
               <p className='text-destructive text-sm' role='alert'>
                 {errorMessage}
@@ -115,14 +103,11 @@ export const LoginForm = () => {
           </div>
         )}
 
-        <div
-          className='animate-scale-gentle'
-          style={{ animationDelay: '0.4s' }}
-        >
+        <div>
           <Button
             type='submit'
             disabled={isLoading || isSuccess}
-            className='w-full bg-gradient-mint hover:bg-mint-dark text-white py-4 rounded-2xl shadow-soft hover:shadow-medium font-medium text-lg transition-all duration-300'
+            className='w-full bg-gradient-mint hover:bg-mint-dark text-white py-4 rounded-2xl shadow-soft hover:shadow-medium font-medium text-lg transform-gpu'
           >
             {isLoading ? (
               <Loader2 className='w-6 h-6 animate-spin' />
@@ -134,15 +119,12 @@ export const LoginForm = () => {
           </Button>
         </div>
 
-        <div
-          className='text-center space-y-4 animate-scale-gentle'
-          style={{ animationDelay: '0.5s' }}
-        >
+        <div className='text-center space-y-4'>
           <p className='text-sm text-muted-foreground'>
             비밀번호를 잊어버리셨나요?{' '}
             <Link
               to='/forgot-password'
-              className='text-mint hover:text-mint-dark font-medium transition-colors duration-200'
+              className='text-mint hover:text-mint-dark font-medium micro-interaction'
             >
               비밀번호 찾기
             </Link>
@@ -152,7 +134,7 @@ export const LoginForm = () => {
             계정이 없으신가요?{' '}
             <Link
               to='/user-role-selection'
-              className='text-mint hover:text-mint-dark font-medium transition-colors duration-200'
+              className='text-mint hover:text-mint-dark font-medium micro-interaction'
             >
               회원가입
             </Link>
