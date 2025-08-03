@@ -146,41 +146,49 @@ export const PasswordResetForm = React.memo(() => {
   }, [resendCode]);
 
   return (
-    <FormLayout title={stepTitle} showBackButton={false}>
+    <FormLayout title={stepTitle} showBackButton={true}>
       <PrivacyNotice message={stepDescription} className='mb-6' />
 
-      <ProgressIndicator
-        currentStep={currentStep as PasswordResetStep}
-        getStepProgress={getStepProgress}
-      />
+      <div>
+        <ProgressIndicator
+          currentStep={currentStep as PasswordResetStep}
+          getStepProgress={getStepProgress}
+        />
+      </div>
 
       {/* 1단계: 이메일 입력 */}
       {currentStep === 1 && (
-        <EmailStepForm
-          onSubmit={handleEmailSubmit}
-          isLoading={emailStep.isLoading}
-          message={emailMessage}
-        />
+        <div>
+          <EmailStepForm
+            onSubmit={handleEmailSubmit}
+            isLoading={emailStep.isLoading}
+            message={emailMessage}
+          />
+        </div>
       )}
 
       {/* 2단계: 인증 코드 입력 */}
       {currentStep === 2 && (
-        <VerificationStepForm
-          email={email}
-          onSubmit={handleVerificationSubmit}
-          onResendCode={handleResendCode}
-          isLoading={verificationStep.isLoading}
-          message={verificationMessage}
-        />
+        <div>
+          <VerificationStepForm
+            email={email}
+            onSubmit={handleVerificationSubmit}
+            onResendCode={handleResendCode}
+            isLoading={verificationStep.isLoading}
+            message={verificationMessage}
+          />
+        </div>
       )}
 
       {/* 3단계: 새 비밀번호 설정 */}
       {currentStep === 3 && (
-        <ResetPasswordStepForm
-          onSubmit={handleResetPasswordSubmit}
-          isLoading={resetStep.isLoading}
-          message={resetMessage}
-        />
+        <div>
+          <ResetPasswordStepForm
+            onSubmit={handleResetPasswordSubmit}
+            isLoading={resetStep.isLoading}
+            message={resetMessage}
+          />
+        </div>
       )}
     </FormLayout>
   );
