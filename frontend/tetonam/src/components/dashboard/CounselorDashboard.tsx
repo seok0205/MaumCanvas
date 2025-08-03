@@ -1,6 +1,7 @@
 // 외부 라이브러리
 
 // 내부 모듈
+import { useSidebar } from '@/components/ui/navigation/sidebar';
 import {
   DAILY_TIPS,
   DASHBOARD_CONSTANTS,
@@ -22,7 +23,11 @@ interface CounselorDashboardProps {
 }
 
 export const CounselorDashboard = ({ user }: CounselorDashboardProps) => {
+  const { state } = useSidebar();
   const primaryRole = getPrimaryRole(user.roles);
+
+  // 사이드바가 expanded 상태일 때 더 많은 패딩 적용
+  const paddingClass = state === 'expanded' ? 'p-8' : 'p-6';
 
   const communityActivities: CommunityActivityType[] = [
     {
@@ -38,7 +43,7 @@ export const CounselorDashboard = ({ user }: CounselorDashboardProps) => {
   ];
 
   return (
-    <div className='p-6 space-y-6'>
+    <div className={`${paddingClass} space-y-6`}>
       {/* 환영 메시지 */}
       <WelcomeSection userName={user.name} userRole={primaryRole} />
 
