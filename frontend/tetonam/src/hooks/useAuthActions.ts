@@ -20,12 +20,6 @@ export const useAuthActions = (): UseAuthActionsReturn => {
     async (email: string, password: string): Promise<boolean> => {
       try {
         const success = await login(email, password);
-        if (success) {
-          toast({
-            title: '로그인 성공',
-            description: '성공적으로 로그인되었습니다.',
-          });
-        }
         return success;
       } catch (error) {
         const errorMessage =

@@ -3,7 +3,7 @@ import { useCallback, useState } from 'react';
 
 // 2. 외부 라이브러리
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2 } from 'lucide-react';
+import { Check, Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -28,6 +28,7 @@ interface LoginFormData extends z.infer<typeof loginSchema> {}
 
 export const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { login } = useAuthActions();
   const navigate = useNavigate();
@@ -44,12 +45,17 @@ export const LoginForm = () => {
   const onSubmit = useCallback(
     async (data: LoginFormData) => {
       setIsLoading(true);
+      setIsSuccess(false);
       setErrorMessage(null);
 
       try {
         const success = await login(data.email, data.password);
         if (success) {
-          navigate('/dashboard');
+          setIsSuccess(true);
+          // 체크 아이콘을 잠깐 보여준 후 대시보드로 이동
+          setTimeout(() => {
+            navigate('/dashboard');
+          }, 1000);
         } else {
           setErrorMessage('이메일 또는 비밀번호를 확인해주세요.');
         }
@@ -93,10 +99,16 @@ export const LoginForm = () => {
 
         <Button
           type='submit'
-          disabled={isLoading}
+          disabled={isLoading || isSuccess}
           className='w-full bg-primary hover:bg-primary-dark text-primary-foreground py-3 rounded-full shadow-soft font-medium text-lg'
         >
-          {isLoading ? <Loader2 className='w-5 h-5 animate-spin' /> : '로그인'}
+          {isLoading ? (
+            <Loader2 className='w-5 h-5 animate-spin' />
+          ) : isSuccess ? (
+            <Check className='w-5 h-5' />
+          ) : (
+            '로그인'
+          )}
         </Button>
 
         <div className='text-center space-y-2'>
