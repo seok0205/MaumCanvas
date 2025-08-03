@@ -23,11 +23,9 @@ export const useAnimation = (options: UseAnimationOptions = {}) => {
         setHasAnimated(true);
 
         // 애니메이션 완료 후 상태 정리
-        const animationTimer = setTimeout(() => {
+        setTimeout(() => {
           setIsAnimating(false);
         }, duration);
-
-        return () => clearTimeout(animationTimer);
       }
     }, delay);
 
