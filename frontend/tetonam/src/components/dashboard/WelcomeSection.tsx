@@ -1,4 +1,4 @@
-import type { UserRole } from '@/constants/userTypes';
+import type { UserRole } from '@/constants/userRoles';
 
 interface WelcomeSectionProps {
   userName: string;

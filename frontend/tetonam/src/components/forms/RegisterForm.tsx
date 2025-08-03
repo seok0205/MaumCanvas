@@ -46,6 +46,7 @@ import { useAuthActions } from '@/hooks/useAuthActions';
 import { useEmailVerification } from '@/hooks/useEmailVerification';
 import { useNicknameCheck } from '@/hooks/useNicknameCheck';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { roleToRolesArray } from '@/utils/userRoleMapping';
 
 const registerSchema = z
   .object({
@@ -130,21 +131,21 @@ export const RegisterForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [showUserTypeModal, setShowUserTypeModal] = useState(false);
   const [showRegisterResultModal, setShowRegisterResultModal] = useState(false);
   const [registerResult, setRegisterResult] = useState<{
     isSuccess: boolean;
   }>({ isSuccess: false });
-  const [emailVerified, setEmailVerified] = useState(false);
   const [nicknameVerified, setNicknameVerified] = useState(false);
 
   const { register } = useAuthActions();
-  const { selectedUserType } = useAuthStore();
+  const { selectedUserRole } = useAuthStore();
   const navigate = useNavigate();
   const {
     isEmailSent,
+    isEmailVerified,
     sendEmailVerification,
     verifyEmail,
+    resetState: resetEmailState,
     error: emailError,
     successMessage: emailSuccessMessage,
     isLoading: emailLoading,
@@ -209,11 +210,11 @@ export const RegisterForm = () => {
   useEffect(() => {
     const subscription = form.watch((_value, { name }) => {
       if (name === 'email') {
-        setEmailVerified(false);
+        resetEmailState();
       }
     });
     return () => subscription.unsubscribe();
-  }, [form]);
+  }, [form, resetEmailState]);
 
   // 닉네임 변경 시 중복 체크 상태 리셋
   useEffect(() => {
@@ -225,17 +226,20 @@ export const RegisterForm = () => {
     return () => subscription.unsubscribe();
   }, [form]);
 
-  // 사용자 타입이 선택되지 않은 경우 자동으로 dialog 표시
+  // 사용자 역할이 선택되지 않은 경우 UserRoleSelection 페이지로 리다이렉트
   useEffect(() => {
-    if (!selectedUserType) {
-      setShowUserTypeModal(true);
+    if (!selectedUserRole) {
+      // 즉시 리다이렉트하여 불필요한 렌더링 방지
+      navigate('/user-role-selection', { replace: true });
     }
-  }, [selectedUserType]);
+  }, [selectedUserRole, navigate]);
 
   const onSubmit = useCallback(
     async (data: RegisterFormData) => {
-      if (!selectedUserType) {
-        setShowUserTypeModal(true);
+      // UserRole이 없으면 이미 useEffect에서 리다이렉트되므로 여기서는 체크 불필요
+      if (!selectedUserRole) {
+        // 추가 안전장치: UserRole이 없으면 리다이렉트
+        navigate('/user-role-selection', { replace: true });
         return;
       }
 
@@ -244,8 +248,15 @@ export const RegisterForm = () => {
         const success = await register({
           name: data.name,
           email: data.email,
-          userType: selectedUserType,
-          ...(data.birthDate && { birthDate: new Date(data.birthDate) }),
+          password: data.password,
+          nickname: data.nickname,
+          gender: data.gender.toUpperCase() as 'MALE' | 'FEMALE' | 'OTHERS',
+          phone: data.phone,
+          school: {
+            name: data.organization,
+          },
+          birthday: data.birthDate,
+          roles: roleToRolesArray(selectedUserRole),
         });
 
         setRegisterResult({ isSuccess: success });
@@ -257,13 +268,14 @@ export const RegisterForm = () => {
         setIsLoading(false);
       }
     },
-    [selectedUserType, register]
+    [selectedUserRole, register, navigate]
   );
 
   const handleRegisterResultClose = useCallback(() => {
     setShowRegisterResultModal(false);
     if (!registerResult.isSuccess) {
-      navigate('/user-type-selection');
+      // 실패 시 UserRoleSelection으로 돌아가서 다시 시도할 수 있도록 함
+      navigate('/user-role-selection');
     }
   }, [registerResult.isSuccess, navigate]);
 
@@ -277,11 +289,16 @@ export const RegisterForm = () => {
     const email = form.getValues('email');
     const code = form.getValues('emailVerificationCode') || '';
 
+    // AbortController를 사용하여 요청 취소 가능하게 함
+    const abortController = new AbortController();
+
     try {
-      await verifyEmail(email, code);
-      setEmailVerified(true);
+      await verifyEmail(email, code, abortController.signal);
     } catch (error) {
-      setEmailVerified(false);
+      // AbortError는 사용자에게 표시하지 않음
+      if (error instanceof Error && error.name !== 'AbortError') {
+        // 에러는 useEmailVerification 훅에서 처리됨
+      }
     }
   }, [verifyEmail, form]);
 
@@ -289,23 +306,28 @@ export const RegisterForm = () => {
   const handleNicknameCheck = useCallback(async () => {
     const nickname = form.getValues('nickname');
 
+    // AbortController를 사용하여 요청 취소 가능하게 함
+    const abortController = new AbortController();
+
     try {
-      await checkNickname(nickname);
+      await checkNickname(nickname, abortController.signal);
       setNicknameVerified(true);
     } catch (error) {
-      setNicknameVerified(false);
-      // 중복확인 실패 시 닉네임 입력창 초기화
-      form.setValue('nickname', '');
+      // AbortError는 사용자에게 표시하지 않음
+      if (error instanceof Error && error.name !== 'AbortError') {
+        setNicknameVerified(false);
+        // 중복확인 실패 시 닉네임 입력창 초기화
+        form.setValue('nickname', '');
+      }
     }
   }, [checkNickname, form]);
 
-  // 회원가입 버튼 활성화 조건
+  // 회원가입 버튼 활성화 조건 (UserRole 체크 제거 - 이미 리다이렉트로 처리)
   const isSubmitDisabled =
     isLoading ||
-    !emailVerified ||
+    !isEmailVerified ||
     !nicknameVerified ||
-    !form.formState.isValid ||
-    !selectedUserType;
+    !form.formState.isValid;
 
   return (
     <div className='flex flex-col items-center justify-center min-h-screen p-6 bg-gradient-warm'>
@@ -315,8 +337,9 @@ export const RegisterForm = () => {
           {/* 헤더 */}
           <div className='flex items-center justify-between mb-6'>
             <Link
-              to='/user-type-selection'
+              to='/user-role-selection'
               className='text-muted-foreground hover:text-foreground transition-colors'
+              aria-label='사용자 타입 선택으로 돌아가기'
             >
               <ArrowLeft className='w-5 h-5' />
             </Link>
@@ -479,12 +502,12 @@ export const RegisterForm = () => {
                 <Button
                   type='button'
                   onClick={() => sendEmailVerification(form.getValues('email'))}
-                  disabled={emailLoading || emailVerified}
+                  disabled={emailLoading || isEmailVerified}
                   className='bg-primary hover:bg-primary-dark text-primary-foreground px-4 py-2 text-sm'
                 >
                   {emailLoading ? (
                     <Loader2 className='w-4 h-4 animate-spin' />
-                  ) : emailVerified ? (
+                  ) : isEmailVerified ? (
                     '인증완료'
                   ) : isEmailSent ? (
                     '재전송'
@@ -518,12 +541,12 @@ export const RegisterForm = () => {
                   <Button
                     type='button'
                     onClick={handleEmailVerification}
-                    disabled={emailLoading || emailVerified}
+                    disabled={emailLoading || isEmailVerified}
                     className='bg-primary hover:bg-primary-dark text-primary-foreground px-4 py-2 text-sm'
                   >
                     {emailLoading ? (
                       <Loader2 className='w-4 h-4 animate-spin' />
-                    ) : emailVerified ? (
+                    ) : isEmailVerified ? (
                       '인증완료'
                     ) : (
                       '인증하기'
@@ -742,32 +765,6 @@ export const RegisterForm = () => {
           </form>
         </Card>
       </div>
-
-      {/* 사용자 타입 미선택 모달 */}
-      <Dialog
-        open={showUserTypeModal}
-        onOpenChange={open => {
-          setShowUserTypeModal(open);
-          if (!open) {
-            navigate('/user-type-selection');
-          }
-        }}
-      >
-        <DialogContent className='sm:max-w-md'>
-          <DialogHeader className='text-center'>
-            <div className='mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-orange-100'>
-              <AlertTriangle className='h-6 w-6 text-orange-600' />
-            </div>
-            <DialogTitle className='text-lg font-semibold text-foreground'>
-              사용자 타입을 선택해주세요
-            </DialogTitle>
-            <DialogDescription className='text-sm text-muted-foreground'>
-              회원가입을 진행하기 위해서는 먼저 사용자 타입을 선택해야 합니다.
-              <br />X 버튼을 클릭하면 사용자 타입 선택 페이지로 이동합니다.
-            </DialogDescription>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
 
       {/* 회원가입 결과 모달 */}
       <RegisterResultDialog

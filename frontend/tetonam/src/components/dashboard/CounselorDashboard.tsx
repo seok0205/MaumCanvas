@@ -9,7 +9,7 @@ import {
 } from '@/constants/dashboard';
 import type { CommunityActivity as CommunityActivityType } from '@/types/dashboard';
 import type { User } from '@/types/user';
-import { getPrimaryRole } from '@/utils/userTypeMapping';
+import { getPrimaryRole } from '@/utils/userRoleMapping';
 import { AppointmentCard } from './AppointmentCard';
 import { CommunityActivity } from './CommunityActivity';
 import { DailyTips } from './DailyTips';
@@ -45,7 +45,7 @@ export const CounselorDashboard = ({ user }: CounselorDashboardProps) => {
       {/* 퀵 시작 섹션 */}
       <QuickStartSection
         actions={DASHBOARD_CONSTANTS.QUICK_ACTIONS.COUNSELOR}
-        userType='counselor' // 임시로 기존 값 사용
+        userRole='COUNSELOR' // 임시로 기존 값 사용
       />
 
       {/* 내 활동 섹션 */}
@@ -53,7 +53,7 @@ export const CounselorDashboard = ({ user }: CounselorDashboardProps) => {
         {/* 다가오는 상담 */}
         <AppointmentCard
           appointments={MOCK_APPOINTMENTS.COUNSELOR}
-          userType='counselor' // 임시로 기존 값 사용
+          userRole='COUNSELOR' // 임시로 기존 값 사용
         />
 
         {/* 자기 진단 결과 */}
@@ -65,7 +65,7 @@ export const CounselorDashboard = ({ user }: CounselorDashboardProps) => {
         {/* 커뮤니티 활동 */}
         <CommunityActivity activities={communityActivities} />
         {/* 오늘의 팁 */}
-        <DailyTips tips={DAILY_TIPS.COUNSELOR} userType='counselor' />{' '}
+        <DailyTips tips={DAILY_TIPS.COUNSELOR} userRole='COUNSELOR' />{' '}
         {/* 임시로 기존 값 사용 */}
       </div>
     </div>

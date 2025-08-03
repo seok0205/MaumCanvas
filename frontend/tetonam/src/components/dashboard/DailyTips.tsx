@@ -4,12 +4,12 @@ import { Lightbulb } from 'lucide-react';
 
 interface DailyTipsProps {
   tips: readonly DailyTip[];
-  userType: 'counselor' | 'user';
+  userRole: 'COUNSELOR' | 'USER';
 }
 
-export const DailyTips = ({ tips, userType }: DailyTipsProps) => {
+export const DailyTips = ({ tips, userRole }: DailyTipsProps) => {
   const getTitle = () => {
-    return userType === 'user' ? '오늘의 마음 팁' : '상담사를 위한 팁';
+    return userRole === 'USER' ? '오늘의 마음 팁' : '상담사를 위한 팁';
   };
 
   return (

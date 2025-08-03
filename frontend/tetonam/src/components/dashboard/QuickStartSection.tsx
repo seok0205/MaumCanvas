@@ -4,12 +4,12 @@ import { QuickStartCard } from './QuickStartCard';
 
 interface QuickStartSectionProps {
   actions: readonly QuickAction[];
-  userType: 'counselor' | 'user';
+  userRole: 'COUNSELOR' | 'USER';
 }
 
 export const QuickStartSection = ({
   actions,
-  userType,
+  userRole,
 }: QuickStartSectionProps) => {
   const getIcon = (title: string) => {
     const iconMap = {
@@ -39,7 +39,7 @@ export const QuickStartSection = ({
   return (
     <div>
       <h2 className='text-xl font-semibold text-foreground mb-4'>
-        {userType === 'counselor' ? '퀵 시작' : '빠른 시작'}
+        {userRole === 'COUNSELOR' ? '퀵 시작' : '빠른 시작'}
       </h2>
       <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
         {actions.map((action, index) => {
