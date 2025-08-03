@@ -1,10 +1,10 @@
 import { ROUTES } from '@/constants/routes';
-import type { UserRole } from '@/constants/userTypes';
+import type { UserRole } from '@/constants/userRoles';
 import { authService } from '@/services/authService';
 import type { AuthError } from '@/types/auth';
 import type { AuthState } from '@/types/store';
 import type { User } from '@/types/user';
-import { getPrimaryRole } from '@/utils/userTypeMapping';
+import { getPrimaryRole } from '@/utils/userRoleMapping';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
@@ -15,7 +15,7 @@ export const useAuthStore = create<AuthState>()(
         user: null,
         isAuthenticated: false,
         hasCompletedOnboarding: false,
-        selectedUserType: null,
+        selectedUserRole: null,
         error: null,
         isLoading: false,
 
@@ -27,7 +27,7 @@ export const useAuthStore = create<AuthState>()(
         setCompletedOnboarding: completed =>
           set({ hasCompletedOnboarding: completed }),
 
-        setSelectedUserType: type => set({ selectedUserType: type }),
+        setSelectedUserRole: type => set({ selectedUserRole: type }),
 
         clearError: () => set({ error: null }),
 
@@ -38,7 +38,7 @@ export const useAuthStore = create<AuthState>()(
 
             // role 배열을 주요 역할로 변환
             const primaryRole =
-              get().selectedUserType || getPrimaryRole(tokenResponse.roles);
+              get().selectedUserRole || getPrimaryRole(tokenResponse.roles);
 
             // 사용자 정보 조회 (JWT 토큰 필요)
             const userInfo = await authService.getMyInfo();
@@ -111,7 +111,7 @@ export const useAuthStore = create<AuthState>()(
           set({
             user: null,
             isAuthenticated: false,
-            selectedUserType: null,
+            selectedUserRole: null,
             error: null,
           });
           // 로그아웃 후 로그인 페이지로 이동

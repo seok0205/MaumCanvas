@@ -293,14 +293,29 @@ export const authService = {
         // 백엔드 API 문서의 에러 코드들에 대한 처리
         switch (apiError.code) {
           case 'MAIL5000': // 이메일 전송에 에러가 발생했습니다
+            throw new AuthenticationError(
+              apiError.code,
+              '이메일 전송 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+            );
           case 'COMMON400': // 잘못된 요청입니다
+            throw new AuthenticationError(
+              apiError.code,
+              '잘못된 요청입니다. 이메일 주소를 확인해주세요.'
+            );
           case 'COMMON401': // 인증이 필요합니다
+            throw new AuthenticationError(apiError.code, '인증이 필요합니다.');
           case 'COMMON403': // 금지된 요청입니다
+            throw new AuthenticationError(apiError.code, '금지된 요청입니다.');
           case 'COMMON500': // 서버 에러
+            throw new AuthenticationError(
+              apiError.code,
+              '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+            );
           default:
             throw new AuthenticationError(
               apiError.code || 'EMAIL_SEND_FAILED',
-              '이메일 발송에 실패했습니다. 다시 시도해주세요.'
+              apiError.message ||
+                '이메일 발송에 실패했습니다. 다시 시도해주세요.'
             );
         }
       }
@@ -355,14 +370,29 @@ export const authService = {
         // 백엔드 API 문서의 에러 코드들에 대한 처리
         switch (apiError.code) {
           case 'MAIL4000': // 인증번호를 입력해주세요 / 인증번호가 틀렸습니다
+            throw new AuthenticationError(
+              apiError.code,
+              '인증번호가 올바르지 않습니다. 다시 확인해주세요.'
+            );
           case 'COMMON400': // 잘못된 요청입니다
+            throw new AuthenticationError(
+              apiError.code,
+              '잘못된 요청입니다. 입력 정보를 확인해주세요.'
+            );
           case 'COMMON401': // 인증이 필요합니다
+            throw new AuthenticationError(apiError.code, '인증이 필요합니다.');
           case 'COMMON403': // 금지된 요청입니다
+            throw new AuthenticationError(apiError.code, '금지된 요청입니다.');
           case 'COMMON500': // 서버 에러
+            throw new AuthenticationError(
+              apiError.code,
+              '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+            );
           default:
             throw new AuthenticationError(
               apiError.code || 'EMAIL_VERIFICATION_FAILED',
-              '이메일 인증에 실패했습니다. 다시 시도해주세요.'
+              apiError.message ||
+                '이메일 인증에 실패했습니다. 다시 시도해주세요.'
             );
         }
       }
@@ -429,14 +459,29 @@ export const authService = {
         // 백엔드 API 문서의 에러 코드들에 대한 처리
         switch (apiError.code) {
           case 'USER4000': // 사용중인 이메일 입니다
+            throw new AuthenticationError(
+              apiError.code,
+              '이미 사용 중인 이메일입니다. 다른 이메일을 입력해주세요.'
+            );
           case 'COMMON400': // 잘못된 요청입니다
+            throw new AuthenticationError(
+              apiError.code,
+              '잘못된 요청입니다. 이메일 주소를 확인해주세요.'
+            );
           case 'COMMON401': // 인증이 필요합니다
+            throw new AuthenticationError(apiError.code, '인증이 필요합니다.');
           case 'COMMON403': // 금지된 요청입니다
+            throw new AuthenticationError(apiError.code, '금지된 요청입니다.');
           case 'COMMON500': // 서버 에러
+            throw new AuthenticationError(
+              apiError.code,
+              '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+            );
           default:
             throw new AuthenticationError(
               apiError.code || 'EMAIL_CHECK_FAILED',
-              '이메일 중복 확인에 실패했습니다. 다시 시도해주세요.'
+              apiError.message ||
+                '이메일 중복 확인에 실패했습니다. 다시 시도해주세요.'
             );
         }
       }

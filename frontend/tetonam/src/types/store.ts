@@ -1,4 +1,4 @@
-import type { UserRole } from '@/constants/userTypes';
+import type { UserRole } from '@/constants/userRoles';
 import type { RegisterCredentials } from './api';
 import type { User } from './user';
 
@@ -7,7 +7,7 @@ export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   hasCompletedOnboarding: boolean;
-  selectedUserType: UserRole | null;
+  selectedUserRole: UserRole | null;
   error: string | null;
   isLoading: boolean;
 
@@ -15,7 +15,7 @@ export interface AuthState {
   setUser: (user: User) => void;
   clearUser: () => void;
   setCompletedOnboarding: (completed: boolean) => void;
-  setSelectedUserType: (type: UserRole) => void;
+  setSelectedUserRole: (type: UserRole) => void;
   clearError: () => void;
   login: (email: string, password: string) => Promise<boolean>;
   register: (userData: RegisterCredentials) => Promise<boolean>;
