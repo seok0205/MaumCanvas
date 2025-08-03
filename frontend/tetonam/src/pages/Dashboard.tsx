@@ -6,9 +6,9 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/navigation/sidebar';
-import { getUserRoleLabel } from '@/constants/userTypes';
+import { getUserRoleLabel } from '@/constants/userRoles';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { getPrimaryRole } from '@/utils/userTypeMapping';
+import { getPrimaryRole } from '@/utils/userRoleMapping';
 import { LogOut, Settings, User } from 'lucide-react';
 
 export const Dashboard = () => {

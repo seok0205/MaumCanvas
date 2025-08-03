@@ -20,8 +20,9 @@ export const AppSidebar = () => {
   const { state } = useSidebar();
   const { user } = useAuthStore();
 
-  const menuItems =
-    user?.userType === 'user' ? USER_MENU_ITEMS : COUNSELOR_MENU_ITEMS;
+  const menuItems = user?.roles.includes('USER')
+    ? USER_MENU_ITEMS
+    : COUNSELOR_MENU_ITEMS;
 
   return (
     <Sidebar

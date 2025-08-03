@@ -16,7 +16,7 @@ export function OnboardingContainer({ className }: OnboardingContainerProps) {
 
   const handleComplete = useCallback(() => {
     setCompletedOnboarding(true);
-    navigate('/user-type-selection');
+    navigate('/user-role-selection');
   }, [setCompletedOnboarding, navigate]);
 
   const handleNext = useCallback(() => {

@@ -38,7 +38,5 @@ export interface CommunityActivity {
   type: 'contribution' | 'achievement';
 }
 
-import type { UserRole } from '@/constants/userTypes';
-
 // readonly 배열 타입을 위한 유틸리티 타입
 export type ReadonlyArray<T> = readonly T[];
