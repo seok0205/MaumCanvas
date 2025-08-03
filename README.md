@@ -1,5 +1,3 @@
 # 108
 
-- test
-- gerrit test
-- trigger test
+- 마음 캔버스
