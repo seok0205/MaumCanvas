@@ -241,27 +241,16 @@ export const NicknameField = ({
     <Label htmlFor='nickname' className='text-foreground font-medium'>
       닉네임
     </Label>
-    <div className='flex space-x-2'>
-      <div className='relative flex-1'>
-        <User className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4' />
-        <Input
-          {...form.register('nickname')}
-          placeholder='닉네임을 입력해주세요'
-          className='pl-10 bg-background/50 border-border focus:border-primary'
-          aria-describedby={
-            form.formState.errors['nickname'] ? 'nickname-error' : undefined
-          }
-        />
-      </div>
-      <Button
-        type='button'
-        onClick={() => {
-          // 닉네임 중복 체크 로직은 부모 컴포넌트에서 처리
-        }}
-        className='bg-primary hover:bg-primary-dark text-primary-foreground px-4 py-2 text-sm'
-      >
-        중복확인
-      </Button>
+    <div className='relative'>
+      <User className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4' />
+      <Input
+        {...form.register('nickname')}
+        placeholder='닉네임을 입력해주세요'
+        className='pl-10 bg-background/50 border-border focus:border-primary'
+        aria-describedby={
+          form.formState.errors['nickname'] ? 'nickname-error' : undefined
+        }
+      />
     </div>
     {form.formState.errors['nickname'] && (
       <p id='nickname-error' className='text-destructive text-sm'>

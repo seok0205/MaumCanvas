@@ -3,14 +3,14 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 // 외부 라이브러리
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertTriangle, CheckCircle, Loader2 } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Loader2, Mail } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
 // 내부 모듈
-import { EmailInput } from '@/components/ui/forms/EmailInput';
 import { FormLayout } from '@/components/ui/forms/FormLayout';
+import { Input } from '@/components/ui/forms/input';
 import { PasswordInput } from '@/components/ui/forms/PasswordInput';
 import { PrivacyNotice } from '@/components/ui/forms/PrivacyNotice';
 import { Button } from '@/components/ui/interactive/button';
@@ -23,6 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/overlay/dialog';
+import { Label } from '@/components/ui/primitives/label';
 import { FORM_CONSTANTS, FORM_MESSAGES } from '@/constants/forms';
 import { useAuthActions } from '@/hooks/useAuthActions';
 import { useEmailVerification } from '@/hooks/useEmailVerification';
@@ -364,19 +365,27 @@ export const RegisterForm = () => {
 
         {/* 이메일 */}
         <div className='space-y-2'>
-          <EmailInput
-            label='이메일'
-            {...form.register('email')}
-            error={form.formState.errors.email?.message || undefined}
-          />
+          <Label htmlFor='email' className='text-foreground font-medium'>
+            이메일
+          </Label>
           <div className='flex space-x-2'>
+            <div className='relative flex-1'>
+              <Mail className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4' />
+              <Input
+                {...form.register('email')}
+                type='email'
+                placeholder='example@email.com'
+                className='pl-10 bg-background/50 border-border focus:border-primary'
+                aria-describedby={
+                  form.formState.errors.email ? 'email-error' : undefined
+                }
+              />
+            </div>
             <Button
               type='button'
               onClick={() => sendEmailVerification(form.getValues('email'))}
               disabled={emailLoading || isEmailVerified || !canResend}
               className='bg-primary hover:bg-primary-dark text-primary-foreground px-4 py-2 text-sm'
-              aria-describedby='email-verification-status'
-              aria-live='polite'
             >
               {emailLoading ? (
                 <Loader2 className='w-4 h-4 animate-spin' />
@@ -391,20 +400,17 @@ export const RegisterForm = () => {
               )}
             </Button>
           </div>
-          <div id='email-verification-status' aria-live='polite'>
-            {emailError && (
-              <p className='text-destructive text-sm' role='alert'>
-                <span className='sr-only'>오류: </span>
-                {emailError}
-              </p>
-            )}
-            {emailSuccessMessage && (
-              <p className='text-green-600 text-sm' role='status'>
-                <span className='sr-only'>성공: </span>
-                {emailSuccessMessage}
-              </p>
-            )}
-          </div>
+          {form.formState.errors.email && (
+            <p id='email-error' className='text-destructive text-sm'>
+              {form.formState.errors.email.message}
+            </p>
+          )}
+          {emailError && (
+            <p className='text-destructive text-sm'>{emailError}</p>
+          )}
+          {emailSuccessMessage && (
+            <p className='text-green-600 text-sm'>{emailSuccessMessage}</p>
+          )}
         </div>
 
         {/* 이메일 인증 코드 */}
