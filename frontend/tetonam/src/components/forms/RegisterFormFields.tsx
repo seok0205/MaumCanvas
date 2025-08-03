@@ -1,4 +1,4 @@
-import { Building2, Calendar, Phone, User } from 'lucide-react';
+import { Building2, Calendar, Loader2, Phone, User } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -17,10 +17,14 @@ import { FORM_CONSTANTS } from '@/constants/forms';
 // Zod 스키마에서 타입 추론
 const registerSchema = z
   .object({
-    name: z.string().min(FORM_CONSTANTS.VALIDATION.NAME_MIN_LENGTH),
+    name: z
+      .string()
+      .min(FORM_CONSTANTS.VALIDATION.NAME_MIN_LENGTH)
+      .regex(FORM_CONSTANTS.VALIDATION.KOREAN_PATTERN),
     organization: z
       .string()
-      .min(FORM_CONSTANTS.VALIDATION.ORGANIZATION_MIN_LENGTH),
+      .min(FORM_CONSTANTS.VALIDATION.ORGANIZATION_MIN_LENGTH)
+      .regex(FORM_CONSTANTS.VALIDATION.KOREAN_PATTERN),
     birthDate: z.string().min(1),
     email: z.string().email(),
     emailVerificationCode: z.string().optional(),
@@ -28,7 +32,11 @@ const registerSchema = z
     password: z.string(),
     confirmPassword: z.string(),
     gender: z.string().min(1),
-    nickname: z.string().min(FORM_CONSTANTS.VALIDATION.NICKNAME_MIN_LENGTH),
+    nickname: z
+      .string()
+      .min(FORM_CONSTANTS.VALIDATION.NICKNAME_MIN_LENGTH)
+      .max(FORM_CONSTANTS.VALIDATION.NICKNAME_MAX_LENGTH)
+      .regex(FORM_CONSTANTS.VALIDATION.NICKNAME_PATTERN),
   })
   .refine(data => data.password === data.confirmPassword, {
     path: ['confirmPassword'],
@@ -55,8 +63,9 @@ export const NameField = ({
       <User className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4' />
       <Input
         {...form.register('name')}
-        placeholder='실명을 입력해주세요'
+        placeholder='실명을 입력해주세요 (한글만)'
         className='pl-10 bg-background/50 border-border focus:border-primary'
+        pattern='[가-힣]+'
         aria-describedby={
           form.formState.errors['name'] ? 'name-error' : undefined
         }
@@ -83,8 +92,9 @@ export const OrganizationField = ({
       <Building2 className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4' />
       <Input
         {...form.register('organization')}
-        placeholder='학교명 또는 기관명'
+        placeholder='학교명 또는 기관명 (한글만, 5자 이상)'
         className='pl-10 bg-background/50 border-border focus:border-primary'
+        pattern='[가-힣]+'
         aria-describedby={
           form.formState.errors['organization']
             ? 'organization-error'
@@ -234,23 +244,45 @@ export const GenderField = ({
 
 export const NicknameField = ({
   form,
+  onCheckNickname,
+  isLoading,
 }: {
   form: UseFormReturn<RegisterFormData>;
+  onCheckNickname?: () => void;
+  isLoading?: boolean;
 }) => (
   <div className='space-y-2'>
     <Label htmlFor='nickname' className='text-foreground font-medium'>
       닉네임
     </Label>
-    <div className='relative'>
-      <User className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4' />
-      <Input
-        {...form.register('nickname')}
-        placeholder='닉네임을 입력해주세요'
-        className='pl-10 bg-background/50 border-border focus:border-primary'
-        aria-describedby={
-          form.formState.errors['nickname'] ? 'nickname-error' : undefined
-        }
-      />
+    <div className='flex space-x-2'>
+      <div className='relative flex-1'>
+        <User className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4' />
+        <Input
+          {...form.register('nickname')}
+          placeholder='닉네임을 입력해주세요 (2-10자, 완성형 한글/영문/숫자)'
+          className='pl-10 bg-background/50 border-border focus:border-primary'
+          pattern='[가-힣a-zA-Z0-9]+'
+          maxLength={FORM_CONSTANTS.VALIDATION.NICKNAME_MAX_LENGTH}
+          aria-describedby={
+            form.formState.errors['nickname'] ? 'nickname-error' : undefined
+          }
+        />
+      </div>
+      {onCheckNickname && (
+        <Button
+          type='button'
+          onClick={onCheckNickname}
+          disabled={isLoading}
+          className='bg-primary hover:bg-primary-dark text-primary-foreground px-4 py-2 text-sm whitespace-nowrap'
+        >
+          {isLoading ? (
+            <Loader2 className='w-4 h-4 animate-spin' />
+          ) : (
+            '중복확인'
+          )}
+        </Button>
+      )}
     </div>
     {form.formState.errors['nickname'] && (
       <p id='nickname-error' className='text-destructive text-sm'>

@@ -15,14 +15,18 @@ export const FORM_CONSTANTS = {
   VALIDATION: {
     NAME_MIN_LENGTH: 2,
     NICKNAME_MIN_LENGTH: 2,
+    NICKNAME_MAX_LENGTH: 10,
+    NICKNAME_PATTERN: /^[가-힣a-zA-Z0-9]+$/,
     PHONE_MIN_LENGTH: 10,
-    ORGANIZATION_MIN_LENGTH: 2,
+    ORGANIZATION_MIN_LENGTH: 5,
+    KOREAN_PATTERN: /^[가-힣]+$/,
   },
 } as const;
 
 export const FORM_MESSAGES = {
   VALIDATION: {
     NAME_MIN: '이름은 2자 이상 입력해주세요',
+    NAME_KOREAN_ONLY: '이름은 한글로만 입력해주세요',
     EMAIL_INVALID: '올바른 이메일 주소를 입력해주세요',
     PASSWORD_MIN: '비밀번호는 8자 이상이어야 합니다',
     PASSWORD_MAX: '비밀번호는 15자 이하여야 합니다',
@@ -30,7 +34,10 @@ export const FORM_MESSAGES = {
     PASSWORD_MISMATCH: '비밀번호가 일치하지 않습니다',
     PHONE_MIN: '올바른 휴대폰 번호를 입력해주세요',
     NICKNAME_MIN: '닉네임은 2자 이상 입력해주세요',
-    ORGANIZATION_MIN: '소속을 입력해주세요',
+    NICKNAME_MAX: '닉네임은 10자 이하여야 합니다',
+    NICKNAME_PATTERN: '닉네임은 한글(완성형), 영문, 숫자만 사용 가능합니다',
+    ORGANIZATION_MIN: '소속은 5자 이상 입력해주세요',
+    ORGANIZATION_KOREAN_ONLY: '소속은 한글로만 입력해주세요',
     BIRTH_DATE_REQUIRED: '생년월일을 입력해주세요',
     BIRTH_DATE_INVALID: '유효한 생년월일을 입력해주세요',
     GENDER_REQUIRED: '성별을 선택해주세요',
@@ -41,7 +48,8 @@ export const FORM_MESSAGES = {
     INVALID_CODE: '인증번호가 올바르지 않습니다.',
     EXPIRED_CODE: '인증번호가 만료되었습니다.',
     MAX_ATTEMPTS: '인증 시도 횟수를 초과했습니다. 처음부터 다시 시도해주세요.',
-    MAX_RESEND: '재전송 횟수를 초과했습니다. 페이지를 새로고침 후 다시 시도해주세요.',
+    MAX_RESEND:
+      '재전송 횟수를 초과했습니다. 페이지를 새로고침 후 다시 시도해주세요.',
     SEND_SUCCESS: '이메일로 인증번호가 발송되었습니다.',
     VERIFICATION_SUCCESS: '이메일 인증이 완료되었습니다.',
     PROCESS_ERROR: '이메일 인증 과정에서 오류가 발생했습니다.',

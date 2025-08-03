@@ -41,13 +41,21 @@ import {
 
 const registerSchema = z
   .object({
-    name: z.string().min(FORM_CONSTANTS.VALIDATION.NAME_MIN_LENGTH, {
-      message: FORM_MESSAGES.VALIDATION.NAME_MIN,
-    }),
+    name: z
+      .string()
+      .min(FORM_CONSTANTS.VALIDATION.NAME_MIN_LENGTH, {
+        message: FORM_MESSAGES.VALIDATION.NAME_MIN,
+      })
+      .regex(FORM_CONSTANTS.VALIDATION.KOREAN_PATTERN, {
+        message: FORM_MESSAGES.VALIDATION.NAME_KOREAN_ONLY,
+      }),
     organization: z
       .string()
       .min(FORM_CONSTANTS.VALIDATION.ORGANIZATION_MIN_LENGTH, {
         message: FORM_MESSAGES.VALIDATION.ORGANIZATION_MIN,
+      })
+      .regex(FORM_CONSTANTS.VALIDATION.KOREAN_PATTERN, {
+        message: FORM_MESSAGES.VALIDATION.ORGANIZATION_KOREAN_ONLY,
       }),
     birthDate: z.string().min(1, {
       message: FORM_MESSAGES.VALIDATION.BIRTH_DATE_REQUIRED,
@@ -74,9 +82,17 @@ const registerSchema = z
     gender: z.string().min(1, {
       message: FORM_MESSAGES.VALIDATION.GENDER_REQUIRED,
     }),
-    nickname: z.string().min(FORM_CONSTANTS.VALIDATION.NICKNAME_MIN_LENGTH, {
-      message: FORM_MESSAGES.VALIDATION.NICKNAME_MIN,
-    }),
+    nickname: z
+      .string()
+      .min(FORM_CONSTANTS.VALIDATION.NICKNAME_MIN_LENGTH, {
+        message: FORM_MESSAGES.VALIDATION.NICKNAME_MIN,
+      })
+      .max(FORM_CONSTANTS.VALIDATION.NICKNAME_MAX_LENGTH, {
+        message: FORM_MESSAGES.VALIDATION.NICKNAME_MAX,
+      })
+      .regex(FORM_CONSTANTS.VALIDATION.NICKNAME_PATTERN, {
+        message: FORM_MESSAGES.VALIDATION.NICKNAME_PATTERN,
+      }),
   })
   .refine(data => data.password === data.confirmPassword, {
     message: FORM_MESSAGES.VALIDATION.PASSWORD_MISMATCH,
@@ -177,6 +193,7 @@ export const RegisterForm = () => {
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
+    mode: 'onBlur',
     defaultValues: {
       name: '',
       organization: '',
@@ -414,7 +431,7 @@ export const RegisterForm = () => {
         </div>
 
         {/* 이메일 인증 코드 */}
-        {isEmailSent && isEmailDuplicateChecked && (
+        {isEmailSent && isEmailDuplicateChecked && !isEmailVerified && (
           <div className='space-y-2'>
             <div className='flex space-x-2'>
               <input
@@ -500,21 +517,11 @@ export const RegisterForm = () => {
 
         {/* 닉네임 */}
         <div className='space-y-2'>
-          <NicknameField form={form} />
-          <div className='flex space-x-2'>
-            <Button
-              type='button'
-              onClick={handleNicknameCheck}
-              disabled={nicknameLoading}
-              className='bg-primary hover:bg-primary-dark text-primary-foreground px-4 py-2 text-sm'
-            >
-              {nicknameLoading ? (
-                <Loader2 className='w-4 h-4 animate-spin' />
-              ) : (
-                '중복확인'
-              )}
-            </Button>
-          </div>
+          <NicknameField
+            form={form}
+            onCheckNickname={handleNicknameCheck}
+            isLoading={nicknameLoading}
+          />
           {nicknameError && (
             <p className='text-destructive text-sm'>{nicknameError}</p>
           )}
