@@ -106,6 +106,6 @@ volumes:
   redis_data:
     external: true
 
-networks:
+networks:   # 도커 간 같은 네트워크 사용
   tetonam-network:
     external: true
