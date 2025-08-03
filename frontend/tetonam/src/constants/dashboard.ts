@@ -94,12 +94,6 @@ export const MOCK_STATS = {
   },
 } as const;
 
-export const MOCK_MENTAL_HEALTH = {
-  stressLevel: { value: 60, label: '중간', color: 'bg-yellow-500' },
-  depressionLevel: { value: 30, label: '낮음', color: 'bg-green-500' },
-  anxietyLevel: { value: 50, label: '보통', color: 'bg-orange-500' },
-} as const;
-
 export const DAILY_TIPS = {
   COUNSELOR: [
     {

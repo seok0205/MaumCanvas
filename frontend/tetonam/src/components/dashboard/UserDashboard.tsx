@@ -2,15 +2,10 @@
 
 // 내부 모듈
 import { useSidebar } from '@/components/ui/navigation/sidebar';
-import {
-  DAILY_TIPS,
-  DASHBOARD_CONSTANTS,
-  MOCK_MENTAL_HEALTH,
-} from '@/constants/dashboard';
+import { DAILY_TIPS, DASHBOARD_CONSTANTS } from '@/constants/dashboard';
 import type { User } from '@/types/user';
 import { getPrimaryRole } from '@/utils/userRoleMapping';
 import { DailyTips } from './DailyTips';
-import { MentalHealthStatus } from './MentalHealthStatus';
 import { QuickStartSection } from './QuickStartSection';
 import { SelfDiagnosisCard } from './SelfDiagnosisCard';
 import { UpcomingCounselingCard } from './UpcomingCounselingCard';
@@ -37,12 +32,9 @@ export const UserDashboard = ({ user }: UserDashboardProps) => {
         userRole='USER' // 임시로 기존 값 사용
       />
       {/* 상담 관리 섹션 */}
-      <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+      <div className='grid grid-cols-1 lg:grid-cols-1 gap-6'>
         {/* 다가오는 상담 */}
         <UpcomingCounselingCard />
-
-        {/* 마음 주간 현황 */}
-        <MentalHealthStatus metrics={MOCK_MENTAL_HEALTH} />
       </div>
       {/* 자가 진단 결과 섹션 */}
       <SelfDiagnosisCard />
