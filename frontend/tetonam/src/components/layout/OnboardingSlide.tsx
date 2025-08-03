@@ -11,7 +11,6 @@ interface OnboardingSlideProps {
   totalSlides: number;
   onNext: () => void;
   onPrev: () => void;
-  onSkip: () => void;
   isLastSlide: boolean;
   className?: string;
 }
@@ -24,7 +23,6 @@ export const OnboardingSlide = memo(function OnboardingSlide({
   totalSlides,
   onNext,
   onPrev,
-  onSkip,
   isLastSlide,
   className,
 }: OnboardingSlideProps) {
@@ -43,10 +41,6 @@ export const OnboardingSlide = memo(function OnboardingSlide({
       case 'ArrowLeft':
         event.preventDefault();
         onPrev();
-        break;
-      case 'Escape':
-        event.preventDefault();
-        onSkip();
         break;
     }
   };
@@ -137,18 +131,6 @@ export const OnboardingSlide = memo(function OnboardingSlide({
             >
               {isLastSlide ? '시작하기' : '다음'}
               {!isLastSlide && <ChevronRight className='w-4 h-4' />}
-            </Button>
-          </div>
-
-          {/* 하단: 건너뛰기 버튼 */}
-          <div className='flex justify-start'>
-            <Button
-              variant='ghost'
-              onClick={onSkip}
-              className='text-muted-foreground hover:text-foreground text-sm'
-              aria-label='온보딩 건너뛰기'
-            >
-              건너뛰기
             </Button>
           </div>
         </div>

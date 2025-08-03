@@ -33,10 +33,6 @@ export function OnboardingContainer({ className }: OnboardingContainerProps) {
     }
   }, [currentSlide]);
 
-  const handleSkip = useCallback(() => {
-    handleComplete();
-  }, [handleComplete]);
-
   const currentSlideData = ONBOARDING_DATA[currentSlide]!;
 
   return (
@@ -48,7 +44,6 @@ export function OnboardingContainer({ className }: OnboardingContainerProps) {
       totalSlides={ONBOARDING_DATA.length}
       onNext={handleNext}
       onPrev={handlePrev}
-      onSkip={handleSkip}
       isLastSlide={currentSlide === ONBOARDING_DATA.length - 1}
       {...(className && { className })}
     />
