@@ -10,7 +10,7 @@ import { Login } from './pages/Login';
 import { NotFound } from './pages/NotFound';
 import { Onboarding } from './pages/Onboarding';
 import { Register } from './pages/Register';
-import { UserTypeSelection } from './pages/UserTypeSelection';
+import { UserRoleSelection } from './pages/UserRoleSelection';
 
 const queryClient = new QueryClient();
 
@@ -23,7 +23,7 @@ const App = () => (
         <Routes>
           <Route path='/' element={<Index />} />
           <Route path='/onboarding' element={<Onboarding />} />
-          <Route path='/user-type-selection' element={<UserTypeSelection />} />
+          <Route path='/user-role-selection' element={<UserRoleSelection />} />
           <Route path='/login' element={<Login />} />
           <Route path='/register' element={<Register />} />
           <Route path='/forgot-password' element={<ForgotPassword />} />
