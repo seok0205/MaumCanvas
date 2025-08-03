@@ -259,14 +259,15 @@ export const authService = {
         }
       );
 
-      if (!response.data.isSuccess || !response.data.result) {
+      if (!response.data.isSuccess) {
         throw new AuthenticationError(
           response.data.code || 'EMAIL_SEND_FAILED',
           '이메일 발송에 실패했습니다. 다시 시도해주세요.'
         );
       }
 
-      return response.data.result;
+      // 백엔드에서 성공 메시지를 반환하므로 result 대신 message 사용
+      return response.data.message || '이메일이 발송되었습니다.';
     } catch (error) {
       if (error instanceof AuthenticationError) {
         throw error;
@@ -346,7 +347,8 @@ export const authService = {
         }
       );
 
-      return response.data.isSuccess;
+      // 백엔드에서 성공 시 UUID를 result에 반환하므로 result 존재 여부로 성공 판단
+      return response.data.isSuccess && !!response.data.result;
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
         throw new AuthenticationError('ABORTED', '요청이 취소되었습니다.');
