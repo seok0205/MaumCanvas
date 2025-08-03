@@ -87,8 +87,18 @@ export const usePasswordReset = () => {
   // 이메일 인증 코드 확인 (UUID 반환)
   const verifyResetCode = useCallback(
     async (code: string) => {
+      // 현재 인증 시도 횟수 확인
+      const currentAttempts = stateRef.current.verificationAttempts;
+
+      console.log(
+        `인증 시도 시작: ${stateRef.current.email} (현재 시도: ${currentAttempts}/${MAX_VERIFICATION_ATTEMPTS})`
+      );
+
       // 인증 시도 제한 체크
-      if (isMaxAttemptsReached) {
+      if (currentAttempts >= MAX_VERIFICATION_ATTEMPTS) {
+        console.warn(
+          `인증 시도 제한 초과: ${stateRef.current.email} (${currentAttempts}/${MAX_VERIFICATION_ATTEMPTS})`
+        );
         setState(prev => ({
           ...prev,
           isBlocked: true,
@@ -98,17 +108,21 @@ export const usePasswordReset = () => {
             error: PASSWORD_RESET_ERROR_MESSAGES.MAX_ATTEMPTS,
           },
         }));
-        console.warn(
-          `비밀번호 재설정 인증 시도 제한 초과: ${stateRef.current.email}`
-        );
         return;
       }
+
+      // 인증 시도 횟수를 미리 증가시켜서 상태 업데이트
+      const newAttempts = currentAttempts + 1;
+
+      console.log(
+        `인증 시도 진행: ${stateRef.current.email} (${newAttempts}/${MAX_VERIFICATION_ATTEMPTS})`
+      );
 
       setState(prev => ({
         ...prev,
         verificationStep: { data: null, isLoading: true, error: null },
         verificationCode: code,
-        verificationAttempts: prev.verificationAttempts + 1, // 인증 시도 횟수 증가
+        verificationAttempts: newAttempts, // 새로운 시도 횟수로 설정
       }));
 
       // Race condition 방지를 위한 ignore 플래그
@@ -123,6 +137,9 @@ export const usePasswordReset = () => {
 
         if (!ignore) {
           if (uuid) {
+            console.log(
+              `인증 성공: ${stateRef.current.email} (${newAttempts}번째 시도에서 성공)`
+            );
             setState(prev => ({
               ...prev,
               verificationStep: { data: uuid, isLoading: false, error: null },
@@ -130,8 +147,10 @@ export const usePasswordReset = () => {
               currentStep: 3,
               isBlocked: false, // 성공 시 차단 해제
             }));
-            console.log(`비밀번호 재설정 인증 성공: ${stateRef.current.email}`);
           } else {
+            console.warn(
+              `인증 실패: ${stateRef.current.email} (${newAttempts}/${MAX_VERIFICATION_ATTEMPTS})`
+            );
             setState(prev => ({
               ...prev,
               verificationStep: {
@@ -140,9 +159,6 @@ export const usePasswordReset = () => {
                 error: PASSWORD_RESET_ERROR_MESSAGES.INVALID_VERIFICATION_CODE,
               },
             }));
-            console.warn(
-              `비밀번호 재설정 인증 실패: ${stateRef.current.email} (${stateRef.current.verificationAttempts + 1}번째 시도)`
-            );
           }
         }
       } catch (error) {
@@ -151,6 +167,11 @@ export const usePasswordReset = () => {
             error instanceof Error
               ? error.message
               : PASSWORD_RESET_ERROR_MESSAGES.VERIFICATION_FAILED;
+
+          console.error(
+            `인증 에러: ${stateRef.current.email} (${newAttempts}/${MAX_VERIFICATION_ATTEMPTS})`,
+            error
+          );
 
           setState(prev => ({
             ...prev,
@@ -161,24 +182,16 @@ export const usePasswordReset = () => {
             },
           }));
 
-          // 3회 실패 시 차단
-          if (
-            stateRef.current.verificationAttempts + 1 >=
-            MAX_VERIFICATION_ATTEMPTS
-          ) {
+          // 3회 실패 시 차단 (이미 증가된 newAttempts 사용)
+          if (newAttempts >= MAX_VERIFICATION_ATTEMPTS) {
+            console.warn(
+              `인증 차단: ${stateRef.current.email} (${newAttempts}/${MAX_VERIFICATION_ATTEMPTS})`
+            );
             setState(prev => ({
               ...prev,
               isBlocked: true,
             }));
-            console.warn(
-              `비밀번호 재설정 인증 시도 제한 도달: ${stateRef.current.email}`
-            );
           }
-
-          console.error(
-            `비밀번호 재설정 인증 실패: ${stateRef.current.email}`,
-            error
-          );
         }
       }
 
@@ -247,14 +260,21 @@ export const usePasswordReset = () => {
     }
   };
 
-  // 상태 초기화 함수 (차단 해제용)
+  // 상태 초기화 함수 (차단 해제용) - 1단계부터 다시 시작
   const resetVerificationState = useCallback(() => {
     setState(prev => ({
       ...prev,
-      verificationAttempts: 0,
-      isBlocked: false,
-      verificationStep: { data: null, isLoading: false, error: null },
+      currentStep: 1, // 1단계로 되돌리기
+      email: '', // 이메일 초기화
+      verificationCode: '', // 인증 코드 초기화
+      uuid: '', // UUID 초기화
+      verificationAttempts: 0, // 인증 시도 횟수 초기화
+      isBlocked: false, // 차단 상태 해제
+      emailStep: { data: null, isLoading: false, error: null }, // 이메일 단계 초기화
+      verificationStep: { data: null, isLoading: false, error: null }, // 인증 단계 초기화
+      resetStep: { data: null, isLoading: false, error: null }, // 재설정 단계 초기화
     }));
+    console.log('비밀번호 재설정 프로세스가 1단계로 초기화되었습니다.');
   }, []);
 
   return {

@@ -49,8 +49,10 @@ export const VerificationStepForm = ({
 
   const handleResetState = () => {
     if (onResetState) {
+      // 폼 초기화
+      form.reset();
+      // 부모 컴포넌트의 상태 초기화 호출
       onResetState();
-      form.reset(); // 폼도 초기화
     }
   };
 
@@ -93,7 +95,7 @@ export const VerificationStepForm = ({
             size='sm'
             className='text-red-700 border-red-300 hover:bg-red-50'
           >
-            다시 시도
+            처음부터 다시 시작
           </Button>
         </div>
       )}

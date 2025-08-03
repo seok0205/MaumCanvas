@@ -152,6 +152,17 @@ export const PasswordResetForm = React.memo(() => {
     }
   }, [resendCode]);
 
+  // 전체 상태 초기화 핸들러
+  const handleResetState = useCallback(() => {
+    // 모든 메시지 상태 초기화
+    setEmailMessage(null);
+    setVerificationMessage(null);
+    setResetMessage(null);
+
+    // 훅의 상태 초기화 (1단계로 돌아가기)
+    resetVerificationState();
+  }, [resetVerificationState]);
+
   return (
     <FormLayout title={stepTitle} showBackButton={true}>
       <PrivacyNotice message={stepDescription} className='mb-6' />
@@ -185,7 +196,7 @@ export const PasswordResetForm = React.memo(() => {
             message={verificationMessage}
             verificationAttempts={verificationAttempts}
             isBlocked={isBlocked}
-            onResetState={resetVerificationState}
+            onResetState={handleResetState}
           />
         </div>
       )}
