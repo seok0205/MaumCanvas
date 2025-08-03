@@ -6,7 +6,6 @@ import type {
   LoginCredentials,
   RegisterCredentials,
   RegisterResponse,
-  ResetPasswordData,
   UserInfoResponse,
 } from '@/types/api';
 import { AuthenticationError } from '@/types/auth';
@@ -172,16 +171,189 @@ export const authService = {
     }
   },
 
-  // 비밀번호 재설정
+  // 비밀번호 재설정 (이메일 인증 코드 발송)
+  requestPasswordReset: async (
+    email: string,
+    signal?: AbortSignal
+  ): Promise<void> => {
+    try {
+      const response = await apiClient.post<ApiResponse<string>>(
+        AUTH_CONSTANTS.ENDPOINTS.EMAIL_SEND,
+        { email },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          ...(signal && { signal }),
+        }
+      );
+
+      if (!response.data.isSuccess) {
+        throw new AuthenticationError(
+          response.data.code || 'EMAIL_SEND_FAILED',
+          '이메일 발송에 실패했습니다. 다시 시도해주세요.'
+        );
+      }
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new AuthenticationError('ABORTED', '요청이 취소되었습니다.');
+      }
+
+      // 네트워크 에러 처리
+      const axiosError = error as AxiosError<ApiResponse<null>>;
+      if (
+        axiosError.code === 'NETWORK_ERROR' ||
+        axiosError.code === 'ERR_NETWORK'
+      ) {
+        throw new AuthenticationError(
+          'NETWORK_ERROR',
+          '네트워크 연결을 확인해주세요.'
+        );
+      }
+
+      // API 에러 처리 (백엔드에서 반환하는 에러)
+      if (axiosError.response?.data) {
+        const apiError = axiosError.response.data;
+        // 백엔드 API 문서의 에러 코드들에 대한 처리
+        switch (apiError.code) {
+          case 'MAIL5000': // 이메일 전송에 에러가 발생했습니다
+            throw new AuthenticationError(
+              apiError.code,
+              '이메일 전송 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+            );
+          case 'COMMON400': // 잘못된 요청입니다
+            throw new AuthenticationError(
+              apiError.code,
+              '잘못된 요청입니다. 이메일 주소를 확인해주세요.'
+            );
+          case 'COMMON401': // 인증이 필요합니다
+            throw new AuthenticationError(apiError.code, '인증이 필요합니다.');
+          case 'COMMON403': // 금지된 요청입니다
+            throw new AuthenticationError(apiError.code, '금지된 요청입니다.');
+          case 'COMMON500': // 서버 에러
+            throw new AuthenticationError(
+              apiError.code,
+              '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+            );
+          default:
+            throw new AuthenticationError(
+              apiError.code || 'EMAIL_SEND_FAILED',
+              apiError.message ||
+                '이메일 발송에 실패했습니다. 다시 시도해주세요.'
+            );
+        }
+      }
+
+      // 기타 예상치 못한 에러
+      throw new AuthenticationError(
+        'EMAIL_SEND_FAILED',
+        '이메일 발송에 실패했습니다. 다시 시도해주세요.'
+      );
+    }
+  },
+
+  // 이메일 인증 코드 확인 (비밀번호 재설정용)
+  verifyResetCode: async (
+    email: string,
+    authNum: string,
+    signal?: AbortSignal
+  ): Promise<string> => {
+    try {
+      const response = await apiClient.post<ApiResponse<string>>(
+        AUTH_CONSTANTS.ENDPOINTS.EMAIL_AUTH_CHECK,
+        { email, authNum } as EmailVerificationData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          ...(signal && { signal }),
+        }
+      );
+
+      // 백엔드에서 성공 시 UUID를 result에 반환
+      if (!response.data.isSuccess || !response.data.result) {
+        throw new AuthenticationError(
+          response.data.code || 'EMAIL_VERIFICATION_FAILED',
+          '인증번호가 올바르지 않습니다. 다시 확인해주세요.'
+        );
+      }
+
+      return response.data.result; // UUID 반환
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new AuthenticationError('ABORTED', '요청이 취소되었습니다.');
+      }
+
+      // 네트워크 에러 처리
+      const axiosError = error as AxiosError<ApiResponse<null>>;
+      if (
+        axiosError.code === 'NETWORK_ERROR' ||
+        axiosError.code === 'ERR_NETWORK'
+      ) {
+        throw new AuthenticationError(
+          'NETWORK_ERROR',
+          '네트워크 연결을 확인해주세요.'
+        );
+      }
+
+      // API 에러 처리 (백엔드에서 반환하는 에러)
+      if (axiosError.response?.data) {
+        const apiError = axiosError.response.data;
+        // 백엔드 API 문서의 에러 코드들에 대한 처리
+        switch (apiError.code) {
+          case 'MAIL4000': // 인증번호를 입력해주세요 / 인증번호가 틀렸습니다
+            throw new AuthenticationError(
+              apiError.code,
+              '인증번호가 올바르지 않습니다. 다시 확인해주세요.'
+            );
+          case 'COMMON400': // 잘못된 요청입니다
+            throw new AuthenticationError(
+              apiError.code,
+              '잘못된 요청입니다. 입력 정보를 확인해주세요.'
+            );
+          case 'COMMON401': // 인증이 필요합니다
+            throw new AuthenticationError(apiError.code, '인증이 필요합니다.');
+          case 'COMMON403': // 금지된 요청입니다
+            throw new AuthenticationError(apiError.code, '금지된 요청입니다.');
+          case 'COMMON500': // 서버 에러
+            throw new AuthenticationError(
+              apiError.code,
+              '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+            );
+          default:
+            throw new AuthenticationError(
+              apiError.code || 'EMAIL_VERIFICATION_FAILED',
+              apiError.message ||
+                '이메일 인증에 실패했습니다. 다시 시도해주세요.'
+            );
+        }
+      }
+
+      // 기타 예상치 못한 에러
+      throw new AuthenticationError(
+        'EMAIL_VERIFICATION_FAILED',
+        '이메일 인증에 실패했습니다. 다시 시도해주세요.'
+      );
+    }
+  },
+
+  // 비밀번호 재설정 (API 문서에 맞게 수정)
   resetPassword: async (
     email: string,
+    uuid: string,
     newPassword: string,
     signal?: AbortSignal
   ): Promise<void> => {
     try {
       const response = await apiClient.patch<ApiResponse<string>>(
         AUTH_CONSTANTS.ENDPOINTS.PASSWORD_RESET,
-        { email, newPassword } as ResetPasswordData,
+        { email, password: newPassword, uuid },
         {
           headers: {
             'Content-Type': 'application/json',
@@ -222,14 +394,29 @@ export const authService = {
         // 백엔드 API 문서의 에러 코드들에 대한 처리
         switch (apiError.code) {
           case 'USER4002': // 해당 유저가 없습니다
+            throw new AuthenticationError(
+              apiError.code,
+              '해당 사용자를 찾을 수 없습니다.'
+            );
           case 'COMMON400': // 잘못된 요청입니다
+            throw new AuthenticationError(
+              apiError.code,
+              '잘못된 요청입니다. 입력 정보를 확인해주세요.'
+            );
           case 'COMMON401': // 인증이 필요합니다
+            throw new AuthenticationError(apiError.code, '인증이 필요합니다.');
           case 'COMMON403': // 금지된 요청입니다
+            throw new AuthenticationError(apiError.code, '금지된 요청입니다.');
           case 'COMMON500': // 서버 에러
+            throw new AuthenticationError(
+              apiError.code,
+              '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+            );
           default:
             throw new AuthenticationError(
               apiError.code || 'PASSWORD_RESET_FAILED',
-              '비밀번호 재설정에 실패했습니다. 다시 시도해주세요.'
+              apiError.message ||
+                '비밀번호 재설정에 실패했습니다. 다시 시도해주세요.'
             );
         }
       }

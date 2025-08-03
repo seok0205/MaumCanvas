@@ -78,7 +78,11 @@ export const PasswordResetForm = React.memo(() => {
       try {
         await verifyResetCode(data.code);
 
-        if (verificationStep.data === true) {
+        // UUID가 성공적으로 반환되었는지 확인
+        if (
+          verificationStep.data &&
+          typeof verificationStep.data === 'string'
+        ) {
           setVerificationMessage({
             type: 'success',
             message: '이제 새 비밀번호를 설정해주세요.',

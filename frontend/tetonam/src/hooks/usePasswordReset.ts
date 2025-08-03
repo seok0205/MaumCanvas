@@ -6,11 +6,12 @@ import type { AsyncState } from '@/types/common';
 
 export interface PasswordResetState {
   emailStep: AsyncState<void>;
-  verificationStep: AsyncState<boolean>;
+  verificationStep: AsyncState<string>; // UUID를 저장하도록 변경
   resetStep: AsyncState<void>;
   currentStep: number;
   email: string;
   verificationCode: string;
+  uuid: string; // UUID 추가
 }
 
 // 비밀번호 재설정 비즈니스 로직을 분리한 커스텀 훅
@@ -22,12 +23,14 @@ export const usePasswordReset = () => {
     currentStep: 1,
     email: '',
     verificationCode: '',
+    uuid: '', // UUID 초기화
   });
 
   // 최신 state 값에 안전하게 접근하기 위한 ref
   const stateRef = useRef(state);
   stateRef.current = state;
 
+  // 이메일 인증 코드 발송
   const requestPasswordReset = useCallback(async (email: string) => {
     setState(prev => ({
       ...prev,
@@ -70,6 +73,7 @@ export const usePasswordReset = () => {
     };
   }, []);
 
+  // 이메일 인증 코드 확인 (UUID 반환)
   const verifyResetCode = useCallback(
     async (code: string) => {
       setState(prev => ({
@@ -83,23 +87,24 @@ export const usePasswordReset = () => {
 
       try {
         // ref를 통해 최신 state 값에 안전하게 접근
-        const isValid = await authService.verifyResetCode(
+        const uuid = await authService.verifyResetCode(
           stateRef.current.email,
           code
         );
 
         if (!ignore) {
-          if (isValid) {
+          if (uuid) {
             setState(prev => ({
               ...prev,
-              verificationStep: { data: true, isLoading: false, error: null },
+              verificationStep: { data: uuid, isLoading: false, error: null },
+              uuid, // UUID 저장
               currentStep: 3,
             }));
           } else {
             setState(prev => ({
               ...prev,
               verificationStep: {
-                data: false,
+                data: null,
                 isLoading: false,
                 error: PASSWORD_RESET_ERROR_MESSAGES.INVALID_VERIFICATION_CODE,
               },
@@ -129,6 +134,7 @@ export const usePasswordReset = () => {
     [] // 의존성 배열이 비어있어도 ref를 통해 최신 값에 접근 가능
   );
 
+  // 비밀번호 재설정 (UUID 포함)
   const resetPassword = useCallback(
     async (newPassword: string) => {
       setState(prev => ({
@@ -143,7 +149,7 @@ export const usePasswordReset = () => {
         // ref를 통해 최신 state 값에 안전하게 접근
         await authService.resetPassword(
           stateRef.current.email,
-          stateRef.current.verificationCode,
+          stateRef.current.uuid, // UUID 전달
           newPassword
         );
 

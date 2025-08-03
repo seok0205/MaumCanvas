@@ -38,7 +38,8 @@ export interface RegisterCredentials {
 
 export interface ResetPasswordData {
   email: string;
-  newPassword: string;
+  password: string; // newPassword에서 password로 변경
+  uuid: string; // UUID 필드 추가
 }
 
 export interface EmailVerificationData {
