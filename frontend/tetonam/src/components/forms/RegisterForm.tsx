@@ -422,9 +422,9 @@ export const RegisterForm = () => {
               type='button'
               onClick={() => sendEmailVerification(form.getValues('email'))}
               disabled={
-                emailLoading || 
-                isEmailVerified || 
-                !canResend || 
+                emailLoading ||
+                isEmailVerified ||
+                !canResend ||
                 !!form.formState.errors.email ||
                 !form.watch('email')
               }
@@ -470,11 +470,23 @@ export const RegisterForm = () => {
                 maxLength={6}
                 pattern='[0-9]{6}'
                 inputMode='numeric'
+                onChange={e => {
+                  const value = e.target.value.replace(/[^0-9]/g, '');
+                  form.setValue('emailVerificationCode', value, {
+                    shouldValidate: true,
+                  });
+                }}
               />
               <Button
                 type='button'
                 onClick={handleEmailVerification}
-                disabled={emailLoading || isEmailVerified || isBlocked}
+                disabled={
+                  emailLoading ||
+                  isEmailVerified ||
+                  isBlocked ||
+                  !form.watch('emailVerificationCode') ||
+                  form.watch('emailVerificationCode')?.length !== 6
+                }
                 className='bg-primary hover:bg-primary-dark text-primary-foreground px-4 py-2 text-sm'
                 aria-describedby='verification-status'
                 aria-live='polite'
