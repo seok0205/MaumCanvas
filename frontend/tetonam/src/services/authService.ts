@@ -894,8 +894,6 @@ export const authService = {
 
   // 로그아웃
   logout: (): void => {
-    console.log('🔐 authService.logout() 호출됨');
-
     // 모든 가능한 토큰 키에서 삭제 (안전성 확보)
     localStorage.removeItem(AUTH_CONSTANTS.STORAGE_KEYS.ACCESS_TOKEN);
     localStorage.removeItem(AUTH_CONSTANTS.STORAGE_KEYS.REFRESH_TOKEN);
@@ -905,19 +903,6 @@ export const authService = {
     // 추가적인 인증 관련 데이터도 정리
     localStorage.removeItem('auth-storage');
     sessionStorage.clear(); // 세션 스토리지도 정리
-
-    console.log('🧹 토큰 삭제 완료');
-    console.log('📦 localStorage 상태:', {
-      accessToken: localStorage.getItem(
-        AUTH_CONSTANTS.STORAGE_KEYS.ACCESS_TOKEN
-      ),
-      refreshToken: localStorage.getItem(
-        AUTH_CONSTANTS.STORAGE_KEYS.REFRESH_TOKEN
-      ),
-      accessTokenAlt: localStorage.getItem('accessToken'),
-      refreshTokenAlt: localStorage.getItem('refreshToken'),
-      authStorage: localStorage.getItem('auth-storage'),
-    });
   },
 
   // 토큰 확인

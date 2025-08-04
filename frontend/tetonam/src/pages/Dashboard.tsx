@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/navigation/sidebar';
 import { getUserRoleLabel } from '@/constants/userRoles';
 import { useAuthActions } from '@/hooks/useAuthActions';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { getPrimaryRole } from '@/utils/userRoleMapping';
 import { AlertCircle, Heart, LogOut, User, X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';

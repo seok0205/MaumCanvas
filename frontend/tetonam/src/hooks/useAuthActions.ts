@@ -1,5 +1,4 @@
 import type { UserRole } from '@/constants/userRoles';
-import { useToast } from '@/hooks/use-toast';
 import { authService } from '@/services/authService';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { RegisterCredentials } from '@/types/api';
@@ -29,7 +28,6 @@ export const useAuthActions = (): UseAuthActionsReturn => {
     isLoading,
     user,
   } = useAuthStore();
-  const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleLogin = useCallback(
@@ -37,36 +35,13 @@ export const useAuthActions = (): UseAuthActionsReturn => {
       try {
         const success = await login(email, password);
 
-        // 로그인 성공 후 인증 상태가 완전히 설정될 때까지 대기
-        if (success) {
-          // 인증 상태가 완전히 설정될 때까지 최대 1초 대기
-          let attempts = 0;
-          const maxAttempts = 20; // 20 * 50ms = 1초
-
-          while (attempts < maxAttempts) {
-            const currentAuth = useAuthStore.getState();
-            if (currentAuth.isAuthenticated && currentAuth.user) {
-              break;
-            }
-            await new Promise(resolve => setTimeout(resolve, 50));
-            attempts++;
-          }
-        }
-
         return success;
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : '로그인에 실패했습니다.';
-        toast({
-          title: '로그인 실패',
-          description: errorMessage,
-          variant: 'destructive',
-        });
         console.error('Login failed:', error);
         return false;
       }
     },
-    [login, toast]
+    [login]
   );
 
   const handleRegister = useCallback(
@@ -74,60 +49,33 @@ export const useAuthActions = (): UseAuthActionsReturn => {
       try {
         const success = await register(userData);
         if (success) {
-          toast({
-            title: '회원가입 성공',
-            description: '성공적으로 회원가입되었습니다.',
-          });
         }
         return success;
       } catch (error) {
         console.error('회원가입 상세 에러:', error);
-        const errorMessage =
-          error instanceof Error ? error.message : '회원가입에 실패했습니다.';
-        toast({
-          title: '회원가입 실패',
-          description: errorMessage,
-          variant: 'destructive',
-        });
         console.error('Registration failed:', error);
         // 에러 정보를 보존하여 상위에서 처리할 수 있도록 함
         throw error;
       }
     },
-    [register, toast]
+    [register]
   );
 
   // 로그아웃 핸들러 - 에러 처리 및 비동기 처리 포함
   const handleLogout = useCallback(async () => {
-    console.log('🚪 useAuthActions.handleLogout() 호출됨');
     try {
       // localStorage에서 토큰 삭제
-      console.log('🗑️ authService.logout() 호출 전');
       authService.logout();
-      console.log('🗑️ authService.logout() 호출 후');
 
       // Zustand 상태 초기화
-      console.log('🔄 Zustand logout() 호출 전');
       logout();
-      console.log('🔄 Zustand logout() 호출 후');
-
-      toast({
-        title: '로그아웃',
-        description: '성공적으로 로그아웃되었습니다.',
-      });
 
       // React Router를 사용한 네비게이션
-      console.log('🧭 navigate("/login") 호출');
       navigate('/login');
     } catch (error) {
       console.error('로그아웃 실패:', error);
-      toast({
-        title: '로그아웃 실패',
-        description: '로그아웃 중 오류가 발생했습니다.',
-        variant: 'destructive',
-      });
     }
-  }, [logout, navigate, toast]);
+  }, [logout, navigate]);
 
   // 사용자 역할 선택 핸들러
   const selectUserRole = useCallback(
