@@ -51,6 +51,10 @@ dependencies {
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: '2.6.3'
     implementation 'org.redisson:redisson-spring-boot-starter:3.18.0'
     implementation("me.paulschwarz:spring-dotenv:3.0.0")
+    implementation('org.springframework.boot:spring-boot-starter-webflux')
+
+
+
 
 
 
