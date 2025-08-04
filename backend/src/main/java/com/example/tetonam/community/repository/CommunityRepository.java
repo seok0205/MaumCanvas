@@ -1,7 +1,7 @@
 package com.example.tetonam.community.repository;
 
-import com.example.tetonam.community.entity.Community;
-import com.example.tetonam.community.entity.Category;
+import com.example.tetonam.community.domain.Category;
+import com.example.tetonam.community.domain.Community;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
