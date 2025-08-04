@@ -29,11 +29,11 @@ export const AppSidebar = () => {
     >
       <SidebarContent className='pt-6'>
         <SidebarGroup>
-          <SidebarGroupLabel
-            className={`${state === 'collapsed' ? 'sr-only' : ''} text-xl font-semibold mb-4`}
-          >
-            메뉴
-          </SidebarGroupLabel>
+          {state !== 'collapsed' && (
+            <SidebarGroupLabel className="text-xl font-semibold mb-4">
+              메뉴
+            </SidebarGroupLabel>
+          )}
           <SidebarGroupContent>
             <SidebarMenu className='space-y-2'>
               {menuItems.map((item, index) => (
