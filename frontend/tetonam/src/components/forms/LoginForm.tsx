@@ -1,11 +1,11 @@
 // 1. 내장 라이브러리
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 // 2. 외부 라이브러리
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Check, Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
 // 3. 내부 모듈
@@ -16,6 +16,7 @@ import { PrivacyNotice } from '@/components/ui/forms/PrivacyNotice';
 import { Button } from '@/components/ui/interactive/button';
 import { FORM_MESSAGES } from '@/constants/forms';
 import { useAuthActions } from '@/hooks/useAuthActions';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 const loginSchema = z.object({
   email: z.email({ message: FORM_MESSAGES.VALIDATION.EMAIL_INVALID }),
@@ -32,6 +33,8 @@ export const LoginForm = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { login } = useAuthActions();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { isAuthenticated } = useAuthStore();
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -41,6 +44,14 @@ export const LoginForm = () => {
       password: '',
     },
   });
+
+  // 이미 로그인된 경우 리다이렉트
+  useEffect(() => {
+    if (isAuthenticated) {
+      const from = location.state?.from?.pathname || '/dashboard';
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, navigate, location]);
 
   const onSubmit = useCallback(
     async (data: LoginFormData) => {
@@ -52,9 +63,10 @@ export const LoginForm = () => {
         const success = await login(data.email, data.password);
         if (success) {
           setIsSuccess(true);
-          // 체크 아이콘을 잠깐 보여준 후 대시보드로 이동
+          // 체크 아이콘을 잠깐 보여준 후 원래 페이지로 이동
           setTimeout(() => {
-            navigate('/dashboard');
+            const from = location.state?.from?.pathname || '/dashboard';
+            navigate(from, { replace: true });
           }, 1000);
         } else {
           setErrorMessage('이메일 또는 비밀번호를 확인해주세요.');

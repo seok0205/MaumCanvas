@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Toaster } from 'sonner';
 
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { QuestionnaireForm } from '@/components/questionnaire/QuestionnaireForm';
 import { QuestionnaireResult } from '@/components/questionnaire/QuestionnaireResult';
 import { Dashboard } from '@/pages/Dashboard';
@@ -12,6 +13,7 @@ import { Login } from '@/pages/Login';
 import { MyPage } from '@/pages/MyPage';
 import { Onboarding } from '@/pages/Onboarding';
 import { Register } from '@/pages/Register';
+import { Unauthorized } from '@/pages/Unauthorized';
 import { UserRoleSelection } from '@/pages/UserRoleSelection';
 
 // React Query 클라이언트 설정
@@ -39,17 +41,47 @@ function App() {
               path='/user-role-selection'
               element={<UserRoleSelection />}
             />
-            <Route path='/dashboard' element={<Dashboard />} />
-            <Route path='/diagnosis' element={<Diagnosis />} />
-            <Route path='/mypage' element={<MyPage />} />
+            <Route
+              path='/dashboard'
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/diagnosis'
+              element={
+                <ProtectedRoute>
+                  <Diagnosis />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/mypage'
+              element={
+                <ProtectedRoute>
+                  <MyPage />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path='/questionnaire/:categoryId'
-              element={<QuestionnaireForm />}
+              element={
+                <ProtectedRoute>
+                  <QuestionnaireForm />
+                </ProtectedRoute>
+              }
             />
             <Route
               path='/questionnaire/:categoryId/result'
-              element={<QuestionnaireResult />}
+              element={
+                <ProtectedRoute>
+                  <QuestionnaireResult />
+                </ProtectedRoute>
+              }
             />
+            <Route path='/unauthorized' element={<Unauthorized />} />
           </Routes>
         </BrowserRouter>
         <Toaster

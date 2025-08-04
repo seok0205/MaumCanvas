@@ -1,5 +1,6 @@
 import { AUTH_CONSTANTS } from '@/constants/auth';
 import { ROUTES } from '@/constants/routes';
+import { useAuthStore } from '@/stores/useAuthStore';
 import type {
   ApiResponse,
   JwtTokenResponse,
@@ -78,6 +79,9 @@ const refreshToken = async (): Promise<string | null> => {
     // 토큰 재발급 실패 시 로그아웃 처리
     localStorage.removeItem(API_CONSTANTS.ACCESS_TOKEN_KEY);
     localStorage.removeItem(API_CONSTANTS.REFRESH_TOKEN_KEY);
+
+    // Zustand store의 logout 호출
+    useAuthStore.getState().logout();
     window.location.href = ROUTES.LOGIN;
     return null;
   }
@@ -151,10 +155,19 @@ const createApiClient = (): AxiosInstance => {
           }
         } catch (refreshError) {
           processQueue(refreshError, null);
+          // 토큰 재발급 실패 시 로그아웃 처리
+          useAuthStore.getState().logout();
           return Promise.reject(refreshError);
         } finally {
           isRefreshing = false;
         }
+      }
+
+      // 401 에러가 아닌 경우에도 인증 관련 에러 처리
+      if (error.response?.status === 403) {
+        console.error('접근 권한이 없습니다:', error);
+        useAuthStore.getState().logout();
+        window.location.href = ROUTES.LOGIN;
       }
 
       return Promise.reject(error);
