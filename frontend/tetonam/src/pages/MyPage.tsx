@@ -268,15 +268,7 @@ export const MyPage = ({}: MyPageProps) => {
                           수정
                         </Button>
                       )}
-                      <Button
-                        variant='outline'
-                        size='sm'
-                        onClick={handleRefresh}
-                        className='text-xs'
-                      >
-                        <RefreshCw className='w-3 h-3 mr-1' />
-                        새로고침
-                      </Button>
+                      {/* 사용자 정보가 있을 때는 새로고침 버튼 제거 */}
                     </div>
                   </CardTitle>
                 </CardHeader>

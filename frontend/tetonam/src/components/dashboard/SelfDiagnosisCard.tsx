@@ -76,7 +76,7 @@ export const SelfDiagnosisCard = memo(() => {
     );
   }
 
-  // 최종 에러 상태 (재시도 실패)
+  // 최종 에러 상태 (재시도 실패) - 새로고침 버튼 표시
   if (error && retryCount >= maxRetries) {
     return (
       <Card className='p-6'>
@@ -116,7 +116,7 @@ export const SelfDiagnosisCard = memo(() => {
     );
   }
 
-  // 데이터가 없는 경우
+  // 데이터가 없는 경우 - 새로고침 버튼 제거
   if (!hasAnyResults()) {
     return (
       <Card className='p-6'>
@@ -124,15 +124,6 @@ export const SelfDiagnosisCard = memo(() => {
           <h3 className='text-lg font-semibold text-foreground'>
             자가 진단 결과
           </h3>
-          <Button
-            variant='outline'
-            size='sm'
-            onClick={handleRefresh}
-            className='text-xs'
-          >
-            <RefreshCw className='w-3 h-3 mr-1' />
-            새로고침
-          </Button>
         </div>
         <div className='text-center py-8'>
           <TrendingUp className='w-12 h-12 text-muted-foreground mx-auto mb-3' />
@@ -153,15 +144,7 @@ export const SelfDiagnosisCard = memo(() => {
         <h3 className='text-lg font-semibold text-foreground'>
           자가 진단 결과
         </h3>
-        <Button
-          variant='outline'
-          size='sm'
-          onClick={handleRefresh}
-          className='text-xs'
-        >
-          <RefreshCw className='w-3 h-3 mr-1' />
-          새로고침
-        </Button>
+        {/* 데이터가 있을 때는 새로고침 버튼 제거 */}
       </div>
 
       {/* 카테고리 선택 버튼들 */}

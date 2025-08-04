@@ -163,7 +163,7 @@ export const UpcomingCounselingCard = memo(() => {
     );
   }
 
-  // 상담이 없는 경우
+  // 상담이 없는 경우 - 새로고침 버튼 제거
   if (!upcomingCounseling) {
     return (
       <Card className='p-6'>
@@ -171,15 +171,6 @@ export const UpcomingCounselingCard = memo(() => {
           <h3 className='text-lg font-semibold text-foreground'>
             다가오는 상담
           </h3>
-          <Button
-            variant='outline'
-            size='sm'
-            onClick={handleRefresh}
-            className='text-xs'
-          >
-            <RefreshCw className='w-3 h-3 mr-1' />
-            새로고침
-          </Button>
         </div>
         <div className='text-center py-8'>
           <Calendar className='w-12 h-12 text-muted-foreground mx-auto mb-3' />
@@ -189,7 +180,7 @@ export const UpcomingCounselingCard = memo(() => {
     );
   }
 
-  // 상담 정보 유효성 검사 및 안전한 파싱
+  // 상담 정보 유효성 검사 및 안전한 파싱 - 새로고침 버튼 제거
   const validatedCounseling = safeParseCounseling(upcomingCounseling);
   if (!validatedCounseling) {
     return (
@@ -198,15 +189,6 @@ export const UpcomingCounselingCard = memo(() => {
           <h3 className='text-lg font-semibold text-foreground'>
             다가오는 상담
           </h3>
-          <Button
-            variant='outline'
-            size='sm'
-            onClick={handleRefresh}
-            className='text-xs'
-          >
-            <RefreshCw className='w-3 h-3 mr-1' />
-            새로고침
-          </Button>
         </div>
         <div className='text-center py-8'>
           <AlertCircle className='w-12 h-12 text-yellow-500 mx-auto mb-3' />
@@ -221,22 +203,14 @@ export const UpcomingCounselingCard = memo(() => {
     );
   }
 
-  // 상담 정보 표시
+  // 상담 정보 표시 - 새로고침 버튼 제거
   const { date, time } = formatDateTime(validatedCounseling.time);
 
   return (
     <Card className='p-6'>
       <div className='flex items-center justify-between mb-4'>
         <h3 className='text-lg font-semibold text-foreground'>다가오는 상담</h3>
-        <Button
-          variant='outline'
-          size='sm'
-          onClick={handleRefresh}
-          className='text-xs'
-        >
-          <RefreshCw className='w-3 h-3 mr-1' />
-          새로고침
-        </Button>
+        {/* 상담 정보가 있을 때는 새로고침 버튼 제거 */}
       </div>
 
       <div className='space-y-4'>
