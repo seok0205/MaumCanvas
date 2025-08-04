@@ -36,5 +36,5 @@ export const COUNSELOR_MENU_ITEMS: MenuItem[] = [
   { title: '내 활동', url: '/my-activities', icon: BarChart3 },
   { title: '상담 관리', url: '/counseling-management', icon: MessageCircle },
   { title: '커뮤니티', url: '/community', icon: MessageCircle },
-  { title: '마이페이지', url: '/profile', icon: User },
+  { title: '마이페이지', url: '/mypage', icon: User },
 ];
