@@ -73,10 +73,12 @@ const registerSchema = z
         message: FORM_MESSAGES.VALIDATION.PHONE_MAX,
       })
       .refine(
-        (value) => {
+        value => {
           // 하이픈 제거 후 패턴 검증
           const cleaned = value.replace(/-/g, '');
-          return FORM_CONSTANTS.VALIDATION.PHONE_NUMBER_ONLY_PATTERN.test(cleaned);
+          return FORM_CONSTANTS.VALIDATION.PHONE_NUMBER_ONLY_PATTERN.test(
+            cleaned
+          );
         },
         {
           message: FORM_MESSAGES.VALIDATION.PHONE_PATTERN,
@@ -310,8 +312,11 @@ export const RegisterForm = () => {
         setRegisterResult({ isSuccess: success });
         setShowRegisterResultModal(true);
       } catch (error) {
+        console.error('회원가입 에러:', error);
         setRegisterResult({ isSuccess: false });
         setShowRegisterResultModal(true);
+        // 에러 정보를 보존하여 상위에서 일관된 처리 가능하도록 함
+        throw error;
       } finally {
         setIsLoading(false);
       }
@@ -378,9 +383,9 @@ export const RegisterForm = () => {
   // 회원가입 버튼 활성화 조건
   const isSubmitDisabled =
     isLoading ||
+    !form.formState.isValid ||
     !isEmailVerified ||
-    !nicknameVerified ||
-    !form.formState.isValid;
+    !nicknameVerified;
 
   return (
     <FormLayout title='회원가입'>
@@ -416,7 +421,13 @@ export const RegisterForm = () => {
             <Button
               type='button'
               onClick={() => sendEmailVerification(form.getValues('email'))}
-              disabled={emailLoading || isEmailVerified || !canResend}
+              disabled={
+                emailLoading || 
+                isEmailVerified || 
+                !canResend || 
+                !!form.formState.errors.email ||
+                !form.watch('email')
+              }
               className='bg-primary hover:bg-primary-dark text-primary-foreground px-4 py-2 text-sm'
             >
               {emailLoading ? (

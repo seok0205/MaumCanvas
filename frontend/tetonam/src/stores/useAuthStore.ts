@@ -101,6 +101,7 @@ export const useAuthStore = create<AuthState>()(
             set({ user, isAuthenticated: true, isLoading: false });
             return true;
           } catch (error) {
+            console.error('회원가입 스토어 에러:', error);
             const authError: AuthError = {
               type: 'validation',
               code: 'REGISTER_FAILED',
@@ -108,7 +109,8 @@ export const useAuthStore = create<AuthState>()(
               ...(error instanceof Error && { details: error.message }),
             };
             set({ error: authError.message, isLoading: false });
-            return false;
+            // 에러 정보를 보존하여 상위에서 처리할 수 있도록 함
+            throw error;
           }
         },
 

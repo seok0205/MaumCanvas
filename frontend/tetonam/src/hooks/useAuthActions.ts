@@ -77,6 +77,7 @@ export const useAuthActions = (): UseAuthActionsReturn => {
         }
         return success;
       } catch (error) {
+        console.error('회원가입 상세 에러:', error);
         const errorMessage =
           error instanceof Error ? error.message : '회원가입에 실패했습니다.';
         toast({
@@ -85,7 +86,8 @@ export const useAuthActions = (): UseAuthActionsReturn => {
           variant: 'destructive',
         });
         console.error('Registration failed:', error);
-        return false;
+        // 에러 정보를 보존하여 상위에서 처리할 수 있도록 함
+        throw error;
       }
     },
     [register, toast]

@@ -173,7 +173,7 @@ export const BirthDateField = ({
             {...form.register('birthDate')}
             onChange={e => {
               const value = e.target.value;
-              form.setValue('birthDate', value);
+              form.setValue('birthDate', value, { shouldValidate: true });
 
               const error = validateBirthDate(value);
               if (typeof error === 'string') {
@@ -203,14 +203,8 @@ export const PhoneField = ({
   form: UseFormReturn<RegisterFormData>;
 }) => {
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const formattedValue = formatPhoneInput(value);
-
-    // 포맷팅된 값으로 필드 업데이트
-    form.setValue('phone', formattedValue, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
+    const formattedValue = formatPhoneInput(e.target.value);
+    form.setValue('phone', formattedValue, { shouldValidate: true });
   };
 
   return (
@@ -256,7 +250,10 @@ export const GenderField = ({
     <Label htmlFor='gender' className='text-foreground font-medium'>
       성별
     </Label>
-    <Select onValueChange={value => form.setValue('gender', value)}>
+    <Select 
+      onValueChange={value => form.setValue('gender', value, { shouldValidate: true })}
+      value={form.watch('gender')}
+    >
       <SelectTrigger
         className={`w-full ${!form.watch('gender') ? 'text-red-500 border-red-500' : ''}`}
         aria-describedby={
@@ -287,44 +284,50 @@ export const NicknameField = ({
   form: UseFormReturn<RegisterFormData>;
   onCheckNickname?: () => void;
   isLoading?: boolean;
-}) => (
-  <div className='space-y-2'>
-    <Label htmlFor='nickname' className='text-foreground font-medium'>
-      닉네임
-    </Label>
-    <div className='flex space-x-2'>
-      <div className='relative flex-1'>
-        <User className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4' />
-        <Input
-          {...form.register('nickname')}
-          placeholder='닉네임을 입력해주세요 (2-10자, 완성형 한글/영문/숫자)'
-          className='pl-10 bg-background/50 border-border focus:border-primary'
-          pattern='[가-힣a-zA-Z0-9]+'
-          maxLength={FORM_CONSTANTS.VALIDATION.NICKNAME_MAX_LENGTH}
-          aria-describedby={
-            form.formState.errors['nickname'] ? 'nickname-error' : undefined
-          }
-        />
+}) => {
+  const nickname = form.watch('nickname');
+  const nicknameError = form.formState.errors.nickname;
+  const isNicknameValid = nickname && !nicknameError && nickname.length >= FORM_CONSTANTS.VALIDATION.NICKNAME_MIN_LENGTH;
+
+  return (
+    <div className='space-y-2'>
+      <Label htmlFor='nickname' className='text-foreground font-medium'>
+        닉네임
+      </Label>
+      <div className='flex space-x-2'>
+        <div className='relative flex-1'>
+          <User className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4' />
+          <Input
+            {...form.register('nickname')}
+            placeholder='닉네임을 입력해주세요 (2-10자, 완성형 한글/영문/숫자)'
+            className='pl-10 bg-background/50 border-border focus:border-primary'
+            pattern='[가-힣a-zA-Z0-9]+'
+            maxLength={FORM_CONSTANTS.VALIDATION.NICKNAME_MAX_LENGTH}
+            aria-describedby={
+              form.formState.errors['nickname'] ? 'nickname-error' : undefined
+            }
+          />
+        </div>
+        {onCheckNickname && (
+          <Button
+            type='button'
+            onClick={onCheckNickname}
+            disabled={isLoading || !isNicknameValid}
+            className='bg-primary hover:bg-primary-dark text-primary-foreground px-4 py-2 text-sm whitespace-nowrap'
+          >
+            {isLoading ? (
+              <Loader2 className='w-4 h-4 animate-spin' />
+            ) : (
+              '중복확인'
+            )}
+          </Button>
+        )}
       </div>
-      {onCheckNickname && (
-        <Button
-          type='button'
-          onClick={onCheckNickname}
-          disabled={isLoading}
-          className='bg-primary hover:bg-primary-dark text-primary-foreground px-4 py-2 text-sm whitespace-nowrap'
-        >
-          {isLoading ? (
-            <Loader2 className='w-4 h-4 animate-spin' />
-          ) : (
-            '중복확인'
-          )}
-        </Button>
+      {form.formState.errors['nickname'] && (
+        <p id='nickname-error' className='text-destructive text-sm'>
+          {form.formState.errors['nickname']?.message}
+        </p>
       )}
     </div>
-    {form.formState.errors['nickname'] && (
-      <p id='nickname-error' className='text-destructive text-sm'>
-        {form.formState.errors['nickname']?.message}
-      </p>
-    )}
-  </div>
-);
+  );
+};
