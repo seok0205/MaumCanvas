@@ -14,7 +14,7 @@ export const DIAGNOSIS_CATEGORIES: DiagnosisCategory[] = [
     description: '충격적인 사건 이후 겪을 수 있는 스트레스 반응을 확인합니다.',
     icon: <AlertTriangle className='h-8 w-8 text-red-500' />,
     color: 'bg-red-50 border-red-200 text-red-700',
-    path: '/diagnosis/ptsd',
+    path: '/questionnaire/ptsd',
   },
   {
     id: 'depression',
@@ -23,7 +23,7 @@ export const DIAGNOSIS_CATEGORIES: DiagnosisCategory[] = [
       '최근 기분 상태와 우울감을 점검하고 이해하는 데 도움을 줍니다.',
     icon: <Smile className='h-8 w-8 text-blue-500' />,
     color: 'bg-blue-50 border-blue-200 text-blue-700',
-    path: '/diagnosis/depression',
+    path: '/questionnaire/depression',
   },
   {
     id: 'anxiety',
@@ -31,7 +31,7 @@ export const DIAGNOSIS_CATEGORIES: DiagnosisCategory[] = [
     description: '일상생활에서 느끼는 불안의 정도와 유형을 파악합니다.',
     icon: <CheckCircle className='h-8 w-8 text-green-500' />,
     color: 'bg-green-50 border-green-200 text-green-700',
-    path: '/diagnosis/anxiety',
+    path: '/questionnaire/anxiety',
   },
   {
     id: 'suicide-risk',
@@ -40,7 +40,7 @@ export const DIAGNOSIS_CATEGORIES: DiagnosisCategory[] = [
       '자살 생각이나 계획의 위험성을 평가하고 도움을 요청할 수 있도록 합니다.',
     icon: <Heart className='h-8 w-8 text-orange-500' />,
     color: 'bg-orange-50 border-orange-200 text-orange-700',
-    path: '/diagnosis/suicide-risk',
+    path: '/questionnaire/suicide-risk',
   },
   {
     id: 'drawing',

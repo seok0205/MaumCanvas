@@ -2,6 +2,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Toaster } from 'sonner';
 
+import { QuestionnaireForm } from '@/components/questionnaire/QuestionnaireForm';
+import { QuestionnaireResult } from '@/components/questionnaire/QuestionnaireResult';
 import { Dashboard } from '@/pages/Dashboard';
 import { Diagnosis } from '@/pages/Diagnosis';
 import { ForgotPassword } from '@/pages/ForgotPassword';
@@ -40,6 +42,14 @@ function App() {
             <Route path='/dashboard' element={<Dashboard />} />
             <Route path='/diagnosis' element={<Diagnosis />} />
             <Route path='/mypage' element={<MyPage />} />
+            <Route
+              path='/questionnaire/:categoryId'
+              element={<QuestionnaireForm />}
+            />
+            <Route
+              path='/questionnaire/:categoryId/result'
+              element={<QuestionnaireResult />}
+            />
           </Routes>
         </BrowserRouter>
         <Toaster

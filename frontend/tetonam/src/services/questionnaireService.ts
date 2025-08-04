@@ -1,262 +1,78 @@
-import type {
-  ApiResponse,
-  QuestionnaireCategory,
+import {
+  getQuestionnaireCategory,
+  getQuestionnaireResultLevel,
+} from '@/constants/questionnaire';
+import {
   QuestionnaireResult,
-} from '@/types/api';
-import { AuthenticationError } from '@/types/auth';
-import type { AxiosError } from 'axios';
+  QuestionnaireSubmission,
+} from '@/types/questionnaire';
 import { apiClient } from './apiClient';
 
-// 설문 관련 API 엔드포인트
-const QUESTIONNAIRE_ENDPOINTS = {
-  CREATE_RESULT: '/api/mind/questionnaire',
-  GET_ALL_RESULTS: '/api/mind/questionnaire',
-  GET_RESULTS_BY_CATEGORY: '/api/mind/questionnaire',
-} as const;
+export interface QuestionnaireApiResponse {
+  isSuccess: boolean;
+  message: string;
+  result?: {
+    id: string;
+    category: string;
+    score: number;
+    submittedAt: string;
+  };
+}
 
-// 진단/설문 관련 API 서비스
-export const questionnaireService = {
-  // 설문 결과 생성
-  createQuestionnaireResult: async (
-    score: number,
-    category: string,
-    signal?: AbortSignal
-  ): Promise<string> => {
-    try {
-      const response = await apiClient.post<ApiResponse<string>>(
-        `${QUESTIONNAIRE_ENDPOINTS.CREATE_RESULT}?score=${score}&category=${encodeURIComponent(category)}`,
-        {},
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          ...(signal && { signal }),
-        }
-      );
-
-      if (!response.data.isSuccess || !response.data.result) {
-        throw new AuthenticationError(
-          response.data.code || 'QUESTIONNAIRE_CREATE_FAILED',
-          '설문 결과 저장에 실패했습니다. 다시 시도해주세요.'
-        );
+export const submitQuestionnaire = async (
+  submission: QuestionnaireSubmission
+): Promise<QuestionnaireApiResponse> => {
+  try {
+    const response = await apiClient.post<QuestionnaireApiResponse>(
+      '/api/mind/questionnaire',
+      {
+        category: submission.category,
+        score: submission.score,
+        responses: submission.responses,
       }
+    );
 
-      return response.data.result;
-    } catch (error) {
-      if (error instanceof AuthenticationError) {
-        throw error;
-      }
-      if (error instanceof Error && error.name === 'AbortError') {
-        throw new AuthenticationError('ABORTED', '요청이 취소되었습니다.');
-      }
+    return response.data;
+  } catch (error) {
+    console.error('설문지 제출 실패:', error);
+    throw new Error('설문지 제출에 실패했습니다.');
+  }
+};
 
-      // 네트워크 에러 처리
-      const axiosError = error as AxiosError<ApiResponse<null>>;
-      if (
-        axiosError.code === 'NETWORK_ERROR' ||
-        axiosError.code === 'ERR_NETWORK'
-      ) {
-        throw new AuthenticationError(
-          'NETWORK_ERROR',
-          '네트워크 연결을 확인해주세요.'
-        );
-      }
+export const calculateQuestionnaireResult = (
+  submission: QuestionnaireSubmission
+): QuestionnaireResult => {
+  const category = getQuestionnaireCategory(submission.category);
+  if (!category) {
+    throw new Error('유효하지 않은 설문지 카테고리입니다.');
+  }
 
-      // API 에러 처리
-      if (axiosError.response?.data) {
-        const apiError = axiosError.response.data;
-        switch (apiError.code) {
-          case 'COMMON400': // 잘못된 요청입니다
-          case 'COMMON401': // 인증이 필요합니다
-          case 'COMMON403': // 금지된 요청입니다
-          case 'COMMON500': // 서버 에러
-          default:
-            throw new AuthenticationError(
-              apiError.code || 'QUESTIONNAIRE_CREATE_FAILED',
-              '설문 결과 저장에 실패했습니다. 다시 시도해주세요.'
-            );
-        }
-      }
+  const level = getQuestionnaireResultLevel(category, submission.score);
+  if (!level) {
+    throw new Error('결과 수준을 계산할 수 없습니다.');
+  }
 
-      throw new AuthenticationError(
-        'QUESTIONNAIRE_CREATE_FAILED',
-        '설문 결과 저장에 실패했습니다. 다시 시도해주세요.'
-      );
-    }
-  },
+  return {
+    category: submission.category,
+    score: submission.score,
+    level: level,
+    responses: submission.responses,
+    submittedAt: new Date(),
+  };
+};
 
-  // 전체 설문 결과 조회
-  getAllQuestionnaireResults: async (
-    signal?: AbortSignal
-  ): Promise<QuestionnaireResult[]> => {
-    try {
-      const response = await apiClient.get<ApiResponse<QuestionnaireResult[]>>(
-        QUESTIONNAIRE_ENDPOINTS.GET_ALL_RESULTS,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          ...(signal && { signal }),
-        }
-      );
+export const submitQuestionnaireAndGetResult = async (
+  submission: QuestionnaireSubmission
+): Promise<QuestionnaireResult> => {
+  try {
+    // API로 결과 제출
+    await submitQuestionnaire(submission);
 
-      if (!response.data.isSuccess || !response.data.result) {
-        throw new AuthenticationError(
-          response.data.code || 'QUESTIONNAIRE_FETCH_FAILED',
-          '설문 결과 조회에 실패했습니다. 다시 시도해주세요.'
-        );
-      }
-
-      return response.data.result;
-    } catch (error) {
-      if (error instanceof AuthenticationError) {
-        throw error;
-      }
-      if (error instanceof Error && error.name === 'AbortError') {
-        throw new AuthenticationError('ABORTED', '요청이 취소되었습니다.');
-      }
-
-      // 네트워크 에러 처리
-      const axiosError = error as AxiosError<ApiResponse<null>>;
-      if (
-        axiosError.code === 'NETWORK_ERROR' ||
-        axiosError.code === 'ERR_NETWORK'
-      ) {
-        throw new AuthenticationError(
-          'NETWORK_ERROR',
-          '네트워크 연결을 확인해주세요.'
-        );
-      }
-
-      // API 에러 처리
-      if (axiosError.response?.data) {
-        const apiError = axiosError.response.data;
-        switch (apiError.code) {
-          case 'COMMON400': // 잘못된 요청입니다
-          case 'COMMON401': // 인증이 필요합니다
-          case 'COMMON403': // 금지된 요청입니다
-          case 'COMMON500': // 서버 에러
-          default:
-            throw new AuthenticationError(
-              apiError.code || 'QUESTIONNAIRE_FETCH_FAILED',
-              '설문 결과 조회에 실패했습니다. 다시 시도해주세요.'
-            );
-        }
-      }
-
-      throw new AuthenticationError(
-        'QUESTIONNAIRE_FETCH_FAILED',
-        '설문 결과 조회에 실패했습니다. 다시 시도해주세요.'
-      );
-    }
-  },
-
-  // 카테고리별 설문 결과 조회
-  getQuestionnaireResultsByCategory: async (
-    category: string,
-    signal?: AbortSignal
-  ): Promise<QuestionnaireResult[]> => {
-    try {
-      const response = await apiClient.get<ApiResponse<QuestionnaireResult[]>>(
-        `${QUESTIONNAIRE_ENDPOINTS.GET_RESULTS_BY_CATEGORY}/${encodeURIComponent(category)}`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          ...(signal && { signal }),
-        }
-      );
-
-      if (!response.data.isSuccess || !response.data.result) {
-        throw new AuthenticationError(
-          response.data.code || 'QUESTIONNAIRE_CATEGORY_FETCH_FAILED',
-          '카테고리별 설문 결과 조회에 실패했습니다. 다시 시도해주세요.'
-        );
-      }
-
-      return response.data.result;
-    } catch (error) {
-      if (error instanceof AuthenticationError) {
-        throw error;
-      }
-      if (error instanceof Error && error.name === 'AbortError') {
-        throw new AuthenticationError('ABORTED', '요청이 취소되었습니다.');
-      }
-
-      // 네트워크 에러 처리
-      const axiosError = error as AxiosError<ApiResponse<null>>;
-      if (
-        axiosError.code === 'NETWORK_ERROR' ||
-        axiosError.code === 'ERR_NETWORK'
-      ) {
-        throw new AuthenticationError(
-          'NETWORK_ERROR',
-          '네트워크 연결을 확인해주세요.'
-        );
-      }
-
-      // API 에러 처리
-      if (axiosError.response?.data) {
-        const apiError = axiosError.response.data;
-        switch (apiError.code) {
-          case 'COMMON400': // 잘못된 요청입니다
-          case 'COMMON401': // 인증이 필요합니다
-          case 'COMMON403': // 금지된 요청입니다
-          case 'COMMON500': // 서버 에러
-          default:
-            throw new AuthenticationError(
-              apiError.code || 'QUESTIONNAIRE_CATEGORY_FETCH_FAILED',
-              '카테고리별 설문 결과 조회에 실패했습니다. 다시 시도해주세요.'
-            );
-        }
-      }
-
-      throw new AuthenticationError(
-        'QUESTIONNAIRE_CATEGORY_FETCH_FAILED',
-        '카테고리별 설문 결과 조회에 실패했습니다. 다시 시도해주세요.'
-      );
-    }
-  },
-
-  // 모든 카테고리의 설문 결과를 병렬로 조회
-  getAllCategoriesQuestionnaireResults: async (
-    categories: QuestionnaireCategory[],
-    signal?: AbortSignal
-  ): Promise<Record<QuestionnaireCategory, QuestionnaireResult[]>> => {
-    try {
-      const promises = categories.map(category =>
-        questionnaireService.getQuestionnaireResultsByCategory(category, signal)
-      );
-
-      const results = await Promise.allSettled(promises);
-
-      const categoryResults: Record<
-        QuestionnaireCategory,
-        QuestionnaireResult[]
-      > = {} as Record<QuestionnaireCategory, QuestionnaireResult[]>;
-
-      categories.forEach((category, index) => {
-        const result = results[index];
-        if (result.status === 'fulfilled') {
-          categoryResults[category] = result.value;
-        } else {
-          categoryResults[category] = [];
-        }
-      });
-
-      return categoryResults;
-    } catch (error) {
-      if (error instanceof AuthenticationError) {
-        throw error;
-      }
-      if (error instanceof Error && error.name === 'AbortError') {
-        throw new AuthenticationError('ABORTED', '요청이 취소되었습니다.');
-      }
-
-      throw new AuthenticationError(
-        'QUESTIONNAIRE_PARALLEL_FETCH_FAILED',
-        '설문 결과 조회에 실패했습니다. 다시 시도해주세요.'
-      );
-    }
-  },
+    // 로컬에서 결과 계산하여 반환
+    return calculateQuestionnaireResult(submission);
+  } catch (error) {
+    console.error('설문지 처리 실패:', error);
+    // API 실패 시에도 로컬 결과는 반환
+    return calculateQuestionnaireResult(submission);
+  }
 };
