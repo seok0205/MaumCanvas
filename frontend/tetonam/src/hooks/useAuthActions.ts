@@ -67,11 +67,13 @@ export const useAuthActions = (): UseAuthActionsReturn => {
       // localStorage에서 토큰 삭제
       authService.logout();
 
-      // Zustand 상태 초기화
-      logout();
-
-      // React Router를 사용한 네비게이션
+      // 먼저 페이지 이동을 시작하여 컴포넌트 언마운트 시작
       navigate('/login');
+
+      // 지연 후 상태 초기화 (컴포넌트가 언마운트된 후)
+      setTimeout(() => {
+        logout();
+      }, 100);
     } catch (error) {
       console.error('로그아웃 실패:', error);
     }
