@@ -1,4 +1,5 @@
 import { counselingService } from '@/services/counselingService';
+import { useAuthStore } from '@/stores/useAuthStore';
 import type { UpcomingCounseling } from '@/types/api';
 import { AuthenticationError } from '@/types/auth';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -24,8 +25,17 @@ export const useUpcomingCounseling = (): UseUpcomingCounselingReturn => {
   const abortControllerRef = useRef<AbortController | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // 인증 상태 확인
+  const { isAuthenticated, user } = useAuthStore();
+
   const fetchUpcomingCounseling = useCallback(
     async (isRetry = false): Promise<void> => {
+      // 인증되지 않은 경우 API 호출하지 않음
+      if (!isAuthenticated || !user) {
+        setError('인증이 필요합니다.');
+        return;
+      }
+
       // 이전 요청이 있다면 취소
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -80,7 +90,7 @@ export const useUpcomingCounseling = (): UseUpcomingCounselingReturn => {
         setIsLoading(false);
       }
     },
-    [retryCount]
+    [retryCount, isAuthenticated, user]
   );
 
   // 수동 재시도 함수
@@ -89,9 +99,12 @@ export const useUpcomingCounseling = (): UseUpcomingCounselingReturn => {
     await fetchUpcomingCounseling();
   }, [fetchUpcomingCounseling]);
 
-  // 컴포넌트 마운트 시 초기 로드
+  // 컴포넌트 마운트 시 초기 로드 (인증 상태 확인 후)
   useEffect(() => {
-    fetchUpcomingCounseling();
+    // 인증된 상태에서만 API 호출
+    if (isAuthenticated && user) {
+      fetchUpcomingCounseling();
+    }
 
     // 컴포넌트 언마운트 시 요청 취소 및 타이머 정리
     return () => {
@@ -102,7 +115,7 @@ export const useUpcomingCounseling = (): UseUpcomingCounselingReturn => {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [fetchUpcomingCounseling]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [fetchUpcomingCounseling, isAuthenticated, user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
     upcomingCounseling,

@@ -9,17 +9,46 @@ interface UseAuthActionsReturn {
   register: (userData: RegisterCredentials) => Promise<boolean>;
   logout: () => void;
   selectUserRole: (userRole: UserRole) => void;
+  // 인증 상태 기반 API 호출 관리
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  user: any;
 }
 
 // 인증 관련 비즈니스 로직을 분리한 커스텀 훅
 export const useAuthActions = (): UseAuthActionsReturn => {
-  const { login, register, logout, setSelectedUserRole } = useAuthStore();
+  const {
+    login,
+    register,
+    logout,
+    setSelectedUserRole,
+    isAuthenticated,
+    isLoading,
+    user,
+  } = useAuthStore();
   const { toast } = useToast();
 
   const handleLogin = useCallback(
     async (email: string, password: string): Promise<boolean> => {
       try {
         const success = await login(email, password);
+
+        // 로그인 성공 후 인증 상태가 완전히 설정될 때까지 대기
+        if (success) {
+          // 인증 상태가 완전히 설정될 때까지 최대 1초 대기
+          let attempts = 0;
+          const maxAttempts = 20; // 20 * 50ms = 1초
+
+          while (attempts < maxAttempts) {
+            const currentAuth = useAuthStore.getState();
+            if (currentAuth.isAuthenticated && currentAuth.user) {
+              break;
+            }
+            await new Promise(resolve => setTimeout(resolve, 50));
+            attempts++;
+          }
+        }
+
         return success;
       } catch (error) {
         const errorMessage =
@@ -81,5 +110,8 @@ export const useAuthActions = (): UseAuthActionsReturn => {
     register: handleRegister,
     logout: handleLogout,
     selectUserRole,
+    isAuthenticated,
+    isLoading,
+    user,
   };
 };

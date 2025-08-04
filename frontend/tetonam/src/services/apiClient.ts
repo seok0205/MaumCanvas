@@ -94,10 +94,18 @@ const createApiClient = (): AxiosInstance => {
 
   // 요청 인터셉터: 토큰 자동 추가
   client.interceptors.request.use(
-    (config: InternalAxiosRequestConfig) => {
+    async (config: InternalAxiosRequestConfig) => {
+      // 토큰이 설정되는 동안 약간의 지연
       const token = localStorage.getItem(API_CONSTANTS.ACCESS_TOKEN_KEY);
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+      } else {
+        // 토큰이 없는 경우 약간의 지연을 두어 토큰 설정을 기다림
+        await new Promise(resolve => setTimeout(resolve, 50));
+        const retryToken = localStorage.getItem(API_CONSTANTS.ACCESS_TOKEN_KEY);
+        if (retryToken) {
+          config.headers.Authorization = `Bearer ${retryToken}`;
+        }
       }
       return config;
     },

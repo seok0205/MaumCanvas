@@ -5,9 +5,15 @@ import type { UserRole } from '@/constants/userRoles';
  * @param roles - 백엔드에서 제공하는 role 배열
  * @returns 프론트엔드 UserRole
  */
-export const getPrimaryRole = (roles: string[]): UserRole => {
-  if (!Array.isArray(roles) || roles.length === 0) {
-    console.warn('getPrimaryRole: 유효하지 않은 roles 배열:', roles);
+export const getPrimaryRole = (
+  roles: string[] | undefined | null
+): UserRole => {
+  // 더 엄격한 유효성 검사
+  if (!roles || !Array.isArray(roles) || roles.length === 0) {
+    // 개발 환경에서만 경고 출력
+    if (process.env['NODE_ENV'] === 'development') {
+      console.warn('getPrimaryRole: 유효하지 않은 roles 배열:', roles);
+    }
     return 'USER'; // 기본값
   }
 
@@ -17,7 +23,9 @@ export const getPrimaryRole = (roles: string[]): UserRole => {
   if (roles.includes('USER')) return 'USER';
 
   // 알 수 없는 role인 경우 경고 및 기본값 반환
-  console.warn('getPrimaryRole: 알 수 없는 role들:', roles);
+  if (process.env['NODE_ENV'] === 'development') {
+    console.warn('getPrimaryRole: 알 수 없는 role들:', roles);
+  }
   return 'USER';
 };
 

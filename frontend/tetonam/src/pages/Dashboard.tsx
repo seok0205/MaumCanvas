@@ -173,10 +173,15 @@ const UnknownRoleDashboard = () => (
 );
 
 export const Dashboard = () => {
-  const { user } = useAuthStore();
+  const { user, isAuthenticated, isLoading } = useAuthStore();
 
   // 로딩 상태 처리
-  if (!user) {
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  // 인증되지 않은 상태 처리
+  if (!isAuthenticated || !user) {
     return <LoadingSpinner />;
   }
 
