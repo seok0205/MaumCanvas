@@ -1,7 +1,5 @@
 package com.example.tetonam.image.domain;
 
-import com.example.tetonam.diagnosis.domain.enums.Category;
-import com.example.tetonam.image.service.enums.DrawingCategory;
 import com.example.tetonam.user.domain.User;
 import com.example.tetonam.util.BaseTime;
 import jakarta.persistence.*;
@@ -15,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Drawing extends BaseTime {
+public class DrawingList extends BaseTime {
 
     //집 나무 사람2개
     @Column(name = "drawing_id", updatable = false, unique = true, nullable = false)
@@ -23,16 +21,9 @@ public class Drawing extends BaseTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false)
-    private String imageUrl;
-
-    @Column(nullable = false)
-    private DrawingCategory drawingCategory;
-
-
-    @JoinColumn(name="drawing_list")
+    @JoinColumn(name="user_id")
     @ManyToOne(fetch = FetchType.LAZY)
-    private DrawingList drawingList;
+    private User user;
 
 
 
