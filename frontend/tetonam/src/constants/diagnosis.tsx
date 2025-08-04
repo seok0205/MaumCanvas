@@ -1,11 +1,18 @@
 import { DiagnosisCategory } from '@/types/diagnosis';
+import {
+  AlertTriangle,
+  CheckCircle,
+  Heart,
+  Palette,
+  Smile,
+} from 'lucide-react';
 
 export const DIAGNOSIS_CATEGORIES: DiagnosisCategory[] = [
   {
     id: 'ptsd',
     title: '외상 후 스트레스 증상',
     description: '충격적인 사건 이후 겪을 수 있는 스트레스 반응을 확인합니다.',
-    icon: '⚠️',
+    icon: <AlertTriangle className='h-8 w-8 text-red-500' />,
     color: 'bg-red-50 border-red-200 text-red-700',
     path: '/diagnosis/ptsd',
   },
@@ -14,7 +21,7 @@ export const DIAGNOSIS_CATEGORIES: DiagnosisCategory[] = [
     title: '우울증상',
     description:
       '최근 기분 상태와 우울감을 점검하고 이해하는 데 도움을 줍니다.',
-    icon: '😊',
+    icon: <Smile className='h-8 w-8 text-blue-500' />,
     color: 'bg-blue-50 border-blue-200 text-blue-700',
     path: '/diagnosis/depression',
   },
@@ -22,7 +29,7 @@ export const DIAGNOSIS_CATEGORIES: DiagnosisCategory[] = [
     id: 'anxiety',
     title: '불안증상',
     description: '일상생활에서 느끼는 불안의 정도와 유형을 파악합니다.',
-    icon: '✅',
+    icon: <CheckCircle className='h-8 w-8 text-green-500' />,
     color: 'bg-green-50 border-green-200 text-green-700',
     path: '/diagnosis/anxiety',
   },
@@ -31,7 +38,7 @@ export const DIAGNOSIS_CATEGORIES: DiagnosisCategory[] = [
     title: '자살위험성',
     description:
       '자살 생각이나 계획의 위험성을 평가하고 도움을 요청할 수 있도록 합니다.',
-    icon: '💝',
+    icon: <Heart className='h-8 w-8 text-orange-500' />,
     color: 'bg-orange-50 border-orange-200 text-orange-700',
     path: '/diagnosis/suicide-risk',
   },
@@ -40,7 +47,7 @@ export const DIAGNOSIS_CATEGORIES: DiagnosisCategory[] = [
     title: '그림 진단',
     description:
       '미술치료 기법을 활용하여 그림을 통해 내면의 감정과 심리상태를 탐색합니다.',
-    icon: '🎨',
+    icon: <Palette className='h-8 w-8 text-purple-500' />,
     color: 'bg-purple-50 border-purple-200 text-purple-700',
     path: '/diagnosis/drawing',
   },

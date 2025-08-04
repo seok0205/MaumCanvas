@@ -1,8 +1,10 @@
+import { ReactNode } from 'react';
+
 export interface DiagnosisCategory {
   id: string;
   title: string;
   description: string;
-  icon: string;
+  icon: ReactNode;
   color: string;
   path: string;
 }

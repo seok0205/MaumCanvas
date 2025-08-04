@@ -28,7 +28,7 @@ export const DiagnosisCard = ({
       aria-labelledby={`diagnosis-title-${category.id}`}
     >
       <div className='flex items-center space-x-3 mb-4'>
-        <div className='text-2xl' aria-hidden='true'>
+        <div className='flex items-center justify-center' aria-hidden='true'>
           {category.icon}
         </div>
         <h3
