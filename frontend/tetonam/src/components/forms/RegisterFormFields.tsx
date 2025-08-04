@@ -250,8 +250,10 @@ export const GenderField = ({
     <Label htmlFor='gender' className='text-foreground font-medium'>
       성별
     </Label>
-    <Select 
-      onValueChange={value => form.setValue('gender', value, { shouldValidate: true })}
+    <Select
+      onValueChange={value =>
+        form.setValue('gender', value, { shouldValidate: true })
+      }
       value={form.watch('gender')}
     >
       <SelectTrigger
@@ -287,7 +289,10 @@ export const NicknameField = ({
 }) => {
   const nickname = form.watch('nickname');
   const nicknameError = form.formState.errors.nickname;
-  const isNicknameValid = nickname && !nicknameError && nickname.length >= FORM_CONSTANTS.VALIDATION.NICKNAME_MIN_LENGTH;
+  const isNicknameValid =
+    nickname &&
+    !nicknameError &&
+    nickname.length >= FORM_CONSTANTS.VALIDATION.NICKNAME_MIN_LENGTH;
 
   return (
     <div className='space-y-2'>
