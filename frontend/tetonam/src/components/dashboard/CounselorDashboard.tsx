@@ -43,9 +43,9 @@ export const CounselorDashboard = ({ user }: CounselorDashboardProps) => {
   ];
 
   return (
-    <div className={`${paddingClass} space-y-8 animate-fade-in`}>
+    <div className={`${paddingClass} space-y-8`}>
       {/* 환영 메시지 */}
-      <div className='animate-scale-gentle'>
+      <div>
         <WelcomeSection userName={user.name} userRole={primaryRole} />
       </div>
 
@@ -58,10 +58,7 @@ export const CounselorDashboard = ({ user }: CounselorDashboardProps) => {
       {/* 내 활동 섹션 */}
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
         {/* 다가오는 상담 */}
-        <div
-          className='animate-scale-gentle'
-          style={{ animationDelay: '0.2s' }}
-        >
+        <div>
           <AppointmentCard
             appointments={MOCK_APPOINTMENTS.COUNSELOR}
             userRole='COUNSELOR' // 임시로 기존 값 사용
@@ -69,10 +66,7 @@ export const CounselorDashboard = ({ user }: CounselorDashboardProps) => {
         </div>
 
         {/* 자기 진단 결과 */}
-        <div
-          className='animate-scale-gentle'
-          style={{ animationDelay: '0.3s' }}
-        >
+        <div>
           <StatisticsCard stats={MOCK_STATS.COUNSELOR} />
         </div>
       </div>
@@ -80,17 +74,11 @@ export const CounselorDashboard = ({ user }: CounselorDashboardProps) => {
       {/* 커뮤니티 활동 및 오늘의 팁 */}
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
         {/* 커뮤니티 활동 */}
-        <div
-          className='animate-scale-gentle'
-          style={{ animationDelay: '0.4s' }}
-        >
+        <div>
           <CommunityActivity activities={communityActivities} />
         </div>
         {/* 오늘의 팁 */}
-        <div
-          className='animate-scale-gentle'
-          style={{ animationDelay: '0.5s' }}
-        >
+        <div>
           <DailyTips tips={DAILY_TIPS.COUNSELOR} userRole='COUNSELOR' />{' '}
           {/* 임시로 기존 값 사용 */}
         </div>

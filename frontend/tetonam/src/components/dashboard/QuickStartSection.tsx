@@ -50,11 +50,7 @@ export const QuickStartSection = ({
           const { bg, color } = getIconStyles(index);
 
           return (
-            <div
-              key={action.title}
-              className='animate-scale-gentle'
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
+            <div key={action.title}>
               <QuickStartCard
                 title={action.title}
                 description={action.description}
