@@ -24,7 +24,7 @@ export const AppSidebar = () => {
 
   return (
     <Sidebar
-      className={`${state === 'collapsed' ? 'w-16' : 'w-40'} pr-2 transition-all duration-300`}
+      className={`${state === 'collapsed' ? 'w-20' : 'w-40'} pr-2 transition-all duration-300`}
       collapsible='icon'
     >
       <SidebarContent className='pt-6'>
@@ -50,7 +50,7 @@ export const AppSidebar = () => {
                         className={`w-5 h-5 ${state === 'collapsed' ? '' : 'mr-3'}`}
                       />
                       {state !== 'collapsed' && (
-                        <span className='font-medium text-base'>
+                        <span className='font-medium text-sm'>
                           {item.title}
                         </span>
                       )}
