@@ -3,6 +3,7 @@ package com.example.tetonam.community.service;
 import com.example.tetonam.community.dto.PostListDto;
 import com.example.tetonam.community.domain.Category;
 import com.example.tetonam.community.domain.Community;
+import com.example.tetonam.community.dto.PostWriteDto;
 import com.example.tetonam.community.repository.CommunityRepository;
 import com.example.tetonam.exception.handler.BoardHandler;
 import com.example.tetonam.response.code.status.ErrorStatus;
@@ -11,13 +12,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)     // 조회 전용(readOnly 최적화)
+@Transactional(readOnly = false)     // 조회 전용(readOnly 최적화)
 public class CommunityService {
 
     private final CommunityRepository communityRepository;
@@ -50,5 +52,28 @@ public class CommunityService {
         return posts.stream()
                 .map(PostListDto::from)
                 .collect(Collectors.toList());
+    }
+    // PostId로 게시글 정보 다 가져오기(게시글 상세 조회)
+    public PostListDto getPostById(Long id) {
+        Community community = communityRepository.findById(id)
+                .orElseThrow(() -> new BoardHandler(ErrorStatus.POST_LIST_EMPTY));
+        return PostListDto.from(community);
+    }
+
+
+    // 글 작성 api
+    public Long writePost(PostWriteDto dto) {
+        Community community = Community.builder()
+                .title(dto.getTitle())
+                .content(dto.getContent())
+                .category(dto.getCategory())
+                .author(dto.getAuthor())
+                .viewCount(0)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        Community saved = communityRepository.save(community);
+        return saved.getId();
     }
 }
