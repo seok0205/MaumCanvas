@@ -7,3 +7,9 @@ services:
     ports:
       - "8000:8000"
     restart: always
+    networks:
+      - tetonam-network
+
+networks:
+  tetonam-network:
+    external: true

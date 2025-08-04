@@ -17,6 +17,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - tetonam-network    
 
   redis:
     image: redis:7
@@ -30,6 +32,8 @@ services:
     volumes:
       - redis_data:/data
     restart: always
+    networks:
+      - tetonam-network    
 
   app:
     build:
@@ -44,12 +48,27 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       SPRING_REDIS_HOST: redis
       JWT_SECRET: ${JWT_SECRET}
+      CLOUD_AWS_CREDENTIALS_ACCESS_KEY: ${CLOUD_AWS_CREDENTIALS_ACCESS_KEY}
+      CLOUD_AWS_CREDENTIALS_SECRET_KEY: ${CLOUD_AWS_CREDENTIALS_SECRET_KEY}
+      CLOUD_AWS_REGION_STATIC: ${CLOUD_AWS_REGION_STATIC}
+      S3_URL: ${S3_URL}
+
+    env_file:
+      - .env
+
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_started
+    
+    networks:
+      - tetonam-network    
 
 volumes:
   mysql_data:
   redis_data:
+
+networks:
+  tetonam-network:
+    external: true

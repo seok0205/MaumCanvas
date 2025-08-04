@@ -1,50 +1,56 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { Toaster } from 'sonner';
+
+import { Dashboard } from '@/pages/Dashboard';
+import { ForgotPassword } from '@/pages/ForgotPassword';
+import { Index } from '@/pages/Index';
+import { Login } from '@/pages/Login';
+import { Onboarding } from '@/pages/Onboarding';
+import { Register } from '@/pages/Register';
+import { UserRoleSelection } from '@/pages/UserRoleSelection';
+
+// React Query 클라이언트 설정
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5분
+      retry: 1,
+    },
+  },
+});
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center">
-      <div className="flex space-x-8 mb-8">
-        <a
-          href="https://vite.dev"
-          target="_blank"
-          className="hover:scale-110 transition-transform"
-        >
-          <img src={viteLogo} className="h-24 w-24" alt="Vite logo" />
-        </a>
-        <a
-          href="https://react.dev"
-          target="_blank"
-          className="hover:scale-110 transition-transform animate-spin-slow"
-        >
-          <img src={reactLogo} className="h-24 w-24" alt="React logo" />
-        </a>
-      </div>
-
-      <h1 className="text-4xl font-bold text-gray-800 mb-8">Vite + React</h1>
-
-      <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full mx-4">
-        <button
-          onClick={() => setCount((count) => count + 1)}
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 mb-4"
-        >
-          count is {count}
-        </button>
-        <p className="text-gray-600 text-center">
-          Edit{" "}
-          <code className="bg-gray-100 px-2 py-1 rounded text-sm">
-            src/App.tsx
-          </code>{" "}
-          and save to test HMR
-        </p>
-      </div>
-
-      <p className="text-gray-500 mt-8 text-center max-w-md">
-        Click on the Vite and React logos to learn more
-      </p>
+    <div className='min-h-screen bg-background font-sans antialiased'>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <Routes>
+            <Route path='/' element={<Index />} />
+            <Route path='/login' element={<Login />} />
+            <Route path='/register' element={<Register />} />
+            <Route path='/forgot-password' element={<ForgotPassword />} />
+            <Route path='/onboarding' element={<Onboarding />} />
+            <Route
+              path='/user-role-selection'
+              element={<UserRoleSelection />}
+            />
+            <Route path='/dashboard' element={<Dashboard />} />
+          </Routes>
+        </BrowserRouter>
+        <Toaster
+          position='top-center'
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: 'hsl(var(--card))',
+              color: 'hsl(var(--card-foreground))',
+              border: '1px solid hsl(var(--border))',
+              borderRadius: 'var(--radius)',
+            },
+          }}
+        />
+      </QueryClientProvider>
     </div>
   );
 }

@@ -1,6 +1,9 @@
 from fastapi import APIRouter, File, UploadFile
 from fastapi.responses import JSONResponse, StreamingResponse
 from app.core.yolo_predict import run_inference
+from app.utils.filtering import nms_filter
+from app.utils.calcSize import calc
+from app.utils.toString import toString
 import numpy as np
 import cv2
 import io
@@ -9,13 +12,33 @@ router = APIRouter(prefix="/predict", tags=["Prediction"])
 
 # 미리 로드된 전역 모델 및 클래스
 from app.core.model_loader import model, class_names
+from app.utils.s3imageLoader import s3imageLoader
 
+#이미지 s3로 받을 때
+@router.post("/json_s3")
+async def predict_json_s3(url):
+    img_np = s3imageLoader(url)
+    _, results = run_inference(img_np, model, class_names, visualize=False)
+    # 일단 필터 빼
+    # filtered_result = nms_filter(results)
+    calc_result = calc(results)
+    stringVal = toString(calc_result)
+    return stringVal
+
+###########################################################################
+
+#이미지 업로드로 받을 때
 @router.post("/json")
 async def predict_json(file: UploadFile = File(...)):
     image_bytes = await file.read()
     img_np = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), cv2.IMREAD_COLOR)
     _, results = run_inference(img_np, model, class_names, visualize=False)
-    return {"num_detections": len(results), "detections": results}
+    # 일단 필터 빼
+    # filtered_result = nms_filter(results)
+    calc_result = calc(results)
+    stringVal = toString(calc_result)
+    # return {"num_detections": len(calc_result), "detections": calc_result}
+    return stringVal
 
 @router.post("/image")
 async def predict_image(file: UploadFile = File(...)):
