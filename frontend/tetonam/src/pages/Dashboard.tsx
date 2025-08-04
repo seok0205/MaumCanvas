@@ -12,6 +12,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { getPrimaryRole } from '@/utils/userRoleMapping';
 import { AlertCircle, Heart, LogOut, User, X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // 타입 정의
 interface DashboardHeaderProps {
@@ -23,6 +24,7 @@ interface DashboardHeaderProps {
 
 const DashboardHeader = ({ user }: DashboardHeaderProps) => {
   const { logout } = useAuthStore();
+  const navigate = useNavigate();
   const [logoutError, setLogoutError] = useState<string | null>(null);
 
   // 에러 배너 자동 사라짐
@@ -65,6 +67,11 @@ const DashboardHeader = ({ user }: DashboardHeaderProps) => {
     setLogoutError(null);
   }, []);
 
+  // 마이페이지로 이동
+  const handleMyPageClick = useCallback(() => {
+    navigate('/mypage');
+  }, [navigate]);
+
   return (
     <>
       {/* 헤더 */}
@@ -81,8 +88,11 @@ const DashboardHeader = ({ user }: DashboardHeaderProps) => {
           </div>
 
           <div className='flex items-center space-x-2 md:space-x-4'>
-            <div
-              className='flex items-center space-x-2 text-foreground'
+            <Button
+              variant='ghost'
+              size='sm'
+              onClick={handleMyPageClick}
+              className='flex items-center space-x-2 text-foreground hover:text-foreground hover:bg-accent'
               aria-label={`사용자 정보: ${user.name || '알 수 없는 사용자'}, 역할: ${getUserRoleLabel(primaryRole)}`}
             >
               <User
@@ -95,7 +105,7 @@ const DashboardHeader = ({ user }: DashboardHeaderProps) => {
               <span className='hidden text-muted-foreground sm:inline'>
                 ({getUserRoleLabel(primaryRole)})
               </span>
-            </div>
+            </Button>
 
             <Button
               variant='ghost'
@@ -131,7 +141,6 @@ const DashboardHeader = ({ user }: DashboardHeaderProps) => {
                 size='sm'
                 onClick={handleCloseError}
                 className='h-6 w-6 p-0'
-                aria-label='에러 메시지 닫기'
               >
                 <X className='h-3 w-3' />
               </Button>

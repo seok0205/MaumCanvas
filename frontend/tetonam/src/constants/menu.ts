@@ -1,5 +1,10 @@
-import { MenuItem } from '@/types/menu';
 import { BarChart3, Calendar, Home, MessageCircle, User } from 'lucide-react';
+
+export interface MenuItem {
+  title: string;
+  url: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
 
 export const USER_TYPES = {
   USER: 'user',
@@ -15,6 +20,7 @@ export const ROUTES = {
   DASHBOARD: '/dashboard',
   ONBOARDING: '/onboarding',
   USER_TYPE_SELECTION: '/user-role-selection',
+  MY_PAGE: '/mypage',
 } as const;
 
 export const USER_MENU_ITEMS: MenuItem[] = [
@@ -22,7 +28,7 @@ export const USER_MENU_ITEMS: MenuItem[] = [
   { title: '내 마음 진단', url: '/progress', icon: BarChart3 },
   { title: '상담 예약', url: '/counseling-history', icon: Calendar },
   { title: '커뮤니티', url: '/community', icon: MessageCircle },
-  { title: '마이페이지', url: '/profile', icon: User },
+  { title: '마이페이지', url: '/mypage', icon: User },
 ];
 
 export const COUNSELOR_MENU_ITEMS: MenuItem[] = [

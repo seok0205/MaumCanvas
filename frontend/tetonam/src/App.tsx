@@ -6,6 +6,7 @@ import { Dashboard } from '@/pages/Dashboard';
 import { ForgotPassword } from '@/pages/ForgotPassword';
 import { Index } from '@/pages/Index';
 import { Login } from '@/pages/Login';
+import { MyPage } from '@/pages/MyPage';
 import { Onboarding } from '@/pages/Onboarding';
 import { Register } from '@/pages/Register';
 import { UserRoleSelection } from '@/pages/UserRoleSelection';
@@ -36,6 +37,7 @@ function App() {
               element={<UserRoleSelection />}
             />
             <Route path='/dashboard' element={<Dashboard />} />
+            <Route path='/mypage' element={<MyPage />} />
           </Routes>
         </BrowserRouter>
         <Toaster
