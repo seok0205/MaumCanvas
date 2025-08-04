@@ -14,7 +14,7 @@ export const ROUTES = {
   FORGOT_PASSWORD: '/forgot-password',
   DASHBOARD: '/dashboard',
   ONBOARDING: '/onboarding',
-  USER_TYPE_SELECTION: '/user-type-selection',
+  USER_TYPE_SELECTION: '/user-role-selection',
 } as const;
 
 export const USER_MENU_ITEMS: MenuItem[] = [

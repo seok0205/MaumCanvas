@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 // 라우트 경로 상수
 export const ROUTES = {
   DASHBOARD: '/dashboard',
-  USER_TYPE_SELECTION: '/user-type-selection',
+  USER_TYPE_SELECTION: '/user-role-selection',
   ONBOARDING: '/onboarding',
 } as const;
 
@@ -33,19 +33,11 @@ export const useRedirectLogic = () => {
       // 처음 방문자는 온보딩으로
       navigate(ROUTES.ONBOARDING);
     } catch (error) {
-      // 개발 환경에서 에러 로깅
-      if (import.meta.env.DEV) {
-        console.error('리다이렉트 중 오류 발생:', error);
-      }
-
       // 에러 발생 시 기본 경로로 리다이렉트
       try {
         navigate(ROUTES.ONBOARDING);
       } catch (fallbackError) {
         // 최후의 수단으로 window.location 사용
-        if (import.meta.env.DEV) {
-          console.error('폴백 리다이렉트도 실패:', fallbackError);
-        }
         window.location.href = ROUTES.ONBOARDING;
       }
     }

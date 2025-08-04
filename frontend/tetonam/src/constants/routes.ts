@@ -3,7 +3,7 @@ export const ROUTES = {
   REGISTER: '/register',
   DASHBOARD: '/dashboard',
   FORGOT_PASSWORD: '/forgot-password',
-  USER_TYPE_SELECTION: '/user-type-selection',
+  USER_TYPE_SELECTION: '/user-role-selection',
   ONBOARDING: '/onboarding',
 } as const;
 
