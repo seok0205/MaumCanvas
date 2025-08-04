@@ -66,7 +66,7 @@ export const UserRoleSelection = () => {
       <div className={styles.content}>
         <div className={styles.header}>
           <div className={styles.titleContainer}>
-            <Heart className='w-8 h-8 text-primary mr-3' />
+            <Heart className='w-8 h-8 text-mint mr-3' />
             <h1 className={styles.title}>마음 캔버스</h1>
           </div>
           <p className={styles.subtitle}>
