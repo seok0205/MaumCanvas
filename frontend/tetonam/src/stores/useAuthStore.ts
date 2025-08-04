@@ -3,7 +3,7 @@ import { authService } from '@/services/authService';
 import type { AuthError } from '@/types/auth';
 import type { AuthState } from '@/types/store';
 import type { User } from '@/types/user';
-import { getPrimaryRole } from '@/utils/userRoleMapping';
+import { getPrimaryRole, validateBackendRoles } from '@/utils/userRoleMapping';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
@@ -35,13 +35,35 @@ export const useAuthStore = create<AuthState>()(
           try {
             const tokenResponse = await authService.login(email, password);
 
-            // role 배열을 주요 역할로 변환 (안전한 처리)
-            const primaryRole =
-              get().selectedUserRole ||
-              getPrimaryRole(tokenResponse.roles || []);
+            // selectedUserRole이 있으면 우선 사용, 없으면 백엔드 roles에서 결정
+            let primaryRole: UserRole;
+            const currentSelectedRole = get().selectedUserRole;
+
+            if (currentSelectedRole) {
+              // 선택된 역할이 있으면 해당 역할 사용
+              primaryRole = currentSelectedRole;
+            } else {
+              // 백엔드 roles에서 주요 역할 결정
+              primaryRole = getPrimaryRole(tokenResponse.roles || []);
+            }
 
             // 사용자 정보 조회 (JWT 토큰 필요)
             const userInfo = await authService.getMyInfo();
+
+            // 백엔드에서 받은 roles와 선택된 역할이 일치하는지 검증
+            if (userInfo.roles && userInfo.roles.length > 0) {
+              const isValidRole = validateBackendRoles(
+                userInfo.roles,
+                primaryRole
+              );
+              if (!isValidRole) {
+                // 백엔드 roles가 예상과 다르면 선택된 역할 우선 사용
+                console.warn('Backend roles do not match expected role:', {
+                  backendRoles: userInfo.roles,
+                  expectedRole: primaryRole,
+                });
+              }
+            }
 
             const user: User = {
               id: userInfo.id || `user-${Date.now()}`, // 백엔드에서 ID 제공하지 않는 경우 임시 ID
@@ -52,7 +74,7 @@ export const useAuthStore = create<AuthState>()(
               phone: userInfo.phone,
               school: userInfo.school,
               birthday: userInfo.birthday,
-              roles: (userInfo.roles || [primaryRole]) as UserRole[], // 타입 캐스팅
+              roles: [primaryRole] as UserRole[], // 선택된 역할을 우선 사용
               createdAt: new Date().toISOString(),
             };
 
@@ -131,6 +153,7 @@ export const useAuthStore = create<AuthState>()(
           hasCompletedOnboarding: state.hasCompletedOnboarding,
           user: state.user,
           isAuthenticated: state.isAuthenticated,
+          selectedUserRole: state.selectedUserRole, // selectedUserRole 추가
         }),
       }
     ),
