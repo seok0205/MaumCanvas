@@ -49,17 +49,22 @@ export const QuickStartSection = ({
           const { bg, color } = getIconStyles(index);
 
           return (
-            <QuickStartCard
+            <div
               key={action.title}
-              title={action.title}
-              description={action.description}
-              icon={Icon}
-              actionText={action.actionText}
-              variant={action.variant}
-              onAction={() => handleAction(action)}
-              bgColor={bg}
-              iconColor={color}
-            />
+              className='animate-scale-gentle'
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              <QuickStartCard
+                title={action.title}
+                description={action.description}
+                icon={Icon}
+                actionText={action.actionText}
+                variant={action.variant}
+                onAction={() => handleAction(action)}
+                bgColor={bg}
+                iconColor={color}
+              />
+            </div>
           );
         })}
       </div>
