@@ -1,10 +1,10 @@
 package com.example.tetonam.community.service;
 
-import com.example.tetonam.community.dto.PostResponse;
-import com.example.tetonam.community.entity.Category;
-import com.example.tetonam.community.entity.Community;
+import com.example.tetonam.community.dto.PostListDto;
+import com.example.tetonam.community.domain.Category;
+import com.example.tetonam.community.domain.Community;
 import com.example.tetonam.community.repository.CommunityRepository;
-import com.example.tetonam.exception.handler.ContentHandler;
+import com.example.tetonam.exception.handler.BoardHandler;
 import com.example.tetonam.response.code.status.ErrorStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +43,7 @@ public class CommunityService {
         // 게시글 아무것도 없으면 예외 발생
         if (posts.isEmpty()) {
             log.info("[getAllPosts] 조회된 게시글이 없습니다. (정렬: {}, 카테고리: {})", sort, category);
-            throw new ContentHandler(ErrorStatus.POST_LIST_EMPTY);
+            throw new BoardHandler(ErrorStatus.POST_LIST_EMPTY);
         }
 
         log.info("[getAllPosts] 게시글 {}건 조회됨 (정렬: {}, 카테고리: {})", posts.size(), sort, category);
