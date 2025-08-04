@@ -8,9 +8,9 @@ interface WelcomeSectionProps {
 export const WelcomeSection = ({ userName, userRole }: WelcomeSectionProps) => {
   const getWelcomeMessage = (name: string, role: UserRole) => {
     const messages = {
-      COUNSELOR: `안녕하세요, ${name} 상담사님! 🌟`,
-      USER: `안녕하세요, ${name}님! ✨`,
-      ADMIN: `안녕하세요, ${name} 관리자님! 🎯`,
+      COUNSELOR: `안녕하세요, ${name} 상담사님!`,
+      USER: `안녕하세요, ${name}님!`,
+      ADMIN: `안녕하세요, ${name} 관리자님!`,
     };
     return messages[role] || `안녕하세요, ${name}님!`;
   };
@@ -28,10 +28,8 @@ export const WelcomeSection = ({ userName, userRole }: WelcomeSectionProps) => {
     <div
       className='
         rounded-2xl p-8
-        bg-gradient-to-br from-mint/20 via-yellow/10 to-light-blue/20
+        bg-white
         border border-border/30 shadow-soft
-        transition-all duration-500 hover:shadow-medium hover:scale-[1.02]
-        animate-float
       '
       role='banner'
       aria-label='환영 메시지'

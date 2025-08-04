@@ -24,13 +24,13 @@ export const AppSidebar = () => {
 
   return (
     <Sidebar
-      className={`${state === 'collapsed' ? 'w-16' : 'w-48'} pr-2 transition-all duration-300`}
+      className={`${state === 'collapsed' ? 'w-16' : 'w-40'} pr-2 transition-all duration-300`}
       collapsible='icon'
     >
       <SidebarContent className='pt-6'>
         <SidebarGroup>
           <SidebarGroupLabel
-            className={`${state === 'collapsed' ? 'sr-only' : ''} text-lg font-semibold mb-4`}
+            className={`${state === 'collapsed' ? 'sr-only' : ''} text-xl font-semibold mb-4`}
           >
             메뉴
           </SidebarGroupLabel>
@@ -40,13 +40,19 @@ export const AppSidebar = () => {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
-                    className='rounded-xl transition-all duration-300 hover:scale-105'
+                    className={`rounded-xl transition-all duration-300 hover:scale-105 ${
+                      state === 'collapsed' ? 'flex justify-center' : ''
+                    }`}
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     <NavLink to={item.url} end className={getNavLinkClassName}>
-                      <item.icon className='mr-3 w-5 h-5' />
+                      <item.icon
+                        className={`w-5 h-5 ${state === 'collapsed' ? '' : 'mr-3'}`}
+                      />
                       {state !== 'collapsed' && (
-                        <span className='font-medium'>{item.title}</span>
+                        <span className='font-medium text-base'>
+                          {item.title}
+                        </span>
                       )}
                     </NavLink>
                   </SidebarMenuButton>

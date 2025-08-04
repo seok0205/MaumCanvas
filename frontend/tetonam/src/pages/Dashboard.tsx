@@ -68,7 +68,7 @@ const DashboardHeader = ({ user }: DashboardHeaderProps) => {
   return (
     <>
       {/* 헤더 */}
-      <header className='border-b border-border/50 bg-card/80 shadow-card backdrop-blur-sm'>
+      <header className='border-b border-border/50 bg-card/80 shadow-card backdrop-blur-sm rounded-2xl mx-4 mt-4'>
         <div className='flex items-center justify-between px-4 py-4'>
           <div className='flex items-center space-x-4'>
             <SidebarTrigger className='mr-2' />
