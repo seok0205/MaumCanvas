@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Toaster } from 'sonner';
 
 import { Dashboard } from '@/pages/Dashboard';
+import { Diagnosis } from '@/pages/Diagnosis';
 import { ForgotPassword } from '@/pages/ForgotPassword';
 import { Index } from '@/pages/Index';
 import { Login } from '@/pages/Login';
@@ -37,6 +38,7 @@ function App() {
               element={<UserRoleSelection />}
             />
             <Route path='/dashboard' element={<Dashboard />} />
+            <Route path='/diagnosis' element={<Diagnosis />} />
             <Route path='/mypage' element={<MyPage />} />
           </Routes>
         </BrowserRouter>
