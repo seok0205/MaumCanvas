@@ -43,59 +43,35 @@ export const CounselorDashboard = ({ user }: CounselorDashboardProps) => {
   ];
 
   return (
-    <div className={`${paddingClass} space-y-8 animate-fade-in`}>
+    <div className={`${paddingClass} space-y-8`}>
       {/* 환영 메시지 */}
-      <div className='animate-scale-gentle'>
-        <WelcomeSection userName={user.name} userRole={primaryRole} />
-      </div>
+      <WelcomeSection userName={user.name} userRole={primaryRole} />
 
       {/* 퀵 시작 섹션 */}
-      <div className='animate-scale-gentle' style={{ animationDelay: '0.1s' }}>
-        <QuickStartSection
-          actions={DASHBOARD_CONSTANTS.QUICK_ACTIONS.COUNSELOR}
-          userRole='COUNSELOR' // 임시로 기존 값 사용
-        />
-      </div>
+      <QuickStartSection
+        actions={DASHBOARD_CONSTANTS.QUICK_ACTIONS.COUNSELOR}
+        userRole='COUNSELOR' // 임시로 기존 값 사용
+      />
 
       {/* 내 활동 섹션 */}
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
         {/* 다가오는 상담 */}
-        <div
-          className='animate-scale-gentle'
-          style={{ animationDelay: '0.2s' }}
-        >
-          <AppointmentCard
-            appointments={MOCK_APPOINTMENTS.COUNSELOR}
-            userRole='COUNSELOR' // 임시로 기존 값 사용
-          />
-        </div>
+        <AppointmentCard
+          appointments={MOCK_APPOINTMENTS.COUNSELOR}
+          userRole='COUNSELOR' // 임시로 기존 값 사용
+        />
 
         {/* 자기 진단 결과 */}
-        <div
-          className='animate-scale-gentle'
-          style={{ animationDelay: '0.3s' }}
-        >
-          <StatisticsCard stats={MOCK_STATS.COUNSELOR} />
-        </div>
+        <StatisticsCard stats={MOCK_STATS.COUNSELOR} />
       </div>
 
       {/* 커뮤니티 활동 및 오늘의 팁 */}
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
         {/* 커뮤니티 활동 */}
-        <div
-          className='animate-scale-gentle'
-          style={{ animationDelay: '0.4s' }}
-        >
-          <CommunityActivity activities={communityActivities} />
-        </div>
+        <CommunityActivity activities={communityActivities} />
         {/* 오늘의 팁 */}
-        <div
-          className='animate-scale-gentle'
-          style={{ animationDelay: '0.5s' }}
-        >
-          <DailyTips tips={DAILY_TIPS.COUNSELOR} userRole='COUNSELOR' />{' '}
-          {/* 임시로 기존 값 사용 */}
-        </div>
+        <DailyTips tips={DAILY_TIPS.COUNSELOR} userRole='COUNSELOR' />{' '}
+        {/* 임시로 기존 값 사용 */}
       </div>
     </div>
   );
