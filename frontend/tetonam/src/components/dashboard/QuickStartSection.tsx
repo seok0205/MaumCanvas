@@ -1,5 +1,5 @@
 import type { QuickAction } from '@/types/dashboard';
-import { BarChart3, BookOpen, Calendar, Heart, Users } from 'lucide-react';
+import { BookOpen, Calendar, Heart, MessageSquare, Users } from 'lucide-react';
 import { QuickStartCard } from './QuickStartCard';
 
 interface QuickStartSectionProps {
@@ -12,7 +12,7 @@ const getIcon = (title: string) => {
   const iconMap = {
     '내 일정 관리하기': Calendar,
     '학생 상담 시작하기': Users,
-    커뮤니티: BarChart3,
+    커뮤니티: MessageSquare,
     '상담 예약하기': Heart,
     '내 마음 진단하기': BookOpen,
   };
