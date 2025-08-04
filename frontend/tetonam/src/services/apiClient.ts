@@ -1,3 +1,4 @@
+import { AUTH_CONSTANTS } from '@/constants/auth';
 import { ROUTES } from '@/constants/routes';
 import type {
   ApiResponse,
@@ -14,8 +15,8 @@ import axios, {
 // 상수 정의
 const API_CONSTANTS = {
   DEFAULT_TIMEOUT: 10000,
-  ACCESS_TOKEN_KEY: 'accessToken',
-  REFRESH_TOKEN_KEY: 'refreshToken',
+  ACCESS_TOKEN_KEY: AUTH_CONSTANTS.STORAGE_KEYS.ACCESS_TOKEN,
+  REFRESH_TOKEN_KEY: AUTH_CONSTANTS.STORAGE_KEYS.REFRESH_TOKEN,
   TOKEN_REISSUE_ENDPOINT: '/api/user/token/reissue',
 } as const;
 

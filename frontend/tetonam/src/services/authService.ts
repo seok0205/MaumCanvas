@@ -894,8 +894,15 @@ export const authService = {
 
   // 로그아웃
   logout: (): void => {
+    // 모든 가능한 토큰 키에서 삭제 (안전성 확보)
     localStorage.removeItem(AUTH_CONSTANTS.STORAGE_KEYS.ACCESS_TOKEN);
     localStorage.removeItem(AUTH_CONSTANTS.STORAGE_KEYS.REFRESH_TOKEN);
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+
+    // 추가적인 인증 관련 데이터도 정리
+    localStorage.removeItem('auth-storage');
+    sessionStorage.clear(); // 세션 스토리지도 정리
   },
 
   // 토큰 확인
