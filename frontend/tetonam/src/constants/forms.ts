@@ -18,6 +18,11 @@ export const FORM_CONSTANTS = {
     NICKNAME_MAX_LENGTH: 10,
     NICKNAME_PATTERN: /^[가-힣a-zA-Z0-9]+$/,
     PHONE_MIN_LENGTH: 10,
+    PHONE_MAX_LENGTH: 13,
+    // 한국 휴대폰 번호 패턴 (하이픈 포함/미포함 모두 허용)
+    PHONE_PATTERN: /^(01[016789])-?(\d{3,4})-?(\d{4})$/,
+    // 하이픈 제거 후 순수 숫자만 검증하는 패턴
+    PHONE_NUMBER_ONLY_PATTERN: /^01[016789]\d{7,8}$/,
     ORGANIZATION_MIN_LENGTH: 5,
     KOREAN_PATTERN: /^[가-힣]+$/,
   },
@@ -32,7 +37,10 @@ export const FORM_MESSAGES = {
     PASSWORD_MAX: '비밀번호는 15자 이하여야 합니다',
     PASSWORD_PATTERN: '영문, 숫자, 특수문자를 포함해야 합니다',
     PASSWORD_MISMATCH: '비밀번호가 일치하지 않습니다',
-    PHONE_MIN: '올바른 휴대폰 번호를 입력해주세요',
+    PHONE_MIN: '휴대폰 번호는 10자 이상 입력해주세요',
+    PHONE_MAX: '휴대폰 번호는 13자 이하여야 합니다',
+    PHONE_INVALID: '올바른 휴대폰 번호 형식을 입력해주세요 (예: 010-1234-5678)',
+    PHONE_PATTERN: '010, 011, 016, 017, 018, 019로 시작하는 번호를 입력해주세요',
     NICKNAME_MIN: '닉네임은 2자 이상 입력해주세요',
     NICKNAME_MAX: '닉네임은 10자 이하여야 합니다',
     NICKNAME_PATTERN: '닉네임은 한글(완성형), 영문, 숫자만 사용 가능합니다',

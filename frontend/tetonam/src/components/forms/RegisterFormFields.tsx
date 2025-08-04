@@ -13,6 +13,7 @@ import {
 import { Button } from '@/components/ui/interactive/button';
 import { Label } from '@/components/ui/primitives/label';
 import { FORM_CONSTANTS } from '@/constants/forms';
+import { formatPhoneInput } from '@/utils/phoneUtils';
 
 // Zod 스키마에서 타입 추론
 const registerSchema = z
@@ -26,9 +27,23 @@ const registerSchema = z
       .min(FORM_CONSTANTS.VALIDATION.ORGANIZATION_MIN_LENGTH)
       .regex(FORM_CONSTANTS.VALIDATION.KOREAN_PATTERN),
     birthDate: z.string().min(1),
-    email: z.string().email(),
+    email: z.email(),
     emailVerificationCode: z.string().optional(),
-    phone: z.string().min(FORM_CONSTANTS.VALIDATION.PHONE_MIN_LENGTH),
+    phone: z
+      .string()
+      .min(FORM_CONSTANTS.VALIDATION.PHONE_MIN_LENGTH)
+      .max(FORM_CONSTANTS.VALIDATION.PHONE_MAX_LENGTH)
+      .refine(
+        value => {
+          const cleaned = value.replace(/-/g, '');
+          return FORM_CONSTANTS.VALIDATION.PHONE_NUMBER_ONLY_PATTERN.test(
+            cleaned
+          );
+        },
+        {
+          message: '올바른 휴대폰 번호를 입력해주세요',
+        }
+      ),
     password: z.string(),
     confirmPassword: z.string(),
     gender: z.string().min(1),
@@ -186,29 +201,51 @@ export const PhoneField = ({
   form,
 }: {
   form: UseFormReturn<RegisterFormData>;
-}) => (
-  <div className='space-y-2'>
-    <Label htmlFor='phone' className='text-foreground font-medium'>
-      휴대폰
-    </Label>
-    <div className='relative'>
-      <Phone className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4' />
-      <Input
-        {...form.register('phone')}
-        placeholder='010-1234-5678'
-        className='pl-10 bg-background/50 border-border focus:border-primary'
-        aria-describedby={
-          form.formState.errors['phone'] ? 'phone-error' : undefined
-        }
-      />
+}) => {
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const formattedValue = formatPhoneInput(value);
+
+    // 포맷팅된 값으로 필드 업데이트
+    form.setValue('phone', formattedValue, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  };
+
+  return (
+    <div className='space-y-2'>
+      <Label htmlFor='phone' className='text-foreground font-medium'>
+        휴대폰
+      </Label>
+      <div className='relative'>
+        <Phone className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4' />
+        <Input
+          {...form.register('phone')}
+          id='phone'
+          type='tel'
+          placeholder='010-1234-5678'
+          className='pl-10 bg-background/50 border-border focus:border-primary'
+          onChange={handlePhoneChange}
+          maxLength={13}
+          aria-describedby={
+            form.formState.errors['phone'] ? 'phone-error' : 'phone-help'
+          }
+          aria-invalid={!!form.formState.errors['phone']}
+        />
+      </div>
+      {form.formState.errors['phone'] ? (
+        <p id='phone-error' className='text-destructive text-sm' role='alert'>
+          {form.formState.errors['phone']?.message}
+        </p>
+      ) : (
+        <p id='phone-help' className='text-muted-foreground text-xs'>
+          하이픈(-)은 자동으로 추가됩니다
+        </p>
+      )}
     </div>
-    {form.formState.errors['phone'] && (
-      <p id='phone-error' className='text-destructive text-sm'>
-        {form.formState.errors['phone']?.message}
-      </p>
-    )}
-  </div>
-);
+  );
+};
 
 export const GenderField = ({
   form,

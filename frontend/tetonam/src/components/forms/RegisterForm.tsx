@@ -64,9 +64,24 @@ const registerSchema = z
       message: FORM_MESSAGES.VALIDATION.EMAIL_INVALID,
     }),
     emailVerificationCode: z.string().optional(),
-    phone: z.string().min(FORM_CONSTANTS.VALIDATION.PHONE_MIN_LENGTH, {
-      message: FORM_MESSAGES.VALIDATION.PHONE_MIN,
-    }),
+    phone: z
+      .string()
+      .min(FORM_CONSTANTS.VALIDATION.PHONE_MIN_LENGTH, {
+        message: FORM_MESSAGES.VALIDATION.PHONE_MIN,
+      })
+      .max(FORM_CONSTANTS.VALIDATION.PHONE_MAX_LENGTH, {
+        message: FORM_MESSAGES.VALIDATION.PHONE_MAX,
+      })
+      .refine(
+        (value) => {
+          // 하이픈 제거 후 패턴 검증
+          const cleaned = value.replace(/-/g, '');
+          return FORM_CONSTANTS.VALIDATION.PHONE_NUMBER_ONLY_PATTERN.test(cleaned);
+        },
+        {
+          message: FORM_MESSAGES.VALIDATION.PHONE_PATTERN,
+        }
+      ),
     password: z
       .string()
       .min(FORM_CONSTANTS.PASSWORD.MIN_LENGTH, {
