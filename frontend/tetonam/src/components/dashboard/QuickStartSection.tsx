@@ -7,32 +7,33 @@ interface QuickStartSectionProps {
   userRole: 'COUNSELOR' | 'USER';
 }
 
+// 컴포넌트 외부로 이동하여 캐싱 처리 제거
+const getIcon = (title: string) => {
+  const iconMap = {
+    '내 일정 관리하기': Calendar,
+    '학생 상담 시작하기': Users,
+    커뮤니티: BarChart3,
+    '상담 예약하기': Heart,
+    '내 마음 진단하기': BookOpen,
+  };
+  return iconMap[title as keyof typeof iconMap] || Users;
+};
+
+const getIconStyles = (index: number) => {
+  const styles = [
+    { bg: 'bg-mint/20', color: 'text-mint-dark' },
+    { bg: 'bg-yellow/20', color: 'text-yellow-dark' },
+    { bg: 'bg-light-blue/20', color: 'text-light-blue-dark' },
+    { bg: 'bg-lilac/20', color: 'text-lilac-dark' },
+    { bg: 'bg-peach/20', color: 'text-peach-dark' },
+  ] as const;
+  return styles[index % styles.length]!;
+};
+
 export const QuickStartSection = ({
   actions,
   userRole,
 }: QuickStartSectionProps) => {
-  const getIcon = (title: string) => {
-    const iconMap = {
-      '내 일정 관리하기': Calendar,
-      '학생 상담 시작하기': Users,
-      커뮤니티: BarChart3,
-      '상담 예약하기': Heart,
-      '내 마음 진단하기': BookOpen,
-    };
-    return iconMap[title as keyof typeof iconMap] || Users;
-  };
-
-  const getIconStyles = (index: number) => {
-    const styles = [
-      { bg: 'bg-mint/20', color: 'text-mint-dark' },
-      { bg: 'bg-yellow/20', color: 'text-yellow-dark' },
-      { bg: 'bg-light-blue/20', color: 'text-light-blue-dark' },
-      { bg: 'bg-lilac/20', color: 'text-lilac-dark' },
-      { bg: 'bg-peach/20', color: 'text-peach-dark' },
-    ] as const;
-    return styles[index % styles.length]!;
-  };
-
   const handleAction = (action: QuickAction) => {
     // TODO: 실제 액션 구현
     console.log(`Action: ${action.title}`);
