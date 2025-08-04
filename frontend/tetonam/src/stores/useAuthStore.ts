@@ -36,9 +36,9 @@ export const useAuthStore = create<AuthState>()(
           try {
             const tokenResponse = await authService.login(email, password);
 
-            // role 배열을 주요 역할로 변환
+            // role 배열을 주요 역할로 변환 (안전한 처리)
             const primaryRole =
-              get().selectedUserRole || getPrimaryRole(tokenResponse.roles);
+              get().selectedUserRole || getPrimaryRole(tokenResponse.roles || []);
 
             // 사용자 정보 조회 (JWT 토큰 필요)
             const userInfo = await authService.getMyInfo();
@@ -56,11 +56,16 @@ export const useAuthStore = create<AuthState>()(
               createdAt: new Date().toISOString(),
             };
 
+            // 인증 상태를 먼저 설정하여 다른 컴포넌트들이 인증 상태를 인식할 수 있도록 함
             set({
               user,
               isAuthenticated: true,
               isLoading: false,
             });
+
+            // 인증 완료 후 약간의 지연을 두어 토큰이 완전히 설정되도록 함
+            await new Promise(resolve => setTimeout(resolve, 100));
+
             return true;
           } catch (error) {
             const authError: AuthError = {
