@@ -35,7 +35,7 @@ async def predict_json_s3(url, category):
     # 일단 필터 빼
     # filtered_result = nms_filter(results)
     calc_result = calc(results)
-    stringVal = toString(calc_result)
+    stringVal = toString(calc_result, category)
     return stringVal
 
 ###########################################################################
