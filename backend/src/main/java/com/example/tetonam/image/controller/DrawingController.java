@@ -1,20 +1,21 @@
 package com.example.tetonam.image.controller;
 
 
+import com.example.tetonam.image.dto.testDto;
 import com.example.tetonam.image.service.DrawingService;
 import com.example.tetonam.response.ApiResponse;
 import com.example.tetonam.user.token.JwtTokenProvider;
+import com.example.tetonam.util.WebClientUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,7 +24,20 @@ public class DrawingController {
     private final DrawingService drawingService;
     private final JwtTokenProvider jwtTokenProvider;
 
-    @Operation(summary = "그림 저장 API", description = "4장의 그림을 저장합니다..")
+    private final WebClientUtil webClientUtil;
+    @GetMapping("/aiserver")
+    public ResponseEntity<?> getAi() {
+
+        webClientUtil.get("http://i13e108.p.ssafy.io:8000/", testDto.class)
+                .subscribe(result -> {
+                    System.out.println(result.getMessage());
+                }, error -> {
+                    error.printStackTrace();
+                });
+        return ResponseEntity.ok().body(ApiResponse.onSuccess("hi"));
+    }
+
+        @Operation(summary = "그림 저장 API", description = "4장의 그림을 저장합니다..")
     @PostMapping()
     public ResponseEntity<?> createDrawing(MultipartFile homeImageUrl,MultipartFile treeImageUrl,MultipartFile humanImageFirstUrl,MultipartFile humanImageSecondUrl,@RequestHeader("Authorization") String token){
         String email = jwtTokenProvider.getEmail(token.substring(7));
