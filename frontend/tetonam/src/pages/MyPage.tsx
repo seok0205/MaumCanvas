@@ -80,7 +80,11 @@ export const MyPage = ({}: MyPageProps) => {
       setIsDuplicateChecked(true);
       toast.success('사용 가능한 닉네임입니다.');
     } catch (error) {
-      toast.error('닉네임 중복확인에 실패했습니다.');
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('닉네임 중복확인에 실패했습니다.');
+      }
     } finally {
       setIsDuplicateChecking(false);
     }

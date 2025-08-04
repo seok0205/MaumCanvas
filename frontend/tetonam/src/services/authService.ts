@@ -689,16 +689,13 @@ export const authService = {
     signal?: AbortSignal
   ): Promise<string> => {
     try {
-      const formData = new FormData();
-      formData.append('nickname', nickname);
-
       const response = await apiClient.post<ApiResponse<string>>(
-        AUTH_CONSTANTS.ENDPOINTS.NICKNAME_DUPLICATE_CHECK,
-        formData,
+        `${AUTH_CONSTANTS.ENDPOINTS.NICKNAME_DUPLICATE_CHECK}?nickname=${encodeURIComponent(nickname)}`,
+        null,
         {
           ...(signal && { signal }),
           headers: {
-            'Content-Type': 'multipart/form-data',
+            'Content-Type': 'application/json',
           },
         }
       );
@@ -737,6 +734,10 @@ export const authService = {
         // 백엔드 API 문서의 에러 코드들에 대한 처리
         switch (apiError.code) {
           case 'USER4001': // 사용중인 닉네임 입니다
+            throw new AuthenticationError(
+              apiError.code,
+              '사용중인 닉네임입니다.'
+            );
           case 'COMMON400': // 잘못된 요청입니다
           case 'COMMON401': // 인증이 필요합니다
           case 'COMMON403': // 금지된 요청입니다

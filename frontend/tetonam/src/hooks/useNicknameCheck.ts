@@ -68,14 +68,19 @@ export const useNicknameCheck = (): UseNicknameCheckReturn => {
           return;
         }
 
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : '닉네임 확인에 실패했습니다.';
-        setError(errorMessage);
-        setSuccessMessage(null);
-        setIsNicknameChecked(false);
-        setIsAvailable(false);
+        // AuthenticationError의 경우 구체적인 메시지 사용
+        if (error instanceof Error) {
+          const errorMessage = error.message;
+          setError(errorMessage);
+          setSuccessMessage(null);
+          setIsNicknameChecked(false);
+          setIsAvailable(false);
+        } else {
+          setError('닉네임 확인에 실패했습니다.');
+          setSuccessMessage(null);
+          setIsNicknameChecked(false);
+          setIsAvailable(false);
+        }
       } finally {
         setIsLoading(false);
       }
