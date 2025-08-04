@@ -1,10 +1,13 @@
-import { questionnaireService } from '@/services/questionnaireService';
+import { getAllCategoriesQuestionnaireResults } from '@/services/questionnaireService';
 import type { QuestionnaireCategory, QuestionnaireResult } from '@/types/api';
 import { useQuery } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
 
 const MAX_RETRIES = 5;
 const RETRY_DELAY = 2000; // 2초
+
+// 카테고리별 결과 타입 정의
+type CategoryResults = Record<QuestionnaireCategory, QuestionnaireResult[]>;
 
 export const useQuestionnaireResults = () => {
   const [retryCount, setRetryCount] = useState(0);
@@ -25,12 +28,9 @@ export const useQuestionnaireResults = () => {
     refetch,
   } = useQuery({
     queryKey: ['questionnaire-results', categories],
-    queryFn: async () => {
+    queryFn: async (): Promise<CategoryResults> => {
       try {
-        const results =
-          await questionnaireService.getAllCategoriesQuestionnaireResults(
-            categories
-          );
+        const results = await getAllCategoriesQuestionnaireResults(categories);
         setRetryCount(0); // 성공 시 재시도 카운트 리셋
         return results;
       } catch (error) {
@@ -38,14 +38,14 @@ export const useQuestionnaireResults = () => {
         throw error;
       }
     },
-    retry: (failureCount, error) => {
+    retry: (failureCount, _error) => {
       // 네트워크 에러가 아니거나 최대 재시도 횟수를 초과한 경우 재시도하지 않음
       if (failureCount >= MAX_RETRIES) {
         return false;
       }
 
       // 2초 후 재시도
-      return new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+      return true;
     },
     retryDelay: RETRY_DELAY,
     staleTime: 5 * 60 * 1000, // 5분
