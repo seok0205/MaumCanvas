@@ -26,13 +26,14 @@ public class DrawingController {
     @Operation(summary = "그림 저장 API", description = "4장의 그림을 저장합니다..")
     @PostMapping()
     public ResponseEntity<?> createDrawing(MultipartFile homeImageUrl,MultipartFile treeImageUrl,MultipartFile humanImageFirstUrl,MultipartFile humanImageSecondUrl,@RequestHeader("Authorization") String token){
+        String email = jwtTokenProvider.getEmail(token.substring(7));
 
         List<MultipartFile> multipartFileList=new ArrayList<>();
         multipartFileList.add(homeImageUrl); // 0은 home
         multipartFileList.add(treeImageUrl); // 1은 tree
         multipartFileList.add(humanImageFirstUrl); //2은 human
         multipartFileList.add(humanImageSecondUrl); //3은 human2
-        String email = jwtTokenProvider.getEmail(token.substring(7));
+
         String result=drawingService.createDrawing(email,multipartFileList);
         return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
     }
