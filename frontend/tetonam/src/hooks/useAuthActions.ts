@@ -1,18 +1,21 @@
 import type { UserRole } from '@/constants/userRoles';
 import { useToast } from '@/hooks/use-toast';
+import { authService } from '@/services/authService';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { RegisterCredentials } from '@/types/api';
+import type { User } from '@/types/user';
 import { useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface UseAuthActionsReturn {
   login: (email: string, password: string) => Promise<boolean>;
   register: (userData: RegisterCredentials) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
   selectUserRole: (userRole: UserRole) => void;
   // 인증 상태 기반 API 호출 관리
   isAuthenticated: boolean;
   isLoading: boolean;
-  user: any;
+  user: User | null;
 }
 
 // 인증 관련 비즈니스 로직을 분리한 커스텀 훅
@@ -27,6 +30,7 @@ export const useAuthActions = (): UseAuthActionsReturn => {
     user,
   } = useAuthStore();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleLogin = useCallback(
     async (email: string, password: string): Promise<boolean> => {
@@ -93,19 +97,38 @@ export const useAuthActions = (): UseAuthActionsReturn => {
     [register, toast]
   );
 
-  // 단순한 동기 함수는 useCallback 불필요
-  const handleLogout = () => {
-    logout();
-    toast({
-      title: '로그아웃',
-      description: '성공적으로 로그아웃되었습니다.',
-    });
-  };
+  // 로그아웃 핸들러 - 에러 처리 및 비동기 처리 포함
+  const handleLogout = useCallback(async () => {
+    try {
+      // localStorage에서 토큰 삭제
+      authService.logout();
+      // Zustand 상태 초기화
+      logout();
 
-  // 단순한 상태 설정 함수는 useCallback 불필요
-  const selectUserRole = (userRole: UserRole) => {
-    setSelectedUserRole(userRole);
-  };
+      toast({
+        title: '로그아웃',
+        description: '성공적으로 로그아웃되었습니다.',
+      });
+
+      // React Router를 사용한 네비게이션
+      navigate('/login');
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
+      toast({
+        title: '로그아웃 실패',
+        description: '로그아웃 중 오류가 발생했습니다.',
+        variant: 'destructive',
+      });
+    }
+  }, [logout, navigate, toast]);
+
+  // 사용자 역할 선택 핸들러
+  const selectUserRole = useCallback(
+    (userRole: UserRole) => {
+      setSelectedUserRole(userRole);
+    },
+    [setSelectedUserRole]
+  );
 
   return {
     login: handleLogin,

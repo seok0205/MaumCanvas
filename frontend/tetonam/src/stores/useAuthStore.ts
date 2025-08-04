@@ -1,4 +1,3 @@
-import { ROUTES } from '@/constants/routes';
 import type { UserRole } from '@/constants/userRoles';
 import { authService } from '@/services/authService';
 import type { AuthError } from '@/types/auth';
@@ -38,7 +37,8 @@ export const useAuthStore = create<AuthState>()(
 
             // role 배열을 주요 역할로 변환 (안전한 처리)
             const primaryRole =
-              get().selectedUserRole || getPrimaryRole(tokenResponse.roles || []);
+              get().selectedUserRole ||
+              getPrimaryRole(tokenResponse.roles || []);
 
             // 사용자 정보 조회 (JWT 토큰 필요)
             const userInfo = await authService.getMyInfo();
@@ -118,11 +118,11 @@ export const useAuthStore = create<AuthState>()(
           set({
             user: null,
             isAuthenticated: false,
+            hasCompletedOnboarding: false,
             selectedUserRole: null,
             error: null,
           });
-          // 로그아웃 후 로그인 페이지로 이동
-          window.location.href = ROUTES.LOGIN;
+          // 네비게이션은 useAuthActions에서 처리
         },
       }),
       {
