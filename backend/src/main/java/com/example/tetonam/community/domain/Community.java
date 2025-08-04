@@ -18,7 +18,7 @@ public class Community {
 
     private String title;
 
-    @Column(columnDefinition = "TEXT")      // content 컬럼을 긴 글로 저장
+    @Lob      // content 컬럼을 긴 글로 저장
     private String content;
 
     @Enumerated(EnumType.STRING)
