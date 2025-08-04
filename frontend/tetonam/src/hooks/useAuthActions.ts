@@ -99,11 +99,17 @@ export const useAuthActions = (): UseAuthActionsReturn => {
 
   // 로그아웃 핸들러 - 에러 처리 및 비동기 처리 포함
   const handleLogout = useCallback(async () => {
+    console.log('🚪 useAuthActions.handleLogout() 호출됨');
     try {
       // localStorage에서 토큰 삭제
+      console.log('🗑️ authService.logout() 호출 전');
       authService.logout();
+      console.log('🗑️ authService.logout() 호출 후');
+
       // Zustand 상태 초기화
+      console.log('🔄 Zustand logout() 호출 전');
       logout();
+      console.log('🔄 Zustand logout() 호출 후');
 
       toast({
         title: '로그아웃',
@@ -111,6 +117,7 @@ export const useAuthActions = (): UseAuthActionsReturn => {
       });
 
       // React Router를 사용한 네비게이션
+      console.log('🧭 navigate("/login") 호출');
       navigate('/login');
     } catch (error) {
       console.error('로그아웃 실패:', error);

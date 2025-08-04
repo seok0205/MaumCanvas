@@ -8,7 +8,7 @@ import {
   SidebarTrigger,
 } from '@/components/ui/navigation/sidebar';
 import { getUserRoleLabel } from '@/constants/userRoles';
-import { useAuthStore } from '@/stores/useAuthStore';
+import { useAuthActions } from '@/hooks/useAuthActions';
 import { getPrimaryRole } from '@/utils/userRoleMapping';
 import { AlertCircle, Heart, LogOut, User, X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
@@ -23,7 +23,7 @@ interface DashboardHeaderProps {
 }
 
 const DashboardHeader = ({ user }: DashboardHeaderProps) => {
-  const { logout } = useAuthStore();
+  const { logout } = useAuthActions();
   const navigate = useNavigate();
   const [logoutError, setLogoutError] = useState<string | null>(null);
 
