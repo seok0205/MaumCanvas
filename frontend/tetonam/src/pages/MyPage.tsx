@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
+import { PasswordChangeDialog } from '@/components/forms/PasswordChangeDialog';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { Input } from '@/components/ui/forms/input';
 import { Button } from '@/components/ui/interactive/button';
@@ -20,16 +21,24 @@ import {
   DialogTrigger,
 } from '@/components/ui/overlay/dialog';
 import { Label } from '@/components/ui/primitives/label';
+import { useUserInfo } from '@/hooks/useUserInfo';
 import { authService } from '@/services/authService';
-import { UserInfoResponse } from '@/types/api';
-import { ArrowLeft, Edit, Lock, Save, X } from 'lucide-react';
+import {
+  AlertCircle,
+  ArrowLeft,
+  Edit,
+  Lock,
+  RefreshCw,
+  Save,
+  X,
+} from 'lucide-react';
 
 interface MyPageProps {}
 
 export const MyPage = ({}: MyPageProps) => {
   const navigate = useNavigate();
-  const [userInfo, setUserInfo] = useState<UserInfoResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { userInfo, isLoading, error, retryCount, maxRetries, refetch } =
+    useUserInfo();
   const [isEditing, setIsEditing] = useState(false);
   const [nickname, setNickname] = useState('');
   const [originalNickname, setOriginalNickname] = useState('');
@@ -37,25 +46,18 @@ export const MyPage = ({}: MyPageProps) => {
   const [isDuplicateChecked, setIsDuplicateChecked] = useState(false);
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
 
-  // 사용자 정보 로드
-  const loadUserInfo = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const data = await authService.getMyInfo();
-      setUserInfo(data);
-      setNickname(data.nickname);
-      setOriginalNickname(data.nickname);
-    } catch (error) {
-      toast.error('사용자 정보를 불러오는데 실패했습니다.');
-      console.error('Failed to load user info:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
+  // 사용자 정보가 로드되면 닉네임 설정
   useEffect(() => {
-    loadUserInfo();
-  }, [loadUserInfo]);
+    if (userInfo) {
+      setNickname(userInfo.nickname);
+      setOriginalNickname(userInfo.nickname);
+    }
+  }, [userInfo]);
+
+  // 새로고침 핸들러
+  const handleRefresh = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
 
   // 닉네임 변경 감지
   useEffect(() => {
@@ -115,7 +117,8 @@ export const MyPage = ({}: MyPageProps) => {
     navigate('/dashboard');
   };
 
-  if (isLoading) {
+  // 로딩 상태
+  if (isLoading && !userInfo) {
     return (
       <SidebarProvider>
         <div className='flex w-full min-h-screen bg-gradient-warm'>
@@ -123,7 +126,7 @@ export const MyPage = ({}: MyPageProps) => {
           <div className='flex-1 flex items-center justify-center'>
             <div className='text-center'>
               <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4'></div>
-              <p className='text-muted-foreground'>로딩 중...</p>
+              <p className='text-muted-foreground'>내 정보를 불러오는 중...</p>
             </div>
           </div>
         </div>
@@ -131,6 +134,71 @@ export const MyPage = ({}: MyPageProps) => {
     );
   }
 
+  // 네트워크 에러 상태 (재시도 중)
+  if (error && retryCount < maxRetries) {
+    return (
+      <SidebarProvider>
+        <div className='flex w-full min-h-screen bg-gradient-warm'>
+          <AppSidebar />
+          <div className='flex-1 flex items-center justify-center'>
+            <div className='text-center'>
+              <AlertCircle className='w-12 h-12 text-orange-500 mx-auto mb-3' />
+              <p className='text-muted-foreground mb-2'>
+                내 정보를 불러오지 못했습니다
+              </p>
+              <p className='text-sm text-muted-foreground mb-4'>
+                재시도 중... ({retryCount}/{maxRetries})
+              </p>
+              <div className='flex items-center justify-center space-x-2'>
+                <RefreshCw className='w-4 h-4 animate-spin text-muted-foreground' />
+                <span className='text-sm text-muted-foreground'>
+                  자동 재시도 중
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </SidebarProvider>
+    );
+  }
+
+  // 최종 에러 상태 (재시도 실패)
+  if (error && retryCount >= maxRetries) {
+    return (
+      <SidebarProvider>
+        <div className='flex w-full min-h-screen bg-gradient-warm'>
+          <AppSidebar />
+          <div className='flex-1 flex items-center justify-center'>
+            <div className='text-center'>
+              <AlertCircle className='w-12 h-12 text-red-500 mx-auto mb-3' />
+              <p className='text-muted-foreground mb-2'>
+                내 정보를 불러오지 못했습니다
+              </p>
+              <p className='text-sm text-muted-foreground mb-4'>
+                네트워크 연결을 확인하고 다시 시도해주세요
+              </p>
+              <div className='flex space-x-2 justify-center'>
+                <Button
+                  variant='outline'
+                  size='sm'
+                  onClick={handleRefresh}
+                  className='text-xs'
+                >
+                  <RefreshCw className='w-3 h-3 mr-1' />
+                  다시 시도
+                </Button>
+                <Button onClick={handleBack} className='text-xs'>
+                  대시보드로 돌아가기
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </SidebarProvider>
+    );
+  }
+
+  // 사용자 정보가 없는 경우
   if (!userInfo) {
     return (
       <SidebarProvider>
@@ -185,17 +253,27 @@ export const MyPage = ({}: MyPageProps) => {
                 <CardHeader>
                   <CardTitle className='flex items-center space-x-2'>
                     <span>내 정보</span>
-                    {!isEditing && (
+                    <div className='ml-auto flex space-x-2'>
+                      {!isEditing && (
+                        <Button
+                          variant='ghost'
+                          size='sm'
+                          onClick={() => setIsEditing(true)}
+                        >
+                          <Edit className='h-4 w-4 mr-2' />
+                          수정
+                        </Button>
+                      )}
                       <Button
-                        variant='ghost'
+                        variant='outline'
                         size='sm'
-                        onClick={() => setIsEditing(true)}
-                        className='ml-auto'
+                        onClick={handleRefresh}
+                        className='text-xs'
                       >
-                        <Edit className='h-4 w-4 mr-2' />
-                        수정
+                        <RefreshCw className='w-3 h-3 mr-1' />
+                        새로고침
                       </Button>
-                    )}
+                    </div>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className='space-y-4'>
@@ -369,81 +447,5 @@ export const MyPage = ({}: MyPageProps) => {
         </div>
       </div>
     </SidebarProvider>
-  );
-};
-
-// 비밀번호 변경 다이얼로그 컴포넌트
-interface PasswordChangeDialogProps {
-  onClose: () => void;
-}
-
-const PasswordChangeDialog = ({ onClose }: PasswordChangeDialogProps) => {
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (newPassword !== confirmPassword) {
-      toast.error('새 비밀번호가 일치하지 않습니다.');
-      return;
-    }
-
-    if (newPassword.length < 8) {
-      toast.error('비밀번호는 8자 이상이어야 합니다.');
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      await authService.updateMyPassword(newPassword);
-
-      toast.success('비밀번호가 변경되었습니다.');
-      onClose();
-    } catch (error) {
-      toast.error('비밀번호 변경에 실패했습니다.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className='space-y-4'>
-      <div className='space-y-2'>
-        <Label htmlFor='newPassword'>새 비밀번호</Label>
-        <Input
-          id='newPassword'
-          type='password'
-          value={newPassword}
-          onChange={e => setNewPassword(e.target.value)}
-          required
-          minLength={8}
-        />
-        <p className='text-xs text-muted-foreground'>
-          비밀번호는 8자 이상이어야 합니다.
-        </p>
-      </div>
-
-      <div className='space-y-2'>
-        <Label htmlFor='confirmPassword'>새 비밀번호 확인</Label>
-        <Input
-          id='confirmPassword'
-          type='password'
-          value={confirmPassword}
-          onChange={e => setConfirmPassword(e.target.value)}
-          required
-        />
-      </div>
-
-      <div className='flex justify-end space-x-2 pt-4'>
-        <Button type='button' variant='outline' onClick={onClose}>
-          취소
-        </Button>
-        <Button type='submit' disabled={isLoading}>
-          {isLoading ? '변경 중...' : '변경'}
-        </Button>
-      </div>
-    </form>
   );
 };
