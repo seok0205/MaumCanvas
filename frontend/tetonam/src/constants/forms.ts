@@ -23,7 +23,6 @@ export const FORM_CONSTANTS = {
     PHONE_PATTERN: /^(01[016789])-?(\d{3,4})-?(\d{4})$/,
     // 하이픈 제거 후 순수 숫자만 검증하는 패턴
     PHONE_NUMBER_ONLY_PATTERN: /^01[016789]\d{7,8}$/,
-    ORGANIZATION_MIN_LENGTH: 5,
     KOREAN_PATTERN: /^[가-힣]+$/,
   },
 } as const;
@@ -44,8 +43,6 @@ export const FORM_MESSAGES = {
     NICKNAME_MIN: '닉네임은 2자 이상 입력해주세요',
     NICKNAME_MAX: '닉네임은 10자 이하여야 합니다',
     NICKNAME_PATTERN: '닉네임은 한글(완성형), 영문, 숫자만 사용 가능합니다',
-    ORGANIZATION_MIN: '소속은 5자 이상 입력해주세요',
-    ORGANIZATION_KOREAN_ONLY: '소속은 한글로만 입력해주세요',
     BIRTH_DATE_REQUIRED: '생년월일을 입력해주세요',
     BIRTH_DATE_INVALID: '유효한 생년월일을 입력해주세요',
     GENDER_REQUIRED: '성별을 선택해주세요',

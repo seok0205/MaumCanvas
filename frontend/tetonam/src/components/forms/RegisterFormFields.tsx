@@ -1,4 +1,4 @@
-import { Building2, Calendar, Loader2, Phone, User } from 'lucide-react';
+import { Calendar, Loader2, Phone, User } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -21,10 +21,6 @@ const registerSchema = z
     name: z
       .string()
       .min(FORM_CONSTANTS.VALIDATION.NAME_MIN_LENGTH)
-      .regex(FORM_CONSTANTS.VALIDATION.KOREAN_PATTERN),
-    organization: z
-      .string()
-      .min(FORM_CONSTANTS.VALIDATION.ORGANIZATION_MIN_LENGTH)
       .regex(FORM_CONSTANTS.VALIDATION.KOREAN_PATTERN),
     birthDate: z.string().min(1),
     email: z.email(),
@@ -89,37 +85,6 @@ export const NameField = ({
     {form.formState.errors['name'] && (
       <p id='name-error' className='text-destructive text-sm'>
         {form.formState.errors['name']?.message}
-      </p>
-    )}
-  </div>
-);
-
-export const OrganizationField = ({
-  form,
-}: {
-  form: UseFormReturn<RegisterFormData>;
-}) => (
-  <div className='space-y-2'>
-    <Label htmlFor='organization' className='text-foreground font-medium'>
-      소속
-    </Label>
-    <div className='relative'>
-      <Building2 className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4' />
-      <Input
-        {...form.register('organization')}
-        placeholder='학교명 또는 기관명 (한글만, 5자 이상)'
-        className='pl-10 bg-background/50 border-border focus:border-primary'
-        pattern='[가-힣]+'
-        aria-describedby={
-          form.formState.errors['organization']
-            ? 'organization-error'
-            : undefined
-        }
-      />
-    </div>
-    {form.formState.errors['organization'] && (
-      <p id='organization-error' className='text-destructive text-sm'>
-        {form.formState.errors['organization']?.message}
       </p>
     )}
   </div>

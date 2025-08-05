@@ -52,14 +52,6 @@ const registerSchema = z
       .regex(FORM_CONSTANTS.VALIDATION.KOREAN_PATTERN, {
         message: FORM_MESSAGES.VALIDATION.NAME_KOREAN_ONLY,
       }),
-    organization: z
-      .string()
-      .min(FORM_CONSTANTS.VALIDATION.ORGANIZATION_MIN_LENGTH, {
-        message: FORM_MESSAGES.VALIDATION.ORGANIZATION_MIN,
-      })
-      .regex(FORM_CONSTANTS.VALIDATION.KOREAN_PATTERN, {
-        message: FORM_MESSAGES.VALIDATION.ORGANIZATION_KOREAN_ONLY,
-      }),
     birthDate: z.string().min(1, {
       message: FORM_MESSAGES.VALIDATION.BIRTH_DATE_REQUIRED,
     }),
@@ -240,7 +232,6 @@ export const RegisterForm = () => {
     mode: 'onBlur',
     defaultValues: {
       name: '',
-      organization: '',
       email: '',
       emailVerificationCode: '',
       phone: '',
