@@ -14,6 +14,22 @@ export default defineConfig(({ mode }) => ({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  assetsInclude: ['**/*.woff2', '**/*.woff'],
+  build: {
+    rollupOptions: {
+      output: {
+        assetFileNames: assetInfo => {
+          if (
+            assetInfo.name?.endsWith('.woff2') ||
+            assetInfo.name?.endsWith('.woff')
+          ) {
+            return 'fonts/[name][extname]';
+          }
+          return 'assets/[name]-[hash][extname]';
+        },
+      },
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',
