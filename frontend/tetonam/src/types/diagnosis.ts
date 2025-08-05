@@ -24,8 +24,8 @@ export interface DiagnosisGridProps {
 }
 
 export type DiagnosisType =
+  | 'drawing'
   | 'ptsd'
   | 'depression'
   | 'anxiety'
-  | 'suicide-risk'
-  | 'drawing';
+  | 'suicide-risk';

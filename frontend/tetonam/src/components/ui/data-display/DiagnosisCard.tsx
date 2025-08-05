@@ -18,6 +18,26 @@ export const DiagnosisCard = ({
     }
   };
 
+  // 카드 색상에 따른 버튼 색상 매핑
+  const getButtonColor = () => {
+    if (category.color.includes('purple')) {
+      return 'bg-purple-500 hover:bg-purple-600 focus:ring-purple-500';
+    }
+    if (category.color.includes('red')) {
+      return 'bg-red-500 hover:bg-red-600 focus:ring-red-500';
+    }
+    if (category.color.includes('blue')) {
+      return 'bg-blue-500 hover:bg-blue-600 focus:ring-blue-500';
+    }
+    if (category.color.includes('green')) {
+      return 'bg-green-500 hover:bg-green-600 focus:ring-green-500';
+    }
+    if (category.color.includes('orange')) {
+      return 'bg-orange-500 hover:bg-orange-600 focus:ring-orange-500';
+    }
+    return 'bg-yellow-500 hover:bg-yellow-600 focus:ring-yellow-500';
+  };
+
   return (
     <div
       className={cn(
@@ -46,7 +66,10 @@ export const DiagnosisCard = ({
       <Button
         onClick={handleStartDiagnosis}
         onKeyDown={handleKeyDown}
-        className='w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2'
+        className={cn(
+          'w-full text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-offset-2',
+          getButtonColor()
+        )}
         aria-label={`${category.title} 진단 시작하기`}
         tabIndex={0}
       >

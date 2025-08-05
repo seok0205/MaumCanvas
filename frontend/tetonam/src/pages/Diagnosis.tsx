@@ -28,7 +28,7 @@ export const Diagnosis = () => {
 
   return (
     <SidebarProvider>
-      <div className='flex w-full min-h-screen bg-gradient-warm'>
+      <div className='flex w-full min-h-screen bg-orange-50/30'>
         <AppSidebar />
 
         <div className='flex flex-1 flex-col'>
