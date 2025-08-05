@@ -557,9 +557,6 @@ export const RegisterForm = () => {
                 <p className='text-green-800 text-sm font-medium'>
                   이메일 인증이 완료되었습니다
                 </p>
-                <p className='text-green-600 text-xs'>
-                  인증된 이메일: {form.watch('email')}
-                </p>
               </div>
             </div>
             <div
