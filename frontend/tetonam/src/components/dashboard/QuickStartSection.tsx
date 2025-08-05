@@ -1,5 +1,6 @@
 import type { QuickAction } from '@/types/dashboard';
 import { BookOpen, Calendar, Heart, MessageSquare, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { QuickStartCard } from './QuickStartCard';
 
 interface QuickStartSectionProps {
@@ -34,9 +35,32 @@ export const QuickStartSection = ({
   actions,
   userRole,
 }: QuickStartSectionProps) => {
+  const navigate = useNavigate();
+
   const handleAction = (action: QuickAction) => {
-    // TODO: 실제 액션 구현
-    console.log(`Action: ${action.title}`);
+    switch (action.title) {
+      case '내 마음 진단하기':
+        navigate('/diagnosis');
+        break;
+      case '상담 예약하기':
+        // TODO: 상담 예약 페이지로 이동
+        console.log('상담 예약 페이지로 이동');
+        break;
+      case '커뮤니티':
+        // TODO: 커뮤니티 페이지로 이동
+        console.log('커뮤니티 페이지로 이동');
+        break;
+      case '내 일정 관리하기':
+        // TODO: 일정 관리 페이지로 이동
+        console.log('일정 관리 페이지로 이동');
+        break;
+      case '학생 상담 시작하기':
+        // TODO: 상담 시작 페이지로 이동
+        console.log('상담 시작 페이지로 이동');
+        break;
+      default:
+        console.log(`Action: ${action.title}`);
+    }
   };
 
   return (
