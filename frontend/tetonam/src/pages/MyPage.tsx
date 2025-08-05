@@ -320,6 +320,12 @@ export const MyPage = ({}: MyPageProps) => {
   const navigate = useNavigate();
   const { userInfo, isLoading, error, refetch } = useUserInfo();
 
+  console.log('📄 [MyPage] 컴포넌트 렌더링:', {
+    userInfo,
+    isLoading,
+    error: error?.message,
+  });
+
   // 뒤로가기 핸들러
   const handleBack = useCallback(() => {
     navigate('/dashboard');
