@@ -428,25 +428,85 @@ export const RegisterForm = () => {
   }, [checkNickname, form]);
 
   // 회원가입 버튼 활성화 조건
-  const isSubmitDisabled =
-    isLoading ||
-    !form.formState.isValid ||
-    !isEmailVerified ||
-    !nicknameVerified ||
-    !selectedSchool ||
-    (form.watch('nickname') !== '' &&
-      form.watch('nickname') !== verifiedNickname);
+  const isSubmitDisabled = useMemo(() => {
+    const isValid = form.formState.isValid;
+    const formNickname = form.watch('nickname');
+    const nicknameMatch = formNickname === verifiedNickname;
+    const nicknameCondition = formNickname !== '' ? nicknameMatch : true;
+
+    const result =
+      isLoading ||
+      !isValid ||
+      !isEmailVerified ||
+      !nicknameVerified ||
+      !selectedSchool ||
+      !nicknameCondition;
+
+    console.group('🔒 [RegisterForm] 버튼 활성화 조건 체크');
+    console.log('⏳ isLoading:', isLoading);
+    console.log('📝 isFormValid:', isValid);
+    console.log('📧 isEmailVerified:', isEmailVerified);
+    console.log('👤 nicknameVerified:', nicknameVerified);
+    console.log('🏫 hasSelectedSchool:', !!selectedSchool);
+    console.log('🏷️ nicknameMatch:', nicknameCondition);
+    console.log('🚨 finalResult (disabled):', result);
+    console.groupEnd();
+
+    return result;
+  }, [
+    form.formState.isValid,
+    isLoading,
+    isEmailVerified,
+    nicknameVerified,
+    selectedSchool,
+    form.watch('nickname'),
+    verifiedNickname,
+  ]);
 
   // 디버깅용: 주요 상태 콘솔 출력 (렌더마다)
   useEffect(() => {
-    console.log('[RegisterForm] formState:', form?.formState);
-    console.log('[RegisterForm] isEmailVerified:', isEmailVerified);
-    console.log('[RegisterForm] nicknameVerified:', nicknameVerified);
-    console.log('[RegisterForm] selectedSchool:', selectedSchool);
-    console.log('[RegisterForm] verifiedNickname:', verifiedNickname);
-    console.log('[RegisterForm] 닉네임:', form?.watch('nickname'));
-    console.log('[RegisterForm] isSubmitDisabled:', isSubmitDisabled);
-  });
+    console.group('🔍 [RegisterForm] 디버깅 정보');
+    console.log('📋 formState:', {
+      defaultValues: form.formState.defaultValues,
+      isDirty: form.formState.isDirty,
+      isValid: form.formState.isValid,
+      errors: form.formState.errors,
+    });
+    console.log('📧 isEmailVerified:', isEmailVerified);
+    console.log('👤 nicknameVerified:', nicknameVerified);
+    console.log('🏫 selectedSchool:', selectedSchool);
+    console.log('✅ verifiedNickname:', verifiedNickname);
+    console.log('🏷️ 현재 닉네임:', form?.watch('nickname'));
+
+    // 모든 필드 값 디버깅
+    const allValues = form.getValues();
+    console.log('📝 모든 필드 값:', allValues);
+    console.groupEnd();
+  }, [
+    form,
+    isEmailVerified,
+    nicknameVerified,
+    selectedSchool,
+    verifiedNickname,
+  ]);
+
+  // 컴포넌트 마운트 시 한 번 실행되는 로그
+  useEffect(() => {
+    console.log('🚀 RegisterForm 컴포넌트가 마운트되었습니다');
+    return () => {
+      console.log('🛑 RegisterForm 컴포넌트가 언마운트됩니다');
+    };
+  }, []);
+
+  // formState가 초기화된 후 한 번만 실행하는 검증 로직
+  useEffect(() => {
+    // 모든 필드를 트리거하여 검증을 활성화
+    const validateAllFields = async () => {
+      await form.trigger();
+    };
+
+    validateAllFields();
+  }, [form]);
 
   return (
     <FormLayout title='회원가입'>
@@ -675,6 +735,9 @@ export const RegisterForm = () => {
           className='w-full bg-primary hover:bg-primary-dark text-primary-foreground py-3 rounded-full shadow-soft font-medium text-lg'
         >
           회원가입
+          {isSubmitDisabled && (
+            <span className='ml-2 text-xs'>(양식을 완성해주세요)</span>
+          )}
         </ApiButton>
       </form>
 
