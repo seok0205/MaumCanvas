@@ -47,6 +47,9 @@ out/
 .DS_Store
 api.md
 
+### Github ###
+.github
+
 ### Node ###
 node_modules/
 npm-debug.log*
