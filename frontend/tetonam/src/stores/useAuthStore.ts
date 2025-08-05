@@ -10,7 +10,7 @@ import { devtools, persist } from 'zustand/middleware';
 export const useAuthStore = create<AuthState>()(
   devtools(
     persist(
-      (set, get) => ({
+      set => ({
         user: null,
         isAuthenticated: false,
         hasCompletedOnboarding: false,
@@ -46,19 +46,11 @@ export const useAuthStore = create<AuthState>()(
             // 사용자 정보 조회 (JWT 토큰 필요)
             const userInfo = await authService.getMyInfo();
 
-            // 백엔드에서 받은 roles가 있으면 해당 역할을 우선 사용
+            // 백엔드에서 받은 실제 roles를 우선 사용
             let finalRole = primaryRole;
             if (userInfo.roles && userInfo.roles.length > 0) {
               const backendPrimaryRole = getPrimaryRole(userInfo.roles);
               finalRole = backendPrimaryRole;
-
-              // JWT 토큰의 역할과 사용자 정보의 역할이 다르면 경고
-              if (backendPrimaryRole !== primaryRole) {
-                console.warn('JWT 토큰과 사용자 정보의 역할이 다릅니다:', {
-                  jwtRole: primaryRole,
-                  userInfoRole: backendPrimaryRole,
-                });
-              }
             }
 
             const user: User = {
@@ -86,12 +78,45 @@ export const useAuthStore = create<AuthState>()(
 
             return true;
           } catch (error) {
+            // 구체적인 에러 타입 확인 및 사용자 친화적 메시지
+            let errorMessage = '로그인에 실패했습니다. 다시 시도해주세요.';
+            let errorCode = 'LOGIN_FAILED';
+
+            if (error instanceof Error) {
+              // 네트워크 에러 처리
+              if (
+                error.message.includes('Network Error') ||
+                error.message.includes('ERR_NETWORK')
+              ) {
+                errorMessage = '네트워크 연결을 확인해주세요.';
+                errorCode = 'NETWORK_ERROR';
+              }
+              // 인증 에러 처리
+              else if (
+                error.message.includes('401') ||
+                error.message.includes('Unauthorized')
+              ) {
+                errorMessage = '이메일 또는 비밀번호가 올바르지 않습니다.';
+                errorCode = 'INVALID_CREDENTIALS';
+              }
+              // 서버 에러 처리
+              else if (
+                error.message.includes('500') ||
+                error.message.includes('Internal Server Error')
+              ) {
+                errorMessage =
+                  '서버에 일시적인 문제가 발생했습니다. 잠시 후 다시 시도해주세요.';
+                errorCode = 'SERVER_ERROR';
+              }
+            }
+
             const authError: AuthError = {
               type: 'authentication',
-              code: 'LOGIN_FAILED',
-              message: '이메일 또는 비밀번호가 올바르지 않습니다.',
+              code: errorCode,
+              message: errorMessage,
               ...(error instanceof Error && { details: error.message }),
             };
+
             set({ error: authError.message, isLoading: false });
             return false;
           }
@@ -102,7 +127,7 @@ export const useAuthStore = create<AuthState>()(
           try {
             const response = await authService.register(userData);
 
-            // 회원가입 성공 시 사용자 정보 생성
+            // 회원가입 성공 시 안전한 사용자 정보 생성
             const user: User = {
               id: response.id.toString(),
               email: userData.email,
@@ -112,20 +137,37 @@ export const useAuthStore = create<AuthState>()(
               phone: userData.phone,
               school: userData.school.name, // school 객체에서 name만 추출
               birthday: userData.birthday,
-              roles: userData.roles as UserRole[], // 타입 캐스팅
+              roles: userData.roles as UserRole[], // 회원가입 시 선택된 역할 사용
               createdAt: new Date().toISOString(),
             };
 
             set({ user, isAuthenticated: true, isLoading: false });
             return true;
           } catch (error) {
-            console.error('회원가입 스토어 에러:', error);
+            // 구체적인 회원가입 에러 처리
+            let errorMessage = '회원가입에 실패했습니다. 다시 시도해주세요.';
+            let errorCode = 'REGISTER_FAILED';
+
+            if (error instanceof Error) {
+              if (error.message.includes('이미 사용 중인 이메일')) {
+                errorMessage = '이미 사용 중인 이메일입니다.';
+                errorCode = 'EMAIL_ALREADY_EXISTS';
+              } else if (error.message.includes('닉네임')) {
+                errorMessage = '이미 사용 중인 닉네임입니다.';
+                errorCode = 'NICKNAME_ALREADY_EXISTS';
+              } else if (error.message.includes('Network Error')) {
+                errorMessage = '네트워크 연결을 확인해주세요.';
+                errorCode = 'NETWORK_ERROR';
+              }
+            }
+
             const authError: AuthError = {
               type: 'validation',
-              code: 'REGISTER_FAILED',
-              message: '회원가입에 실패했습니다. 다시 시도해주세요.',
+              code: errorCode,
+              message: errorMessage,
               ...(error instanceof Error && { details: error.message }),
             };
+
             set({ error: authError.message, isLoading: false });
             // 에러 정보를 보존하여 상위에서 처리할 수 있도록 함
             throw error;
@@ -133,12 +175,14 @@ export const useAuthStore = create<AuthState>()(
         },
 
         logout: () => {
+          // 모든 인증 관련 상태 완전 초기화
           set({
             user: null,
             isAuthenticated: false,
             hasCompletedOnboarding: false,
             selectedUserRole: null,
             error: null,
+            isLoading: false, // 로딩 상태도 초기화
           });
           // 네비게이션은 useAuthActions에서 처리
         },
