@@ -21,7 +21,10 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000, // 5분
-      retry: 1,
+      retry: 3,
+      retryDelay: 2000, // 2초
+      refetchOnWindowFocus: false, // 윈도우 포커스 시 자동 재요청 비활성화
+      refetchOnReconnect: true, // 네트워크 재연결 시 자동 재요청
     },
   },
 });
