@@ -761,6 +761,8 @@ export const authService = {
   // 마이페이지 정보 조회
   getMyInfo: async (signal?: AbortSignal): Promise<UserInfoResponse> => {
     try {
+      console.log('🔍 [getMyInfo] API 요청 시작');
+
       const response = await apiClient.get<ApiResponse<UserInfoResponse>>(
         AUTH_CONSTANTS.ENDPOINTS.MY_INFO,
         {
@@ -771,13 +773,30 @@ export const authService = {
         }
       );
 
+      console.log('📥 [getMyInfo] 전체 Response:', response);
+      console.log('📥 [getMyInfo] Response.data:', response.data);
+      console.log('📥 [getMyInfo] Response.data.result:', response.data.result);
+      console.log(
+        '📥 [getMyInfo] Response.data.isSuccess:',
+        response.data.isSuccess
+      );
+
       if (!response.data.isSuccess || !response.data.result) {
+        console.error('❌ [getMyInfo] API 응답 실패:', {
+          isSuccess: response.data.isSuccess,
+          result: response.data.result,
+          code: response.data.code,
+        });
         throw new AuthenticationError(
           response.data.code || 'USER_INFO_FAILED',
           '사용자 정보 조회에 실패했습니다. 다시 시도해주세요.'
         );
       }
 
+      console.log(
+        '✅ [getMyInfo] API 응답 성공, 반환 데이터:',
+        response.data.result
+      );
       return response.data.result;
     } catch (error) {
       if (error instanceof AuthenticationError) {

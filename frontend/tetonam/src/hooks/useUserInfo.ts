@@ -14,6 +14,8 @@ interface UseUserInfoReturn {
 export const useUserInfo = (): UseUserInfoReturn => {
   const { isAuthenticated } = useAuthStore();
 
+  console.log('🔍 [useUserInfo] 훅 실행, isAuthenticated:', isAuthenticated);
+
   const {
     data: userInfo,
     isLoading,
@@ -21,14 +23,27 @@ export const useUserInfo = (): UseUserInfoReturn => {
     refetch,
   } = useQuery({
     queryKey: ['userInfo'],
-    queryFn: () => authService.getMyInfo(),
+    queryFn: () => {
+      console.log('🔍 [useUserInfo] queryFn 실행');
+      return authService.getMyInfo();
+    },
     enabled: isAuthenticated, // 단순화: user 체크 제거
     staleTime: 5 * 60 * 1000, // 5분
     retry: 3,
     retryDelay: 2000, // 2초
     refetchOnWindowFocus: false, // 윈도우 포커스 시 자동 재요청 비활성화
     // 에러 타입 안전성 개선
-    select: (data: UserInfoResponse) => data,
+    select: (data: UserInfoResponse) => {
+      console.log('📥 [useUserInfo] select 함수에서 받은 데이터:', data);
+      return data;
+    },
+  });
+
+  console.log('📊 [useUserInfo] 훅 상태:', {
+    userInfo,
+    isLoading,
+    error: error?.message,
+    isAuthenticated,
   });
 
   return {
