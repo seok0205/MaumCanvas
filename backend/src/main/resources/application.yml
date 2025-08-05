@@ -42,3 +42,7 @@ cloud:
     stack:
       auto: false
     url: ${S3_URL}
+
+ai:
+  server:
+    url: ${AI_SERVER_URL}

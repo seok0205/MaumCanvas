@@ -1,0 +1,49 @@
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=MYSQL
+    username: sa
+    password:
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        globally_quoted_identifiers: true
+
+mail:
+  username: dummy@gmail.com
+  password: dummy-password
+
+jwt:
+  secret: dGVzdC1qd3Qtc2VjcmV0LXRoaXMtaXMtbG9uZy1lbm91Z2g=
+
+server:
+  address: 0.0.0.0
+  port: 8080
+
+cloud:
+  aws:
+    credentials:
+      access-key: dummy-access-key
+      secret-key: dummy-secret-key
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: tetonam-test
+    stack:
+      auto: false
+    url: https://dummy-s3-url.com
+
+ai:
+  server:
+    url: https://dummy-ai-server.com
