@@ -84,4 +84,13 @@ public class CommunityService {
         }
         communityRepository.deleteById(id);
     }
+
+    @Transactional
+    public Community updatePost(Long id, Community updateCommunity){
+        Community community = communityRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("게시글이 존재하지 않습니다."));
+        community.setTitle(updateCommunity.getTitle());
+        community.setContent(updateCommunity.getContent());
+        community.setUpdatedAt(updateCommunity.getCreatedAt());
+        return communityRepository.save(community);
+    }
 }
