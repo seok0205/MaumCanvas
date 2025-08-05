@@ -482,7 +482,7 @@ export const RegisterForm = () => {
         </div>
 
         {/* 이메일 인증 코드 */}
-        {isEmailSent && (
+        {isEmailSent && !isEmailVerified && (
           <div className='space-y-2'>
             <Label
               htmlFor='emailVerificationCode'
@@ -542,9 +542,32 @@ export const RegisterForm = () => {
               aria-live='polite'
               className='sr-only'
             >
-              {isEmailVerified && '이메일 인증이 완료되었습니다.'}
               {isEmailBlocked &&
                 '인증이 차단되었습니다. 페이지를 새로고침 후 다시 시도해주세요.'}
+            </div>
+          </div>
+        )}
+
+        {/* 이메일 인증 성공 상태 표시 */}
+        {isEmailSent && isEmailVerified && (
+          <div className='space-y-2'>
+            <div className='flex items-center space-x-2 p-3 bg-green-50 border border-green-200 rounded-lg'>
+              <CheckCircle className='w-5 h-5 text-green-600 flex-shrink-0' />
+              <div className='flex-1'>
+                <p className='text-green-800 text-sm font-medium'>
+                  이메일 인증이 완료되었습니다
+                </p>
+                <p className='text-green-600 text-xs'>
+                  인증된 이메일: {form.watch('email')}
+                </p>
+              </div>
+            </div>
+            <div
+              id='verification-success-status'
+              aria-live='polite'
+              className='sr-only'
+            >
+              이메일 인증이 완료되었습니다. 인증된 이메일: {form.watch('email')}
             </div>
           </div>
         )}
