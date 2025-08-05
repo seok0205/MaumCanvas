@@ -22,6 +22,7 @@ import {
 import { Label } from '@/components/ui/primitives/label';
 import { useNicknameEdit } from '@/hooks/useNicknameEdit';
 import { useUserInfo } from '@/hooks/useUserInfo';
+import { mapGenderToKorean } from '@/utils/genderMapping';
 import {
   AlertCircle,
   ArrowLeft,
@@ -250,7 +251,11 @@ const MyPageForm = React.memo<MyPageFormProps>(({ userInfo }) => {
                 성별
               </Label>
               <div className='md:col-span-2'>
-                <Input value={userInfo.gender} disabled className='bg-muted' />
+                <Input
+                  value={mapGenderToKorean(userInfo.gender)}
+                  disabled
+                  className='bg-muted'
+                />
               </div>
             </div>
 
