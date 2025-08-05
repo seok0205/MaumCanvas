@@ -9,6 +9,13 @@ export interface SchoolSearchResponse {
   result: School[];
 }
 
+// 구체적인 에러 타입 정의
+export interface SchoolSearchError {
+  code: string;
+  message: string;
+  originalError?: unknown;
+}
+
 export interface SchoolSearchInputProps {
   value: string;
   onChange: (value: string) => void;
@@ -23,5 +30,6 @@ export interface SchoolSearchResultsProps {
   onSelect: (school: School) => void;
   query: string;
   isLoading?: boolean;
+  error?: SchoolSearchError | null;
   className?: string;
 }

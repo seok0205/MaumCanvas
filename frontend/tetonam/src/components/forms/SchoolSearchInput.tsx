@@ -16,7 +16,6 @@ export const SchoolSearchInput = React.memo<SchoolSearchInputProps>(
     const [isOpen, setIsOpen] = useState(false);
     const [focusedIndex, setFocusedIndex] = useState(-1);
     const inputRef = useRef<HTMLInputElement>(null);
-    const resultsRef = useRef<HTMLDivElement>(null);
 
     const debouncedQuery = useDebounce(value, 300);
     const {
@@ -62,7 +61,7 @@ export const SchoolSearchInput = React.memo<SchoolSearchInputProps>(
             break;
           case 'Enter':
             e.preventDefault();
-            if (focusedIndex >= 0) {
+            if (focusedIndex >= 0 && schools[focusedIndex]) {
               handleSelect(schools[focusedIndex]);
             }
             break;
@@ -120,17 +119,20 @@ export const SchoolSearchInput = React.memo<SchoolSearchInputProps>(
           aria-label='학교 검색'
         />
 
+        {/* 에러 상태 표시 - React Query 디버그 메시지 대신 사용자 친화적인 메시지 */}
         {error && (
-          <div className='mt-1 text-sm text-red-600'>{error.message}</div>
+          <div className='mt-1 text-sm text-red-600'>
+            검색 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.
+          </div>
         )}
 
         {isOpen && (
           <SchoolSearchResults
-            ref={resultsRef}
             schools={schools}
             onSelect={handleSelect}
             query={debouncedQuery}
             isLoading={isLoading}
+            error={error}
             className='mt-1'
           />
         )}

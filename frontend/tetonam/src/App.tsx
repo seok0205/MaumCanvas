@@ -29,6 +29,10 @@ const queryClient = new QueryClient({
       refetchOnReconnect: false, // 네트워크 재연결 시 자동 재요청 비활성화 (깜빡거림 방지)
       refetchOnMount: true, // 컴포넌트 마운트 시 재요청 활성화
     },
+    mutations: {
+      retry: 1,
+      retryDelay: 1000,
+    },
   },
 });
 
