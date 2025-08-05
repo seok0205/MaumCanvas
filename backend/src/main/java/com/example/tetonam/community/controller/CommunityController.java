@@ -42,4 +42,11 @@ public class CommunityController {
         Long postId = communityService.writePost(dto);
         return ResponseEntity.ok(postId);
     }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "글 삭제 API", description = "등록된 글을 삭제합니다")
+    public ResponseEntity<Void> deletePost(@PathVariable Long id){
+        communityService.deletePost(id);
+        return ResponseEntity.noContent().build();
+    }
 }

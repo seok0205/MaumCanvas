@@ -76,4 +76,12 @@ public class CommunityService {
         Community saved = communityRepository.save(community);
         return saved.getId();
     }
+
+    @Transactional
+    public void deletePost(Long id){
+        if (!communityRepository.existsById(id)){
+            throw new IllegalArgumentException("게시글이 존재하지 않습니다");
+        }
+        communityRepository.deleteById(id);
+    }
 }
