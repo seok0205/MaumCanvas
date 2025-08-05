@@ -1,4 +1,4 @@
-// ✅ TailwindCSS 스타일 추상화
+// TailwindCSS 스타일 추상화
 export const questionnaireStyles = {
   // 레이아웃 스타일
   container: 'max-w-4xl mx-auto',
@@ -48,7 +48,32 @@ export const questionnaireStyles = {
   },
 } as const;
 
-// ✅ 접근성 속성들
+// 동적 스타일 유틸리티 함수
+export const getProgressBarWidth = (percentage: number): string => {
+  // TailwindCSS width 클래스로 변환
+  if (percentage <= 0) return 'w-0';
+  if (percentage >= 100) return 'w-full';
+
+  // 10% 단위로 반올림하여 안전한 Tailwind 클래스 사용
+  const roundedPercentage = Math.round(percentage / 10) * 10;
+
+  const widthClasses: Record<number, string> = {
+    10: 'w-1/12',
+    20: 'w-1/6',
+    30: 'w-1/4',
+    40: 'w-2/5',
+    50: 'w-1/2',
+    60: 'w-3/5',
+    70: 'w-2/3',
+    80: 'w-4/5',
+    90: 'w-11/12',
+    100: 'w-full',
+  };
+
+  return widthClasses[roundedPercentage] || `w-[${percentage}%]`;
+};
+
+// 접근성 속성들
 export const accessibilityProps = {
   progressBar: {
     role: 'progressbar' as const,
