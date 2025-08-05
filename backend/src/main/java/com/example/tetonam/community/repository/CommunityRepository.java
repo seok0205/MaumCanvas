@@ -2,12 +2,13 @@ package com.example.tetonam.community.repository;
 
 import com.example.tetonam.community.domain.Category;
 import com.example.tetonam.community.domain.Community;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface CommunityRepository extends JpaRepository<Community, Long> {
+public interface  CommunityRepository extends JpaRepository<Community, Long> {
 
     /**
      * 특정 카테고리의 게시글을 모두 조회
@@ -21,6 +22,8 @@ public interface CommunityRepository extends JpaRepository<Community, Long> {
      */
     List<Community> findAllByOrderByCreatedAtDesc();
 
+    //커서 사용으로 게시글 조회할거라 새로운 정렬 생성
+    List<Community> findByIdLessThanOrderByIdDesc(Long lastId, Pageable pageable);
     /**
      * 특정 카테고리의 게시글을 최신순 정렬
      */

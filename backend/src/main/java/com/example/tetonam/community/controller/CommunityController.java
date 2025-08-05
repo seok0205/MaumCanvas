@@ -57,4 +57,10 @@ public class CommunityController {
         Community community = communityService.updatePost(id, updatedCommunity);
         return ResponseEntity.ok(community);
     }
+
+    @GetMapping
+    @Operation(summary = "게시판 10개 단위 조회 API", description = "10개 단위로 커서를 활용하여 조회합니다")
+    public ResponseEntity<List<Community>> getPosts(@RequestParam(required = false) Long lastId, @RequestParam(defaultValue = "10") int size){
+        return ResponseEntity.ok(communityService.getPosts(lastId, size));
+    }
 }

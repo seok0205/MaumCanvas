@@ -9,6 +9,8 @@ import com.example.tetonam.exception.handler.BoardHandler;
 import com.example.tetonam.response.code.status.ErrorStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -92,5 +94,13 @@ public class CommunityService {
         community.setContent(updateCommunity.getContent());
         community.setUpdatedAt(updateCommunity.getCreatedAt());
         return communityRepository.save(community);
+    }
+
+    public List<Community> getPosts(Long lastId, int size){
+        if(lastId == null){
+            lastId = Long.MAX_VALUE;
+        }
+        Pageable pageable = PageRequest.of(0, size);
+        return communityRepository.findByIdLessThanOrderByIdDesc(lastId, pageable);
     }
 }
