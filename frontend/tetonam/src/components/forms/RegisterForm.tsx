@@ -339,8 +339,8 @@ export const RegisterForm = () => {
     onError: () => {
       setRegisterResult({ isSuccess: false });
       setShowRegisterResultModal(true);
+      // 에러 메시지는 모달에서 처리
     },
-    errorMessage: '회원가입에 실패했습니다. 다시 시도해주세요.',
   });
 
   const onSubmit = useCallback(

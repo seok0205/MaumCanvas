@@ -282,10 +282,12 @@ export const NicknameField = ({
   form,
   onCheckNickname,
   isLoading,
+  isVerified,
 }: {
   form: UseFormReturn<RegisterFormData>;
   onCheckNickname?: () => void;
   isLoading?: boolean;
+  isVerified?: boolean;
 }) => {
   const nickname = form.watch('nickname');
   const nicknameError = form.formState.errors.nickname;
@@ -305,7 +307,9 @@ export const NicknameField = ({
           <Input
             {...form.register('nickname')}
             placeholder='닉네임을 입력해주세요 (2-10자, 완성형 한글/영문/숫자)'
-            className='pl-10 bg-background/50 border-border focus:border-primary'
+            className={`pl-10 bg-background/50 border-border focus:border-primary ${
+              isVerified ? 'border-green-500' : ''
+            }`}
             pattern='[가-힣a-zA-Z0-9]+'
             maxLength={FORM_CONSTANTS.VALIDATION.NICKNAME_MAX_LENGTH}
             aria-describedby={
@@ -317,11 +321,17 @@ export const NicknameField = ({
           <Button
             type='button'
             onClick={onCheckNickname}
-            disabled={isLoading || !isNicknameValid}
-            className='bg-primary hover:bg-primary-dark text-primary-foreground px-4 py-2 text-sm whitespace-nowrap'
+            disabled={isLoading || !isNicknameValid || isVerified}
+            className={`px-4 py-2 text-sm whitespace-nowrap ${
+              isVerified
+                ? 'bg-green-500 hover:bg-green-600 text-white'
+                : 'bg-primary hover:bg-primary-dark text-primary-foreground'
+            }`}
           >
             {isLoading ? (
               <Loader2 className='w-4 h-4 animate-spin' />
+            ) : isVerified ? (
+              '확인완료'
             ) : (
               '중복확인'
             )}
@@ -332,6 +342,9 @@ export const NicknameField = ({
         <p id='nickname-error' className='text-destructive text-sm'>
           {form.formState.errors['nickname']?.message}
         </p>
+      )}
+      {isVerified && (
+        <p className='text-green-600 text-sm'>✓ 사용 가능한 닉네임입니다.</p>
       )}
     </div>
   );
