@@ -24,7 +24,8 @@ const queryClient = new QueryClient({
       retry: 3,
       retryDelay: 2000, // 2초
       refetchOnWindowFocus: false, // 윈도우 포커스 시 자동 재요청 비활성화
-      refetchOnReconnect: true, // 네트워크 재연결 시 자동 재요청
+      refetchOnReconnect: false, // 네트워크 재연결 시 자동 재요청 비활성화 (깜빡거림 방지)
+      refetchOnMount: true, // 컴포넌트 마운트 시 재요청 활성화
     },
   },
 });
