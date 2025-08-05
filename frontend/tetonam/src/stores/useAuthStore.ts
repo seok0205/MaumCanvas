@@ -3,7 +3,7 @@ import { authService } from '@/services/authService';
 import type { AuthError } from '@/types/auth';
 import type { AuthState } from '@/types/store';
 import type { User } from '@/types/user';
-import { getPrimaryRole, validateBackendRoles } from '@/utils/userRoleMapping';
+import { getPrimaryRole } from '@/utils/userRoleMapping';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
@@ -35,32 +35,28 @@ export const useAuthStore = create<AuthState>()(
           try {
             const tokenResponse = await authService.login(email, password);
 
-            // selectedUserRole이 있으면 우선 사용, 없으면 백엔드 roles에서 결정
-            let primaryRole: UserRole;
-            const currentSelectedRole = get().selectedUserRole;
+            // 로그인 시 이전 선택된 역할 초기화 (백엔드 실제 역할 우선)
+            set({ selectedUserRole: null });
 
-            if (currentSelectedRole) {
-              // 선택된 역할이 있으면 해당 역할 사용
-              primaryRole = currentSelectedRole;
-            } else {
-              // 백엔드 roles에서 주요 역할 결정
-              primaryRole = getPrimaryRole(tokenResponse.roles || []);
-            }
+            // 백엔드 JWT 토큰의 roles에서 주요 역할 결정 (실제 사용자 역할 우선)
+            const primaryRole: UserRole = getPrimaryRole(
+              tokenResponse.roles || []
+            );
 
             // 사용자 정보 조회 (JWT 토큰 필요)
             const userInfo = await authService.getMyInfo();
 
-            // 백엔드에서 받은 roles와 선택된 역할이 일치하는지 검증
+            // 백엔드에서 받은 roles가 있으면 해당 역할을 우선 사용
+            let finalRole = primaryRole;
             if (userInfo.roles && userInfo.roles.length > 0) {
-              const isValidRole = validateBackendRoles(
-                userInfo.roles,
-                primaryRole
-              );
-              if (!isValidRole) {
-                // 백엔드 roles가 예상과 다르면 선택된 역할 우선 사용
-                console.warn('Backend roles do not match expected role:', {
-                  backendRoles: userInfo.roles,
-                  expectedRole: primaryRole,
+              const backendPrimaryRole = getPrimaryRole(userInfo.roles);
+              finalRole = backendPrimaryRole;
+
+              // JWT 토큰의 역할과 사용자 정보의 역할이 다르면 경고
+              if (backendPrimaryRole !== primaryRole) {
+                console.warn('JWT 토큰과 사용자 정보의 역할이 다릅니다:', {
+                  jwtRole: primaryRole,
+                  userInfoRole: backendPrimaryRole,
                 });
               }
             }
@@ -74,7 +70,7 @@ export const useAuthStore = create<AuthState>()(
               phone: userInfo.phone,
               school: userInfo.school,
               birthday: userInfo.birthday,
-              roles: [primaryRole] as UserRole[], // 선택된 역할을 우선 사용
+              roles: [finalRole] as UserRole[], // 최종 확정된 역할 사용
               createdAt: new Date().toISOString(),
             };
 
