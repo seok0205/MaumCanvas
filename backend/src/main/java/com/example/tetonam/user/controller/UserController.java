@@ -32,6 +32,13 @@ public class UserController {
         return ResponseEntity.ok().body(ApiResponse.onSuccess(schoolList));
     }
 
+    @GetMapping("/school/{name}")
+    @Operation(summary = "학교검색 API", description = "학교 검색 결과 반환합니다.")
+    public ResponseEntity<?> schoolSearch(@PathVariable String name) {
+        List<School> schoolList=userService.schoolSearch(name);
+        return ResponseEntity.ok().body(ApiResponse.onSuccess(schoolList));
+    }
+
 
 
     @GetMapping("/my-info")

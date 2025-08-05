@@ -195,4 +195,8 @@ public class UserService {
     public List<School> schoolList() {
         return schoolRepository.findAll();
     }
+
+    public List<School> schoolSearch(String name) {
+        return schoolRepository.findByNameContaining(name);
+    }
 }
