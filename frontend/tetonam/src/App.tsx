@@ -5,6 +5,7 @@ import { Toaster } from 'sonner';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { QuestionnaireForm } from '@/components/questionnaire/QuestionnaireForm';
 import { QuestionnaireResult } from '@/components/questionnaire/QuestionnaireResult';
+import { useGlobalFontLoading } from '@/hooks/useFontLoading';
 import { Dashboard } from '@/pages/Dashboard';
 import { Diagnosis } from '@/pages/Diagnosis';
 import { ForgotPassword } from '@/pages/ForgotPassword';
@@ -31,8 +32,14 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  const fontsLoaded = useGlobalFontLoading();
+
   return (
-    <div className='min-h-screen bg-background font-sans antialiased'>
+    <div
+      className={`min-h-screen bg-background font-sans antialiased ${
+        fontsLoaded ? 'font-loaded' : 'font-loading'
+      }`}
+    >
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <Routes>
