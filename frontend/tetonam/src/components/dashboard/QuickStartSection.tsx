@@ -43,8 +43,7 @@ export const QuickStartSection = ({
         navigate('/diagnosis');
         break;
       case '상담 예약하기':
-        // TODO: 상담 예약 페이지로 이동
-        console.log('상담 예약 페이지로 이동');
+        navigate('/counseling-reservation');
         break;
       case '커뮤니티':
         // TODO: 커뮤니티 페이지로 이동

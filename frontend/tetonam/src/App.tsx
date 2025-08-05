@@ -6,6 +6,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { QuestionnaireForm } from '@/components/questionnaire/QuestionnaireForm';
 import { QuestionnaireResult } from '@/components/questionnaire/QuestionnaireResult';
 import { useFontLoading } from '@/hooks/useFontLoading';
+import { CounselingReservation } from '@/pages/CounselingReservation';
 import { Dashboard } from '@/pages/Dashboard';
 import { Diagnosis } from '@/pages/Diagnosis';
 import { ForgotPassword } from '@/pages/ForgotPassword';
@@ -94,6 +95,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <QuestionnaireResult />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/counseling-reservation'
+              element={
+                <ProtectedRoute>
+                  <CounselingReservation />
                 </ProtectedRoute>
               }
             />

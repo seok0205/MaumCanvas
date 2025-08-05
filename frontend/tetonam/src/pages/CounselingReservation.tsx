@@ -1,0 +1,290 @@
+import { format } from 'date-fns';
+import { ko } from 'date-fns/locale';
+import { ArrowLeft, Calendar, Clock, Info, User } from 'lucide-react';
+
+import { Alert, AlertDescription } from '@/components/ui/feedback/alert';
+import { Button } from '@/components/ui/interactive/button';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/layout/card';
+import { useCounselingReservation } from '@/hooks/useCounselingReservation';
+import { cn } from '@/utils/cn';
+
+interface CounselingReservationProps {
+  // 향후 확장을 위한 props 정의
+  // 예: onReservationComplete?: () => void;
+  // 예: initialDate?: Date;
+}
+
+const CounselingReservation = ({}: CounselingReservationProps) => {
+  const {
+    selectedDate,
+    selectedTime,
+    selectedCounselor,
+    dateOptions,
+    timeOptions,
+    counselors,
+    isLoadingCounselors,
+    counselorsError,
+    handleDateSelect,
+    handleTimeSelect,
+    handleCounselorSelect,
+    handleReservationConfirm,
+    handleGoBack,
+    isReservationPending,
+    refetchCounselors,
+  } = useCounselingReservation();
+
+  return (
+    <div className='min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4'>
+      <div className='mx-auto max-w-4xl space-y-6'>
+        {/* 헤더 */}
+        <header className='flex items-center gap-4'>
+          <Button
+            variant='ghost'
+            size='icon'
+            onClick={handleGoBack}
+            className='h-10 w-10 rounded-full bg-white shadow-sm hover:bg-gray-50'
+            aria-label='뒤로 가기'
+          >
+            <ArrowLeft className='h-5 w-5' />
+          </Button>
+          <h1 className='text-2xl font-bold text-gray-900'>상담 예약</h1>
+        </header>
+
+        {/* 날짜 선택 섹션 */}
+        <Card className='bg-white shadow-sm'>
+          <CardHeader>
+            <CardTitle className='flex items-center gap-2 text-lg'>
+              <Calendar className='h-5 w-5 text-blue-600' />
+              날짜 선택
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div
+              className='grid grid-cols-4 gap-3 sm:grid-cols-7'
+              role='group'
+              aria-label='날짜 선택'
+            >
+              {dateOptions.map(option => (
+                <Button
+                  key={option.date.toISOString()}
+                  variant={option.isSelected ? 'default' : 'outline'}
+                  className={cn(
+                    'h-auto flex-col gap-1 p-3 transition-all',
+                    option.isSelected
+                      ? 'bg-yellow-100 border-yellow-300 text-yellow-900 hover:bg-yellow-200'
+                      : 'hover:bg-gray-50'
+                  )}
+                  onClick={() => handleDateSelect(option.date)}
+                >
+                  <Calendar className='h-4 w-4' />
+                  <span className='text-xs font-medium'>
+                    {option.formattedDate}
+                  </span>
+                  <span className='text-xs text-gray-500'>
+                    ({option.dayOfWeek})
+                  </span>
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 시간 선택 섹션 */}
+        <Card className='bg-white shadow-sm'>
+          <CardHeader>
+            <CardTitle className='flex items-center gap-2 text-lg'>
+              <Clock className='h-5 w-5 text-blue-600' />
+              시간 선택
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div
+              className='grid grid-cols-4 gap-3 sm:grid-cols-6'
+              role='group'
+              aria-label='시간 선택'
+            >
+              {timeOptions.map(option => (
+                <Button
+                  key={option.time}
+                  variant={option.isSelected ? 'default' : 'outline'}
+                  className={cn(
+                    'h-auto flex-col gap-1 p-3 transition-all',
+                    option.isSelected
+                      ? 'bg-yellow-100 border-yellow-300 text-yellow-900 hover:bg-yellow-200'
+                      : 'hover:bg-gray-50'
+                  )}
+                  onClick={() => handleTimeSelect(option.time)}
+                  disabled={!selectedDate}
+                >
+                  <Clock className='h-4 w-4' />
+                  <span className='text-sm font-medium'>
+                    {option.formattedTime}
+                  </span>
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 상담사 선택 섹션 */}
+        {selectedDate && selectedTime && (
+          <Card className='bg-white shadow-sm'>
+            <CardHeader>
+              <CardTitle className='flex items-center gap-2 text-lg'>
+                <User className='h-5 w-5 text-blue-600' />
+                상담사 선택
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isLoadingCounselors ? (
+                <div className='flex items-center justify-center py-8'>
+                  <div className='text-center'>
+                    <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2'></div>
+                    <p className='text-gray-600'>상담사를 불러오는 중...</p>
+                  </div>
+                </div>
+              ) : counselorsError ? (
+                <Alert variant='destructive'>
+                  <Info className='h-4 w-4' />
+                  <AlertDescription>
+                    상담사 목록을 불러오는데 실패했습니다.
+                    <Button
+                      variant='link'
+                      className='p-0 h-auto text-destructive underline'
+                      onClick={() => refetchCounselors()}
+                    >
+                      다시 시도
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              ) : counselors && counselors.length > 0 ? (
+                <div
+                  className='space-y-3'
+                  role='group'
+                  aria-label='상담사 선택'
+                >
+                  {counselors.map(counselor => (
+                    <Button
+                      key={counselor.id}
+                      variant={
+                        selectedCounselor?.id === counselor.id
+                          ? 'default'
+                          : 'outline'
+                      }
+                      className={cn(
+                        'w-full justify-start gap-3 p-4 h-auto transition-all',
+                        selectedCounselor?.id === counselor.id
+                          ? 'bg-yellow-100 border-yellow-300 text-yellow-900 hover:bg-yellow-200'
+                          : 'hover:bg-gray-50'
+                      )}
+                      onClick={() => handleCounselorSelect(counselor)}
+                    >
+                      <User className='h-5 w-5' />
+                      <span className='font-medium'>
+                        {counselor.counselorName} 상담사
+                      </span>
+                    </Button>
+                  ))}
+                </div>
+              ) : (
+                <Alert>
+                  <Info className='h-4 w-4' />
+                  <AlertDescription>
+                    선택하신 날짜와 시간에 가능한 상담사가 없습니다. 다른 날짜나
+                    시간을 선택해주세요.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* 예약 확인 섹션 */}
+        {selectedDate && selectedTime && selectedCounselor && (
+          <Card className='bg-blue-50 border-blue-200'>
+            <CardHeader>
+              <CardTitle className='text-lg text-blue-900'>예약 확인</CardTitle>
+            </CardHeader>
+            <CardContent className='space-y-3'>
+              <div className='flex justify-between items-center'>
+                <span className='text-gray-600'>날짜</span>
+                <span className='font-medium'>
+                  {format(selectedDate, 'M월 d일 (E)', { locale: ko })}
+                </span>
+              </div>
+              <div className='flex justify-between items-center'>
+                <span className='text-gray-600'>시간</span>
+                <span className='font-medium'>{selectedTime}</span>
+              </div>
+              <div className='flex justify-between items-center'>
+                <span className='text-gray-600'>상담사</span>
+                <span className='font-medium'>
+                  {selectedCounselor.counselorName} 상담사
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* 예약 안내사항 */}
+        <Card className='bg-white shadow-sm'>
+          <CardHeader>
+            <CardTitle className='flex items-center gap-2 text-lg'>
+              <Info className='h-5 w-5 text-blue-600' />
+              예약 안내사항
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className='space-y-2 text-sm text-gray-700'>
+              <li className='flex items-start gap-2'>
+                <span className='text-blue-600 mt-0.5'>•</span>
+                <span>예약 시간 10분 전까지 접속해주세요</span>
+              </li>
+              <li className='flex items-start gap-2'>
+                <span className='text-blue-600 mt-0.5'>•</span>
+                <span>예약 변경은 24시간 전까지 가능합니다</span>
+              </li>
+              <li className='flex items-start gap-2'>
+                <span className='text-blue-600 mt-0.5'>•</span>
+                <span>상담 내용은 비밀이 보장됩니다</span>
+              </li>
+            </ul>
+          </CardContent>
+        </Card>
+
+        {/* 예약 확정 버튼 */}
+        <Button
+          onClick={handleReservationConfirm}
+          disabled={
+            !selectedDate ||
+            !selectedTime ||
+            !selectedCounselor ||
+            isReservationPending
+          }
+          className={cn(
+            'w-full h-12 text-lg font-medium transition-all focus:outline-none focus:ring-2 focus:ring-offset-2',
+            selectedDate && selectedTime && selectedCounselor
+              ? 'bg-yellow-500 hover:bg-yellow-600 text-black focus:ring-yellow-500'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed focus:ring-gray-400'
+          )}
+        >
+          {isReservationPending ? (
+            <div className='flex items-center gap-2'>
+              <div className='animate-spin rounded-full h-5 w-5 border-b-2 border-black'></div>
+              예약 처리 중...
+            </div>
+          ) : (
+            '예약 확정하기'
+          )}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+export { CounselingReservation };

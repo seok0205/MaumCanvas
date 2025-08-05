@@ -1,20 +1,19 @@
 import { AppSidebar } from '@/components/layout/AppSidebar';
+import { CommonHeader } from '@/components/layout/CommonHeader';
 import { DisclaimerBox } from '@/components/ui/feedback/DisclaimerBox';
 import { DiagnosisGrid } from '@/components/ui/layout/DiagnosisGrid';
-import {
-  SidebarProvider,
-  SidebarTrigger,
-} from '@/components/ui/navigation/sidebar';
+import { SidebarProvider } from '@/components/ui/navigation/sidebar';
 import {
   DIAGNOSIS_CATEGORIES,
   DIAGNOSIS_PAGE_TITLE,
 } from '@/constants/diagnosis';
-import { Heart } from 'lucide-react';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export const Diagnosis = () => {
   const navigate = useNavigate();
+  const { user } = useAuthStore();
 
   const handleStartDiagnosis = useCallback(
     (categoryId: string) => {
@@ -26,39 +25,31 @@ export const Diagnosis = () => {
     [navigate]
   );
 
+  if (!user) {
+    return <div>로딩 중...</div>;
+  }
+
   return (
     <SidebarProvider>
       <div className='flex w-full min-h-screen bg-orange-50/30'>
         <AppSidebar />
 
         <div className='flex flex-1 flex-col'>
-          {/* 헤더 */}
-          <header className='border-b border-border/50 bg-card/80 shadow-card backdrop-blur-sm rounded-2xl mx-4 mt-4'>
-            <div className='flex items-center justify-between px-4 py-4'>
-              <div className='flex items-center space-x-4'>
-                <SidebarTrigger className='mr-2' />
-                <div className='flex items-center space-x-2'>
-                  <Heart className='h-5 w-5 text-primary' />
-                  <span className='font-bold text-lg text-foreground'>
-                    마음 캔버스
-                  </span>
-                </div>
-              </div>
-            </div>
-          </header>
+          <CommonHeader user={user} />
+
+          {/* 페이지 제목 */}
+          <div className='px-6 py-4'>
+            <h1 className='text-3xl font-bold text-foreground'>
+              {DIAGNOSIS_PAGE_TITLE}
+            </h1>
+            <p className='text-muted-foreground mt-2'>
+              자신의 마음 상태를 점검하고 이해하는 데 도움을 받아보세요.
+            </p>
+          </div>
 
           {/* 메인 콘텐츠 */}
           <main className='flex-1 overflow-auto'>
             <div className='p-6 max-w-7xl mx-auto'>
-              <div className='mb-8'>
-                <h1 className='text-3xl font-bold text-foreground mb-2'>
-                  {DIAGNOSIS_PAGE_TITLE}
-                </h1>
-                <p className='text-muted-foreground'>
-                  자신의 마음 상태를 점검하고 이해하는 데 도움을 받아보세요.
-                </p>
-              </div>
-
               {/* 면책조항 */}
               <div className='mb-8'>
                 <DisclaimerBox />

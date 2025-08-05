@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { PasswordChangeDialog } from '@/components/forms/PasswordChangeDialog';
 import { AppSidebar } from '@/components/layout/AppSidebar';
+import { CommonHeader } from '@/components/layout/CommonHeader';
 import { Input } from '@/components/ui/forms/input';
 import { Button } from '@/components/ui/interactive/button';
 import {
@@ -22,42 +23,11 @@ import {
 import { Label } from '@/components/ui/primitives/label';
 import { useNicknameEdit } from '@/hooks/useNicknameEdit';
 import { useUserInfo } from '@/hooks/useUserInfo';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { mapGenderToKorean } from '@/utils/genderMapping';
-import {
-  AlertCircle,
-  ArrowLeft,
-  Edit,
-  Lock,
-  RefreshCw,
-  Save,
-  X,
-} from 'lucide-react';
+import { AlertCircle, Edit, Lock, RefreshCw, Save, X } from 'lucide-react';
 
-// 헤더 컴포넌트 분리
-interface MyPageHeaderProps {
-  onBack: () => void;
-}
-
-const MyPageHeader = React.memo<MyPageHeaderProps>(({ onBack }) => {
-  return (
-    <header className='border-b border-border/50 bg-card/80 shadow-card backdrop-blur-sm rounded-2xl mx-4 mt-4'>
-      <div className='flex items-center justify-between px-4 py-4'>
-        <div className='flex items-center space-x-4'>
-          <Button
-            variant='ghost'
-            size='sm'
-            onClick={onBack}
-            className='text-muted-foreground hover:text-foreground'
-          >
-            <ArrowLeft className='mr-2 h-4 w-4' />
-            뒤로가기
-          </Button>
-          <h1 className='text-xl font-bold text-foreground'>마이페이지</h1>
-        </div>
-      </div>
-    </header>
-  );
-});
+// 헤더 컴포넌트 제거 (CommonHeader 사용)
 
 // 로딩 컴포넌트 분리
 const MyPageLoading = React.memo(() => {
@@ -323,6 +293,7 @@ interface MyPageProps {}
 
 export const MyPage = ({}: MyPageProps) => {
   const navigate = useNavigate();
+  const { user } = useAuthStore();
   const { userInfo, isLoading, error, refetch } = useUserInfo();
 
   // 뒤로가기 핸들러
@@ -335,6 +306,10 @@ export const MyPage = ({}: MyPageProps) => {
     refetch();
   }, [refetch]);
 
+  if (!user) {
+    return <div>로딩 중...</div>;
+  }
+
   return (
     <SidebarProvider>
       <div className='flex w-full min-h-screen bg-gradient-warm'>
@@ -342,7 +317,14 @@ export const MyPage = ({}: MyPageProps) => {
 
         <div className='flex-1 flex flex-col'>
           {/* 헤더는 항상 고정 */}
-          <MyPageHeader onBack={handleBack} />
+          <CommonHeader
+            user={user}
+            showBackButton={true}
+            title='마이페이지'
+            onBackClick={handleBack}
+            showUserInfo={false}
+            showLogout={false}
+          />
 
           {/* 메인 콘텐츠만 상태에 따라 변경 */}
           {isLoading && !userInfo && <MyPageLoading />}
