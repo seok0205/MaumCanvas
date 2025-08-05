@@ -1,6 +1,7 @@
 // DB에 어떤 데이터를 저장할지 정의
 package com.example.tetonam.community.domain;
 
+import com.example.tetonam.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -24,7 +25,9 @@ public class Community {
     @Enumerated(EnumType.STRING)
     private Category category;
 
-    private String author;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_nickname", referencedColumnName = "nickname")
+    private User author;
 
     private int viewCount;
 

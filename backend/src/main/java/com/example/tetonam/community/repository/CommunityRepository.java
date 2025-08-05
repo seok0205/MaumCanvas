@@ -5,6 +5,7 @@ import com.example.tetonam.community.domain.Community;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -43,11 +44,5 @@ public interface  CommunityRepository extends JpaRepository<Community, Long> {
      * 키워드 검색 (제목에 포함되는 값)
      * - 확장 가능성 예시용
      */
-    @Query("""
-    SELECT c
-    FROM Community c
-    WHERE c.title
-    LIKE %:keyword%
-    """)
-    List<Community> searchByTitle(String keyword);
+
 }
