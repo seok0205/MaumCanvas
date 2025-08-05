@@ -187,11 +187,6 @@ const RegisterResultDialog = ({
 };
 
 export const RegisterForm = () => {
-  // ...existing code...
-
-  // 디버깅용: 주요 상태 콘솔 출력 (return문 바로 위에서 실행)
-
-  // ...existing code...
   const [showRegisterResultModal, setShowRegisterResultModal] = useState(false);
   const [registerResult, setRegisterResult] = useState<{
     isSuccess: boolean;
@@ -433,16 +428,6 @@ export const RegisterForm = () => {
       !selectedSchool ||
       !nicknameCondition;
 
-    console.group('🔒 [RegisterForm] 버튼 활성화 조건 체크');
-    console.log('⏳ isLoading:', isLoading);
-    console.log('📝 isFormValid:', isValid);
-    console.log('📧 isEmailVerified:', isEmailVerified);
-    console.log('👤 nicknameVerified:', nicknameVerified);
-    console.log('🏫 hasSelectedSchool:', !!selectedSchool);
-    console.log('🏷️ nicknameMatch:', nicknameCondition);
-    console.log('🚨 finalResult (disabled):', result);
-    console.groupEnd();
-
     return result;
   }, [
     form.formState.isValid,
@@ -453,51 +438,6 @@ export const RegisterForm = () => {
     form.watch('nickname'),
     verifiedNickname,
   ]);
-
-  // 디버깅용: 주요 상태 콘솔 출력 (렌더마다)
-  useEffect(() => {
-    console.group('🔍 [RegisterForm] 디버깅 정보');
-    console.log('📋 formState:', {
-      defaultValues: form.formState.defaultValues,
-      isDirty: form.formState.isDirty,
-      isValid: form.formState.isValid,
-      errors: form.formState.errors,
-    });
-    console.log('📧 isEmailVerified:', isEmailVerified);
-    console.log('👤 nicknameVerified:', nicknameVerified);
-    console.log('🏫 selectedSchool:', selectedSchool);
-    console.log('✅ verifiedNickname:', verifiedNickname);
-    console.log('🏷️ 현재 닉네임:', form?.watch('nickname'));
-
-    // 모든 필드 값 디버깅
-    const allValues = form.getValues();
-    console.log('📝 모든 필드 값:', allValues);
-    console.groupEnd();
-  }, [
-    form,
-    isEmailVerified,
-    nicknameVerified,
-    selectedSchool,
-    verifiedNickname,
-  ]);
-
-  // 컴포넌트 마운트 시 한 번 실행되는 로그
-  useEffect(() => {
-    console.log('🚀 RegisterForm 컴포넌트가 마운트되었습니다');
-    return () => {
-      console.log('🛑 RegisterForm 컴포넌트가 언마운트됩니다');
-    };
-  }, []);
-
-  // formState가 초기화된 후 한 번만 실행하는 검증 로직
-  useEffect(() => {
-    // 모든 필드를 트리거하여 검증을 활성화
-    const validateAllFields = async () => {
-      await form.trigger();
-    };
-
-    validateAllFields();
-  }, [form]);
 
   return (
     <FormLayout title='회원가입'>
