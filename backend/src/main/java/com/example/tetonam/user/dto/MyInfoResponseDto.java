@@ -24,7 +24,7 @@ public class MyInfoResponseDto {
                 .name(user.getName())
                 .birthday(user.getBirthday())
                 .phone(user.getPhone())
-                .school(user.getSchool().toString())
+                .school(user.getSchool().getName())
                 .email(user.getEmail())
                 .gender(user.getGender().toString())
                 .nickname(user.getNickname())

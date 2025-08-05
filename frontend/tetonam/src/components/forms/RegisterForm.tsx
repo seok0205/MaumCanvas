@@ -1,14 +1,23 @@
-// 내장 라이브러리
+// 1. 내장 라이브러리
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-// 외부 라이브러리
+// 2. 외부 라이브러리
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertTriangle, CheckCircle, Loader2, Mail } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
-// 내부 모듈
+// 3. 내부 모듈
+import {
+  BirthDateField,
+  GenderField,
+  NameField,
+  NicknameField,
+  OrganizationField,
+  PhoneField,
+} from '@/components/forms/RegisterFormFields';
+import { ApiButton } from '@/components/ui/ApiButton';
 import { FormLayout } from '@/components/ui/forms/FormLayout';
 import { Input } from '@/components/ui/forms/input';
 import { PasswordInput } from '@/components/ui/forms/PasswordInput';
@@ -28,16 +37,9 @@ import { FORM_CONSTANTS, FORM_MESSAGES } from '@/constants/forms';
 import { useAuthActions } from '@/hooks/useAuthActions';
 import { useEmailVerification } from '@/hooks/useEmailVerification';
 import { useNicknameCheck } from '@/hooks/useNicknameCheck';
+import { useSubmitButton } from '@/hooks/useSubmitButton';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { roleToRolesArray } from '@/utils/userRoleMapping';
-import {
-  BirthDateField,
-  GenderField,
-  NameField,
-  NicknameField,
-  OrganizationField,
-  PhoneField,
-} from './RegisterFormFields';
 
 const registerSchema = z
   .object({
@@ -131,9 +133,24 @@ const RegisterResultDialog = ({
   isSuccess,
   onLoginClick,
 }: RegisterResultDialogProps) => {
+  // 자동 리다이렉트를 위한 타이머
+  useEffect(() => {
+    if (isOpen && isSuccess) {
+      const timer = setTimeout(() => {
+        onLoginClick?.();
+      }, 1000); // 1초 후 자동 리다이렉트
+
+      return () => clearTimeout(timer);
+    }
+    return undefined; // 명시적으로 undefined 반환
+  }, [isOpen, isSuccess, onLoginClick]);
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className='sm:max-w-md'>
+      <DialogContent
+        className='sm:max-w-md'
+        onPointerDownOutside={e => e.preventDefault()}
+      >
         <DialogHeader className='text-center'>
           <div className='mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-orange-100'>
             {isSuccess ? (
@@ -147,15 +164,20 @@ const RegisterResultDialog = ({
           </DialogTitle>
           <DialogDescription className='text-sm text-muted-foreground'>
             {isSuccess
-              ? '마음 캔버스에 오신 것을 환영합니다! 로그인을 진행해주세요.'
+              ? '마음 캔버스에 오신 것을 환영합니다! 잠시 후 로그인 페이지로 이동합니다.'
               : '회원가입에 실패했습니다. 다시 시도해주세요.'}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className='flex flex-col sm:flex-row gap-2'>
           {isSuccess ? (
-            <Button onClick={onLoginClick} className='w-full sm:w-auto'>
-              로그인하러 가기
-            </Button>
+            <div className='w-full text-center'>
+              <p className='text-sm text-muted-foreground mb-2'>
+                자동으로 로그인 페이지로 이동합니다...
+              </p>
+              <Button onClick={onLoginClick} className='w-full sm:w-auto'>
+                바로 로그인하기
+              </Button>
+            </div>
           ) : (
             <Button
               onClick={onClose}
@@ -172,12 +194,12 @@ const RegisterResultDialog = ({
 };
 
 export const RegisterForm = () => {
-  const [isLoading, setIsLoading] = useState(false);
   const [showRegisterResultModal, setShowRegisterResultModal] = useState(false);
   const [registerResult, setRegisterResult] = useState<{
     isSuccess: boolean;
   }>({ isSuccess: false });
   const [nicknameVerified, setNicknameVerified] = useState(false);
+  const [verifiedNickname, setVerifiedNickname] = useState<string>(''); // 중복 체크 완료된 닉네임 저장
   const [showAuthFailureModal, setShowAuthFailureModal] = useState(false);
 
   const { register } = useAuthActions();
@@ -192,11 +214,8 @@ export const RegisterForm = () => {
     error: emailError,
     successMessage: emailSuccessMessage,
     isLoading: emailLoading,
-    resendCount,
-    canResend,
     verificationAttempts,
-    isBlocked,
-    isEmailDuplicateChecked,
+    isBlocked: isEmailBlocked,
   } = useEmailVerification();
   const {
     checkNickname,
@@ -264,16 +283,17 @@ export const RegisterForm = () => {
 
   // 인증 차단 상태 감지
   useEffect(() => {
-    if (isBlocked) {
+    if (isEmailBlocked) {
       setShowAuthFailureModal(true);
     }
-  }, [isBlocked]);
+  }, [isEmailBlocked]);
 
   // 닉네임 변경 시 중복 체크 상태 리셋
   useEffect(() => {
     const subscription = form.watch((_value, { name }) => {
       if (name === 'nickname') {
         setNicknameVerified(false);
+        setVerifiedNickname(''); // 닉네임 변경 시 중복 체크 완료된 닉네임 초기화
       }
     });
     return () => subscription.unsubscribe();
@@ -286,42 +306,48 @@ export const RegisterForm = () => {
     }
   }, [selectedUserRole, navigate]);
 
+  const { handleSubmit, isLoading } = useSubmitButton({
+    mutationFn: async (data: RegisterFormData) => {
+      if (!selectedUserRole) {
+        throw new Error('사용자 역할이 선택되지 않았습니다.');
+      }
+
+      const success = await register({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        nickname: data.nickname,
+        gender: data.gender.toUpperCase() as 'MALE' | 'FEMALE' | 'OTHERS',
+        phone: data.phone,
+        school: {
+          name: data.organization,
+        },
+        birthday: data.birthDate,
+        roles: roleToRolesArray(selectedUserRole),
+      });
+
+      if (!success) {
+        throw new Error('회원가입에 실패했습니다.');
+      }
+
+      return success;
+    },
+    onSuccess: () => {
+      setRegisterResult({ isSuccess: true });
+      setShowRegisterResultModal(true);
+    },
+    onError: () => {
+      setRegisterResult({ isSuccess: false });
+      setShowRegisterResultModal(true);
+      // 에러 메시지는 모달에서 처리
+    },
+  });
+
   const onSubmit = useCallback(
     async (data: RegisterFormData) => {
-      if (!selectedUserRole) {
-        navigate('/user-role-selection', { replace: true });
-        return;
-      }
-
-      setIsLoading(true);
-      try {
-        const success = await register({
-          name: data.name,
-          email: data.email,
-          password: data.password,
-          nickname: data.nickname,
-          gender: data.gender.toUpperCase() as 'MALE' | 'FEMALE' | 'OTHERS',
-          phone: data.phone,
-          school: {
-            name: data.organization,
-          },
-          birthday: data.birthDate,
-          roles: roleToRolesArray(selectedUserRole),
-        });
-
-        setRegisterResult({ isSuccess: success });
-        setShowRegisterResultModal(true);
-      } catch (error) {
-        console.error('회원가입 에러:', error);
-        setRegisterResult({ isSuccess: false });
-        setShowRegisterResultModal(true);
-        // 에러 정보를 보존하여 상위에서 일관된 처리 가능하도록 함
-        throw error;
-      } finally {
-        setIsLoading(false);
-      }
+      await handleSubmit(data);
     },
-    [selectedUserRole, register, navigate]
+    [handleSubmit]
   );
 
   const handleRegisterResultClose = useCallback(() => {
@@ -370,12 +396,21 @@ export const RegisterForm = () => {
     const abortController = new AbortController();
 
     try {
-      await checkNickname(nickname, abortController.signal);
-      setNicknameVerified(true);
+      // checkNickname이 true를 반환할 때만 성공으로 처리
+      const isSuccess = await checkNickname(nickname, abortController.signal);
+
+      if (isSuccess) {
+        setNicknameVerified(true); // 200 코드를 받았을 때만 true로 설정
+        setVerifiedNickname(nickname); // 중복 체크 완료된 닉네임 저장
+      } else {
+        setNicknameVerified(false); // 실패 시 false로 설정
+        setVerifiedNickname(''); // 닉네임 필드 초기화
+      }
     } catch (error) {
+      // 예상치 못한 에러 처리
       if (error instanceof Error && error.name !== 'AbortError') {
         setNicknameVerified(false);
-        form.setValue('nickname', '');
+        setVerifiedNickname('');
       }
     }
   }, [checkNickname, form]);
@@ -385,7 +420,9 @@ export const RegisterForm = () => {
     isLoading ||
     !form.formState.isValid ||
     !isEmailVerified ||
-    !nicknameVerified;
+    !nicknameVerified ||
+    (form.watch('nickname') !== '' &&
+      form.watch('nickname') !== verifiedNickname);
 
   return (
     <FormLayout title='회원가입'>
@@ -407,44 +444,32 @@ export const RegisterForm = () => {
           </Label>
           <div className='flex space-x-2'>
             <div className='relative flex-1'>
-              <Mail className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4' />
+              <Mail className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 pointer-events-none' />
               <Input
-                {...form.register('email')}
+                id='email'
                 type='email'
-                placeholder='example@email.com'
-                className='pl-10 bg-background/50 border-border focus:border-primary'
-                aria-describedby={
-                  form.formState.errors.email ? 'email-error' : undefined
-                }
+                placeholder='이메일을 입력하세요'
+                className='pl-10'
+                {...form.register('email')}
               />
             </div>
             <Button
               type='button'
               onClick={() => sendEmailVerification(form.getValues('email'))}
-              disabled={
-                emailLoading ||
-                isEmailVerified ||
-                !canResend ||
-                !!form.formState.errors.email ||
-                !form.watch('email')
-              }
-              className='bg-primary hover:bg-primary-dark text-primary-foreground px-4 py-2 text-sm'
+              disabled={!form.watch('email') || emailLoading || isEmailBlocked}
+              variant='outline'
+              size='sm'
+              className='whitespace-nowrap'
             >
               {emailLoading ? (
                 <Loader2 className='w-4 h-4 animate-spin' />
-              ) : isEmailVerified ? (
-                '인증완료'
-              ) : !canResend ? (
-                '재전송 제한'
-              ) : isEmailSent ? (
-                `재전송 (${resendCount}/${FORM_CONSTANTS.EMAIL.RESEND_LIMIT})`
               ) : (
                 '인증번호 발송'
               )}
             </Button>
           </div>
           {form.formState.errors.email && (
-            <p id='email-error' className='text-destructive text-sm'>
+            <p className='text-destructive text-sm'>
               {form.formState.errors.email.message}
             </p>
           )}
@@ -457,48 +482,44 @@ export const RegisterForm = () => {
         </div>
 
         {/* 이메일 인증 코드 */}
-        {isEmailSent && isEmailDuplicateChecked && !isEmailVerified && (
+        {isEmailSent && !isEmailVerified && (
           <div className='space-y-2'>
+            <Label
+              htmlFor='emailVerificationCode'
+              className='text-foreground font-medium'
+            >
+              인증번호
+            </Label>
             <div className='flex space-x-2'>
-              <input
-                {...form.register('emailVerificationCode')}
-                placeholder='인증 코드 6자리 입력'
-                className='flex-1 bg-background/50 border border-border focus:border-primary rounded-md px-3 py-2'
-                disabled={isBlocked}
-                aria-describedby='verification-code-help'
-                aria-invalid={verificationAttempts > 0}
+              <Input
+                id='emailVerificationCode'
+                type='text'
+                placeholder='인증번호 6자리를 입력하세요'
                 maxLength={6}
-                pattern='[0-9]{6}'
-                inputMode='numeric'
-                onChange={e => {
-                  const value = e.target.value.replace(/[^0-9]/g, '');
-                  form.setValue('emailVerificationCode', value, {
-                    shouldValidate: true,
-                  });
-                }}
+                className='flex-1'
+                {...form.register('emailVerificationCode')}
               />
+              {form.formState.errors.emailVerificationCode && (
+                <p className='text-destructive text-sm'>
+                  {form.formState.errors.emailVerificationCode.message}
+                </p>
+              )}
               <Button
                 type='button'
                 onClick={handleEmailVerification}
                 disabled={
-                  emailLoading ||
-                  isEmailVerified ||
-                  isBlocked ||
                   !form.watch('emailVerificationCode') ||
-                  form.watch('emailVerificationCode')?.length !== 6
+                  emailLoading ||
+                  isEmailBlocked
                 }
-                className='bg-primary hover:bg-primary-dark text-primary-foreground px-4 py-2 text-sm'
-                aria-describedby='verification-status'
-                aria-live='polite'
+                variant='outline'
+                size='sm'
+                className='whitespace-nowrap'
               >
                 {emailLoading ? (
                   <Loader2 className='w-4 h-4 animate-spin' />
-                ) : isEmailVerified ? (
-                  '인증완료'
-                ) : isBlocked ? (
-                  '차단됨'
                 ) : (
-                  `인증하기 (${verificationAttempts}/${FORM_CONSTANTS.EMAIL.VERIFICATION_ATTEMPTS})`
+                  '인증 확인'
                 )}
               </Button>
             </div>
@@ -521,9 +542,29 @@ export const RegisterForm = () => {
               aria-live='polite'
               className='sr-only'
             >
-              {isEmailVerified && '이메일 인증이 완료되었습니다.'}
-              {isBlocked &&
+              {isEmailBlocked &&
                 '인증이 차단되었습니다. 페이지를 새로고침 후 다시 시도해주세요.'}
+            </div>
+          </div>
+        )}
+
+        {/* 이메일 인증 성공 상태 표시 */}
+        {isEmailSent && isEmailVerified && (
+          <div className='space-y-2'>
+            <div className='flex items-center space-x-2 p-3 bg-green-50 border border-green-200 rounded-lg'>
+              <CheckCircle className='w-5 h-5 text-green-600 flex-shrink-0' />
+              <div className='flex-1'>
+                <p className='text-green-800 text-sm font-medium'>
+                  이메일 인증이 완료되었습니다
+                </p>
+              </div>
+            </div>
+            <div
+              id='verification-success-status'
+              aria-live='polite'
+              className='sr-only'
+            >
+              이메일 인증이 완료되었습니다. 인증된 이메일: {form.watch('email')}
             </div>
           </div>
         )}
@@ -559,6 +600,9 @@ export const RegisterForm = () => {
             form={form}
             onCheckNickname={handleNicknameCheck}
             isLoading={nicknameLoading}
+            isVerified={
+              nicknameVerified && form.watch('nickname') === verifiedNickname
+            }
           />
           {nicknameError && (
             <p className='text-destructive text-sm'>{nicknameError}</p>
@@ -569,17 +613,16 @@ export const RegisterForm = () => {
         </div>
 
         {/* 회원가입 버튼 */}
-        <Button
+        <ApiButton
           type='submit'
+          isLoading={isLoading}
+          loadingText='회원가입 중...'
           disabled={isSubmitDisabled}
+          onClick={() => {}} // 폼 제출은 onSubmit에서 처리되므로 빈 함수
           className='w-full bg-primary hover:bg-primary-dark text-primary-foreground py-3 rounded-full shadow-soft font-medium text-lg'
         >
-          {isLoading ? (
-            <Loader2 className='w-5 h-5 animate-spin' />
-          ) : (
-            '회원가입'
-          )}
-        </Button>
+          회원가입
+        </ApiButton>
       </form>
 
       {/* 회원가입 결과 모달 */}

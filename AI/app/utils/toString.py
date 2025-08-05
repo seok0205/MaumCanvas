@@ -1,5 +1,6 @@
 def toString(result, category) :
-    if category == "house" :
+    stringVal = ""
+    if category == "HOME" :
         stringVal = f"{len(result)}개의 그림이 탐지되었습니다. "
         counts = {}
         for x in result :
@@ -17,7 +18,7 @@ def toString(result, category) :
                 if value == 1 :
                     elseLst = elseLst + f", {key}"
         stringVal = stringVal + elseLst + "가 탐지되었습니다."
-    if category == "person" :
+    if category == "PERSON1" or "PERSON2" :
         stringVal = f"{len(result)}개의 그림이 탐지되었습니다."
         counts = {}
         for x in result :
@@ -29,7 +30,7 @@ def toString(result, category) :
         for key, value in counts.items() :
             stringVal = stringVal + f"{key}이(가) 탐지되었습니다. "
         stringVal = stringVal + elseLst + "가 탐지되었습니다."
-    if category == "tree" :
+    if category == "TREE" :
         stringVal = f"{len(result)}개의 그림이 탐지되었습니다. "
         counts = {}
         for x in result :

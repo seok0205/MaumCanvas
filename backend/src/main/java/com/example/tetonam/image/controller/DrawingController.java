@@ -24,20 +24,8 @@ public class DrawingController {
     private final DrawingService drawingService;
     private final JwtTokenProvider jwtTokenProvider;
 
-    private final WebClientUtil webClientUtil;
-    @GetMapping("/aiserver")
-    public ResponseEntity<?> getAi() {
 
-        webClientUtil.get("http://i13e108.p.ssafy.io:8000/", testDto.class)
-                .subscribe(result -> {
-                    System.out.println(result.getMessage());
-                }, error -> {
-                    error.printStackTrace();
-                });
-        return ResponseEntity.ok().body(ApiResponse.onSuccess("hi"));
-    }
-
-        @Operation(summary = "그림 저장 API", description = "4장의 그림을 저장합니다..")
+    @Operation(summary = "그림 저장 API", description = "4장의 그림을 저장합니다..")
     @PostMapping()
     public ResponseEntity<?> createDrawing(MultipartFile homeImageUrl,MultipartFile treeImageUrl,MultipartFile humanImageFirstUrl,MultipartFile humanImageSecondUrl,@RequestHeader("Authorization") String token){
         String email = jwtTokenProvider.getEmail(token.substring(7));

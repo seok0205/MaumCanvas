@@ -9,6 +9,8 @@ import com.example.tetonam.exception.handler.BoardHandler;
 import com.example.tetonam.response.code.status.ErrorStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,5 +77,30 @@ public class CommunityService {
 
         Community saved = communityRepository.save(community);
         return saved.getId();
+    }
+
+    @Transactional
+    public void deletePost(Long id){
+        if (!communityRepository.existsById(id)){
+            throw new IllegalArgumentException("게시글이 존재하지 않습니다");
+        }
+        communityRepository.deleteById(id);
+    }
+
+    @Transactional
+    public Community updatePost(Long id, Community updateCommunity){
+        Community community = communityRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("게시글이 존재하지 않습니다."));
+        community.setTitle(updateCommunity.getTitle());
+        community.setContent(updateCommunity.getContent());
+        community.setUpdatedAt(updateCommunity.getCreatedAt());
+        return communityRepository.save(community);
+    }
+
+    public List<Community> getPosts(Long lastId, int size){
+        if(lastId == null){
+            lastId = Long.MAX_VALUE;
+        }
+        Pageable pageable = PageRequest.of(0, size);
+        return communityRepository.findByIdLessThanOrderByIdDesc(lastId, pageable);
     }
 }

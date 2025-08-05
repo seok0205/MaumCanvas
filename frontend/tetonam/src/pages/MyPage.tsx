@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
 
 import { PasswordChangeDialog } from '@/components/forms/PasswordChangeDialog';
 import { AppSidebar } from '@/components/layout/AppSidebar';
@@ -21,9 +20,9 @@ import {
   DialogTrigger,
 } from '@/components/ui/overlay/dialog';
 import { Label } from '@/components/ui/primitives/label';
+import { useNicknameEdit } from '@/hooks/useNicknameEdit';
 import { useUserInfo } from '@/hooks/useUserInfo';
-import { authService } from '@/services/authService';
-import { UserInfoResponse } from '@/types/api';
+import { mapGenderToKorean } from '@/utils/genderMapping';
 import {
   AlertCircle,
   ArrowLeft,
@@ -113,81 +112,32 @@ const MyPageError = React.memo<MyPageErrorProps>(
 
 // 사용자 정보 폼 컴포넌트 분리
 interface MyPageFormProps {
-  userInfo: UserInfoResponse;
+  userInfo: {
+    name: string;
+    nickname: string;
+    email: string;
+    birthday: string;
+    phone: string;
+    school: string;
+    gender: string;
+  };
 }
 
 const MyPageForm = React.memo<MyPageFormProps>(({ userInfo }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [nickname, setNickname] = useState('');
-  const [originalNickname, setOriginalNickname] = useState('');
-  const [isDuplicateChecking, setIsDuplicateChecking] = useState(false);
-  const [isDuplicateChecked, setIsDuplicateChecked] = useState(false);
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
 
-  // 사용자 정보가 로드되면 닉네임 설정
-  useEffect(() => {
-    if (userInfo) {
-      setNickname(userInfo.nickname);
-      setOriginalNickname(userInfo.nickname);
-    }
-  }, [userInfo]);
-
-  // 닉네임 변경 감지
-  useEffect(() => {
-    if (nickname !== originalNickname) {
-      setIsDuplicateChecked(false);
-    }
-  }, [nickname, originalNickname]);
-
-  // 중복확인
-  const handleDuplicateCheck = useCallback(async () => {
-    if (!nickname.trim()) {
-      toast.error('닉네임을 입력해주세요.');
-      return;
-    }
-
-    try {
-      setIsDuplicateChecking(true);
-      await authService.checkNicknameDuplicate(nickname);
-
-      setIsDuplicateChecked(true);
-      toast.success('사용 가능한 닉네임입니다.');
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else {
-        toast.error('닉네임 중복확인에 실패했습니다.');
-      }
-    } finally {
-      setIsDuplicateChecking(false);
-    }
-  }, [nickname]);
-
-  // 저장
-  const handleSave = useCallback(async () => {
-    if (!isDuplicateChecked) {
-      toast.error('중복확인을 완료해주세요.');
-      return;
-    }
-
-    try {
-      await authService.updateMyNickname(nickname);
-
-      setOriginalNickname(nickname);
-      setIsEditing(false);
-      setIsDuplicateChecked(false);
-      toast.success('닉네임이 변경되었습니다.');
-    } catch (error) {
-      toast.error('닉네임 변경에 실패했습니다.');
-    }
-  }, [isDuplicateChecked, nickname]);
-
-  // 취소
-  const handleCancel = useCallback(() => {
-    setNickname(originalNickname);
-    setIsEditing(false);
-    setIsDuplicateChecked(false);
-  }, [originalNickname]);
+  // 닉네임 편집 로직을 커스텀 훅으로 분리
+  const {
+    nickname,
+    isEditing,
+    isDuplicateChecking,
+    isDuplicateChecked,
+    setNickname,
+    setIsEditing,
+    handleDuplicateCheck,
+    handleSave,
+    handleCancel,
+  } = useNicknameEdit(userInfo.nickname);
 
   return (
     <main className='flex-1 overflow-auto p-6'>
@@ -202,7 +152,7 @@ const MyPageForm = React.memo<MyPageFormProps>(({ userInfo }) => {
                   <Button
                     variant='ghost'
                     size='sm'
-                    onClick={useCallback(() => setIsEditing(true), [])}
+                    onClick={() => setIsEditing(true)}
                   >
                     <Edit className='h-4 w-4 mr-2' />
                     수정
@@ -230,11 +180,9 @@ const MyPageForm = React.memo<MyPageFormProps>(({ userInfo }) => {
               <div className='md:col-span-2 flex space-x-2'>
                 <Input
                   value={nickname}
-                  onChange={useCallback(
-                    (e: React.ChangeEvent<HTMLInputElement>) =>
-                      setNickname(e.target.value),
-                    []
-                  )}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setNickname(e.target.value)
+                  }
                   disabled={!isEditing}
                   className='flex-1'
                 />
@@ -243,7 +191,7 @@ const MyPageForm = React.memo<MyPageFormProps>(({ userInfo }) => {
                     variant='outline'
                     onClick={handleDuplicateCheck}
                     disabled={
-                      isDuplicateChecking || nickname === originalNickname
+                      isDuplicateChecking || nickname === userInfo.nickname
                     }
                     className='whitespace-nowrap'
                   >
@@ -303,7 +251,11 @@ const MyPageForm = React.memo<MyPageFormProps>(({ userInfo }) => {
                 성별
               </Label>
               <div className='md:col-span-2'>
-                <Input value={userInfo.gender} disabled className='bg-muted' />
+                <Input
+                  value={mapGenderToKorean(userInfo.gender)}
+                  disabled
+                  className='bg-muted'
+                />
               </div>
             </div>
 
@@ -317,7 +269,7 @@ const MyPageForm = React.memo<MyPageFormProps>(({ userInfo }) => {
                 <Button
                   onClick={handleSave}
                   disabled={
-                    !isDuplicateChecked || nickname === originalNickname
+                    !isDuplicateChecked || nickname === userInfo.nickname
                   }
                 >
                   <Save className='h-4 w-4 mr-2' />
@@ -355,10 +307,7 @@ const MyPageForm = React.memo<MyPageFormProps>(({ userInfo }) => {
                   <DialogTitle>비밀번호 변경</DialogTitle>
                 </DialogHeader>
                 <PasswordChangeDialog
-                  onClose={useCallback(
-                    () => setIsPasswordDialogOpen(false),
-                    []
-                  )}
+                  onClose={() => setIsPasswordDialogOpen(false)}
                 />
               </DialogContent>
             </Dialog>

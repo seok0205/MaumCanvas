@@ -20,10 +20,10 @@ from app.utils.s3imageLoader import s3imageLoader
 #이미지 s3로 받을 때
 @router.post("/json_s3")
 async def predict_json_s3(url, category):
-    if category == "person":
+    if category == "PERSON1" or "PERSON2":
         model = personModel
         class_names = class_names_person
-    elif category == "tree":
+    elif category == "TREE":
         model = treeModel
         class_names = class_names_tree
     else:
@@ -43,10 +43,10 @@ async def predict_json_s3(url, category):
 #이미지 업로드로 받을 때
 @router.post("/json")
 async def predict_json(file: UploadFile = File(...), category: str = Form(...)):
-    if category == "person":
+    if category == "PERSON1" or "PERSON2":
         model = personModel
         class_names = class_names_person
-    elif category == "tree":
+    elif category == "TREE":
         model = treeModel
         class_names = class_names_tree
     else:
@@ -64,10 +64,10 @@ async def predict_json(file: UploadFile = File(...), category: str = Form(...)):
 
 @router.post("/image")
 async def predict_image(file: UploadFile = File(...), category: str = Form(...)):
-    if category == "person":
+    if category == "PERSON1" or "PERSON2":
         model = personModel
         class_names = class_names_person
-    elif category == "tree":
+    elif category == "TREE":
         model = treeModel
         class_names = class_names_tree
     else:

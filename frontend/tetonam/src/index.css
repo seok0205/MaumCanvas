@@ -2,6 +2,60 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Pretendard Font - 로컬 폰트 정의 */
+@font-face {
+  font-family: 'Pretendard';
+  src: url('/fonts/Pretendard-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap; /* FOUT 방지를 위한 즉시 표시 */
+  unicode-range:
+    U+AC00-D7AF, U+0041-005A, U+0061-007A, U+0030-0039; /* 한글 + 영문 + 숫자 */
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  src: url('/fonts/Pretendard-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+AC00-D7AF, U+0041-005A, U+0061-007A, U+0030-0039;
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  src: url('/fonts/Pretendard-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+AC00-D7AF, U+0041-005A, U+0061-007A, U+0030-0039;
+}
+
+/* 폰트 로딩 최적화를 위한 CSS */
+.font-loading {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR',
+    'Malgun Gothic', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.font-loaded {
+  font-family:
+    'Pretendard',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Apple SD Gothic Neo',
+    'Noto Sans KR',
+    'Malgun Gothic',
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    sans-serif;
+  opacity: 1;
+}
+
 /* 청소년 친화적 디자인 시스템 */
 
 @layer base {
@@ -52,8 +106,7 @@
     /* 그라디언트 정의 */
     --gradient-warm: linear-gradient(
       135deg,
-      hsl(160 84% 39% / 0.1),
-      hsl(45 93% 47% / 0.1),
+      /* hsl(160 84% 39% / 0.1), */ hsl(45 93% 47% / 0.1),
       hsl(25 95% 53% / 0.1)
     );
     --gradient-primary: linear-gradient(
@@ -203,6 +256,19 @@
     font-feature-settings:
       'rlig' 1,
       'calt' 1;
+    /* 폰트 로딩 상태에 따른 동적 폰트 적용 */
+    font-family:
+      'Pretendard',
+      -apple-system,
+      BlinkMacSystemFont,
+      'Apple SD Gothic Neo',
+      'Noto Sans KR',
+      'Malgun Gothic',
+      'Segoe UI',
+      Roboto,
+      'Helvetica Neue',
+      Arial,
+      sans-serif;
   }
 
   /* 부드러운 스크롤 */

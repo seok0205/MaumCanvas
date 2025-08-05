@@ -2,6 +2,7 @@ package com.example.tetonam.user.controller;
 
 
 import com.example.tetonam.user.domain.JwtToken;
+import com.example.tetonam.user.domain.School;
 import com.example.tetonam.user.dto.*;
 import com.example.tetonam.user.service.UserService;
 import com.example.tetonam.user.token.JwtTokenProvider;
@@ -11,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -22,7 +25,35 @@ public class UserController {
 
     private final JwtTokenProvider jwtTokenProvider;
 
+    /**
+     * 학교 전체 목록 반환
+     * @return
+     */
+    @GetMapping("/school-list")
+    @Operation(summary = "학교목록 API", description = "학교 목록을 반환합니다.")
+    public ResponseEntity<?> schoolList() {
+        List<School> schoolList=userService.schoolList();
+        return ResponseEntity.ok().body(ApiResponse.onSuccess(schoolList));
+    }
 
+    /**
+     * 특정 학교 검색하기
+     * @param name
+     * @return
+     */
+    @GetMapping("/school/{name}")
+    @Operation(summary = "학교검색 API", description = "학교 검색 결과 반환합니다.")
+    public ResponseEntity<?> schoolSearch(@PathVariable String name) {
+        List<School> schoolList=userService.schoolSearch(name);
+        return ResponseEntity.ok().body(ApiResponse.onSuccess(schoolList));
+    }
+
+
+    /**
+     * 마이페이지 내 정보보기
+     * @param token
+     * @return
+     */
     @GetMapping("/my-info")
     @Operation(summary = "마이페이지 API", description = "마이페이지 정보를 반환합니다.")
     public ResponseEntity<?> myInfo(@RequestHeader("Authorization") String token) {
@@ -150,5 +181,6 @@ public class UserController {
         String result=userService.mypageResetNickname(email,nickname);
         return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
     }
+
 
 }

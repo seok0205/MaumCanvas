@@ -1,5 +1,6 @@
 package com.example.tetonam.community.controller;
 
+import com.example.tetonam.community.domain.Community;
 import com.example.tetonam.community.dto.PostListDto;
 import com.example.tetonam.community.dto.PostWriteDto;
 import com.example.tetonam.community.service.CommunityService;
@@ -41,5 +42,25 @@ public class CommunityController {
     public ResponseEntity<Long> createPost(@RequestBody PostWriteDto dto) {
         Long postId = communityService.writePost(dto);
         return ResponseEntity.ok(postId);
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "글 삭제 API", description = "등록된 글을 삭제합니다")
+    public ResponseEntity<Void> deletePost(@PathVariable Long id){
+        communityService.deletePost(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "글 수정 API", description = "등록된 글을 수정합니다")
+    public ResponseEntity<Community> updatePost(@PathVariable Long id, @RequestBody Community updatedCommunity){
+        Community community = communityService.updatePost(id, updatedCommunity);
+        return ResponseEntity.ok(community);
+    }
+
+    @GetMapping
+    @Operation(summary = "게시판 10개 단위 조회 API", description = "10개 단위로 커서를 활용하여 조회합니다")
+    public ResponseEntity<List<Community>> getPosts(@RequestParam(required = false) Long lastId, @RequestParam(defaultValue = "10") int size){
+        return ResponseEntity.ok(communityService.getPosts(lastId, size));
     }
 }

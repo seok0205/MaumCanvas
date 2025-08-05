@@ -69,7 +69,7 @@ export interface UserInfoResponse {
   phone: string;
   school: string;
   email: string;
-  gender: string;
+  gender: string; // 백엔드 API 응답과 일치하도록 string 유지
   nickname: string;
   roles: string[]; // 백엔드에서 제공하는 roles 배열
 }

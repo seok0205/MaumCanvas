@@ -1,9 +1,9 @@
+import { ApiButton } from '@/components/ui/ApiButton';
 import { Input } from '@/components/ui/forms/input';
-import { Button } from '@/components/ui/interactive/button';
 import { Label } from '@/components/ui/primitives/label';
 import { emailSchema, type EmailFormData } from '@/types/passwordReset';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, Mail } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
 interface EmailStepFormProps {
@@ -52,6 +52,7 @@ export const EmailStepForm = ({
         )}
       </div>
 
+      {/* 인라인 메시지 (성공/에러) */}
       {message && (
         <div
           className={`p-3 border rounded-lg ${
@@ -71,17 +72,15 @@ export const EmailStepForm = ({
         </div>
       )}
 
-      <Button
+      <ApiButton
         type='submit'
-        disabled={isLoading}
+        isLoading={isLoading}
+        loadingText='인증 코드 전송 중...'
+        onClick={() => {}} // 폼 제출은 onSubmit에서 처리되므로 빈 함수
         className='w-full bg-primary hover:bg-primary-dark text-primary-foreground py-3 rounded-full shadow-soft font-medium'
       >
-        {isLoading ? (
-          <Loader2 className='w-5 h-5 animate-spin' />
-        ) : (
-          '인증 코드 전송'
-        )}
-      </Button>
+        인증 코드 전송
+      </ApiButton>
     </form>
   );
 };
