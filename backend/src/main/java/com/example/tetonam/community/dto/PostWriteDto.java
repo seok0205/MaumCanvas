@@ -1,6 +1,7 @@
 package com.example.tetonam.community.dto;
 
 import com.example.tetonam.community.domain.Category;
+import com.example.tetonam.user.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,5 +13,4 @@ public class PostWriteDto {
     private String title;
     private String content;
     private Category category;
-    private String author;
 }
