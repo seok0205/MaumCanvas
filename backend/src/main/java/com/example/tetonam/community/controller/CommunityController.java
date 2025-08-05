@@ -1,5 +1,6 @@
 package com.example.tetonam.community.controller;
 
+import com.example.tetonam.community.domain.Community;
 import com.example.tetonam.community.dto.PostListDto;
 import com.example.tetonam.community.dto.PostWriteDto;
 import com.example.tetonam.community.service.CommunityService;
@@ -48,5 +49,12 @@ public class CommunityController {
     public ResponseEntity<Void> deletePost(@PathVariable Long id){
         communityService.deletePost(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "글 수정 API", description = "등록된 글을 수정합니다")
+    public ResponseEntity<Community> updatePost(@PathVariable Long id, @RequestBody Community updatedCommunity){
+        Community community = communityService.updatePost(id, updatedCommunity);
+        return ResponseEntity.ok(community);
     }
 }
