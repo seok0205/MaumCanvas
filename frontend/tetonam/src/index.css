@@ -55,8 +55,7 @@
     /* 그라디언트 정의 */
     --gradient-warm: linear-gradient(
       135deg,
-      hsl(160 84% 39% / 0.1),
-      hsl(45 93% 47% / 0.1),
+      /* hsl(160 84% 39% / 0.1), */ hsl(45 93% 47% / 0.1),
       hsl(25 95% 53% / 0.1)
     );
     --gradient-primary: linear-gradient(
