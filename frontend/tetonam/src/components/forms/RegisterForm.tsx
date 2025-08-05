@@ -195,6 +195,11 @@ const RegisterResultDialog = ({
 };
 
 export const RegisterForm = () => {
+  // ...existing code...
+
+  // 디버깅용: 주요 상태 콘솔 출력 (return문 바로 위에서 실행)
+
+  // ...existing code...
   const [showRegisterResultModal, setShowRegisterResultModal] = useState(false);
   const [registerResult, setRegisterResult] = useState<{
     isSuccess: boolean;
@@ -431,6 +436,17 @@ export const RegisterForm = () => {
     !selectedSchool ||
     (form.watch('nickname') !== '' &&
       form.watch('nickname') !== verifiedNickname);
+
+  // 디버깅용: 주요 상태 콘솔 출력 (렌더마다)
+  useEffect(() => {
+    console.log('[RegisterForm] formState:', form?.formState);
+    console.log('[RegisterForm] isEmailVerified:', isEmailVerified);
+    console.log('[RegisterForm] nicknameVerified:', nicknameVerified);
+    console.log('[RegisterForm] selectedSchool:', selectedSchool);
+    console.log('[RegisterForm] verifiedNickname:', verifiedNickname);
+    console.log('[RegisterForm] 닉네임:', form?.watch('nickname'));
+    console.log('[RegisterForm] isSubmitDisabled:', isSubmitDisabled);
+  });
 
   return (
     <FormLayout title='회원가입'>
