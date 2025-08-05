@@ -1,0 +1,30 @@
+package com.example.tetonam.image.domain;
+
+import com.example.tetonam.image.service.enums.DrawingCategory;
+import com.example.tetonam.util.BaseTime;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class DrawingResult {
+    @Column(name = "drawing_result_id", updatable = false, unique = true, nullable = false)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
+    @Column(nullable = false)
+    private String drawingResult;
+
+    @JoinColumn(name="drawing_id")
+    @OneToOne
+    private Drawing drawing;
+
+
+}
