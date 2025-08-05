@@ -444,14 +444,16 @@ export const RegisterForm = () => {
           </Label>
           <div className='flex space-x-2'>
             <div className='relative flex-1'>
-              <Mail className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4' />
-              <Input
-                id='email'
-                type='email'
-                placeholder='이메일을 입력하세요'
-                className='pl-10'
-                {...form.register('email')}
-              />
+              <div className='relative'>
+                <Mail className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 pointer-events-none' />
+                <Input
+                  id='email'
+                  type='email'
+                  placeholder='이메일을 입력하세요'
+                  className='pl-10'
+                  {...form.register('email')}
+                />
+              </div>
               {form.formState.errors.email && (
                 <p className='text-destructive text-sm'>
                   {form.formState.errors.email.message}
