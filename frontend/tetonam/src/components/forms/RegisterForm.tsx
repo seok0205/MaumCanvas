@@ -486,13 +486,20 @@ export const RegisterForm = () => {
             <Button
               type='button'
               onClick={() => sendEmailVerification(form.getValues('email'))}
-              disabled={!form.watch('email') || emailLoading || isEmailBlocked}
+              disabled={
+                !form.watch('email') ||
+                emailLoading ||
+                isEmailBlocked ||
+                isEmailVerified
+              }
               variant='outline'
               size='sm'
               className='whitespace-nowrap'
             >
               {emailLoading ? (
                 <Loader2 className='w-4 h-4 animate-spin' />
+              ) : isEmailSent ? (
+                '재발송'
               ) : (
                 '인증번호 발송'
               )}
