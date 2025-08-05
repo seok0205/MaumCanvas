@@ -8,7 +8,7 @@ interface UseNicknameCheckReturn {
   isLoading: boolean;
   error: string | null;
   successMessage: string | null;
-  checkNickname: (nickname: string, signal?: AbortSignal) => Promise<void>;
+  checkNickname: (nickname: string, signal?: AbortSignal) => Promise<boolean>;
   resetState: () => void;
 }
 
@@ -41,14 +41,14 @@ export const useNicknameCheck = (): UseNicknameCheckReturn => {
   }, []);
 
   const checkNickname = useCallback(
-    async (nickname: string, signal?: AbortSignal): Promise<void> => {
+    async (nickname: string, signal?: AbortSignal): Promise<boolean> => {
       const validationError = validateNickname(nickname);
       if (validationError) {
         setError(validationError);
         setSuccessMessage(null);
         setIsNicknameChecked(false);
         setIsAvailable(false);
-        return;
+        return false; // 유효성 검사 실패 시 false 반환
       }
 
       setIsLoading(true);
@@ -59,28 +59,27 @@ export const useNicknameCheck = (): UseNicknameCheckReturn => {
         // 실제 닉네임 중복 체크 API 호출
         await authService.checkNicknameDuplicate(nickname, signal);
 
+        // 200 코드를 받았을 때만 성공으로 처리
         setIsNicknameChecked(true);
         setIsAvailable(true);
         setSuccessMessage('해당 닉네임을 사용할 수 있습니다.');
+        return true; // 성공 시 true 반환
       } catch (error) {
         // AbortError는 사용자에게 표시하지 않음
         if (error instanceof Error && error.name === 'AbortError') {
-          return;
+          return false;
         }
 
-        // AuthenticationError의 경우 구체적인 메시지 사용
-        if (error instanceof Error) {
-          const errorMessage = error.message;
-          setError(errorMessage);
-          setSuccessMessage(null);
-          setIsNicknameChecked(false);
-          setIsAvailable(false);
-        } else {
-          setError('닉네임 확인에 실패했습니다.');
-          setSuccessMessage(null);
-          setIsNicknameChecked(false);
-          setIsAvailable(false);
-        }
+        // 모든 에러 상황에서 실패로 처리
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : '닉네임 확인에 실패했습니다.';
+        setError(errorMessage);
+        setSuccessMessage(null);
+        setIsNicknameChecked(false);
+        setIsAvailable(false);
+        return false; // 실패 시 false 반환
       } finally {
         setIsLoading(false);
       }
