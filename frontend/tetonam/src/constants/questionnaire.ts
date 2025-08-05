@@ -404,3 +404,15 @@ export const getQuestionnaireResultLevel = (
     ) || category.resultLevels[0]
   );
 };
+
+// ✅ 하드코딩된 메시지들을 상수로 분리
+export const QUESTIONNAIRE_MESSAGES = {
+  LOADING: '로딩 중...',
+  ALL_QUESTIONS_REQUIRED: '모든 질문에 답변해주세요.',
+  SUBMIT_BUTTON_TEXT: '결과 확인하기',
+  REMAINING_QUESTIONS: (count: number) => `${count}개 질문 남음`,
+  PROGRESS_LABEL: '진행률',
+  SUBMIT_ERROR_TITLE: '제출 실패',
+  SUBMIT_ERROR_MESSAGE: '설문 제출 중 오류가 발생했습니다. 다시 시도해주세요.',
+  VALIDATION_ERROR_TITLE: '입력 확인',
+} as const;
