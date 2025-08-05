@@ -9,7 +9,7 @@ export const schoolService = {
   getSchoolList: async (): Promise<School[]> => {
     try {
       const response =
-        await apiClient.get<SchoolSearchResponse>('/user/school-list');
+        await apiClient.get<SchoolSearchResponse>('/api/user/school-list');
 
       // API 응답 검증
       if (!response.data.isSuccess) {
@@ -28,7 +28,7 @@ export const schoolService = {
   searchSchool: async (name: string): Promise<School[]> => {
     try {
       const response = await apiClient.get<SchoolSearchResponse>(
-        `/user/school/${encodeURIComponent(name)}`
+        `/api/user/school/${encodeURIComponent(name)}`
       );
 
       // HTTP 상태 코드 확인
