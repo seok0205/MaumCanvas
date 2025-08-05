@@ -3,14 +3,20 @@ package com.example.tetonam.image.service;
 import com.example.tetonam.exception.handler.UserHandler;
 import com.example.tetonam.image.domain.Drawing;
 import com.example.tetonam.image.domain.DrawingList;
+import com.example.tetonam.image.domain.DrawingResult;
+import com.example.tetonam.image.dto.testDto;
 import com.example.tetonam.image.repository.DrawingListRepository;
 import com.example.tetonam.image.repository.DrawingRepository;
+import com.example.tetonam.image.repository.DrawingResultRepository;
 import com.example.tetonam.image.service.enums.DrawingCategory;
 import com.example.tetonam.response.code.status.ErrorStatus;
 import com.example.tetonam.user.domain.User;
 import com.example.tetonam.user.repository.UserRepository;
+import com.example.tetonam.util.WebClientUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -23,7 +29,12 @@ public class DrawingService {
     private final AwsS3Service awsS3Service;
     private final DrawingRepository drawingRepository;
     private final DrawingListRepository drawingListRepository;
+    private final WebClientUtil webClientUtil;
+    private final DrawingResultRepository drawingResultRepository;
+    @Value("${ai.server.url}")
+    private String AI_SERVER_URL;
 
+    @Transactional
     public String createDrawing(String email, List<MultipartFile> multipartFile) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
@@ -33,14 +44,33 @@ public class DrawingService {
 
 
         for(int i=0;i<4;i++){
-            drawingRepository.save(Drawing.builder()
-                            .imageUrl(fileNameList.get(i))
-                            .drawingList(drawingList)
-                            .drawingCategory(DrawingCategory.values()[i])
-                    .build());
+            Drawing drawing =Drawing.builder()
+                    .imageUrl(fileNameList.get(i))
+                    .drawingList(drawingList)
+                    .drawingCategory(DrawingCategory.values()[i])
+                    .build();
+            drawingRepository.save(drawing);
+            drawingResult(drawing);
         }
 
-
         return "그림이 저장되었습니다";
+    }
+
+    public void drawingResult(Drawing drawing){
+        String imageUrl=drawing.getImageUrl();
+//        String category="house";
+        String category=drawing.getDrawingCategory().toString();
+        String url = AI_SERVER_URL+"/predict/json_s3?url=" + imageUrl + "&category=" + category;
+
+        System.out.println(url);
+        webClientUtil.post(url, "", String.class)
+                .subscribe(result -> {
+                    drawingResultRepository.save(DrawingResult.builder()
+                                    .drawing(drawing)
+                                    .drawingResult(result)
+                            .build());
+                }, error -> {
+                    error.printStackTrace();
+                });
     }
 }
