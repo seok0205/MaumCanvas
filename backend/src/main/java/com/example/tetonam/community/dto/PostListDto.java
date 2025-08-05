@@ -29,7 +29,7 @@ public class PostListDto {
                 .title(community.getTitle())
                 .content(community.getContent())
                 .category(community.getCategory())
-                .author(community.getAuthor())
+                .author(community.getAuthor().toString())
                 .viewCount(community.getViewCount())
                 .createdAt(community.getCreatedAt())
                 .updatedAt(community.getUpdatedAt())

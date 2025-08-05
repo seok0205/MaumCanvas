@@ -7,6 +7,8 @@ import com.example.tetonam.community.dto.PostWriteDto;
 import com.example.tetonam.community.repository.CommunityRepository;
 import com.example.tetonam.exception.handler.BoardHandler;
 import com.example.tetonam.response.code.status.ErrorStatus;
+import com.example.tetonam.user.domain.User;
+import com.example.tetonam.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 public class CommunityService {
 
     private final CommunityRepository communityRepository;
+    private final UserRepository userRepository;
 
     /**
      * 게시글 목록 조회
@@ -64,19 +67,17 @@ public class CommunityService {
 
 
     // 글 작성 api
-    public Long writePost(PostWriteDto dto) {
+    public Long writePost(PostWriteDto dto, String email) {
+        User author = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("일치하는 정보가 없습니다"));
         Community community = Community.builder()
                 .title(dto.getTitle())
                 .content(dto.getContent())
+                .author(author)
                 .category(dto.getCategory())
-                .author(dto.getAuthor())
-                .viewCount(0)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build();
-
-        Community saved = communityRepository.save(community);
-        return saved.getId();
+        communityRepository.save(community);
+        return community.getId();
     }
 
     @Transactional
