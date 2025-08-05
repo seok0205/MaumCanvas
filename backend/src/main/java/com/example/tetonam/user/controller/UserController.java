@@ -2,6 +2,7 @@ package com.example.tetonam.user.controller;
 
 
 import com.example.tetonam.user.domain.JwtToken;
+import com.example.tetonam.user.domain.School;
 import com.example.tetonam.user.dto.*;
 import com.example.tetonam.user.service.UserService;
 import com.example.tetonam.user.token.JwtTokenProvider;
@@ -12,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -21,6 +24,14 @@ public class UserController {
     private final UserService userService;
 
     private final JwtTokenProvider jwtTokenProvider;
+
+    @GetMapping("/school-list")
+    @Operation(summary = "학교목록 API", description = "학교 목록을 반환합니다.")
+    public ResponseEntity<?> schoolList() {
+        List<School> schoolList=userService.schoolList();
+        return ResponseEntity.ok().body(ApiResponse.onSuccess(schoolList));
+    }
+
 
 
     @GetMapping("/my-info")
@@ -150,5 +161,6 @@ public class UserController {
         String result=userService.mypageResetNickname(email,nickname);
         return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
     }
+
 
 }
