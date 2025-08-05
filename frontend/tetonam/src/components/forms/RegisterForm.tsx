@@ -14,7 +14,6 @@ import {
   GenderField,
   NameField,
   NicknameField,
-  OrganizationField,
   PhoneField,
 } from '@/components/forms/RegisterFormFields';
 import { ApiButton } from '@/components/ui/ApiButton';
@@ -39,7 +38,9 @@ import { useEmailVerification } from '@/hooks/useEmailVerification';
 import { useNicknameCheck } from '@/hooks/useNicknameCheck';
 import { useSubmitButton } from '@/hooks/useSubmitButton';
 import { useAuthStore } from '@/stores/useAuthStore';
+import type { School } from '@/types/school';
 import { roleToRolesArray } from '@/utils/userRoleMapping';
+import { SchoolSearchInput } from './SchoolSearchInput';
 
 const registerSchema = z
   .object({
@@ -201,6 +202,8 @@ export const RegisterForm = () => {
   const [nicknameVerified, setNicknameVerified] = useState(false);
   const [verifiedNickname, setVerifiedNickname] = useState<string>(''); // 중복 체크 완료된 닉네임 저장
   const [showAuthFailureModal, setShowAuthFailureModal] = useState(false);
+  const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
+  const [schoolSearchValue, setSchoolSearchValue] = useState('');
 
   const { register } = useAuthActions();
   const { selectedUserRole } = useAuthStore();
@@ -312,6 +315,10 @@ export const RegisterForm = () => {
         throw new Error('사용자 역할이 선택되지 않았습니다.');
       }
 
+      if (!selectedSchool) {
+        throw new Error('학교를 선택해주세요.');
+      }
+
       const success = await register({
         name: data.name,
         email: data.email,
@@ -320,7 +327,7 @@ export const RegisterForm = () => {
         gender: data.gender.toUpperCase() as 'MALE' | 'FEMALE' | 'OTHERS',
         phone: data.phone,
         school: {
-          name: data.organization,
+          name: selectedSchool.name,
         },
         birthday: data.birthDate,
         roles: roleToRolesArray(selectedUserRole),
@@ -421,6 +428,7 @@ export const RegisterForm = () => {
     !form.formState.isValid ||
     !isEmailVerified ||
     !nicknameVerified ||
+    !selectedSchool ||
     (form.watch('nickname') !== '' &&
       form.watch('nickname') !== verifiedNickname);
 
@@ -430,7 +438,29 @@ export const RegisterForm = () => {
 
       <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
         <NameField form={form} />
-        <OrganizationField form={form} />
+
+        {/* 학교 검색 */}
+        <div className='space-y-2'>
+          <Label htmlFor='school' className='text-foreground font-medium'>
+            학교 *
+          </Label>
+          <SchoolSearchInput
+            value={schoolSearchValue}
+            onChange={setSchoolSearchValue}
+            onSelect={school => {
+              setSelectedSchool(school);
+              setSchoolSearchValue(school.name);
+            }}
+            placeholder='학교명을 입력하세요'
+            className='w-full'
+          />
+          {selectedSchool && (
+            <div className='mt-1 text-sm text-green-600'>
+              선택된 학교: {selectedSchool.name}
+            </div>
+          )}
+        </div>
+
         <BirthDateField
           form={form}
           currentDate={currentDate}
