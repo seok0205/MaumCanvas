@@ -3,7 +3,6 @@ import { useCallback, useEffect, useState } from 'react';
 
 // 2. 외부 라이브러리
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Check, Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -13,10 +12,11 @@ import { EmailInput } from '@/components/ui/forms/EmailInput';
 import { FormLayout } from '@/components/ui/forms/FormLayout';
 import { PasswordInput } from '@/components/ui/forms/PasswordInput';
 import { PrivacyNotice } from '@/components/ui/forms/PrivacyNotice';
-import { Button } from '@/components/ui/interactive/button';
+import { ApiButton } from '@/components/ui/ApiButton';
 import { FORM_MESSAGES } from '@/constants/forms';
 import { useAuthActions } from '@/hooks/useAuthActions';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useSubmitButton } from '@/hooks/useSubmitButton';
 
 const loginSchema = z.object({
   email: z.email({ message: FORM_MESSAGES.VALIDATION.EMAIL_INVALID }),
@@ -28,8 +28,6 @@ const loginSchema = z.object({
 interface LoginFormData extends z.infer<typeof loginSchema> {}
 
 export const LoginForm = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { login } = useAuthActions();
   const navigate = useNavigate();
@@ -53,35 +51,33 @@ export const LoginForm = () => {
     }
   }, [isAuthenticated, navigate, location]);
 
+  const { handleSubmit, isLoading, isSuccess } = useSubmitButton({
+    mutationFn: async (data: LoginFormData) => {
+      const success = await login(data.email, data.password);
+      if (!success) {
+        throw new Error('이메일 또는 비밀번호를 확인해주세요.');
+      }
+      return success;
+    },
+    onSuccess: () => {
+      setErrorMessage(null);
+      // 체크 아이콘을 잠깐 보여준 후 원래 페이지로 이동
+      setTimeout(() => {
+        const from = location.state?.from?.pathname || '/dashboard';
+        navigate(from, { replace: true });
+      }, 1000);
+    },
+    onError: (error) => {
+      setErrorMessage(error.message);
+    },
+  });
+
   const onSubmit = useCallback(
     async (data: LoginFormData) => {
-      setIsLoading(true);
-      setIsSuccess(false);
-      setErrorMessage(null);
-
-      try {
-        const success = await login(data.email, data.password);
-        if (success) {
-          setIsSuccess(true);
-          // 체크 아이콘을 잠깐 보여준 후 원래 페이지로 이동
-          setTimeout(() => {
-            const from = location.state?.from?.pathname || '/dashboard';
-            navigate(from, { replace: true });
-          }, 1000);
-        } else {
-          setErrorMessage('이메일 또는 비밀번호를 확인해주세요.');
-        }
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : '로그인 중 문제가 발생했습니다.';
-        setErrorMessage(errorMessage);
-      } finally {
-        setIsLoading(false);
-      }
+      setErrorMessage(null); // 폼 제출 시 에러 메시지 초기화
+      await handleSubmit(data);
     },
-    [login, navigate]
+    [handleSubmit]
   );
 
   return (
@@ -105,30 +101,25 @@ export const LoginForm = () => {
           />
         </div>
 
+        {/* 인라인 에러 메시지 */}
         {errorMessage && (
-          <div>
-            <div className='p-4 bg-destructive/10 border border-destructive/20 rounded-xl'>
-              <p className='text-destructive text-sm' role='alert'>
-                {errorMessage}
-              </p>
-            </div>
+          <div className='p-4 bg-destructive/10 border border-destructive/20 rounded-xl'>
+            <p className='text-destructive text-sm' role='alert'>
+              {errorMessage}
+            </p>
           </div>
         )}
 
         <div>
-          <Button
+          <ApiButton
             type='submit'
-            disabled={isLoading || isSuccess}
+            isLoading={isLoading}
+            loadingText='로그인 중...'
+            onClick={() => {}} // 폼 제출은 onSubmit에서 처리되므로 빈 함수
             className='w-full bg-gradient-mint hover:bg-mint-dark text-white py-4 rounded-2xl shadow-soft hover:shadow-medium font-medium text-lg transform-gpu'
           >
-            {isLoading ? (
-              <Loader2 className='w-6 h-6 animate-spin' />
-            ) : isSuccess ? (
-              <Check className='w-6 h-6' />
-            ) : (
-              '로그인'
-            )}
-          </Button>
+            {isSuccess ? '로그인 성공!' : '로그인'}
+          </ApiButton>
         </div>
 
         <div className='text-center space-y-4'>
