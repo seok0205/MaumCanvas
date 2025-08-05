@@ -6,6 +6,11 @@ import type {
   UpcomingCounseling,
 } from '@/types/api';
 import { AuthenticationError } from '@/types/auth';
+import {
+  handleApiError,
+  handleHttpError,
+  handleNetworkError,
+} from '@/utils/errorHandler';
 import type { AxiosError } from 'axios';
 import { apiClient } from './apiClient';
 
@@ -58,26 +63,17 @@ export const counselingService = {
         axiosError.code === 'NETWORK_ERROR' ||
         axiosError.code === 'ERR_NETWORK'
       ) {
-        throw new AuthenticationError(
-          'NETWORK_ERROR',
-          '네트워크 연결을 확인해주세요.'
-        );
+        throw handleNetworkError(axiosError);
+      }
+
+      // HTTP 상태 코드 기반 에러 처리
+      if (axiosError.response?.status) {
+        throw handleHttpError(axiosError.response.status);
       }
 
       // API 에러 처리
       if (axiosError.response?.data) {
-        const apiError = axiosError.response.data;
-        switch (apiError.code) {
-          case 'COMMON400': // 잘못된 요청입니다
-          case 'COMMON401': // 인증이 필요합니다
-          case 'COMMON403': // 금지된 요청입니다
-          case 'COMMON500': // 서버 에러
-          default:
-            throw new AuthenticationError(
-              apiError.code || 'COUNSELOR_FETCH_FAILED',
-              '상담사 조회에 실패했습니다. 다시 시도해주세요.'
-            );
-        }
+        throw handleApiError(axiosError.response.data);
       }
 
       throw new AuthenticationError(
@@ -126,27 +122,17 @@ export const counselingService = {
         axiosError.code === 'NETWORK_ERROR' ||
         axiosError.code === 'ERR_NETWORK'
       ) {
-        throw new AuthenticationError(
-          'NETWORK_ERROR',
-          '네트워크 연결을 확인해주세요.'
-        );
+        throw handleNetworkError(axiosError);
+      }
+
+      // HTTP 상태 코드 기반 에러 처리
+      if (axiosError.response?.status) {
+        throw handleHttpError(axiosError.response.status);
       }
 
       // API 에러 처리
       if (axiosError.response?.data) {
-        const apiError = axiosError.response.data;
-        switch (apiError.code) {
-          case 'COUNSELING4000': // 이미 예약된 시간입니다
-          case 'COMMON400': // 잘못된 요청입니다
-          case 'COMMON401': // 인증이 필요합니다
-          case 'COMMON403': // 금지된 요청입니다
-          case 'COMMON500': // 서버 에러
-          default:
-            throw new AuthenticationError(
-              apiError.code || 'COUNSELING_RESERVE_FAILED',
-              '상담 예약에 실패했습니다. 다시 시도해주세요.'
-            );
-        }
+        throw handleApiError(axiosError.response.data);
       }
 
       throw new AuthenticationError(
