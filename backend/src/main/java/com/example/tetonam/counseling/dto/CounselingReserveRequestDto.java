@@ -16,7 +16,7 @@ import java.time.LocalTime;
 public class CounselingReserveRequestDto {
     private LocalDateTime time;
     private String types;
-    private Long CounselorId;
+    private Long counselorId;
 
     public static Counseling toEntity(User student, User counselor,CounselingReserveRequestDto counselingReserveRequestDto){
         return Counseling.builder()
