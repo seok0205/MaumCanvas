@@ -6,6 +6,18 @@ import type { QuestionnaireCategory, QuestionnaireResult } from '@/types/api';
 import type { QuestionnaireSubmission } from '@/types/questionnaire';
 import { apiClient } from './apiClient';
 
+// ✅ 백엔드 DTO와 일치하는 타입 정의
+interface ShowAllQuestionnaireDto {
+  category: QuestionnaireCategory;
+  score: string;
+}
+
+interface ShowCategoryQuestionnaireDto {
+  category: QuestionnaireCategory;
+  score: string;
+  createdDate: string; // LocalDateTime은 ISO string으로 전송됨
+}
+
 interface QuestionnaireApiResponse {
   isSuccess: boolean;
   code: string;
@@ -83,10 +95,23 @@ const getAllCategoriesQuestionnaireResults = async (
     // ✅ 실제 API 구현 시에는 각 카테고리별로 API 호출
     for (const category of categories) {
       try {
-        const response = await apiClient.get<QuestionnaireResult[]>(
-          `/api/mind/questionnaire/results/${category}`
-        );
-        results[category] = response.data || [];
+        const response = await apiClient.get<{
+          isSuccess: boolean;
+          code: string;
+          message: string;
+          result: ShowCategoryQuestionnaireDto[];
+        }>(`/api/mind/questionnaire/${category}`);
+
+        if (response.data.isSuccess && response.data.result) {
+          // 백엔드 DTO를 프론트엔드 결과 형태로 변환
+          results[category] = response.data.result.map(item => ({
+            category: item.category,
+            score: parseInt(item.score, 10),
+            createdDate: item.createdDate, // ISO 형식 날짜 문자열 유지
+          }));
+        } else {
+          results[category] = [];
+        }
       } catch (error) {
         console.error(`${category} 설문 결과 조회 실패:`, error);
         results[category] = [];
@@ -100,10 +125,62 @@ const getAllCategoriesQuestionnaireResults = async (
   }
 };
 
+// ✅ 백엔드의 전체 설문 결과 조회 API 활용
+const getAllQuestionnaireResults = async (): Promise<
+  ShowAllQuestionnaireDto[]
+> => {
+  try {
+    const response = await apiClient.get<{
+      isSuccess: boolean;
+      code: string;
+      message: string;
+      result: ShowAllQuestionnaireDto[];
+    }>('/api/mind/questionnaire');
+
+    if (!response.data.isSuccess || !response.data.result) {
+      throw new Error(
+        response.data.message || '설문 결과 조회에 실패했습니다.'
+      );
+    }
+
+    return response.data.result;
+  } catch (error) {
+    console.error('전체 설문 결과 조회 실패:', error);
+    throw new Error('설문 결과를 가져오는데 실패했습니다.');
+  }
+};
+
+// ✅ 특정 카테고리의 설문 결과 조회 API 활용
+const getCategoryQuestionnaireResults = async (
+  category: QuestionnaireCategory
+): Promise<ShowCategoryQuestionnaireDto[]> => {
+  try {
+    const response = await apiClient.get<{
+      isSuccess: boolean;
+      code: string;
+      message: string;
+      result: ShowCategoryQuestionnaireDto[];
+    }>(`/api/mind/questionnaire/${category}`);
+
+    if (!response.data.isSuccess || !response.data.result) {
+      throw new Error(
+        response.data.message || '설문 결과 조회에 실패했습니다.'
+      );
+    }
+
+    return response.data.result;
+  } catch (error) {
+    console.error(`${category} 설문 결과 조회 실패:`, error);
+    throw new Error('설문 결과를 가져오는데 실패했습니다.');
+  }
+};
+
 // ✅ Named exports 사용 (가이드라인 준수)
 export {
   calculateQuestionnaireResult,
   getAllCategoriesQuestionnaireResults,
+  getAllQuestionnaireResults,
+  getCategoryQuestionnaireResults,
   submitQuestionnaire,
   submitQuestionnaireAndGetResult,
 };
