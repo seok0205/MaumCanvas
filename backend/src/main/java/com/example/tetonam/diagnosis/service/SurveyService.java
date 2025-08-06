@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class SurveyService {
     private final SurveyRepository surveyRepository;
     private final UserRepository userRepository;
-    public String questionnaireCreate(String email, int score, Category category) {
+    public String questionnaireCreate(String email, String score, Category category) {
         User user=userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
         Survey survey=Survey.builder().score(score).user(user).category(category).build();
@@ -38,7 +38,7 @@ public class SurveyService {
         for(Category c:Category.values()){
             Survey survey=surveyRepository.findTopByUserIdAndCategoryOrderByCreatedAtDesc(user,c);
             if(survey==null) {
-                showAllQuestionnaireDtoList.add(new ShowAllQuestionnaireDto(c, -1));
+                showAllQuestionnaireDtoList.add(new ShowAllQuestionnaireDto(c, ""));
                 continue;
             }
             showAllQuestionnaireDtoList.add(new ShowAllQuestionnaireDto(c,survey.getScore()));

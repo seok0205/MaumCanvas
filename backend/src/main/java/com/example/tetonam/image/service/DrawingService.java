@@ -97,4 +97,26 @@ public class DrawingService {
         }
         return counselingImage.getDrawingList().getDrawings().stream().map(RecentDrawingResponseDto::toDto).toList();
     }
+
+
+//    public void drawingRagResult(String question,String category){
+//        String imageUrl=drawing.getImageUrl();
+////        String category="house";
+//        String category=drawing.getDrawingCategory().toString();
+//        String url = AI_SERVER_URL+"/predict/json_s3?url=" + imageUrl + "&category=" + category;
+//
+//        System.out.println(url);
+//        webClientUtil.post(url, "", String.class)
+//                .subscribe(result -> {
+//                    drawingResultRepository.save(DrawingResult.builder()
+//                            .drawing(drawing)
+//                            .drawingResult(result)
+//                            .build());
+//                }, error -> {
+//                    error.printStackTrace();
+//                });
+//    }
+
+
+
 }

@@ -11,5 +11,5 @@ import lombok.*;
 public class ShowAllQuestionnaireDto {
 
   private Category category;
-  private int score;
+  private String score;
 }
