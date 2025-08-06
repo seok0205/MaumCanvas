@@ -12,4 +12,5 @@ import java.util.Optional;
 
 public interface CounselingImageRepository extends JpaRepository<CounselingImage,Long> {
 
+    CounselingImage findByCounselingId(Long id);
 }
