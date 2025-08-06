@@ -3,6 +3,7 @@ package com.example.tetonam.community.service;
 import com.example.tetonam.community.dto.PostListDto;
 import com.example.tetonam.community.domain.Category;
 import com.example.tetonam.community.domain.Community;
+import com.example.tetonam.community.dto.PostUpdateDto;
 import com.example.tetonam.community.dto.PostWriteDto;
 import com.example.tetonam.community.repository.CommunityRepository;
 import com.example.tetonam.exception.handler.BoardHandler;
@@ -89,11 +90,11 @@ public class CommunityService {
     }
 
     @Transactional
-    public Community updatePost(Long id, Community updateCommunity){
+    public Community updatePost(Long id, PostUpdateDto updateCommunity){
         Community community = communityRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("게시글이 존재하지 않습니다."));
         community.setTitle(updateCommunity.getTitle());
         community.setContent(updateCommunity.getContent());
-        community.setUpdatedAt(updateCommunity.getCreatedAt());
+        community.setUpdatedAt(LocalDateTime.now());
         return communityRepository.save(community);
     }
 
