@@ -81,6 +81,46 @@ export default {
           ring: 'hsl(var(--sidebar-ring))',
         },
         // 청소년 친화적 컬러 팔레트
+        'youth-orange': {
+          DEFAULT: '#FFC107',
+          light: '#FFD54F',
+          dark: '#FF8F00',
+        },
+        'youth-gold': {
+          DEFAULT: '#FFD700',
+          light: '#FFECB3',
+          dark: '#FFC107',
+        },
+        'youth-yellow': {
+          DEFAULT: '#FFEB99',
+          light: '#FFF9C4',
+          dark: '#FFD54F',
+        },
+        'youth-cream': {
+          DEFAULT: '#FFEFD5',
+          light: '#FFF8E1',
+          dark: '#FFECB3',
+        },
+        'youth-light-yellow': {
+          DEFAULT: '#FFFACD',
+          light: '#FFFDE7',
+          dark: '#FFF9C4',
+        },
+        'youth-green': {
+          DEFAULT: '#A3C9A8',
+          light: '#C8E6C9',
+          dark: '#81C784',
+        },
+        'youth-light-pink': {
+          DEFAULT: '#FFE4E1',
+          light: '#FFEBEE',
+          dark: '#FFCDD2',
+        },
+        'youth-light-blue': {
+          DEFAULT: '#E6F3FF',
+          light: '#F3E5F5',
+          dark: '#E1F5FE',
+        },
         mint: {
           DEFAULT: 'hsl(var(--mint))',
           light: 'hsl(var(--mint-light))',
@@ -114,6 +154,13 @@ export default {
         'gradient-mint': 'var(--gradient-mint)',
         'gradient-yellow': 'var(--gradient-yellow)',
         'gradient-blue': 'var(--gradient-blue)',
+        // 청소년 친화적 그라디언트
+        'gradient-youth-warm':
+          'linear-gradient(135deg, #FFC107 0%, #FFD700 50%, #FFEB99 100%)',
+        'gradient-youth-header':
+          'linear-gradient(135deg, #FFEFD5 0%, #FFFACD 100%)',
+        'gradient-youth-subtle':
+          'linear-gradient(135deg, #FFFACD 0%, #FFEFD5 100%)',
       },
       boxShadow: {
         soft: 'var(--shadow-soft)',

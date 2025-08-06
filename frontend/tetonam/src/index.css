@@ -66,28 +66,28 @@
 
 @layer base {
   :root {
-    /* 기본 색상 팔레트 - 더 깊이감 있는 톤으로 조정 */
-    --background: 0 0% 98%; /* 매우 밝은 회색 */
-    --foreground: 220 10% 15%; /* 진한 회색 */
-    --card: 0 0% 100%; /* 순백 */
-    --card-foreground: 220 10% 15%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 10% 15%;
-    --primary: 160 84% 39%; /* 민트 그린 - 더 진한 톤 */
-    --primary-foreground: 0 0% 98%;
-    --primary-light: 160 84% 45%; /* 밝은 민트 */
-    --primary-dark: 160 84% 32%; /* 어두운 민트 */
-    --secondary: 220 14% 96%; /* 연한 회색 */
-    --secondary-foreground: 220 10% 15%;
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
-    --accent: 220 14% 96%;
-    --accent-foreground: 220 10% 15%;
+    /* 기본 색상 팔레트 - 청소년 친화적 노란색-오렌지 계열 */
+    --background: 45 100% 97%; /* 매우 연한 크림 옐로우 */
+    --foreground: 25 20% 25%; /* 따뜻한 다크 브라운 */
+    --card: 45 100% 99%; /* 연한 크림 화이트 */
+    --card-foreground: 25 20% 25%;
+    --popover: 45 100% 99%;
+    --popover-foreground: 25 20% 25%;
+    --primary: 45 93% 47%; /* 청소년 친화적 옐로우 */
+    --primary-foreground: 25 20% 25%;
+    --primary-light: 45 93% 55%; /* 밝은 옐로우 */
+    --primary-dark: 45 93% 40%; /* 진한 옐로우 */
+    --secondary: 45 80% 90%; /* 연한 크림 옐로우 */
+    --secondary-foreground: 25 20% 25%;
+    --muted: 45 60% 94%;
+    --muted-foreground: 25 15% 50%;
+    --accent: 25 95% 53%; /* 피치 계열 액센트 */
+    --accent-foreground: 25 20% 25%;
     --destructive: 0 84% 60%; /* 빨간색 */
     --destructive-foreground: 0 0% 98%;
-    --border: 220 13% 91%; /* 테두리 색상 */
-    --input: 220 13% 91%;
-    --ring: 160 84% 39%; /* 민트 그린 */
+    --border: 45 40% 85%; /* 따뜻한 크림 보더 */
+    --input: 45 40% 85%;
+    --ring: 45 93% 47%; /* 옐로우 포커스 링 */
     --radius: 1.25rem; /* 더 둥근 모서리 */
     --radius-lg: 1.5rem;
     --radius-xl: 2rem;
@@ -109,16 +109,17 @@
     --peach-light: 25 95% 60%;
     --peach-dark: 25 95% 45%;
 
-    /* 그라디언트 정의 */
+    /* 그라디언트 정의 - 청소년 친화적 따뜻한 계열 */
     --gradient-warm: linear-gradient(
       135deg,
-      /* hsl(160 84% 39% / 0.1), */ hsl(45 93% 47% / 0.1),
-      hsl(25 95% 53% / 0.1)
+      hsl(45 93% 47% / 0.15),
+      /* 옐로우 */ hsl(36 100% 74% / 0.15),
+      /* 골드 */ hsl(25 95% 53% / 0.15) /* 피치 */
     );
     --gradient-primary: linear-gradient(
       135deg,
-      hsl(160 84% 39% / 0.2),
-      hsl(199 89% 48% / 0.2)
+      hsl(45 93% 47% / 0.2),
+      hsl(36 100% 74% / 0.2)
     );
     --gradient-subtle: linear-gradient(
       135deg,
@@ -150,15 +151,15 @@
     /* 전환 효과 */
     --transition-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
-    /* 사이드바 색상 */
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 220 10% 15%;
-    --sidebar-primary: 160 84% 39%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 220 14% 96%;
-    --sidebar-accent-foreground: 220 10% 15%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 160 84% 39%;
+    /* 사이드바 색상 - 청소년 친화적 따뜻한 계열 */
+    --sidebar-background: 45 100% 98%;
+    --sidebar-foreground: 25 20% 25%;
+    --sidebar-primary: 45 93% 47%;
+    --sidebar-primary-foreground: 25 20% 25%;
+    --sidebar-accent: 45 80% 90%;
+    --sidebar-accent-foreground: 25 20% 25%;
+    --sidebar-border: 45 40% 85%;
+    --sidebar-ring: 45 93% 47%;
   }
 
   .dark {
@@ -448,4 +449,120 @@
   50% {
     transform: rotate(3deg);
   }
+}
+
+/* 청소년 친화적 컴포넌트 스타일 */
+
+/* 버튼 스타일 */
+.btn-youth-primary {
+  @apply px-6 py-3 bg-youth-orange text-white font-medium rounded-xl shadow-soft transition-all duration-300 hover:bg-youth-orange-dark hover:shadow-medium hover:scale-105 focus:outline-none focus:ring-2 focus:ring-youth-orange focus:ring-offset-2;
+}
+
+.btn-youth-secondary {
+  @apply px-6 py-3 bg-youth-cream text-gray-800 font-medium rounded-xl shadow-soft transition-all duration-300 hover:bg-youth-cream-dark hover:shadow-medium hover:scale-105 focus:outline-none focus:ring-2 focus:ring-youth-cream focus:ring-offset-2;
+}
+
+.btn-youth-success {
+  @apply px-6 py-3 bg-youth-green text-white font-medium rounded-xl shadow-soft transition-all duration-300 hover:bg-youth-green-dark hover:shadow-medium hover:scale-105 focus:outline-none focus:ring-2 focus:ring-youth-green focus:ring-offset-2;
+}
+
+/* 카드 스타일 */
+.card-youth {
+  @apply bg-gradient-youth-subtle rounded-2xl p-6 shadow-card transition-all duration-300 hover:shadow-hover border border-youth-cream;
+}
+
+.card-youth-selected {
+  @apply bg-gradient-youth-header rounded-2xl p-6 shadow-hover border-2 border-youth-orange transition-all duration-300;
+}
+
+.card-counselor {
+  @apply bg-youth-light-yellow rounded-2xl p-6 shadow-card transition-all duration-300 hover:shadow-hover hover:scale-102 border border-youth-cream;
+}
+
+/* 탭 스타일 */
+.tab-youth {
+  @apply px-4 py-2 bg-youth-cream text-gray-700 rounded-lg font-medium transition-all duration-300 hover:bg-youth-light-yellow hover:text-gray-800;
+}
+
+.tab-youth-active {
+  @apply px-4 py-2 bg-youth-orange text-white rounded-lg font-medium shadow-soft;
+}
+
+/* 입력 필드 스타일 */
+.input-youth {
+  @apply bg-youth-light-yellow border border-youth-cream rounded-xl px-4 py-3 text-gray-800 placeholder:text-gray-500 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-youth-orange focus:border-youth-orange;
+}
+
+.focus-youth {
+  @apply focus:bg-white focus:shadow-soft;
+}
+
+/* 배지 스타일 */
+.badge-youth-success {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-youth-green text-white;
+}
+
+.badge-youth-warning {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-youth-orange text-white;
+}
+
+.badge-youth-info {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-youth-light-blue text-gray-800;
+}
+
+.badge-youth-pending {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-youth-cream text-gray-800;
+}
+
+/* 상태 스타일 */
+.state-success {
+  @apply bg-youth-green-light text-gray-800;
+}
+
+.state-warning {
+  @apply bg-youth-orange-light text-gray-800;
+}
+
+.state-info {
+  @apply bg-youth-light-blue text-gray-800;
+}
+
+.state-pending {
+  @apply bg-youth-cream text-gray-800;
+}
+
+/* 프로그레스 바 */
+.progress-youth {
+  @apply w-full bg-youth-cream rounded-full h-3 overflow-hidden;
+}
+
+.progress-youth-fill {
+  @apply h-full bg-gradient-to-r from-youth-orange to-youth-gold transition-all duration-500 ease-out;
+}
+
+/* 그림자 및 전환 효과 */
+.shadow-youth {
+  @apply shadow-soft;
+}
+
+.shadow-youth-hover {
+  @apply shadow-hover;
+}
+
+.transition-youth {
+  @apply transition-all duration-300 ease-out;
+}
+
+/* 터치 친화적 크기 */
+.touch-target {
+  @apply min-h-[44px] min-w-[44px];
+}
+
+/* 스케일 효과 */
+.hover\:scale-102:hover {
+  transform: scale(1.02);
+}
+
+.hover\:scale-105:hover {
+  transform: scale(1.05);
 }
