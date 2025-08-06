@@ -1,9 +1,9 @@
 import {
   getQuestionnaireCategory,
   getQuestionnaireResultLevel,
-  getCategoryKoreanName, // ✅ 새로운 매핑 함수 import
+  getCategoryKoreanName, // 새로운 매핑 함수 import
 } from '@/constants/questionnaire';
-import type { QuestionnaireCategory, QuestionnaireResult } from '@/types/api';
+import type { QuestionnaireCategory, QuestionnaireResult } from '@/types/questionnaire';
 import type { QuestionnaireSubmission } from '@/types/questionnaire';
 import { apiClient } from './apiClient';
 
@@ -26,8 +26,14 @@ interface QuestionnaireApiResponse {
   result: string | null;
 }
 
-// 카테고리별 결과 타입 정의
-type CategoryResults = Record<QuestionnaireCategory, QuestionnaireResult[]>;
+// 카테고리별 결과 타입 정의 (내부 서비스용)
+interface CategoryQuestionnaireResult {
+  category: string;
+  score: number | string; // 자살위험성은 string, 나머지는 number
+  createdDate: string;
+}
+
+type CategoryResults = Record<string, CategoryQuestionnaireResult[]>;
 
 const submitQuestionnaire = async (
   submission: QuestionnaireSubmission
@@ -35,18 +41,19 @@ const submitQuestionnaire = async (
   try {
     // ✅ 영어 카테고리 ID를 한글로 변환 (백엔드 Category enum에 맞춤)
     const koreanCategory = getCategoryKoreanName(submission.category);
-    
+
     // ✅ 디버깅용 로그
     console.log('설문 제출 데이터:', {
       originalCategory: submission.category,
       koreanCategory,
       score: submission.score
     });
-    
+
     // ✅ 백엔드 API 스펙에 맞게 query parameter 방식으로 전송
     // ✅ 백엔드에서 body를 받지 않으므로 null을 명시적으로 전달
+    // ✅ 모든 설문의 score를 string으로 변환하여 전송
     const response = await apiClient.post<QuestionnaireApiResponse>(
-      `/api/mind/questionnaire?score=${submission.score}&category=${encodeURIComponent(koreanCategory)}`,
+      `/api/mind/questionnaire?score=${encodeURIComponent(String(submission.score))}&category=${encodeURIComponent(koreanCategory)}`,
       null // ✅ body를 null로 명시적 설정
     );
 
@@ -85,7 +92,9 @@ const calculateQuestionnaireResult = (
   return {
     category: submission.category,
     score: submission.score,
-    createdDate: new Date().toISOString(),
+    level: level,
+    responses: submission.responses,
+    submittedAt: new Date(),
   };
 };
 
@@ -120,26 +129,30 @@ const getAllCategoriesQuestionnaireResults = async (
     // 실제 API 구현 시에는 각 카테고리별로 API 호출
     for (const category of categories) {
       try {
+        // ✅ 영어 카테고리를 한글로 변환하여 API 호출
+        const koreanCategory = getCategoryKoreanName(String(category));
+
         const response = await apiClient.get<{
           isSuccess: boolean;
           code: string;
           message: string;
           result: ShowCategoryQuestionnaireDto[];
-        }>(`/api/mind/questionnaire/${category}`);
+        }>(`/api/mind/questionnaire/${koreanCategory}`);
 
         if (response.data.isSuccess && response.data.result) {
           // 백엔드 DTO를 프론트엔드 결과 형태로 변환
-          results[category] = response.data.result.map(item => ({
-            category: item.category,
-            score: parseInt(item.score, 10),
+          results[koreanCategory] = response.data.result.map(item => ({
+            category: String(item.category), // 문자열로 변환
+            score: isNaN(parseInt(item.score, 10)) ? item.score : parseInt(item.score, 10), // 자살위험성은 문자열, 나머지는 숫자
             createdDate: item.createdDate, // ISO 형식 날짜 문자열 유지
           }));
         } else {
-          results[category] = [];
+          results[koreanCategory] = [];
         }
       } catch (error) {
-        console.error(`${category} 설문 결과 조회 실패:`, error);
-        results[category] = [];
+        const koreanCategory = getCategoryKoreanName(String(category));
+        console.error(`${koreanCategory} 설문 결과 조회 실패:`, error);
+        results[koreanCategory] = [];
       }
     }
 

@@ -25,9 +25,13 @@ import {
 import {
   getQuestionnaireCategory,
   getQuestionnaireResultLevel,
+  getCategoryKoreanName,
 } from '@/constants/questionnaire';
 import { getAllCategoriesQuestionnaireResults } from '@/services/questionnaireService';
-import type { QuestionnaireResult as QuestionnaireResultType } from '@/types/questionnaire';
+import type { 
+  QuestionnaireResult as QuestionnaireResultType,
+  QuestionnaireCategory 
+} from '@/types/questionnaire';
 
 export const QuestionnaireResult = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
@@ -79,11 +83,12 @@ export const QuestionnaireResult = () => {
 
         // API에서 저장된 결과들을 확인해보기
         try {
-          const categoryKey = submission.category as keyof typeof apiResponse;
+          const categoryKey = submission.category as QuestionnaireCategory;
           const apiResponse = await getAllCategoriesQuestionnaireResults([
             categoryKey,
           ]);
-          if (apiResponse && apiResponse[categoryKey]?.length > 0) {
+          const koreanCategoryName = getCategoryKoreanName(String(categoryKey));
+          if (apiResponse && apiResponse[koreanCategoryName] && apiResponse[koreanCategoryName].length > 0) {
             setApiResultsAvailable(true);
           }
         } catch (apiError) {
@@ -206,7 +211,11 @@ export const QuestionnaireResult = () => {
                     {result!.level.level}
                   </h3>
                 </div>
-                <p className='text-blue-700 text-sm'>총점: {result!.score}점</p>
+                <p className='text-blue-700 text-sm'>
+                  {typeof result!.score === 'number'
+                    ? `총점: ${result!.score}점`
+                    : `검사결과: ${result!.score}`}
+                </p>
               </div>
               <div className='bg-blue-50 p-4 rounded-lg'>
                 <h4 className='font-semibold text-blue-800 mb-2'>검사 결과</h4>
@@ -336,7 +345,9 @@ export const QuestionnaireResult = () => {
                     <td className='p-3 text-center border-b border-gray-200 text-yellow-800'></td>
                     <td className='p-3 text-center border-b border-gray-200 text-yellow-800'></td>
                     <td className='p-3 text-center border-b border-gray-200 text-yellow-800 font-bold'>
-                      {result!.score}점
+                      {typeof result!.score === 'number'
+                        ? `${result!.score}점`
+                        : result!.score}
                     </td>
                   </tr>
                 </tbody>
@@ -361,7 +372,11 @@ export const QuestionnaireResult = () => {
                     <h3 className='text-xl font-bold text-yellow-800'>
                       {result!.level.level}
                     </h3>
-                    <p className='text-yellow-700'>총점: {result!.score}점</p>
+                    <p className='text-yellow-700'>
+                      {typeof result!.score === 'number'
+                        ? `총점: ${result!.score}점`
+                        : `검사결과: ${result!.score}`}
+                    </p>
                   </div>
                 </div>
                 <p className='text-yellow-800 text-sm leading-relaxed mb-4'>
@@ -491,7 +506,9 @@ export const QuestionnaireResult = () => {
                     <td className='p-3 text-center border-b border-gray-200 text-gray-800'></td>
                     <td className='p-3 text-center border-b border-gray-200 text-gray-800'></td>
                     <td className='p-3 text-center border-b border-gray-200 text-gray-800 font-bold'>
-                      {result!.score}점
+                      {typeof result!.score === 'number'
+                        ? `${result!.score}점`
+                        : result!.score}
                     </td>
                   </tr>
                 </tbody>
@@ -517,7 +534,11 @@ export const QuestionnaireResult = () => {
                     <h3 className='text-xl font-bold text-gray-800'>
                       {result!.level.level}
                     </h3>
-                    <p className='text-gray-700'>총점: {result!.score}점</p>
+                    <p className='text-gray-700'>
+                      {typeof result!.score === 'number'
+                        ? `총점: ${result!.score}점`
+                        : `검사결과: ${result!.score}`}
+                    </p>
                   </div>
                 </div>
                 <p className='text-gray-800 text-sm leading-relaxed mb-4'>
@@ -631,7 +652,11 @@ export const QuestionnaireResult = () => {
                     {result!.level.level}
                   </h3>
                 </div>
-                <p className='text-blue-700 text-sm'>총점: {result!.score}점</p>
+                <p className='text-blue-700 text-sm'>
+                  {typeof result!.score === 'number'
+                    ? `총점: ${result!.score}점`
+                    : `검사결과: ${result!.score}`}
+                </p>
               </div>
               <div className='bg-blue-50 p-4 rounded-lg'>
                 <h4 className='font-semibold text-blue-800 mb-2'>검사 결과</h4>

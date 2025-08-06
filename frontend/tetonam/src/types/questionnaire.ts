@@ -33,13 +33,13 @@ export interface QuestionnaireResponse {
 
 export interface QuestionnaireSubmission {
   category: string; // 백엔드 쿼리 파라미터로 전송
-  score: number; // 백엔드 쿼리 파라미터로 전송
+  score: number | string; // 일반 설문은 number, 자살위험성은 string (백엔드 쿼리 파라미터로 전송)
   responses: QuestionnaireResponse[]; // 프론트엔드에서만 사용 (백엔드 전송 X)
 }
 
 export interface QuestionnaireResult {
   category: string;
-  score: number;
+  score: number | string; // 일반 설문은 number, 자살위험성은 string
   level: QuestionnaireResultLevel;
   responses: QuestionnaireResponse[];
   submittedAt: Date;

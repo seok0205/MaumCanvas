@@ -323,7 +323,7 @@ export const QUESTIONNAIRE_CATEGORIES: QuestionnaireCategory[] = [
     id: 'suicide-risk',
     title: '자살위험성',
     description: '당신 자신을 정말 해치겠다는 생각을 했던 적이 있습니까?',
-    maxScore: 5,
+    maxScore: 0, // 자살위험성은 조건부 평가이므로 maxScore 불사용
     questions: [
       {
         id: 1,
@@ -347,7 +347,7 @@ export const QUESTIONNAIRE_CATEGORIES: QuestionnaireCategory[] = [
         options: [
           { text: '전혀 아니다', score: 0 },
           { text: '약간 그렇다', score: 1 },
-          { text: '매우 그렇다', score: 1 },
+          { text: '매우 그렇다', score: 2 },
         ],
       },
       {
@@ -360,29 +360,31 @@ export const QUESTIONNAIRE_CATEGORIES: QuestionnaireCategory[] = [
       },
     ],
     resultLevels: [
+      // 자살위험성은 조건부 평가이므로 resultLevels는 참조용으로만 사용
+      // 실제 평가는 evaluateSuicideRisk 함수에서 수행
       {
         minScore: 0,
-        maxScore: 1,
-        level: '자살 위험성',
-        description:
-          '자살위험성 서술을 하거나 자살 계획에 대한 생각을 보고하였지만, 우발적인 자살 시도를 보일 가능성은 낮습니다.',
-      },
-      {
-        minScore: 2,
-        maxScore: 2,
+        maxScore: 0,
         level: '자살위험성 낮음',
         description:
-          "1,2번 문항중에 하나라도 '있다'라고 응답하고, 3,4번 문항에는 해당되지 않는 경우",
+          "'당신자신을 정말 해치겠다는 생각을 했던 적이 있습니까?' 라는 문항에 '없다'라고 응답한 경우 또는 아래 기준에 해당되지 않는 경우입니다.",
+      },
+      {
+        minScore: 0,
+        maxScore: 0,
+        level: '자살위험성 중간',
+        description:
+          "1,2번 문항중에 하나라도 '있다'라고 응답하고, 3,4번 문항에는 해당되지 않는 경우 자살 과거력이 있었거나 자살 계획에 대한 생각을 보고하였지만, 우발적인 자살 시도를 보일 가능성은 낮습니다.",
         recommendation: '정신건강 전문가와 상담을 고려해보세요.',
       },
       {
-        minScore: 3,
-        maxScore: 5,
+        minScore: 0,
+        maxScore: 0,
         level: '자살위험성 높음',
         description:
-          "3번 문항에 '약간' 혹은 매우 그렇다라고 응답하거나 4번문항에 '없다'라고 응답한 경우 자살 가능성이 있다고 보고하였거나 자살 사고나 행동을 저지할 수 있는 보호요인이 없다고 보고하였습니다. 추가적인 평가나 정신건강 전문가의 도움을 받아보시기를 권해드립니다.",
+          "3번 문항에 '매우 그렇다'라고 응답하거나 4번문항에 '없다'라고 응답한 경우 자살 가능성이 있다고 보고하였거나 자살 사고나 행동을 저지할 수 있는 보호요인이 없다고 보고하였습니다. 추가적인 평가나 정신건강 전문가의 도움을 받아보시기를 권해드립니다.",
         recommendation:
-          '보건복지부는 2005년부터 전국 공통 자살예방 및 정신건강상담 전화 1577-0199를 운영하고 있습니다. 정신건강 또는 자살에 대한 고민이 있다면, 실명공개 하여 의사하여 자신의 성향을 더욱 객관적으로 바라볼 수 있도록 전문가의 도움을 받아보시기를 권해 드립니다.',
+          '보건복지부는 2005년부터 전국 공통 자살예방 및 정신건강상담 전화 1577-0199를 운영하고 있습니다. 정신건강 또는 자살에 대한 고민이 있다면, 전문가의 도움을 받아보시기를 권해 드립니다.',
       },
     ],
   },
@@ -397,10 +399,10 @@ export const getQuestionnaireCategory = (
 // 영어 ID를 한글 카테고리명으로 변환 (백엔드 Category enum 매핑)
 export const getCategoryKoreanName = (englishId: string): string => {
   const categoryMap: Record<string, string> = {
-    'ptsd': '스트레스',  // 외상 후 스트레스 -> 스트레스로 매핑
-    'depression': '우울',
-    'anxiety': '불안',
-    'suicide-risk': '자살'
+    ptsd: '스트레스', // 외상 후 스트레스 -> 스트레스로 매핑
+    depression: '우울',
+    anxiety: '불안',
+    'suicide-risk': '자살',
   };
 
   return categoryMap[englishId] || englishId;
@@ -408,16 +410,87 @@ export const getCategoryKoreanName = (englishId: string): string => {
 
 export const getQuestionnaireResultLevel = (
   category: QuestionnaireCategory,
-  score: number
+  score: number | string
 ) => {
-  return (
-    category.resultLevels.find(
-      level => score >= level.minScore && score <= level.maxScore
-    ) || category.resultLevels[0]
-  );
+  // 자살위험성은 조건부 평가이므로 별도 처리
+  if (category.id === 'suicide-risk') {
+    // score가 문자열(레벨명)인 경우, 해당 레벨 찾기
+    if (typeof score === 'string') {
+      return (
+        category.resultLevels.find(level => level.level === score) ||
+        category.resultLevels[0]
+      );
+    }
+  }
+
+  // 일반 설문은 기존 점수 기반 평가
+  if (typeof score === 'number') {
+    return (
+      category.resultLevels.find(
+        level => score >= level.minScore && score <= level.maxScore
+      ) || category.resultLevels[0]
+    );
+  }
+
+  // 예외 상황 처리
+  return category.resultLevels[0];
 };
 
-// ✅ 하드코딩된 메시지들을 상수로 분리
+// 자살위험성 조건부 평가 로직 (국립정신건강센터 기준)
+export const evaluateSuicideRisk = (
+  responses: Array<{ questionId: number; selectedScore: number }>
+): {
+  level: string;
+  description: string;
+  recommendation?: string;
+} => {
+  // 응답을 questionId별로 매핑
+  const responseMap = responses.reduce(
+    (map, response) => {
+      map[response.questionId] = response.selectedScore;
+      return map;
+    },
+    {} as Record<number, number>
+  );
+
+  // 각 문항별 응답 확인
+  const q1Answer = responseMap[1]; // 1번: 위험 행동 경험 (1=있다, 0=없다)
+  const q2Answer = responseMap[2]; // 2번: 구체적 자해 생각 (1=있다, 0=없다)
+  const q3Answer = responseMap[3]; // 3번: 자해 방법 생각 (0=전혀아니다, 1=약간그렇다, 2=매우그렇다)
+  const q4Answer = responseMap[4]; // 4번: 자해 행동 억제력 (0=있다, 1=없다)
+
+  // 조건별 위험도 평가 (국립정신건강센터 기준)
+
+  // 높은 위험: 3번 문항에 '매우 그렇다'(2점) 응답 또는 4번 문항에 '없다'(1점) 응답
+  if (q3Answer === 2 || q4Answer === 1) {
+    return {
+      level: '자살위험성 높음',
+      description:
+        "3번 문항에 '매우 그렇다'라고 응답하거나 4번문항에 '없다'라고 응답한 경우 자살 가능성이 있다고 보고하였거나 자살 사고나 행동을 저지할 수 있는 보호요인이 없다고 보고하였습니다. 추가적인 평가나 정신건강 전문가의 도움을 받아보시기를 권해드립니다.",
+      recommendation:
+        '보건복지부는 2005년부터 전국 공통 자살예방 및 정신건강상담 전화 1577-0199를 운영하고 있습니다. 정신건강 또는 자살에 대한 고민이 있다면, 전문가의 도움을 받아보시기를 권해 드립니다.',
+    };
+  }
+
+  // 중간 위험: 1,2번 문항 중 하나라도 '있다'(1점) 응답하고, 3,4번은 높은 위험 기준에 해당하지 않는 경우
+  if ((q1Answer === 1 || q2Answer === 1) && q3Answer !== 2 && q4Answer !== 1) {
+    return {
+      level: '자살위험성 중간',
+      description:
+        "1,2번 문항중에 하나라도 '있다'라고 응답하고, 3,4번 문항에는 해당되지 않는 경우 자살 과거력이 있었거나 자살 계획에 대한 생각을 보고하였지만, 우발적인 자살 시도를 보일 가능성은 낮습니다.",
+      recommendation: '정신건강 전문가와 상담을 고려해보세요.',
+    };
+  }
+
+  // 낮은 위험: 위의 조건들에 해당하지 않는 경우
+  return {
+    level: '자살위험성 낮음',
+    description:
+      "'당신자신을 정말 해치겠다는 생각을 했던 적이 있습니까?' 라는 문항에 '없다'라고 응답한 경우 또는 아래 기준에 해당되지 않는 경우입니다.",
+  };
+};
+
+// 하드코딩된 메시지들을 상수로 분리
 export const QUESTIONNAIRE_MESSAGES = {
   LOADING: '로딩 중...',
   ALL_QUESTIONS_REQUIRED: '모든 질문에 답변해주세요.',
