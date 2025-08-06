@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 public class MailSendService {
     private final JavaMailSender mailSender;
-    private int authNumber;
+    private String authNumber;
     private final RedisTemplate redisTemplate;
 
     /**
@@ -33,7 +33,7 @@ public class MailSendService {
         for (int i = 0; i < 6; i++) {
             randomNumber += Integer.toString(r.nextInt(10));
         }
-        authNumber = Integer.parseInt(randomNumber);
+        authNumber = randomNumber;
     }
 
     /**
