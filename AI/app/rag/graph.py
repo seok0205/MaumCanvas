@@ -3,7 +3,7 @@ from pathlib import Path
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
 from langgraph.graph import StateGraph, END
-from state import GraphState
+from .state import GraphState
 
 # Load prompts from YAML file
 PROMPT_DIR = Path(__file__).parent.parent.parent / "prompts"
