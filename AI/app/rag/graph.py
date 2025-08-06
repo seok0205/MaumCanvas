@@ -11,6 +11,7 @@ with open(PROMPT_DIR / "htp_prompts.yaml", "r", encoding="utf-8") as file:
     prompts = yaml.safe_load(file)
 
 
+# ---Graph Node definitions---
 def relevance_check_node(state: GraphState, llm):
     """1. 질문 관령성 검사
     질문의 HTP 검사 관련성 여부를 확인하는 노드
@@ -72,4 +73,20 @@ def generate_node(state: GraphState, llm):
     generation = chain.invoke({"question": question, "context": contexts})
 
     state["generation"] = generation
+    return state
+
+
+def hallucination_check_node(state: GraphState, llm):
+    """5. 환각 검사
+    생성된 답변이 검색된 문맥과 일치하는지 확인하는 노드
+    state["retrieved_contexts"]와 state["generation"]을 사용
+    환각이 발생하면 "yes", 발생하지 않으면 "no"로 할당
+    """
+    contexts = state["retrieved_contexts"]
+    generation = state["generation"]
+    prompt = ChatPromptTemplate.from_template(prompts["hallucination_check"])
+    chain = prompt | llm | StrOutputParser()
+    check_result = chain.invoke({"context": "\n\n".join(contexts), "generation": generation})
+    
+    state["hallucination_check"] = check_result.lower()
     return state
