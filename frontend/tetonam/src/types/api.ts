@@ -138,6 +138,21 @@ export type CounselingType =
   | '정서'
   | '기타';
 
+// === 커뮤니티 관련 타입 (community.ts에서 재export) ===
+export type {
+  Comment,
+  CommentListResponse,
+  CommentWriteRequest,
+  Community,
+  CommunityCategory,
+  CursorPaginatedResponse,
+  PostListQuery,
+  PostListResponse,
+  PostSortType,
+  PostUpdateRequest,
+  PostWriteRequest,
+} from './community';
+
 // 상담 정보 유효성 검사 함수 타입
 export type CounselingValidator = (counseling: UpcomingCounseling) => boolean;
 
