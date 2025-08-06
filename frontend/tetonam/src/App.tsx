@@ -42,7 +42,7 @@ function App() {
 
   return (
     <div
-      className={`min-h-screen bg-gradient-to-br from-youth-orange to-youth-cream font-sans antialiased ${
+      className={`min-h-screen bg-background font-sans antialiased ${
         isLoaded ? 'font-loaded' : isError ? 'font-fallback' : 'font-loading'
       }`}
     >
