@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { COUNSELING_CONSTANTS } from '@/constants/counseling';
 import { counselingService } from '@/services/counselingService';
 import type { CounselingReservationRequest, CounselorInfo } from '@/types/api';
-import type { CounselingTypeItem } from '@/types/counselingType';
+import type { CounselingTypeCategory } from '@/types/counselingType';
 
 interface DateOption {
   date: Date;
@@ -28,7 +28,7 @@ interface UseCounselingReservationReturn {
   selectedDate: Date | null;
   selectedTime: string;
   selectedCounselor: CounselorInfo | null;
-  selectedCounselingType: CounselingTypeItem | null;
+  selectedCounselingType: CounselingTypeCategory | null;
 
   // 옵션들
   dateOptions: DateOption[];
@@ -43,7 +43,7 @@ interface UseCounselingReservationReturn {
   handleDateSelect: (date: Date) => void;
   handleTimeSelect: (time: string) => void;
   handleCounselorSelect: (counselor: CounselorInfo) => void;
-  handleCounselingTypeSelect: (type: CounselingTypeItem) => void;
+  handleCounselingTypeSelect: (type: CounselingTypeCategory) => void;
   handleReservationConfirm: () => void;
   handleGoBack: () => void;
 
@@ -59,7 +59,7 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
   const [selectedCounselor, setSelectedCounselor] =
     useState<CounselorInfo | null>(null);
   const [selectedCounselingType, setSelectedCounselingType] =
-    useState<CounselingTypeItem | null>(null);
+    useState<CounselingTypeCategory | null>(null);
 
   // 날짜 옵션 생성 (주말 제외, 오늘부터 7일)
   const dateOptions = useMemo((): DateOption[] => {
@@ -158,9 +158,12 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
   }, []);
 
   // 상담유형 선택 핸들러
-  const handleCounselingTypeSelect = useCallback((type: CounselingTypeItem) => {
-    setSelectedCounselingType(type);
-  }, []);
+  const handleCounselingTypeSelect = useCallback(
+    (type: CounselingTypeCategory) => {
+      setSelectedCounselingType(type);
+    },
+    []
+  );
 
   // 예약 확정 핸들러
   const handleReservationConfirm = useCallback(() => {
@@ -178,7 +181,7 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
       format(selectedDate, 'yyyy-MM-dd') + 'T' + selectedTime + ':00';
     const reservationData: CounselingReservationRequest = {
       time: dateTime,
-      types: selectedCounselingType.name,
+      types: selectedCounselingType.title,
       CounselorId: selectedCounselor.id,
     };
 

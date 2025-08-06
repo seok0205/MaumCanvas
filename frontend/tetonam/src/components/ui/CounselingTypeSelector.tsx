@@ -1,13 +1,13 @@
 import { CounselingTypeCard } from '@/components/ui/CounselingTypeCard';
 import type {
   COUNSELING_TYPE_DATA,
-  CounselingTypeItem,
+  CounselingTypeCategory,
 } from '@/types/counselingType';
 import { cn } from '@/utils/cn';
 
 interface CounselingTypeSelectorProps {
-  selectedType: CounselingTypeItem | null;
-  onTypeSelect: (type: CounselingTypeItem) => void;
+  selectedType: CounselingTypeCategory | null;
+  onTypeSelect: (type: CounselingTypeCategory) => void;
   categories: typeof COUNSELING_TYPE_DATA;
   className?: string;
 }
@@ -31,17 +31,14 @@ export const CounselingTypeSelector = ({
       </div>
 
       <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-3'>
-        {categories.map(category =>
-          category.items.map(item => (
-            <CounselingTypeCard
-              key={item.id}
-              item={item}
-              categoryTitle={category.title}
-              isSelected={selectedType?.id === item.id}
-              onSelect={onTypeSelect}
-            />
-          ))
-        )}
+        {categories.map(category => (
+          <CounselingTypeCard
+            key={category.id}
+            category={category}
+            isSelected={selectedType?.id === category.id}
+            onSelect={onTypeSelect}
+          />
+        ))}
       </div>
 
       {selectedType && (
@@ -63,7 +60,7 @@ export const CounselingTypeSelector = ({
             </div>
             <div>
               <h3 className='text-sm font-medium text-blue-900'>
-                선택된 상담 유형: {selectedType.name}
+                선택된 상담 유형: {selectedType.title}
               </h3>
               <p className='text-sm text-blue-700 mt-1'>
                 {selectedType.description}
@@ -76,7 +73,7 @@ export const CounselingTypeSelector = ({
       {/* 접근성을 위한 스크린 리더 텍스트 */}
       <div className='sr-only' aria-live='polite' aria-atomic='true'>
         {selectedType
-          ? `${selectedType.name} 상담 유형이 선택되었습니다.`
+          ? `${selectedType.title} 상담 유형이 선택되었습니다.`
           : '상담 유형을 선택해주세요.'}
       </div>
     </div>

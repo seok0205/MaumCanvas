@@ -1,29 +1,27 @@
-import type { CounselingTypeItem } from '@/types/counselingType';
+import type { CounselingTypeCategory } from '@/types/counselingType';
 import { cn } from '@/utils/cn';
 
 interface CounselingTypeCardProps {
-  item: CounselingTypeItem;
-  categoryTitle: string;
+  category: CounselingTypeCategory;
   isSelected: boolean;
-  onSelect: (item: CounselingTypeItem) => void;
+  onSelect: (category: CounselingTypeCategory) => void;
   className?: string;
 }
 
 export const CounselingTypeCard = ({
-  item,
-  categoryTitle,
+  category,
   isSelected,
   onSelect,
   className,
 }: CounselingTypeCardProps) => {
   const handleClick = () => {
-    onSelect(item);
+    onSelect(category);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      onSelect(item);
+      onSelect(category);
     }
   };
 
@@ -44,14 +42,13 @@ export const CounselingTypeCard = ({
         className
       )}
       aria-pressed={isSelected}
-      aria-label={`상담유형: ${categoryTitle} - ${item.name}. ${item.description}`}
+      aria-label={`상담유형: ${category.title}. ${category.description}`}
     >
       <div className='flex items-center justify-between'>
         <div className='flex-1'>
           <span className='font-medium text-sm leading-tight block'>
-            {categoryTitle}
+            {category.title}
           </span>
-          <span className='text-xs text-gray-600 mt-1 block'>{item.name}</span>
         </div>
 
         {/* 선택 표시 아이콘 */}
