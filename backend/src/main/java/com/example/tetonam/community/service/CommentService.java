@@ -3,10 +3,7 @@ package com.example.tetonam.community.service;
 import com.example.tetonam.community.domain.Category;
 import com.example.tetonam.community.domain.Comment;
 import com.example.tetonam.community.domain.Community;
-import com.example.tetonam.community.dto.CommentWriteDto;
-import com.example.tetonam.community.dto.PostListDto;
-import com.example.tetonam.community.dto.PostUpdateDto;
-import com.example.tetonam.community.dto.PostWriteDto;
+import com.example.tetonam.community.dto.*;
 import com.example.tetonam.community.repository.CommentRepository;
 import com.example.tetonam.community.repository.CommunityRepository;
 import com.example.tetonam.exception.handler.BoardHandler;
@@ -62,19 +59,22 @@ public class CommentService {
     }
 
     @Transactional
-    public Comment updateComment(Long id, CommentWriteDto updateComment){
-        Comment comment = commentRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("게시글이 존재하지 않습니다."));
+    public Comment updateComment(Long id, Long community_id, String email, CommentWriteDto updateComment){
+        Comment comment = commentRepository.findById(id)
+                .orElseThrow(()-> new IllegalArgumentException("게시글이 존재하지 않습니다."));
+        User user = userRepository.findByEmail(email)
+                        .orElseThrow(() -> new BoardHandler(ErrorStatus.USER_NOT_FOUND));
+        if(!user.equals(comment.getAuthor())){
+            throw new BoardHandler(ErrorStatus.USER_NOT_MATCH);
+        }
         comment.setContent(updateComment.getContent());
         comment.setUpdatedAt(LocalDateTime.now());
-        return commentRepository.save(comment);
+        return comment;
     }
 
-    public List<Community> getPosts(Long lastId, int size){
-        if(lastId == null){
-            lastId = Long.MAX_VALUE;
-        }
-        Pageable pageable = PageRequest.of(0, size);
-        return communityRepository.findByIdLessThanOrderByIdDesc(lastId, pageable);
+    public List<CommentListDto> getComments(Long community_id){
+        List<Comment> result = commentRepository.findByCommunity_id(community_id);
+        return result.stream().map(CommentListDto::toDto).collect(Collectors.toList());
     }
 
 

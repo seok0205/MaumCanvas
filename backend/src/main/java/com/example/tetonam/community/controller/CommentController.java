@@ -1,17 +1,14 @@
 package com.example.tetonam.community.controller;
 
 import com.example.tetonam.community.domain.Comment;
-import com.example.tetonam.community.domain.Community;
+import com.example.tetonam.community.dto.CommentListDto;
 import com.example.tetonam.community.dto.CommentWriteDto;
 import com.example.tetonam.community.dto.PostListDto;
-import com.example.tetonam.community.dto.PostUpdateDto;
-import com.example.tetonam.community.dto.PostWriteDto;
 import com.example.tetonam.community.repository.CommunityRepository;
 import com.example.tetonam.community.repository.CommentRepository;
 import com.example.tetonam.community.service.CommentService;
 import com.example.tetonam.community.service.CommunityService;
 import com.example.tetonam.response.ApiResponse;
-import com.example.tetonam.user.domain.User;
 import com.example.tetonam.user.repository.UserRepository;
 import com.example.tetonam.user.token.JwtTokenProvider;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,19 +29,13 @@ public class CommentController {
     private final CommunityService communityService;
     private final CommentService commentService;
     private final JwtTokenProvider jwtTokenProvider;
-    private final UserRepository userRepository;
-    private final CommunityRepository communityRepository;
     private final CommentRepository commentRepository;
 
-    /**
-     * 게시글 단건 조회
-     * GET /community/{id}
-     */
-    @GetMapping("/{id}")
-    @Operation(summary = "게시글 단건 조회", description = "정해진 한건의 게시글을 가져옵니다")
-    public ResponseEntity<PostListDto> getPost(@PathVariable Long id) {
-        PostListDto post = communityService.getPostById(id);
-        return ResponseEntity.ok(post);
+    @GetMapping
+    @Operation(summary = "게시글 내 댓글 전체 조회", description = "정해진 한건의 게시글의 댓글을 전부 가져옵니다")
+    public ResponseEntity<?> getComments(@PathVariable Long community_id) {
+        List<CommentListDto> result = commentService.getComments(community_id);
+        return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
     }
 
     //글 작성
@@ -71,17 +62,8 @@ public class CommentController {
     public ResponseEntity<CommentWriteDto> updatePost(@PathVariable Long community_id, @PathVariable Long id, @RequestBody CommentWriteDto updatedComment, @RequestHeader("Authorization") String token){
         String jwt = token.substring(7);
         String email = jwtTokenProvider.getEmail(jwt);
-        Comment comment = commentRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "유효하지 않은 댓글"));
-        if(email.equals(comment.getAuthor().getEmail())){
-            Comment updateComment = commentService.updateComment(id, updatedComment);
-        }
-        return ResponseEntity.ok(updatedComment);
+            Comment comment = commentService.updateComment(id, community_id, email, updatedComment);
+        return ResponseEntity.ok(CommentWriteDto.toDto(comment));
     }
 
-    @GetMapping
-    @Operation(summary = "게시판 10개 단위 조회 API", description = "10개 단위로 커서를 활용하여 조회합니다")
-    public ResponseEntity<List<Community>> getPosts(@RequestParam(required = false) Long lastId, @RequestParam(defaultValue = "10") int size){
-        return ResponseEntity.ok(communityService.getPosts(lastId, size));
-    }
 }
