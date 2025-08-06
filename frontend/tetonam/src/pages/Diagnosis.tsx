@@ -2,7 +2,10 @@ import { AppSidebar } from '@/components/layout/AppSidebar';
 import { CommonHeader } from '@/components/layout/CommonHeader';
 import { DisclaimerBox } from '@/components/ui/feedback/DisclaimerBox';
 import { DiagnosisGrid } from '@/components/ui/layout/DiagnosisGrid';
-import { SidebarProvider } from '@/components/ui/navigation/sidebar';
+import {
+  MobileSidebarToggle,
+  SidebarProvider,
+} from '@/components/ui/navigation/sidebar';
 import {
   DIAGNOSIS_CATEGORIES,
   DIAGNOSIS_PAGE_TITLE,
@@ -68,6 +71,9 @@ export const Diagnosis = () => {
             </div>
           </main>
         </div>
+
+        {/* 모바일 사이드바 토글 버튼 - 왼쪽 하단 고정 */}
+        <MobileSidebarToggle />
       </div>
     </SidebarProvider>
   );

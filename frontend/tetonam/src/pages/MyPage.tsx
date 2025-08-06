@@ -12,7 +12,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/layout/card';
-import { SidebarProvider } from '@/components/ui/navigation/sidebar';
+import {
+  MobileSidebarToggle,
+  SidebarProvider,
+} from '@/components/ui/navigation/sidebar';
 import {
   Dialog,
   DialogContent,
@@ -327,6 +330,9 @@ export const MyPage = ({}: MyPageProps) => {
             {userInfo && <MyPageForm userInfo={userInfo} />}
           </main>
         </div>
+
+        {/* 모바일 사이드바 토글 버튼 - 왼쪽 하단 고정 */}
+        <MobileSidebarToggle />
       </div>
     </SidebarProvider>
   );

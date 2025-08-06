@@ -2,7 +2,10 @@ import { CounselorDashboard } from '@/components/dashboard/CounselorDashboard';
 import { UserDashboard } from '@/components/dashboard/UserDashboard';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { CommonHeader } from '@/components/layout/CommonHeader';
-import { SidebarProvider } from '@/components/ui/navigation/sidebar';
+import {
+  MobileSidebarToggle,
+  SidebarProvider,
+} from '@/components/ui/navigation/sidebar';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { getPrimaryRole } from '@/utils/userRoleMapping';
 import { useCallback } from 'react';
@@ -79,6 +82,9 @@ export const Dashboard = () => {
             {renderDashboardContent()}
           </main>
         </div>
+
+        {/* 모바일 사이드바 토글 버튼 - 왼쪽 하단 고정 */}
+        <MobileSidebarToggle />
       </div>
     </SidebarProvider>
   );
