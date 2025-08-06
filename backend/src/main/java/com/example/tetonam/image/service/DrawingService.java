@@ -1,9 +1,11 @@
 package com.example.tetonam.image.service;
 
+import com.example.tetonam.exception.handler.CounselingHandler;
 import com.example.tetonam.exception.handler.UserHandler;
 import com.example.tetonam.image.domain.Drawing;
 import com.example.tetonam.image.domain.DrawingList;
 import com.example.tetonam.image.domain.DrawingResult;
+import com.example.tetonam.image.dto.RecentDrawingResponseDto;
 import com.example.tetonam.image.dto.testDto;
 import com.example.tetonam.image.repository.DrawingListRepository;
 import com.example.tetonam.image.repository.DrawingRepository;
@@ -72,5 +74,14 @@ public class DrawingService {
                 }, error -> {
                     error.printStackTrace();
                 });
+    }
+
+    // 최근그림 반환
+    public List<RecentDrawingResponseDto> showRecentImages(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+        DrawingList drawingList=drawingListRepository.findLatestByUser(user)
+                .orElseThrow(()-> new CounselingHandler(ErrorStatus.STUDENT_HAVE_NOT_IMAGE));
+        return drawingList.getDrawings().stream().map(RecentDrawingResponseDto::toDto).toList();
     }
 }

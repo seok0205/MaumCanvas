@@ -2,12 +2,17 @@ package com.example.tetonam.counseling.service;
 
 
 import com.example.tetonam.counseling.domain.Counseling;
+import com.example.tetonam.counseling.domain.CounselingImage;
 import com.example.tetonam.counseling.dto.CounselingPossibleCounselorResponseDto;
 import com.example.tetonam.counseling.dto.CounselingReserveRequestDto;
+import com.example.tetonam.counseling.dto.MyCounselingDetailResponseDto;
 import com.example.tetonam.counseling.dto.MyCounselingListResponseDto;
+import com.example.tetonam.counseling.repository.CounselingImageRepository;
 import com.example.tetonam.counseling.repository.CounselingRepository;
 import com.example.tetonam.exception.handler.CounselingHandler;
 import com.example.tetonam.exception.handler.UserHandler;
+import com.example.tetonam.image.domain.DrawingList;
+import com.example.tetonam.image.repository.DrawingListRepository;
 import com.example.tetonam.response.code.status.ErrorStatus;
 import com.example.tetonam.user.domain.School;
 import com.example.tetonam.user.domain.User;
@@ -27,6 +32,8 @@ import java.util.stream.Collectors;
 public class CounselingService {
     private final UserRepository userRepository;
     private final CounselingRepository counselingRepository;
+    private final CounselingImageRepository counselingImageRepository;
+    private final DrawingListRepository drawingListRepository;
 
     //테이블의 해당시간에 상담가가 없는사람
     public List<CounselingPossibleCounselorResponseDto> showPossibleCounselor(String email, LocalDateTime time) {
@@ -46,16 +53,17 @@ public class CounselingService {
                 .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
         User counselor = userRepository.findById(dto.getCounselorId())
                 .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
-
+        DrawingList drawingList=drawingListRepository.findLatestByUser(student)
+                .orElseThrow(()-> new CounselingHandler(ErrorStatus.STUDENT_HAVE_NOT_IMAGE));
         // 락 키를 상담사ID + 예약시간(분단위로 포맷팅)으로 생성
 
         // 락 키를 메서드 파라미터로 넘겨서 DistributedLock이 적용되게 함
-        return this.createCounselingInternal(lockKey, student, counselor, dto);
+        return this.createCounselingInternal(lockKey, student, counselor, dto,drawingList);
     }
 
     // 실제 예약 로직 분리
     @Transactional
-    public String createCounselingInternal(String lockKey, User student, User counselor, CounselingReserveRequestDto dto) {
+    public String createCounselingInternal(String lockKey, User student, User counselor, CounselingReserveRequestDto dto, DrawingList drawingList) {
         // 이미 예약 여부 체크
         boolean isReserved = counselingRepository.existsByCounselorAndCounselingTime(counselor, dto.getTime());
         if (isReserved) {
@@ -64,6 +72,10 @@ public class CounselingService {
 
         Counseling counseling = CounselingReserveRequestDto.toEntity(student, counselor, dto);
         counselingRepository.save(counseling);
+        counselingImageRepository.save(CounselingImage.builder()
+                .counseling(counseling)
+                .drawingList(drawingList).build());
+
         return "상담이 예약 되었습니다";
     }
 
@@ -83,6 +95,19 @@ public class CounselingService {
 
         return MyCounselingListResponseDto.toDto(counseling);
 
+    }
+
+    public MyCounselingDetailResponseDto showMyCounselingDetail(String email, Long id) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+        Counseling counseling=counselingRepository.findById(id)
+                .orElseThrow(()-> new CounselingHandler(ErrorStatus.NOTING_COUNSELING));
+
+        // 해당 유저의 예약이 아닐때 비정상적 접속
+        if (!counseling.getStudent().equals(user)){
+            throw new CounselingHandler(ErrorStatus.COUNSELING_IS_NOT_AUTHORITY);
+        }
+        return MyCounselingDetailResponseDto.toDto(counseling);
     }
 
 

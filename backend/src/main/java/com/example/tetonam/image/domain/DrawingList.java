@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Getter
 @NoArgsConstructor
@@ -25,6 +27,7 @@ public class DrawingList extends BaseTime {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
-
+    @OneToMany(mappedBy = "drawingList", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Drawing> drawings;
 
 }

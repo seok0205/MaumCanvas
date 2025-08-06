@@ -57,6 +57,9 @@ public enum ErrorStatus implements BaseErrorCode {
     //상담 예약 응답
     ALREADY_RESERVED(HttpStatus.BAD_REQUEST,"COUNSELING4000","이미 예약된 시간입니다."),
     NOTING_COUNSELING(HttpStatus.BAD_REQUEST,"COUNSELING4001","상담예약이 없습니다."),
+    COUNSELING_IS_NOT_AUTHORITY(HttpStatus.BAD_REQUEST,"COUNSELING4002","권한이 없는 예약입니다."),
+    STUDENT_HAVE_NOT_IMAGE(HttpStatus.BAD_REQUEST,"COUNSELING4003","학생이 그림을 그리지 않았습니다. (그림을 먼저 그려주세요)"),
+
 
     POST_LIST_EMPTY(HttpStatus.BAD_REQUEST, "BOARD4000", "없는 게시글입니다."),
     COMMENT_LIST_EMPTY(HttpStatus.BAD_REQUEST, "BOARD4001", "댓글을 찾을 수 없습니다.");
