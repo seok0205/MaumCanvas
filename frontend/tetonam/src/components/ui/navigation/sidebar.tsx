@@ -19,9 +19,9 @@ import { cn } from '@/utils/cn';
 
 const SIDEBAR_COOKIE_NAME = 'sidebar:state';
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
-const SIDEBAR_WIDTH = '16rem';
-const SIDEBAR_WIDTH_MOBILE = '18rem';
-const SIDEBAR_WIDTH_ICON = '3rem';
+const SIDEBAR_WIDTH = '10rem';
+const SIDEBAR_WIDTH_MOBILE = '12rem';
+const SIDEBAR_WIDTH_ICON = '4rem';
 const SIDEBAR_KEYBOARD_SHORTCUT = 'b';
 
 type SidebarContext = {
@@ -260,7 +260,7 @@ const Sidebar = React.forwardRef<
 Sidebar.displayName = 'Sidebar';
 
 const SidebarTrigger = React.forwardRef<
-  React.ElementRef<typeof Button>,
+  React.ComponentRef<typeof Button>,
   React.ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
   const { toggleSidebar } = useSidebar();
@@ -284,6 +284,40 @@ const SidebarTrigger = React.forwardRef<
   );
 });
 SidebarTrigger.displayName = 'SidebarTrigger';
+
+const MobileSidebarToggle = React.forwardRef<
+  React.ComponentRef<typeof Button>,
+  React.ComponentProps<typeof Button>
+>(({ className, onClick, ...props }, ref) => {
+  const { toggleSidebar } = useSidebar();
+  const isMobile = useIsMobile();
+
+  if (!isMobile) {
+    return null;
+  }
+
+  return (
+    <Button
+      ref={ref}
+      data-sidebar='mobile-trigger'
+      variant='ghost'
+      size='icon'
+      className={cn(
+        'fixed bottom-4 left-4 z-50 h-12 w-12 rounded-full shadow-lg bg-background border border-border',
+        className
+      )}
+      onClick={event => {
+        onClick?.(event);
+        toggleSidebar();
+      }}
+      {...props}
+    >
+      <PanelLeft className='h-5 w-5' />
+      <span className='sr-only'>Toggle Sidebar</span>
+    </Button>
+  );
+});
+MobileSidebarToggle.displayName = 'MobileSidebarToggle';
 
 const SidebarRail = React.forwardRef<
   HTMLButtonElement,
@@ -421,7 +455,7 @@ const SidebarGroup = React.forwardRef<
     <div
       ref={ref}
       data-sidebar='group'
-      className={cn('relative flex w-full min-w-0 flex-col p-1', className)}
+      className={cn('relative flex w-full min-w-0 flex-col pl-3', className)}
       {...props}
     />
   );
@@ -735,6 +769,7 @@ const SidebarMenuSubButton = React.forwardRef<
 SidebarMenuSubButton.displayName = 'SidebarMenuSubButton';
 
 export {
+  MobileSidebarToggle,
   Sidebar,
   SidebarContent,
   SidebarFooter,
