@@ -260,7 +260,7 @@ const Sidebar = React.forwardRef<
 Sidebar.displayName = 'Sidebar';
 
 const SidebarTrigger = React.forwardRef<
-  React.ElementRef<typeof Button>,
+  React.ComponentRef<typeof Button>,
   React.ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
   const { toggleSidebar } = useSidebar();
@@ -284,6 +284,35 @@ const SidebarTrigger = React.forwardRef<
   );
 });
 SidebarTrigger.displayName = 'SidebarTrigger';
+
+const MobileSidebarToggle = React.forwardRef<
+  React.ComponentRef<typeof Button>,
+  React.ComponentProps<typeof Button>
+>(({ className, onClick, ...props }, ref) => {
+  const { toggleSidebar } = useSidebar();
+
+  return (
+    <Button
+      ref={ref}
+      data-sidebar='mobile-trigger'
+      variant='ghost'
+      size='icon'
+      className={cn(
+        'fixed bottom-4 left-4 z-50 h-12 w-12 rounded-full shadow-lg bg-background border border-border md:hidden',
+        className
+      )}
+      onClick={event => {
+        onClick?.(event);
+        toggleSidebar();
+      }}
+      {...props}
+    >
+      <PanelLeft className='h-5 w-5' />
+      <span className='sr-only'>Toggle Sidebar</span>
+    </Button>
+  );
+});
+MobileSidebarToggle.displayName = 'MobileSidebarToggle';
 
 const SidebarRail = React.forwardRef<
   HTMLButtonElement,
@@ -735,6 +764,7 @@ const SidebarMenuSubButton = React.forwardRef<
 SidebarMenuSubButton.displayName = 'SidebarMenuSubButton';
 
 export {
+  MobileSidebarToggle,
   Sidebar,
   SidebarContent,
   SidebarFooter,
