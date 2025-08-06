@@ -15,7 +15,7 @@ public class PostListDto {
     private String title;
     private String content;
     private Category category;
-    private String author;
+    private String nickname;
     private int viewCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -29,7 +29,7 @@ public class PostListDto {
                 .title(community.getTitle())
                 .content(community.getContent())
                 .category(community.getCategory())
-                .author(community.getAuthor().toString())
+                .nickname(community.getAuthor().getNickname())
                 .viewCount(community.getViewCount())
                 .createdAt(community.getCreatedAt())
                 .updatedAt(community.getUpdatedAt())

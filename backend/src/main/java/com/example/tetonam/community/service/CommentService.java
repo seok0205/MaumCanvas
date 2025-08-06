@@ -50,11 +50,11 @@ public class CommentService {
     }
 
     @Transactional
-    public void deletePost(Long id){
-        if (!communityRepository.existsById(id)){
-            throw new IllegalArgumentException("게시글이 존재하지 않습니다");
+    public void deleteComment(Long id){
+        if (!commentRepository.existsById(id)){
+            throw new IllegalArgumentException("댓글이 존재하지 않습니다");
         }
-        communityRepository.deleteById(id);
+        commentRepository.deleteById(id);
     }
 
     @Transactional

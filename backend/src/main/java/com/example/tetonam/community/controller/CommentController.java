@@ -59,14 +59,14 @@ public class CommentController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "글 삭제 API", description = "등록된 글을 삭제합니다")
-    public ResponseEntity<Void> deletePost(@PathVariable Long id, @RequestHeader("Authorization") String token){
+    @Operation(summary = "댓글 삭제 API", description = "등록된 댓글을 삭제합니다")
+    public ResponseEntity<Void> deletePost(@PathVariable Long community_id, @PathVariable Long id, @RequestHeader("Authorization") String token){
         String jwt = token.substring(7);
         String email = jwtTokenProvider.getEmail(jwt);
-        Community community = communityRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "유효하지 않은 게시글"));
-        if(email.equals(community.getAuthor().getEmail())){
-            communityService.deletePost(id);
+        Comment comment = commentRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "유효하지 않은 댓글"));
+        if(email.equals(comment.getAuthor().getEmail())){
+            commentService.deleteComment(id);
         }
         return ResponseEntity.noContent().build();
     }
@@ -77,7 +77,7 @@ public class CommentController {
         String jwt = token.substring(7);
         String email = jwtTokenProvider.getEmail(jwt);
         Comment comment = commentRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "유효하지 않은 게시글"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "유효하지 않은 댓글"));
         if(email.equals(comment.getAuthor().getEmail())){
             Comment updateComment = commentService.updateComment(id, updatedComment);
         }
