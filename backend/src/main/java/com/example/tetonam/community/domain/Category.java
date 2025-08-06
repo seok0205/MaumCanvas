@@ -5,7 +5,7 @@ public enum Category {
     STUDY("학업"),
     FRIENDSHIP("친구관계"),
     FAMILY("가족"),
-    REVIEW("상담후기");
+    SECRET("비밀상담게시판");
 
     private final String description;
 

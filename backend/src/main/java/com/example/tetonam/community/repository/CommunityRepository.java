@@ -4,10 +4,9 @@ import com.example.tetonam.community.domain.Category;
 import com.example.tetonam.community.domain.Community;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface  CommunityRepository extends JpaRepository<Community, Long> {
 
@@ -16,6 +15,7 @@ public interface  CommunityRepository extends JpaRepository<Community, Long> {
      * - 사용 예: /community/posts?category=STUDY 요청 시
      */
     List<Community> findByCategory(Category category);
+
 
     /**
      * 전체 게시글 중 최신순 정렬 조회

@@ -2,7 +2,9 @@ package com.example.tetonam.community.controller;
 
 import com.example.tetonam.community.domain.Community;
 import com.example.tetonam.community.dto.PostListDto;
+import com.example.tetonam.community.dto.PostUpdateDto;
 import com.example.tetonam.community.dto.PostWriteDto;
+import com.example.tetonam.community.repository.CommunityRepository;
 import com.example.tetonam.community.service.CommunityService;
 import com.example.tetonam.exception.handler.TokenHandler;
 import com.example.tetonam.user.domain.User;
@@ -26,6 +28,7 @@ public class CommunityController {
     private final CommunityService communityService;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
+    private final CommunityRepository communityRepository;
 
     /**
      * 게시글 단건 조회
@@ -52,16 +55,28 @@ public class CommunityController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "글 삭제 API", description = "등록된 글을 삭제합니다")
-    public ResponseEntity<Void> deletePost(@PathVariable Long id){
-        communityService.deletePost(id);
+    public ResponseEntity<Void> deletePost(@PathVariable Long id, @RequestHeader("Authorization") String token){
+        String jwt = token.substring(7);
+        String email = jwtTokenProvider.getEmail(jwt);
+        Community community = communityRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "유효하지 않은 게시글"));
+        if(email.equals(community.getAuthor().getEmail())){
+            communityService.deletePost(id);
+        }
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "글 수정 API", description = "등록된 글을 수정합니다")
-    public ResponseEntity<Community> updatePost(@PathVariable Long id, @RequestBody Community updatedCommunity){
-        Community community = communityService.updatePost(id, updatedCommunity);
-        return ResponseEntity.ok(community);
+    public ResponseEntity<PostUpdateDto> updatePost(@PathVariable Long id, @RequestBody PostUpdateDto updatedCommunity, @RequestHeader("Authorization") String token){
+        String jwt = token.substring(7);
+        String email = jwtTokenProvider.getEmail(jwt);
+        Community community = communityRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "유효하지 않은 게시글"));
+        if(email.equals(community.getAuthor().getEmail())){
+            Community updateCommunity = communityService.updatePost(id, updatedCommunity);
+        }
+        return ResponseEntity.ok(updatedCommunity);
     }
 
     @GetMapping

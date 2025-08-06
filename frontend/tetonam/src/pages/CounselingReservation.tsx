@@ -1,7 +1,15 @@
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { ArrowLeft, Calendar, Clock, Info, User } from 'lucide-react';
+import {
+  ArrowLeft,
+  Calendar,
+  Clock,
+  Info,
+  MessageCircle,
+  User,
+} from 'lucide-react';
 
+import { CounselingTypeSelector } from '@/components/ui/CounselingTypeSelector';
 import { Alert, AlertDescription } from '@/components/ui/feedback/alert';
 import { Button } from '@/components/ui/interactive/button';
 import {
@@ -11,6 +19,7 @@ import {
   CardTitle,
 } from '@/components/ui/layout/card';
 import { useCounselingReservation } from '@/hooks/useCounselingReservation';
+import { COUNSELING_TYPE_DATA } from '@/types/counselingType';
 import { cn } from '@/utils/cn';
 
 interface CounselingReservationProps {
@@ -24,6 +33,7 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
     selectedDate,
     selectedTime,
     selectedCounselor,
+    selectedCounselingType,
     dateOptions,
     timeOptions,
     counselors,
@@ -32,6 +42,7 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
     handleDateSelect,
     handleTimeSelect,
     handleCounselorSelect,
+    handleCounselingTypeSelect,
     handleReservationConfirm,
     handleGoBack,
     isReservationPending,
@@ -131,8 +142,27 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
           </CardContent>
         </Card>
 
-        {/* 상담사 선택 섹션 */}
+        {/* 상담유형 선택 섹션 */}
         {selectedDate && selectedTime && (
+          <Card className='bg-white shadow-sm'>
+            <CardHeader>
+              <CardTitle className='flex items-center gap-2 text-lg'>
+                <MessageCircle className='h-5 w-5 text-purple-600' />
+                상담 유형 선택
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CounselingTypeSelector
+                selectedType={selectedCounselingType}
+                onTypeSelect={handleCounselingTypeSelect}
+                categories={COUNSELING_TYPE_DATA}
+              />
+            </CardContent>
+          </Card>
+        )}
+
+        {/* 상담사 선택 섹션 */}
+        {selectedDate && selectedTime && selectedCounselingType && (
           <Card className='bg-white shadow-sm'>
             <CardHeader>
               <CardTitle className='flex items-center gap-2 text-lg'>
@@ -205,31 +235,42 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
         )}
 
         {/* 예약 확인 섹션 */}
-        {selectedDate && selectedTime && selectedCounselor && (
-          <Card className='bg-blue-50 border-blue-200'>
-            <CardHeader>
-              <CardTitle className='text-lg text-blue-900'>예약 확인</CardTitle>
-            </CardHeader>
-            <CardContent className='space-y-3'>
-              <div className='flex justify-between items-center'>
-                <span className='text-gray-600'>날짜</span>
-                <span className='font-medium'>
-                  {format(selectedDate, 'M월 d일 (E)', { locale: ko })}
-                </span>
-              </div>
-              <div className='flex justify-between items-center'>
-                <span className='text-gray-600'>시간</span>
-                <span className='font-medium'>{selectedTime}</span>
-              </div>
-              <div className='flex justify-between items-center'>
-                <span className='text-gray-600'>상담사</span>
-                <span className='font-medium'>
-                  {selectedCounselor.counselorName} 상담사
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        {selectedDate &&
+          selectedTime &&
+          selectedCounselingType &&
+          selectedCounselor && (
+            <Card className='bg-blue-50 border-blue-200'>
+              <CardHeader>
+                <CardTitle className='text-lg text-blue-900'>
+                  예약 확인
+                </CardTitle>
+              </CardHeader>
+              <CardContent className='space-y-3'>
+                <div className='flex justify-between items-center'>
+                  <span className='text-gray-600'>날짜</span>
+                  <span className='font-medium'>
+                    {format(selectedDate, 'M월 d일 (E)', { locale: ko })}
+                  </span>
+                </div>
+                <div className='flex justify-between items-center'>
+                  <span className='text-gray-600'>시간</span>
+                  <span className='font-medium'>{selectedTime}</span>
+                </div>
+                <div className='flex justify-between items-center'>
+                  <span className='text-gray-600'>상담 유형</span>
+                  <span className='font-medium'>
+                    {selectedCounselingType.name}
+                  </span>
+                </div>
+                <div className='flex justify-between items-center'>
+                  <span className='text-gray-600'>상담사</span>
+                  <span className='font-medium'>
+                    {selectedCounselor.counselorName} 상담사
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
         {/* 예약 안내사항 */}
         <Card className='bg-white shadow-sm'>
@@ -263,6 +304,7 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
           disabled={
             !selectedDate ||
             !selectedTime ||
+            !selectedCounselingType ||
             !selectedCounselor ||
             isReservationPending
           }
