@@ -303,7 +303,7 @@ const MobileSidebarToggle = React.forwardRef<
       variant='ghost'
       size='icon'
       className={cn(
-        'fixed bottom-4 left-4 z-50 h-12 w-12 rounded-full shadow-lg bg-background border border-border',
+        'fixed bottom-4 left-4 z-[999] h-12 w-12 rounded-full shadow-lg bg-background border border-border',
         className
       )}
       onClick={event => {

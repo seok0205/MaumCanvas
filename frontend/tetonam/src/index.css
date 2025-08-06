@@ -66,138 +66,221 @@
 
 @layer base {
   :root {
-    /* 기본 색상 팔레트 - 더 깊이감 있는 톤으로 조정 */
-    --background: 0 0% 98%; /* 매우 밝은 회색 */
-    --foreground: 220 10% 15%; /* 진한 회색 */
-    --card: 0 0% 100%; /* 순백 */
+    /* Youth-Friendly Color Palette - Warm Pastels for Mental Health Platform */
+
+    /* Primary Colors - Orange-Gold System */
+    --youth-orange: 45 100% 65%; /* #FFC107 converted to HSL */
+    --youth-gold: 51 100% 50%; /* #FFD700 converted to HSL */
+
+    /* Secondary Colors - Yellow Family */
+    --youth-yellow: 51 100% 80%; /* #FFEB99 converted to HSL */
+    --youth-cream: 39 100% 93%; /* #FFEFD5 converted to HSL */
+    --youth-light-yellow: 56 100% 94%; /* #FFFACD converted to HSL */
+
+    /* Accent Colors - Nature Inspired */
+    --youth-green: 127 21% 72%; /* #A3C9A8 converted to HSL */
+    --youth-olive: 54 77% 75%; /* #F0E68C converted to HSL */
+    --youth-soft-brown: 37 57% 70%; /* #DEB887 converted to HSL */
+
+    /* Functional Colors - Soft Pastels */
+    --youth-light-pink: 0 100% 94%; /* #FFE4E1 converted to HSL */
+    --youth-light-blue: 211 100% 93%; /* #E6F3FF converted to HSL */
+
+    /* Text Colors for States */
+    --text-success: 127 37% 26%; /* #2d5a31 converted to HSL */
+    --text-warning: 344 55% 35%; /* #8b2635 converted to HSL */
+    --text-info: 224 100% 32%; /* #1e3a8a converted to HSL */
+
+    /* Base System Colors mapped to Youth Palette */
+    --background: 56 100% 94%; /* --youth-light-yellow as main background */
+    --foreground: 220 10% 15%; /* Dark text for contrast */
+    --card: 0 0% 100%; /* Pure white for cards */
     --card-foreground: 220 10% 15%;
     --popover: 0 0% 100%;
     --popover-foreground: 220 10% 15%;
-    --primary: 160 84% 39%; /* 민트 그린 - 더 진한 톤 */
-    --primary-foreground: 0 0% 98%;
-    --primary-light: 160 84% 45%; /* 밝은 민트 */
-    --primary-dark: 160 84% 32%; /* 어두운 민트 */
-    --secondary: 220 14% 96%; /* 연한 회색 */
+    --primary: 45 100% 65%; /* --youth-orange as primary */
+    --primary-foreground: 220 10% 15%;
+    --primary-light: 51 100% 50%; /* --youth-gold for hover states */
+    --primary-dark: 45 100% 55%; /* Darker orange */
+    --secondary: 39 100% 93%; /* --youth-cream for secondary elements */
     --secondary-foreground: 220 10% 15%;
-    --muted: 220 14% 96%;
+    --muted: 51 100% 80%; /* --youth-yellow for muted elements */
     --muted-foreground: 220 9% 46%;
-    --accent: 220 14% 96%;
-    --accent-foreground: 220 10% 15%;
-    --destructive: 0 84% 60%; /* 빨간색 */
-    --destructive-foreground: 0 0% 98%;
-    --border: 220 13% 91%; /* 테두리 색상 */
-    --input: 220 13% 91%;
-    --ring: 160 84% 39%; /* 민트 그린 */
-    --radius: 1.25rem; /* 더 둥근 모서리 */
+    --accent: 127 21% 72%; /* --youth-green for accents */
+    --accent-foreground: 127 37% 26%; /* --text-success for accent text */
+    --destructive: 344 55% 35%; /* --text-warning for destructive actions */
+    --destructive-foreground: 0 100% 94%; /* --youth-light-pink background */
+    --border: 220 13% 91%; /* Soft border color */
+    --input: 56 100% 94%; /* --youth-light-yellow for input backgrounds */
+    --ring: 45 100% 65%; /* --youth-orange for focus rings */
+    --radius: 1.25rem; /* Rounded corners for friendly feel */
     --radius-lg: 1.5rem;
     --radius-xl: 2rem;
 
-    /* 청소년 친화적 파스텔 컬러 팔레트 */
-    --mint: 160 84% 39%; /* 민트 그린 */
-    --mint-light: 160 84% 45%;
-    --mint-dark: 160 84% 32%;
-    --yellow: 45 93% 47%; /* 밝은 노란색 */
-    --yellow-light: 45 93% 55%;
-    --yellow-dark: 45 93% 40%;
-    --light-blue: 199 89% 48%; /* 밝은 파란색 */
-    --light-blue-light: 199 89% 55%;
-    --light-blue-dark: 199 89% 40%;
-    --lilac: 262 83% 58%; /* 라일락 */
-    --lilac-light: 262 83% 65%;
-    --lilac-dark: 262 83% 50%;
-    --peach: 25 95% 53%; /* 복숭아색 */
-    --peach-light: 25 95% 60%;
-    --peach-dark: 25 95% 45%;
+    /* Extended Youth Palette Colors */
+    --mint: 127 21% 72%; /* --youth-green renamed for consistency */
+    --mint-light: 127 21% 80%;
+    --mint-dark: 127 21% 65%;
+    --yellow: 51 100% 80%; /* --youth-yellow */
+    --yellow-light: 56 100% 94%; /* --youth-light-yellow */
+    --yellow-dark: 51 100% 70%;
+    --light-blue: 211 100% 93%; /* --youth-light-blue */
+    --light-blue-light: 211 100% 96%;
+    --light-blue-dark: 211 100% 88%;
+    --lilac: 0 100% 94%; /* --youth-light-pink for soft accent */
+    --lilac-light: 0 100% 96%;
+    --lilac-dark: 0 100% 90%;
+    --peach: 37 57% 70%; /* --youth-soft-brown */
+    --peach-light: 37 57% 77%;
+    --peach-dark: 37 57% 63%;
 
-    /* 그라디언트 정의 */
+    /* Youth-Friendly Gradient Definitions */
     --gradient-warm: linear-gradient(
       135deg,
-      /* hsl(160 84% 39% / 0.1), */ hsl(45 93% 47% / 0.1),
-      hsl(25 95% 53% / 0.1)
+      hsl(56 100% 94%),
+      /* --youth-light-yellow */ hsl(39 100% 93%),
+      /* --youth-cream */ hsl(51 100% 80%) /* --youth-yellow */
     );
     --gradient-primary: linear-gradient(
       135deg,
-      hsl(160 84% 39% / 0.2),
-      hsl(199 89% 48% / 0.2)
+      hsl(45 100% 65%),
+      /* --youth-orange */ hsl(51 100% 50%) /* --youth-gold */
     );
     --gradient-subtle: linear-gradient(
       135deg,
-      hsl(220 14% 96%),
-      hsl(0 0% 100%)
+      hsl(39 100% 93%),
+      /* --youth-cream */ hsl(0 0% 100%) /* Pure white */
     );
     --gradient-mint: linear-gradient(
       135deg,
-      hsl(160 84% 39%),
-      hsl(160 84% 45%)
+      hsl(127 21% 72%),
+      /* --youth-green */ hsl(127 21% 80%)
     );
     --gradient-yellow: linear-gradient(
       135deg,
-      hsl(45 93% 47%),
-      hsl(45 93% 55%)
+      hsl(51 100% 80%),
+      /* --youth-yellow */ hsl(56 100% 94%) /* --youth-light-yellow */
     );
     --gradient-blue: linear-gradient(
       135deg,
-      hsl(199 89% 48%),
-      hsl(199 89% 55%)
+      hsl(211 100% 93%),
+      /* --youth-light-blue */ hsl(211 100% 96%)
+    );
+    --gradient-header: linear-gradient(
+      to right,
+      hsl(51 100% 80%),
+      /* --youth-yellow */ hsl(39 100% 93%) /* --youth-cream */
     );
 
-    /* 그림자 시스템 */
-    --shadow-soft: 0 2px 8px hsl(220 10% 15% / 0.08);
-    --shadow-medium: 0 4px 16px hsl(220 10% 15% / 0.12);
-    --shadow-card: 0 2px 12px hsl(220 10% 15% / 0.06);
-    --shadow-hover: 0 8px 24px hsl(220 10% 15% / 0.15);
+    /* Youth-Friendly Shadow System - Softer and warmer */
+    --shadow-soft: 0 2px 8px hsl(45 100% 65% / 0.08);
+    --shadow-medium: 0 4px 16px hsl(45 100% 65% / 0.12);
+    --shadow-card: 0 2px 12px hsl(45 100% 65% / 0.06);
+    --shadow-hover: 0 8px 24px hsl(45 100% 65% / 0.15);
+    --shadow-youth: 0 2px 8px hsl(45 100% 65% / 0.08);
+    --shadow-youth-hover: 0 8px 24px hsl(45 100% 65% / 0.15);
 
-    /* 전환 효과 */
+    /* Smooth transitions for youth-friendly interactions */
     --transition-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 
-    /* 사이드바 색상 */
-    --sidebar-background: 0 0% 100%;
+    /* Sidebar colors adapted to youth palette */
+    --sidebar-background: 39 100% 93%; /* --youth-cream */
     --sidebar-foreground: 220 10% 15%;
-    --sidebar-primary: 160 84% 39%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 220 14% 96%;
+    --sidebar-primary: 45 100% 65%; /* --youth-orange */
+    --sidebar-primary-foreground: 220 10% 15%;
+    --sidebar-accent: 56 100% 94%; /* --youth-light-yellow */
     --sidebar-accent-foreground: 220 10% 15%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 160 84% 39%;
+    --sidebar-ring: 45 100% 65%; /* --youth-orange */
   }
 
   .dark {
-    --background: 220 10% 8%; /* 어두운 배경 */
-    --foreground: 0 0% 98%; /* 밝은 텍스트 */
-    --card: 220 10% 12%; /* 어두운 카드 */
+    /* Dark mode with warm, youth-friendly colors */
+    --background: 220 10% 8%; /* Dark background */
+    --foreground: 0 0% 98%; /* Light text */
+    --card: 220 10% 12%; /* Dark cards */
     --card-foreground: 0 0% 98%;
     --popover: 220 10% 12%;
     --popover-foreground: 0 0% 98%;
-    --primary: 160 84% 45%; /* 밝은 민트 */
+    --primary: 51 100% 50%; /* --youth-gold for dark mode primary */
     --primary-foreground: 220 10% 8%;
-    --primary-light: 160 84% 50%;
-    --primary-dark: 160 84% 39%;
-    --secondary: 220 10% 15%; /* 어두운 보조 색상 */
+    --primary-light: 51 100% 60%;
+    --primary-dark: 45 100% 55%;
+    --secondary: 220 10% 15%; /* Dark secondary */
     --secondary-foreground: 0 0% 98%;
     --muted: 220 10% 15%;
     --muted-foreground: 220 9% 65%;
     --accent: 220 10% 15%;
     --accent-foreground: 0 0% 98%;
-    --destructive: 0 84% 60%;
+    --destructive: 344 55% 45%; /* Slightly brighter for dark mode */
     --destructive-foreground: 0 0% 98%;
-    --border: 220 10% 18%; /* 어두운 테두리 */
+    --border: 220 10% 18%; /* Dark borders */
     --input: 220 10% 18%;
-    --ring: 160 84% 45%;
+    --ring: 51 100% 50%; /* --youth-gold for focus rings */
 
-    /* 다크 모드 파스텔 컬러 */
-    --mint: 160 84% 45%;
-    --mint-light: 160 84% 50%;
-    --mint-dark: 160 84% 39%;
-    --yellow: 45 93% 55%;
-    --yellow-light: 45 93% 62%;
-    --yellow-dark: 45 93% 47%;
-    --light-blue: 199 89% 55%;
-    --light-blue-light: 199 89% 62%;
-    --light-blue-dark: 199 89% 47%;
-    --lilac: 262 83% 65%;
-    --lilac-light: 262 83% 72%;
-    --lilac-dark: 262 83% 58%;
-    --peach: 25 95% 60%;
+    /* Dark mode youth palette - maintaining warmth */
+    --youth-orange: 45 100% 70%; /* Brighter for dark mode */
+    --youth-gold: 51 100% 60%;
+    --youth-yellow: 51 100% 75%;
+    --youth-cream: 39 50% 25%; /* Darker but warm cream */
+    --youth-light-yellow: 56 50% 20%;
+    --youth-green: 127 21% 55%; /* Adjusted for dark mode */
+    --youth-olive: 54 40% 45%;
+    --youth-soft-brown: 37 30% 40%;
+    --youth-light-pink: 0 50% 25%;
+    --youth-light-blue: 211 50% 25%;
+
+    /* Dark mode extended colors */
+    --mint: 127 21% 55%;
+    --mint-light: 127 21% 65%;
+    --mint-dark: 127 21% 45%;
+    --yellow: 51 100% 75%;
+    --yellow-light: 56 100% 80%;
+    --yellow-dark: 51 100% 65%;
+    --light-blue: 211 50% 35%;
+    --light-blue-light: 211 50% 45%;
+    --light-blue-dark: 211 50% 25%;
+    --lilac: 0 50% 35%;
+    --lilac-light: 0 50% 45%;
+    --lilac-dark: 0 50% 25%;
+    --peach: 37 30% 45%;
+    --peach-light: 37 30% 55%;
+    --peach-dark: 37 30% 35%;
+
+    /* Dark mode gradients - maintaining warmth */
+    --gradient-warm: linear-gradient(
+      135deg,
+      hsl(56 50% 20%),
+      hsl(39 50% 25%),
+      hsl(51 100% 75%)
+    );
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(45 100% 70%),
+      hsl(51 100% 60%)
+    );
+    --gradient-subtle: linear-gradient(
+      135deg,
+      hsl(39 50% 25%),
+      hsl(220 10% 12%)
+    );
+
+    /* Dark mode shadows with warm tint */
+    --shadow-soft: 0 2px 8px hsl(45 100% 70% / 0.12);
+    --shadow-medium: 0 4px 16px hsl(45 100% 70% / 0.16);
+    --shadow-card: 0 2px 12px hsl(45 100% 70% / 0.1);
+    --shadow-hover: 0 8px 24px hsl(45 100% 70% / 0.2);
+
+    /* Dark mode sidebar */
+    --sidebar-background: 220 10% 12%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 51 100% 50%;
+    --sidebar-primary-foreground: 220 10% 8%;
+    --sidebar-accent: 220 10% 15%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 220 10% 18%;
+    --sidebar-ring: 51 100% 50%;
     --peach-light: 25 95% 67%;
     --peach-dark: 25 95% 53%;
 
@@ -318,7 +401,7 @@
   }
 
   .btn-youth-primary {
-    @apply btn-youth bg-gradient-mint hover:bg-mint-dark text-white shadow-soft hover:shadow-medium;
+    @apply btn-youth bg-youth-orange hover:bg-youth-gold text-white shadow-soft hover:shadow-medium;
   }
 
   .btn-youth-secondary {
@@ -367,9 +450,337 @@
 }
 
 @layer utilities {
+  /* Youth-Friendly Color Utilities */
+  .bg-youth-orange {
+    background-color: hsl(var(--youth-orange));
+  }
+  .bg-youth-gold {
+    background-color: hsl(var(--youth-gold));
+  }
+  .bg-youth-yellow {
+    background-color: hsl(var(--youth-yellow));
+  }
+  .bg-youth-cream {
+    background-color: hsl(var(--youth-cream));
+  }
+  .bg-youth-light-yellow {
+    background-color: hsl(var(--youth-light-yellow));
+  }
+  .bg-youth-green {
+    background-color: hsl(var(--youth-green));
+  }
+  .bg-youth-olive {
+    background-color: hsl(var(--youth-olive));
+  }
+  .bg-youth-soft-brown {
+    background-color: hsl(var(--youth-soft-brown));
+  }
+  .bg-youth-light-pink {
+    background-color: hsl(var(--youth-light-pink));
+  }
+  .bg-youth-light-blue {
+    background-color: hsl(var(--youth-light-blue));
+  }
+
+  .text-youth-orange {
+    color: hsl(var(--youth-orange));
+  }
+  .text-youth-gold {
+    color: hsl(var(--youth-gold));
+  }
+  .text-success {
+    color: hsl(var(--text-success));
+  }
+  .text-warning {
+    color: hsl(var(--text-warning));
+  }
+  .text-info {
+    color: hsl(var(--text-info));
+  }
+
+  /* Youth-Friendly Gradient Backgrounds */
+  .bg-gradient-youth-warm {
+    background: var(--gradient-warm);
+  }
+  .bg-gradient-youth-primary {
+    background: var(--gradient-primary);
+  }
+  .bg-gradient-youth-header {
+    background: var(--gradient-header);
+  }
+  .bg-gradient-youth-subtle {
+    background: var(--gradient-subtle);
+  }
+
+  /* State-Based Color Utilities */
+  .state-success {
+    background-color: hsl(var(--youth-green));
+    color: hsl(var(--text-success));
+  }
+  .state-warning {
+    background-color: hsl(var(--youth-light-pink));
+    color: hsl(var(--text-warning));
+  }
+  .state-info {
+    background-color: hsl(var(--youth-light-blue));
+    color: hsl(var(--text-info));
+  }
+  .state-pending {
+    background-color: hsl(var(--youth-light-yellow));
+    color: hsl(var(--youth-orange));
+  }
+
+  /* Youth-Friendly Shadow Utilities */
+  .shadow-youth {
+    box-shadow: var(--shadow-youth);
+  }
+  .shadow-youth-hover {
+    box-shadow: var(--shadow-youth-hover);
+  }
+
+  /* Transition Utilities */
+  .transition-youth {
+    transition: all 0.2s var(--transition-smooth);
+  }
+  .transition-spring {
+    transition: all 0.3s var(--transition-spring);
+  }
+}
+
+/* Youth-Friendly Component Styles */
+@layer components {
+  /* Primary Button - Youth Orange to Gold on Hover */
+  .btn-youth-primary {
+    @apply px-6 py-3 rounded-xl font-medium text-white transition-youth;
+    background-color: hsl(var(--youth-orange));
+  }
+  .btn-youth-primary:hover {
+    background-color: hsl(var(--youth-gold));
+    box-shadow: var(--shadow-youth-hover);
+  }
+  .btn-youth-primary:active {
+    transform: scale(0.98);
+  }
+
+  /* Secondary Button */
+  .btn-youth-secondary {
+    @apply px-6 py-3 rounded-xl font-medium transition-youth;
+    background-color: hsl(var(--youth-cream));
+    color: hsl(var(--foreground));
+  }
+  .btn-youth-secondary:hover {
+    background-color: hsl(var(--youth-yellow));
+    box-shadow: var(--shadow-youth);
+  }
+
+  /* Success Button */
+  .btn-youth-success {
+    @apply px-6 py-3 rounded-xl font-medium text-white transition-youth;
+    background-color: hsl(var(--youth-green));
+    color: hsl(var(--text-success));
+  }
+  .btn-youth-success:hover {
+    opacity: 0.9;
+    box-shadow: var(--shadow-youth);
+  }
+
+  /* Youth-Friendly Cards */
+  .card-youth {
+    @apply rounded-2xl bg-white p-6 transition-youth;
+    box-shadow: var(--shadow-card);
+  }
+  .card-youth:hover {
+    box-shadow: var(--shadow-youth-hover);
+    transform: translateY(-2px);
+  }
+
+  /* Selected Card State */
+  .card-youth-selected {
+    @apply card-youth;
+    background-color: hsl(var(--youth-light-yellow));
+    border: 2px solid hsl(var(--youth-orange));
+  }
+
+  /* Counselor Card with Green Accent */
+  .card-counselor {
+    @apply card-youth;
+    border-left: 4px solid hsl(var(--youth-green));
+  }
+
+  /* Youth-Friendly Form Inputs */
+  .input-youth {
+    @apply px-4 py-3 rounded-xl border border-gray-200 transition-youth;
+    background-color: white;
+  }
+  .input-youth:focus {
+    background-color: hsl(var(--youth-light-yellow));
+    border-color: hsl(var(--youth-orange));
+    outline: none;
+    box-shadow: 0 0 0 3px hsl(var(--youth-orange) / 0.1);
+  }
+
+  /* Navigation Tabs */
+  .tab-youth {
+    @apply px-4 py-2 rounded-lg font-medium transition-youth cursor-pointer;
+    background-color: hsl(var(--youth-cream));
+    color: hsl(var(--foreground));
+  }
+  .tab-youth-active {
+    @apply tab-youth;
+    background-color: hsl(var(--youth-orange));
+    color: white;
+  }
+  .tab-youth:hover:not(.tab-youth-active) {
+    background-color: hsl(var(--youth-light-yellow));
+  }
+
+  /* Progress Bar */
+  .progress-youth {
+    @apply w-full rounded-full overflow-hidden;
+    background-color: hsl(var(--youth-cream));
+    height: 8px;
+  }
+  .progress-youth-fill {
+    @apply h-full transition-all duration-500 ease-out;
+    background-color: hsl(var(--youth-orange));
+  }
+
+  /* Status Badges */
+  .badge-youth-success {
+    @apply px-3 py-1 rounded-full text-sm font-medium;
+    background-color: hsl(var(--youth-green));
+    color: hsl(var(--text-success));
+  }
+  .badge-youth-warning {
+    @apply px-3 py-1 rounded-full text-sm font-medium;
+    background-color: hsl(var(--youth-light-pink));
+    color: hsl(var(--text-warning));
+  }
+  .badge-youth-info {
+    @apply px-3 py-1 rounded-full text-sm font-medium;
+    background-color: hsl(var(--youth-light-blue));
+    color: hsl(var(--text-info));
+  }
+  .badge-youth-pending {
+    @apply px-3 py-1 rounded-full text-sm font-medium;
+    background-color: hsl(var(--youth-light-yellow));
+    color: hsl(var(--youth-orange));
+  }
+
+  /* Page-Specific Styles */
+
+  /* Home Page */
+  .home-hero {
+    @apply min-h-screen;
+    background: var(--gradient-warm);
+  }
+  .home-cta {
+    @apply btn-youth-primary text-lg px-8 py-4;
+  }
+
+  /* Assessment Page */
+  .assessment-option {
+    @apply p-4 rounded-xl border-2 transition-youth cursor-pointer;
+    border-color: hsl(var(--border));
+    background-color: white;
+  }
+  .assessment-option:hover {
+    border-color: hsl(var(--youth-orange));
+    background-color: hsl(var(--youth-light-yellow));
+  }
+  .assessment-option-selected {
+    @apply assessment-option;
+    border-color: hsl(var(--youth-orange));
+    background-color: hsl(var(--youth-light-yellow));
+  }
+
+  /* Booking Page */
+  .date-picker-day {
+    @apply p-2 rounded-lg transition-youth cursor-pointer text-center;
+  }
+  .date-picker-day:hover {
+    background-color: hsl(var(--youth-light-yellow));
+  }
+  .date-picker-day-selected {
+    @apply date-picker-day;
+    background-color: hsl(var(--youth-orange));
+    color: white;
+  }
+  .time-slot {
+    @apply px-4 py-2 rounded-lg transition-youth cursor-pointer text-center;
+    background-color: hsl(var(--youth-light-yellow));
+  }
+  .time-slot:hover {
+    background-color: hsl(var(--youth-yellow));
+  }
+  .time-slot-selected {
+    @apply time-slot;
+    background-color: hsl(var(--youth-orange));
+    color: white;
+  }
+
+  /* Community/Forum Page */
+  .category-tab {
+    @apply px-4 py-2 rounded-lg font-medium transition-youth cursor-pointer;
+    background-color: hsl(var(--youth-cream));
+  }
+  .category-tab-active {
+    @apply category-tab;
+    background-color: hsl(var(--youth-orange));
+    color: white;
+  }
+  .category-tab:hover:not(.category-tab-active) {
+    background-color: hsl(var(--youth-light-yellow));
+  }
+
+  /* Profile/My Page */
+  .profile-nav-item {
+    @apply px-4 py-3 rounded-lg transition-youth cursor-pointer;
+  }
+  .profile-nav-item:hover {
+    background-color: hsl(var(--youth-light-yellow));
+  }
+  .profile-nav-item-active {
+    @apply profile-nav-item;
+    background-color: hsl(var(--youth-light-yellow));
+    border-left: 4px solid hsl(var(--youth-orange));
+  }
+
+  /* Accessibility and Touch-Friendly Utilities */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px]; /* Minimum touch target size */
+  }
+
+  .focus-youth {
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+    --tw-ring-color: hsl(var(--youth-orange));
+  }
+
+  /* Loading States */
+  .loading-youth {
+    @apply animate-pulse;
+    background: linear-gradient(
+      90deg,
+      hsl(var(--youth-cream)),
+      hsl(var(--youth-light-yellow)),
+      hsl(var(--youth-cream))
+    );
+    background-size: 200% 100%;
+    animation: loading-shimmer 1.5s ease-in-out infinite;
+  }
+
+  @keyframes loading-shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
   /* 새로운 그라디언트 유틸리티 */
-  .bg-gradient-mint {
-    background: var(--gradient-mint);
+  .bg-gradient-youth-warm {
+    background: var(--gradient-warm);
   }
 
   .bg-gradient-yellow {
