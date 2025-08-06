@@ -105,7 +105,7 @@ export const isValidCounselorInfo = (
 export interface CounselingReservationRequest {
   time: string;
   types: string;
-  counselorId: number; // 소문자 c로 변경
+  CounselorId: number; // 백엔드 DTO와 일치하도록 대문자 C 사용
 }
 
 // 상담 내역 타입

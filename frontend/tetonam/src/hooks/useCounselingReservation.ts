@@ -131,9 +131,9 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
     mutationFn: async (data: CounselingReservationRequest) => {
       // 추가 검증 로직
       if (
-        !data.counselorId ||
-        typeof data.counselorId !== 'number' ||
-        data.counselorId <= 0
+        !data.CounselorId ||
+        typeof data.CounselorId !== 'number' ||
+        data.CounselorId <= 0
       ) {
         throw new Error('상담사 ID가 유효하지 않습니다.');
       }
@@ -221,7 +221,7 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
     const reservationData: CounselingReservationRequest = {
       time: dateTime,
       types: selectedCounselingType.title,
-      counselorId: selectedCounselor.id, // 소문자 c로 변경
+      CounselorId: selectedCounselor.id, // 백엔드 DTO와 일치하도록 대문자 C 사용
     };
 
     reservationMutation.mutate(reservationData);
