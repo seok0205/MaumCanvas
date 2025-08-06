@@ -4,22 +4,14 @@ import com.example.tetonam.community.domain.Community;
 import com.example.tetonam.community.dto.PostListDto;
 import com.example.tetonam.community.dto.PostUpdateDto;
 import com.example.tetonam.community.dto.PostWriteDto;
-import com.example.tetonam.community.repository.CommunityRepository;
 import com.example.tetonam.community.service.CommunityService;
-import com.example.tetonam.exception.handler.BoardHandler;
-import com.example.tetonam.exception.handler.TokenHandler;
 import com.example.tetonam.response.ApiResponse;
-import com.example.tetonam.response.code.status.ErrorStatus;
-import com.example.tetonam.user.domain.User;
-import com.example.tetonam.user.repository.UserRepository;
 import com.example.tetonam.user.token.JwtTokenProvider;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -30,8 +22,6 @@ import java.util.List;
 public class CommunityController {
     private final CommunityService communityService;
     private final JwtTokenProvider jwtTokenProvider;
-    private final UserRepository userRepository;
-    private final CommunityRepository communityRepository;
 
     /**
      * 게시글 단건 조회

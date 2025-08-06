@@ -88,7 +88,7 @@ public class CommunityService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BoardHandler(ErrorStatus.USER_NOT_FOUND));
         if(!user.equals(community.getAuthor())){
-            throw new BoardHandler(ErrorStatus.USER_INVALID_CREDENTIALS);
+            throw new BoardHandler(ErrorStatus.USER_NOT_MATCH);
         }
         communityRepository.deleteById(id);
     }
@@ -99,7 +99,7 @@ public class CommunityService {
         User user = userRepository.findByEmail(email)
                         .orElseThrow(() -> new BoardHandler(ErrorStatus.USER_NOT_FOUND));
         if(!user.equals(community.getAuthor())){
-            throw new BoardHandler(ErrorStatus.USER_INVALID_CREDENTIALS);
+            throw new BoardHandler(ErrorStatus.USER_NOT_MATCH);
         }
         community.setTitle(updateCommunity.getTitle());
         community.setContent(updateCommunity.getContent());
