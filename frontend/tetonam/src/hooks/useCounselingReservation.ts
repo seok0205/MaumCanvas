@@ -223,6 +223,16 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
       counselorId: selectedCounselor.id, // 백엔드 DTO와 일치하도록 수정
     };
 
+    // 🚨 디버깅: 예약 데이터 확인
+    console.log('🔍 선택된 상담사:', selectedCounselor);
+    console.log('🔍 최종 예약 데이터:', reservationData);
+    console.log('🔍 counselorId 확인:', {
+      value: reservationData.counselorId,
+      type: typeof reservationData.counselorId,
+      isNumber: typeof reservationData.counselorId === 'number',
+      isPositive: reservationData.counselorId > 0,
+    });
+
     reservationMutation.mutate(reservationData);
   }, [
     selectedDate,

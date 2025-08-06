@@ -89,6 +89,13 @@ export const counselingService = {
     signal?: AbortSignal
   ): Promise<string> => {
     try {
+      // 🚨 디버깅: 실제 전송 데이터 확인
+      console.log('🔍 예약 요청 데이터:', data);
+      console.log('🔍 counselorId 타입:', typeof data.counselorId);
+      console.log('🔍 counselorId 값:', data.counselorId);
+      console.log('🔍 time 값:', data.time);
+      console.log('🔍 types 값:', data.types);
+
       const response = await apiClient.post<ApiResponse<string>>(
         COUNSELING_ENDPOINTS.RESERVE_COUNSELING,
         data,
