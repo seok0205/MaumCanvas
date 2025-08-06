@@ -68,9 +68,9 @@ public class CommunityService {
 
 
     // 글 작성 api
-    public Long writePost(PostWriteDto dto, String email) {
+    public Community writePost(PostWriteDto dto, String email) {
         User author = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("일치하는 정보가 없습니다"));
+                .orElseThrow(() -> new BoardHandler(ErrorStatus.USER_NOT_FOUND));
         Community community = Community.builder()
                 .title(dto.getTitle())
                 .content(dto.getContent())
@@ -78,24 +78,34 @@ public class CommunityService {
                 .category(dto.getCategory())
                 .build();
         communityRepository.save(community);
-        return community.getId();
+        return community;
     }
 
     @Transactional
-    public void deletePost(Long id){
-        if (!communityRepository.existsById(id)){
-            throw new IllegalArgumentException("게시글이 존재하지 않습니다");
+    public void deletePost(Long id, String email){
+        Community community = communityRepository.findById(id)
+                .orElseThrow(() -> new BoardHandler(ErrorStatus.POST_LIST_EMPTY));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BoardHandler(ErrorStatus.USER_NOT_FOUND));
+        if(!user.equals(community.getAuthor())){
+            throw new BoardHandler(ErrorStatus.USER_INVALID_CREDENTIALS);
         }
         communityRepository.deleteById(id);
     }
 
-    @Transactional
-    public Community updatePost(Long id, PostUpdateDto updateCommunity){
-        Community community = communityRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("게시글이 존재하지 않습니다."));
+    public Community updatePost(Long id, PostUpdateDto updateCommunity, String email){
+        Community community = communityRepository.findById(id)
+                .orElseThrow(()-> new BoardHandler(ErrorStatus.POST_LIST_EMPTY));
+        User user = userRepository.findByEmail(email)
+                        .orElseThrow(() -> new BoardHandler(ErrorStatus.USER_NOT_FOUND));
+        if(!user.equals(community.getAuthor())){
+            throw new BoardHandler(ErrorStatus.USER_INVALID_CREDENTIALS);
+        }
         community.setTitle(updateCommunity.getTitle());
         community.setContent(updateCommunity.getContent());
         community.setUpdatedAt(LocalDateTime.now());
-        return communityRepository.save(community);
+        communityRepository.save(community);
+        return community;
     }
 
     public List<Community> getPosts(Long lastId, int size){
@@ -105,6 +115,4 @@ public class CommunityService {
         Pageable pageable = PageRequest.of(0, size);
         return communityRepository.findByIdLessThanOrderByIdDesc(lastId, pageable);
     }
-
-
 }

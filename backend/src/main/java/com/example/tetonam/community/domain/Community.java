@@ -26,7 +26,7 @@ public class Community {
     private Category category;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_nickname", referencedColumnName = "nickname")
+    @JoinColumn(name = "author_id", referencedColumnName = "user_id")
     private User author;
 
     private int viewCount;
