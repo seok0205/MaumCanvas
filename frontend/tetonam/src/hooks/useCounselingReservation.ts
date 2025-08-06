@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { COUNSELING_CONSTANTS } from '@/constants/counseling';
 import { counselingService } from '@/services/counselingService';
 import type { CounselingReservationRequest, CounselorInfo } from '@/types/api';
+import type { CounselingTypeItem } from '@/types/counselingType';
 
 interface DateOption {
   date: Date;
@@ -27,6 +28,7 @@ interface UseCounselingReservationReturn {
   selectedDate: Date | null;
   selectedTime: string;
   selectedCounselor: CounselorInfo | null;
+  selectedCounselingType: CounselingTypeItem | null;
 
   // 옵션들
   dateOptions: DateOption[];
@@ -41,6 +43,7 @@ interface UseCounselingReservationReturn {
   handleDateSelect: (date: Date) => void;
   handleTimeSelect: (time: string) => void;
   handleCounselorSelect: (counselor: CounselorInfo) => void;
+  handleCounselingTypeSelect: (type: CounselingTypeItem) => void;
   handleReservationConfirm: () => void;
   handleGoBack: () => void;
 
@@ -55,6 +58,8 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [selectedCounselor, setSelectedCounselor] =
     useState<CounselorInfo | null>(null);
+  const [selectedCounselingType, setSelectedCounselingType] =
+    useState<CounselingTypeItem | null>(null);
 
   // 날짜 옵션 생성 (주말 제외, 오늘부터 7일)
   const dateOptions = useMemo((): DateOption[] => {
@@ -152,9 +157,19 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
     setSelectedCounselor(counselor);
   }, []);
 
+  // 상담유형 선택 핸들러
+  const handleCounselingTypeSelect = useCallback((type: CounselingTypeItem) => {
+    setSelectedCounselingType(type);
+  }, []);
+
   // 예약 확정 핸들러
   const handleReservationConfirm = useCallback(() => {
-    if (!selectedDate || !selectedTime || !selectedCounselor) {
+    if (
+      !selectedDate ||
+      !selectedTime ||
+      !selectedCounselor ||
+      !selectedCounselingType
+    ) {
       toast.error('모든 항목을 선택해주세요.');
       return;
     }
@@ -163,12 +178,18 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
       format(selectedDate, 'yyyy-MM-dd') + 'T' + selectedTime + ':00';
     const reservationData: CounselingReservationRequest = {
       time: dateTime,
-      types: COUNSELING_CONSTANTS.DEFAULT_COUNSELING_TYPE,
+      types: selectedCounselingType.name,
       CounselorId: selectedCounselor.id,
     };
 
     reservationMutation.mutate(reservationData);
-  }, [selectedDate, selectedTime, selectedCounselor, reservationMutation]);
+  }, [
+    selectedDate,
+    selectedTime,
+    selectedCounselor,
+    selectedCounselingType,
+    reservationMutation,
+  ]);
 
   // 뒤로가기 핸들러
   const handleGoBack = useCallback(() => {
@@ -180,6 +201,7 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
     selectedDate,
     selectedTime,
     selectedCounselor,
+    selectedCounselingType,
 
     // 옵션들
     dateOptions,
@@ -194,6 +216,7 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
     handleDateSelect,
     handleTimeSelect,
     handleCounselorSelect,
+    handleCounselingTypeSelect,
     handleReservationConfirm,
     handleGoBack,
 
