@@ -33,7 +33,7 @@ export interface RegisterCredentials {
     name: string;
   };
   birthday: string;
-  roles: string[]; // 백엔드의 roles 배열에 맞춤
+  role: string; // 백엔드와 일치하도록 단일 role로 수정
 }
 
 export interface ResetPasswordData {
@@ -58,7 +58,7 @@ export interface JwtTokenResponse {
   accessToken: string;
   refreshToken: string;
   refreshTokenExpirationTime: number;
-  roles: string[]; // 백엔드에서 제공하는 roles 배열
+  role: string; // 실제 백엔드에서는 단일 role 문자열로 제공
 }
 
 // 사용자 정보 응답 타입
@@ -71,7 +71,7 @@ export interface UserInfoResponse {
   email: string;
   gender: string; // 백엔드 API 응답과 일치하도록 string 유지
   nickname: string;
-  roles: string[]; // 백엔드에서 제공하는 roles 배열
+  role: string; // 실제 백엔드에서는 단일 role 문자열로 제공
 }
 
 // 회원가입 응답 타입

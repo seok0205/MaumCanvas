@@ -39,7 +39,6 @@ import { useNicknameCheck } from '@/hooks/useNicknameCheck';
 import { useSubmitButton } from '@/hooks/useSubmitButton';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { School } from '@/types/school';
-import { roleToRolesArray } from '@/utils/userRoleMapping';
 import { SchoolSearchInput } from './SchoolSearchInput';
 
 const registerSchema = z
@@ -321,7 +320,7 @@ export const RegisterForm = () => {
           name: selectedSchool.name,
         },
         birthday: data.birthDate,
-        roles: roleToRolesArray(selectedUserRole),
+        role: selectedUserRole, // 단일 role로 직접 전송
       });
 
       if (!success) {

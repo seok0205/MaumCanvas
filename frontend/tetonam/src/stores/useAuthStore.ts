@@ -38,32 +38,55 @@ export const useAuthStore = create<AuthState>()(
             // 로그인 시 이전 선택된 역할 초기화 (백엔드 실제 역할 우선)
             set({ selectedUserRole: null });
 
-            // 백엔드 JWT 토큰의 roles에서 주요 역할 결정 (실제 사용자 역할 우선)
+            // 백엔드 JWT 토큰의 role에서 주요 역할 결정 (백엔드는 단일 role 문자열 전송)
+            console.log('🔍 [LOGIN DEBUG] tokenResponse:', tokenResponse); // 전체 tokenResponse 확인
             console.log(
-              '🔍 [LOGIN DEBUG] tokenResponse.roles:',
-              tokenResponse.roles
+              '🔍 [LOGIN DEBUG] tokenResponse.role:',
+              tokenResponse.role
             );
-            const primaryRole: UserRole = getPrimaryRole(
-              tokenResponse.roles || []
-            );
+            // 백엔드에서 role을 단일 문자열로 보내므로 배열로 변환
+            const tokenRoles = tokenResponse.role ? [tokenResponse.role] : [];
+            const primaryRole: UserRole = getPrimaryRole(tokenRoles);
             console.log(
               '🔍 [LOGIN DEBUG] primaryRole from token:',
               primaryRole
             );
 
             // 사용자 정보 조회 (JWT 토큰 필요)
+            console.log('🔍 [LOGIN DEBUG] getMyInfo 호출 시작...');
             const userInfo = await authService.getMyInfo();
-            console.log('🔍 [LOGIN DEBUG] userInfo.roles:', userInfo.roles);
+            console.log('🔍 [LOGIN DEBUG] getMyInfo 성공! userInfo:', userInfo); // 전체 userInfo 확인
+            console.log('🔍 [LOGIN DEBUG] userInfo.role:', userInfo.role);
 
-            // 백엔드에서 받은 실제 roles를 검증하여 사용
-            const validatedRoles = userInfo.roles.filter((role): role is UserRole => 
-              ['USER', 'COUNSELOR', 'ADMIN'].includes(role)
+            // 각 필드별로 확인
+            console.log('🔍 [LOGIN DEBUG] userInfo 필드별 확인:');
+            console.log('  - id:', userInfo.id);
+            console.log('  - email:', userInfo.email);
+            console.log('  - name:', userInfo.name);
+            console.log('  - nickname:', userInfo.nickname);
+            console.log('  - gender:', userInfo.gender);
+            console.log('  - phone:', userInfo.phone);
+            console.log('  - school:', userInfo.school);
+            console.log('  - birthday:', userInfo.birthday);
+
+            // 백엔드에서 받은 실제 role을 안전하게 검증하여 배열로 변환
+            const backendRoles = userInfo.role ? [userInfo.role] : []; // 단일 role을 배열로 변환
+            console.log('🔍 [LOGIN DEBUG] backendRoles:', backendRoles);
+
+            const validatedRoles = backendRoles.filter(
+              (role): role is UserRole =>
+                ['USER', 'COUNSELOR', 'ADMIN'].includes(role)
             );
-            
-            // 유효한 역할이 없으면 기본값 설정
-            const finalRoles = validatedRoles.length > 0 ? validatedRoles : ['USER'] as UserRole[];
-            console.log('🔍 [LOGIN DEBUG] Validated roles:', finalRoles);
+            console.log('🔍 [LOGIN DEBUG] validatedRoles:', validatedRoles);
 
+            // 유효한 역할이 없으면 기본값 설정
+            const finalRoles =
+              validatedRoles.length > 0
+                ? validatedRoles
+                : (['USER'] as UserRole[]);
+            console.log('🔍 [LOGIN DEBUG] finalRoles:', finalRoles);
+
+            console.log('🔍 [LOGIN DEBUG] User 객체 생성 시작...');
             const user: User = {
               id: userInfo.id || `user-${Date.now()}`, // 백엔드에서 ID 제공하지 않는 경우 임시 ID
               email: userInfo.email,
@@ -76,7 +99,7 @@ export const useAuthStore = create<AuthState>()(
               roles: finalRoles, // 검증된 roles 배열 사용
               createdAt: new Date().toISOString(),
             };
-            console.log('🔍 [LOGIN DEBUG] Final user object:', user);
+            console.log('🔍 [LOGIN DEBUG] User 객체 생성 완료! user:', user);
 
             // 인증 상태를 먼저 설정하여 다른 컴포넌트들이 인증 상태를 인식할 수 있도록 함
             set({
@@ -149,7 +172,7 @@ export const useAuthStore = create<AuthState>()(
               phone: userData.phone,
               school: userData.school.name, // school 객체에서 name만 추출
               birthday: userData.birthday,
-              roles: userData.roles as UserRole[], // 회원가입 시 선택된 역할 사용
+              roles: [userData.role as UserRole], // 단일 role을 배열로 변환
               createdAt: new Date().toISOString(),
             };
 
