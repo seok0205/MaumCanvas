@@ -38,65 +38,46 @@ export const useAuthStore = create<AuthState>()(
             // 로그인 시 이전 선택된 역할 초기화 (백엔드 실제 역할 우선)
             set({ selectedUserRole: null });
 
-            // 백엔드 JWT 토큰의 role에서 주요 역할 결정 (백엔드는 단일 role 문자열 전송)
+            // 백엔드 JWT 토큰의 role에서 주요 역할 결정 (백엔드는 role 배열 전송)
             console.log('🔍 [LOGIN DEBUG] tokenResponse:', tokenResponse); // 전체 tokenResponse 확인
             console.log(
               '🔍 [LOGIN DEBUG] tokenResponse.role:',
               tokenResponse.role
             );
-            // 백엔드에서 role을 단일 문자열로 보내므로 배열로 변환
-            const tokenRoles = tokenResponse.role ? [tokenResponse.role] : [];
+            // 토큰에서 받은 role 배열을 그대로 사용
+            const tokenRoles = tokenResponse.role || [];
             const primaryRole: UserRole = getPrimaryRole(tokenRoles);
             console.log(
               '🔍 [LOGIN DEBUG] primaryRole from token:',
               primaryRole
             );
 
-            // 사용자 정보 조회 (JWT 토큰 필요)
-            console.log('🔍 [LOGIN DEBUG] getMyInfo 호출 시작...');
-            const userInfo = await authService.getMyInfo();
-            console.log('🔍 [LOGIN DEBUG] getMyInfo 성공! userInfo:', userInfo); // 전체 userInfo 확인
-            console.log('🔍 [LOGIN DEBUG] userInfo.role:', userInfo.role);
-
-            // 각 필드별로 확인
-            console.log('🔍 [LOGIN DEBUG] userInfo 필드별 확인:');
-            console.log('  - id:', userInfo.id);
-            console.log('  - email:', userInfo.email);
-            console.log('  - name:', userInfo.name);
-            console.log('  - nickname:', userInfo.nickname);
-            console.log('  - gender:', userInfo.gender);
-            console.log('  - phone:', userInfo.phone);
-            console.log('  - school:', userInfo.school);
-            console.log('  - birthday:', userInfo.birthday);
-
-            // 백엔드에서 받은 실제 role을 안전하게 검증하여 배열로 변환
-            const backendRoles = userInfo.role ? [userInfo.role] : []; // 단일 role을 배열로 변환
-            console.log('🔍 [LOGIN DEBUG] backendRoles:', backendRoles);
-
-            const validatedRoles = backendRoles.filter(
-              (role): role is UserRole =>
-                ['USER', 'COUNSELOR', 'ADMIN'].includes(role)
+            // JWT 토큰의 role 정보를 사용 (my-info API는 역할 판단에 불필요)
+            const finalRoles = tokenRoles.filter((role): role is UserRole =>
+              ['USER', 'COUNSELOR', 'ADMIN'].includes(role)
             );
-            console.log('🔍 [LOGIN DEBUG] validatedRoles:', validatedRoles);
+            console.log('🔍 [LOGIN DEBUG] 토큰 기반 finalRoles:', finalRoles);
 
             // 유효한 역할이 없으면 기본값 설정
-            const finalRoles =
-              validatedRoles.length > 0
-                ? validatedRoles
-                : (['USER'] as UserRole[]);
-            console.log('🔍 [LOGIN DEBUG] finalRoles:', finalRoles);
+            const validatedRoles =
+              finalRoles.length > 0 ? finalRoles : (['USER'] as UserRole[]);
+            console.log(
+              '🔍 [LOGIN DEBUG] 최종 validatedRoles:',
+              validatedRoles
+            );
 
             console.log('🔍 [LOGIN DEBUG] User 객체 생성 시작...');
+            // 로그인 시에는 role 정보만 설정하고, 나머지 정보는 필요시 별도 API로 가져옴
             const user: User = {
-              id: userInfo.id || `user-${Date.now()}`, // 백엔드에서 ID 제공하지 않는 경우 임시 ID
-              email: userInfo.email,
-              name: userInfo.name,
-              nickname: userInfo.nickname,
-              gender: userInfo.gender,
-              phone: userInfo.phone,
-              school: userInfo.school,
-              birthday: userInfo.birthday,
-              roles: finalRoles, // 검증된 roles 배열 사용
+              id: `user-${Date.now()}`, // 임시 ID
+              email: email, // 로그인 파라미터에서 가져옴
+              name: '', // 필요시 my-info API로 별도 조회
+              nickname: '',
+              gender: '',
+              phone: '',
+              school: '',
+              birthday: '',
+              roles: validatedRoles, // 토큰 기반 검증된 roles 배열 사용
               createdAt: new Date().toISOString(),
             };
             console.log('🔍 [LOGIN DEBUG] User 객체 생성 완료! user:', user);

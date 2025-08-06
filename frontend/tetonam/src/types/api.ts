@@ -52,26 +52,25 @@ export interface TokenReissueData {
   refreshToken: string;
 }
 
-// JWT 토큰 응답 타입 - 백엔드 API와 일치
+// JWT 토큰 응답 타입 - 실제 백엔드 응답에 맞춤
 export interface JwtTokenResponse {
   grantType: string;
   accessToken: string;
   refreshToken: string;
   refreshTokenExpirationTime: number;
-  role: string; // 실제 백엔드에서는 단일 role 문자열로 제공
+  role: string[]; // 실제 백엔드에서는 role 배열로 제공
 }
 
 // 사용자 정보 응답 타입
 export interface UserInfoResponse {
-  id?: string; // ID 필드 추가 (백엔드에서 제공하는 경우)
   name: string;
   birthday: string;
   phone: string;
   school: string;
   email: string;
-  gender: string; // 백엔드 API 응답과 일치하도록 string 유지
+  gender: string;
   nickname: string;
-  role: string; // 실제 백엔드에서는 단일 role 문자열로 제공
+  // role 필드 없음 - 마이페이지 표시용이므로 역할 정보 불필요
 }
 
 // 회원가입 응답 타입
