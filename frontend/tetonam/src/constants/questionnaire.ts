@@ -5,7 +5,7 @@ export const QUESTIONNAIRE_CATEGORIES: QuestionnaireCategory[] = [
     id: 'ptsd',
     title: '외상 후 스트레스 증상',
     description:
-      '지난 한 달 동안 다음과 같은 문제들로 인해 얼마나 괴로움을 느꼈습니까?',
+      '살면서 두려웠던 경험, 끔찍했던 경험, 힘들었던 경험, 그 어떤 것이라도 있다면, 그것 때문에 지난 한 달 동안 다음과 같은 문제들로 인해 얼마나 괴로움을 느꼈습니까?',
     maxScore: 5,
     questions: [
       {
