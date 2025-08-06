@@ -290,6 +290,11 @@ const MobileSidebarToggle = React.forwardRef<
   React.ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
   const { toggleSidebar } = useSidebar();
+  const isMobile = useIsMobile();
+
+  if (!isMobile) {
+    return null;
+  }
 
   return (
     <Button
@@ -298,7 +303,7 @@ const MobileSidebarToggle = React.forwardRef<
       variant='ghost'
       size='icon'
       className={cn(
-        'fixed bottom-4 left-4 z-50 h-12 w-12 rounded-full shadow-lg bg-background border border-border md:hidden',
+        'fixed bottom-4 left-4 z-50 h-12 w-12 rounded-full shadow-lg bg-background border border-border',
         className
       )}
       onClick={event => {
