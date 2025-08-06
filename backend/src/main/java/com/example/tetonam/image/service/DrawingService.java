@@ -3,13 +3,17 @@ package com.example.tetonam.image.service;
 import com.example.tetonam.counseling.domain.CounselingImage;
 import com.example.tetonam.counseling.repository.CounselingImageRepository;
 import com.example.tetonam.exception.handler.CounselingHandler;
+import com.example.tetonam.exception.handler.DrawingHandler;
 import com.example.tetonam.exception.handler.UserHandler;
 import com.example.tetonam.image.domain.Drawing;
 import com.example.tetonam.image.domain.DrawingList;
+import com.example.tetonam.image.domain.DrawingRagResult;
 import com.example.tetonam.image.domain.DrawingResult;
+import com.example.tetonam.image.dto.CounselingRagRequestDto;
+import com.example.tetonam.image.dto.LLMRequestDto;
 import com.example.tetonam.image.dto.RecentDrawingResponseDto;
-import com.example.tetonam.image.dto.testDto;
 import com.example.tetonam.image.repository.DrawingListRepository;
+import com.example.tetonam.image.repository.DrawingRagResultRepository;
 import com.example.tetonam.image.repository.DrawingRepository;
 import com.example.tetonam.image.repository.DrawingResultRepository;
 import com.example.tetonam.image.service.enums.DrawingCategory;
@@ -22,7 +26,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 
@@ -35,6 +38,7 @@ public class DrawingService {
     private final DrawingListRepository drawingListRepository;
     private final WebClientUtil webClientUtil;
     private final DrawingResultRepository drawingResultRepository;
+    private final DrawingRagResultRepository drawingRagResultRepository;
     @Value("${ai.server.url}")
     private String AI_SERVER_URL;
 
@@ -99,24 +103,34 @@ public class DrawingService {
     }
 
 
-//    public void drawingRagResult(String question,String category){
-//        String imageUrl=drawing.getImageUrl();
-////        String category="house";
-//        String category=drawing.getDrawingCategory().toString();
-//        String url = AI_SERVER_URL+"/predict/json_s3?url=" + imageUrl + "&category=" + category;
-//
-//        System.out.println(url);
-//        webClientUtil.post(url, "", String.class)
-//                .subscribe(result -> {
-//                    drawingResultRepository.save(DrawingResult.builder()
-//                            .drawing(drawing)
-//                            .drawingResult(result)
-//                            .build());
-//                }, error -> {
-//                    error.printStackTrace();
-//                });
-//    }
+    //rag로 통신
+    public void drawingRagResult(Drawing drawing, String question, String category){
+
+        String url = AI_SERVER_URL+"/llm";
+
+        LLMRequestDto llmRequestDto=LLMRequestDto.toDto(question,category);
+        webClientUtil.post(url, llmRequestDto, String.class)
+                .subscribe(result -> {
+                    drawingRagResultRepository.save(DrawingRagResult.builder()
+                                    .drawing(drawing)
+                                    .drawingRagResult(result)
+                            .build());
+                }, error -> {
+                    error.printStackTrace();
+                });
+    }
 
 
+    public String counselingRagSave(String email, Long id, CounselingRagRequestDto counselingRagRequestDto) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+        Drawing drawing=drawingRepository.findById(id)
+                .orElseThrow(()-> new DrawingHandler(ErrorStatus.DRAWING_NOT_FOUND));
+        if(!drawing.getDrawingList().getUser().equals(user)){
+            throw new DrawingHandler(ErrorStatus.DRAWING_NOT_VALID);
+        }
 
+        drawingRagResult(drawing,counselingRagRequestDto.getComment(),drawing.getDrawingCategory().toString());
+        return "저장되었습니다.";
+    }
 }
