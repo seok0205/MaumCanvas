@@ -32,7 +32,7 @@ import { AlertCircle, Edit, Lock, RefreshCw, Save, X } from 'lucide-react';
 // 로딩 컴포넌트 분리
 const MyPageLoading = React.memo(() => {
   return (
-    <div className='flex-1 flex items-center justify-center'>
+    <div className='p-6 flex items-center justify-center'>
       <div className='text-center'>
         <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4'></div>
         <p className='text-muted-foreground'>내 정보를 불러오는 중...</p>
@@ -51,7 +51,7 @@ interface MyPageErrorProps {
 const MyPageError = React.memo<MyPageErrorProps>(
   ({ error, onRetry, onBack }) => {
     return (
-      <div className='flex-1 flex items-center justify-center'>
+      <div className='p-6 flex items-center justify-center'>
         <div className='text-center'>
           <AlertCircle className='w-12 h-12 text-red-500 mx-auto mb-3' />
           <p className='text-muted-foreground mb-2'>
@@ -110,181 +110,173 @@ const MyPageForm = React.memo<MyPageFormProps>(({ userInfo }) => {
   } = useNicknameEdit(userInfo.nickname);
 
   return (
-    <main className='flex-1 overflow-auto p-6'>
-      <div className='max-w-2xl mx-auto space-y-6'>
-        {/* 사용자 정보 카드 */}
-        <Card className='shadow-lg'>
-          <CardHeader>
-            <CardTitle className='flex items-center space-x-2'>
-              <span>내 정보</span>
-              <div className='ml-auto flex space-x-2'>
-                {!isEditing && (
-                  <Button
-                    variant='ghost'
-                    size='sm'
-                    onClick={() => setIsEditing(true)}
-                  >
-                    <Edit className='h-4 w-4 mr-2' />
-                    수정
-                  </Button>
-                )}
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className='space-y-4'>
-            {/* 이름 */}
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-              <Label className='text-sm font-medium text-muted-foreground'>
-                이름
-              </Label>
-              <div className='md:col-span-2'>
-                <Input value={userInfo.name} disabled className='bg-muted' />
-              </div>
-            </div>
-
-            {/* 닉네임 */}
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-              <Label className='text-sm font-medium text-muted-foreground'>
-                닉네임
-              </Label>
-              <div className='md:col-span-2 flex space-x-2'>
-                <Input
-                  value={nickname}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setNickname(e.target.value)
-                  }
-                  disabled={!isEditing}
-                  className='flex-1'
-                />
-                {isEditing && (
-                  <Button
-                    variant='outline'
-                    onClick={handleDuplicateCheck}
-                    disabled={
-                      isDuplicateChecking || nickname === userInfo.nickname
-                    }
-                    className='whitespace-nowrap'
-                  >
-                    {isDuplicateChecking ? '확인 중...' : '중복확인'}
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            {/* 이메일 */}
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-              <Label className='text-sm font-medium text-muted-foreground'>
-                이메일
-              </Label>
-              <div className='md:col-span-2'>
-                <Input value={userInfo.email} disabled className='bg-muted' />
-              </div>
-            </div>
-
-            {/* 생년월일 */}
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-              <Label className='text-sm font-medium text-muted-foreground'>
-                생년월일
-              </Label>
-              <div className='md:col-span-2'>
-                <Input
-                  value={userInfo.birthday}
-                  disabled
-                  className='bg-muted'
-                />
-              </div>
-            </div>
-
-            {/* 전화번호 */}
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-              <Label className='text-sm font-medium text-muted-foreground'>
-                전화번호
-              </Label>
-              <div className='md:col-span-2'>
-                <Input value={userInfo.phone} disabled className='bg-muted' />
-              </div>
-            </div>
-
-            {/* 학교 */}
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-              <Label className='text-sm font-medium text-muted-foreground'>
-                학교
-              </Label>
-              <div className='md:col-span-2'>
-                <Input value={userInfo.school} disabled className='bg-muted' />
-              </div>
-            </div>
-
-            {/* 성별 */}
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-              <Label className='text-sm font-medium text-muted-foreground'>
-                성별
-              </Label>
-              <div className='md:col-span-2'>
-                <Input
-                  value={mapGenderToKorean(userInfo.gender)}
-                  disabled
-                  className='bg-muted'
-                />
-              </div>
-            </div>
-
-            {/* 수정 버튼들 */}
-            {isEditing && (
-              <div className='flex justify-end space-x-2 pt-4 border-t'>
-                <Button variant='outline' onClick={handleCancel}>
-                  <X className='h-4 w-4 mr-2' />
-                  취소
-                </Button>
+    <div className='p-6 max-w-2xl mx-auto space-y-6'>
+      {/* 사용자 정보 카드 */}
+      <Card className='shadow-lg'>
+        <CardHeader>
+          <CardTitle className='flex items-center space-x-2'>
+            <span>내 정보</span>
+            <div className='ml-auto flex space-x-2'>
+              {!isEditing && (
                 <Button
-                  onClick={handleSave}
-                  disabled={
-                    !isDuplicateChecked || nickname === userInfo.nickname
-                  }
+                  variant='ghost'
+                  size='sm'
+                  onClick={() => setIsEditing(true)}
                 >
-                  <Save className='h-4 w-4 mr-2' />
-                  저장
+                  <Edit className='h-4 w-4 mr-2' />
+                  수정
                 </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              )}
+            </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className='space-y-4'>
+          {/* 이름 */}
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+            <Label className='text-sm font-medium text-muted-foreground'>
+              이름
+            </Label>
+            <div className='md:col-span-2'>
+              <Input value={userInfo.name} disabled className='bg-muted' />
+            </div>
+          </div>
 
-        {/* 비밀번호 변경 카드 */}
-        <Card className='shadow-lg'>
-          <CardHeader>
-            <CardTitle className='flex items-center space-x-2'>
-              <Lock className='h-5 w-5' />
-              <span>비밀번호 변경</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className='text-sm text-muted-foreground mb-4'>
-              보안을 위해 정기적으로 비밀번호를 변경하는 것을 권장합니다.
-            </p>
-            <Dialog
-              open={isPasswordDialogOpen}
-              onOpenChange={setIsPasswordDialogOpen}
-            >
-              <DialogTrigger asChild>
-                <Button variant='outline'>
-                  <Lock className='h-4 w-4 mr-2' />
-                  비밀번호 변경
+          {/* 닉네임 */}
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+            <Label className='text-sm font-medium text-muted-foreground'>
+              닉네임
+            </Label>
+            <div className='md:col-span-2 flex space-x-2'>
+              <Input
+                value={nickname}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setNickname(e.target.value)
+                }
+                disabled={!isEditing}
+                className='flex-1'
+              />
+              {isEditing && (
+                <Button
+                  variant='outline'
+                  onClick={handleDuplicateCheck}
+                  disabled={
+                    isDuplicateChecking || nickname === userInfo.nickname
+                  }
+                  className='whitespace-nowrap'
+                >
+                  {isDuplicateChecking ? '확인 중...' : '중복확인'}
                 </Button>
-              </DialogTrigger>
-              <DialogContent className='sm:max-w-md'>
-                <DialogHeader>
-                  <DialogTitle>비밀번호 변경</DialogTitle>
-                </DialogHeader>
-                <PasswordChangeDialog
-                  onClose={() => setIsPasswordDialogOpen(false)}
-                />
-              </DialogContent>
-            </Dialog>
-          </CardContent>
-        </Card>
-      </div>
-    </main>
+              )}
+            </div>
+          </div>
+
+          {/* 이메일 */}
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+            <Label className='text-sm font-medium text-muted-foreground'>
+              이메일
+            </Label>
+            <div className='md:col-span-2'>
+              <Input value={userInfo.email} disabled className='bg-muted' />
+            </div>
+          </div>
+
+          {/* 생년월일 */}
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+            <Label className='text-sm font-medium text-muted-foreground'>
+              생년월일
+            </Label>
+            <div className='md:col-span-2'>
+              <Input value={userInfo.birthday} disabled className='bg-muted' />
+            </div>
+          </div>
+
+          {/* 전화번호 */}
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+            <Label className='text-sm font-medium text-muted-foreground'>
+              전화번호
+            </Label>
+            <div className='md:col-span-2'>
+              <Input value={userInfo.phone} disabled className='bg-muted' />
+            </div>
+          </div>
+
+          {/* 학교 */}
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+            <Label className='text-sm font-medium text-muted-foreground'>
+              학교
+            </Label>
+            <div className='md:col-span-2'>
+              <Input value={userInfo.school} disabled className='bg-muted' />
+            </div>
+          </div>
+
+          {/* 성별 */}
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+            <Label className='text-sm font-medium text-muted-foreground'>
+              성별
+            </Label>
+            <div className='md:col-span-2'>
+              <Input
+                value={mapGenderToKorean(userInfo.gender)}
+                disabled
+                className='bg-muted'
+              />
+            </div>
+          </div>
+
+          {/* 수정 버튼들 */}
+          {isEditing && (
+            <div className='flex justify-end space-x-2 pt-4 border-t'>
+              <Button variant='outline' onClick={handleCancel}>
+                <X className='h-4 w-4 mr-2' />
+                취소
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={!isDuplicateChecked || nickname === userInfo.nickname}
+              >
+                <Save className='h-4 w-4 mr-2' />
+                저장
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* 비밀번호 변경 카드 */}
+      <Card className='shadow-lg'>
+        <CardHeader>
+          <CardTitle className='flex items-center space-x-2'>
+            <Lock className='h-5 w-5' />
+            <span>비밀번호 변경</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className='text-sm text-muted-foreground mb-4'>
+            보안을 위해 정기적으로 비밀번호를 변경하는 것을 권장합니다.
+          </p>
+          <Dialog
+            open={isPasswordDialogOpen}
+            onOpenChange={setIsPasswordDialogOpen}
+          >
+            <DialogTrigger asChild>
+              <Button variant='outline'>
+                <Lock className='h-4 w-4 mr-2' />
+                비밀번호 변경
+              </Button>
+            </DialogTrigger>
+            <DialogContent className='sm:max-w-md'>
+              <DialogHeader>
+                <DialogTitle>비밀번호 변경</DialogTitle>
+              </DialogHeader>
+              <PasswordChangeDialog
+                onClose={() => setIsPasswordDialogOpen(false)}
+              />
+            </DialogContent>
+          </Dialog>
+        </CardContent>
+      </Card>
+    </div>
   );
 });
 
@@ -295,11 +287,6 @@ export const MyPage = ({}: MyPageProps) => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const { userInfo, isLoading, error, refetch } = useUserInfo();
-
-  // 뒤로가기 핸들러
-  const handleBack = useCallback(() => {
-    navigate('/dashboard');
-  }, [navigate]);
 
   // 재시도 핸들러
   const handleRetry = useCallback(() => {
@@ -317,25 +304,28 @@ export const MyPage = ({}: MyPageProps) => {
 
         <div className='flex-1 flex flex-col'>
           {/* 헤더는 항상 고정 */}
-          <CommonHeader
-            user={user}
-            showBackButton={true}
-            title='마이페이지'
-            onBackClick={handleBack}
-            showUserInfo={false}
-            showLogout={false}
-          />
+          <CommonHeader user={user} title='마이페이지' />
 
-          {/* 메인 콘텐츠만 상태에 따라 변경 */}
-          {isLoading && !userInfo && <MyPageLoading />}
-          {error && !userInfo && (
-            <MyPageError
-              error={error}
-              onRetry={handleRetry}
-              onBack={handleBack}
-            />
-          )}
-          {userInfo && <MyPageForm userInfo={userInfo} />}
+          {/* 페이지 제목 */}
+          <div className='px-6 py-4'>
+            <h1 className='text-3xl font-bold text-foreground'>마이페이지</h1>
+            <p className='text-muted-foreground mt-2'>
+              내 정보를 확인하고 관리할 수 있습니다.
+            </p>
+          </div>
+
+          {/* 메인 콘텐츠 */}
+          <main className='flex-1 overflow-auto'>
+            {isLoading && !userInfo && <MyPageLoading />}
+            {error && !userInfo && (
+              <MyPageError
+                error={error}
+                onRetry={handleRetry}
+                onBack={() => navigate('/dashboard')}
+              />
+            )}
+            {userInfo && <MyPageForm userInfo={userInfo} />}
+          </main>
         </div>
       </div>
     </SidebarProvider>
