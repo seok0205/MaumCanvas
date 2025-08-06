@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  # --- Frontend ---
+  frontend:
+    build:
+      context: ../frontend/tetonam
+    container_name: tetonam-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"  # Nginx 사용하는 경우 생략 가능
+    env_file:
+      - ../deploy/.env
+    networks:
+      - tetonam-network
+
+networks:   # 도커 간 같은 네트워크 사용
+  tetonam-network:
+    external: true
