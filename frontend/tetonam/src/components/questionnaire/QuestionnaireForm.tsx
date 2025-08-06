@@ -265,7 +265,7 @@ export const QuestionnaireForm = () => {
                   </div>
                   <div className='flex-1'>
                     <h2 className='text-sm font-semibold text-blue-800 mb-1'>
-                      설문 안내
+                      질문
                     </h2>
                     <p className='text-gray-900 text-base font-medium leading-relaxed'>
                       {category.description}
