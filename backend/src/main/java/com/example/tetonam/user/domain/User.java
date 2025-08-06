@@ -33,7 +33,7 @@ public class User extends BaseTime implements UserDetails {
   @Column(nullable = false)
   private String password;
 
-  @Column(nullable = false)
+  @Column(nullable = false, unique = true)
   private String nickname;
 
   @Column(nullable = false)
