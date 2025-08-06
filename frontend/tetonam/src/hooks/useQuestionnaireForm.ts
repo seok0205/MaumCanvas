@@ -133,12 +133,24 @@ export const useQuestionnaireForm = ({
         responses: responses,
       };
 
-      // 실제 API 호출
-      await submitQuestionnaire(submission);
+      try {
+        // 실제 API 호출
+        await submitQuestionnaire(submission);
 
-      // 성공 시 결과 페이지로 이동
-      const resultData = encodeURIComponent(JSON.stringify(submission));
-      navigate(`/questionnaire/${categoryId}/result?data=${resultData}`);
+        // 성공 시 결과 페이지로 이동 (저장 성공 표시)
+        const resultData = encodeURIComponent(JSON.stringify(submission));
+        navigate(
+          `/questionnaire/${categoryId}/result?data=${resultData}&saved=true`
+        );
+      } catch (apiError) {
+        console.warn('서버 저장 실패, 로컬 결과만 표시:', apiError);
+
+        // API 실패해도 로컬 결과는 보여주되, 저장 실패 표시
+        const resultData = encodeURIComponent(JSON.stringify(submission));
+        navigate(
+          `/questionnaire/${categoryId}/result?data=${resultData}&saved=false`
+        );
+      }
     } catch (error: any) {
       console.error('설문 제출 실패:', error);
 

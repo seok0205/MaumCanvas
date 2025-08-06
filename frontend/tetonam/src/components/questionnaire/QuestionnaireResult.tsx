@@ -25,13 +25,8 @@ import {
 import {
   getQuestionnaireCategory,
   getQuestionnaireResultLevel,
-  getCategoryKoreanName,
 } from '@/constants/questionnaire';
-import { getAllCategoriesQuestionnaireResults } from '@/services/questionnaireService';
-import type { 
-  QuestionnaireResult as QuestionnaireResultType,
-  QuestionnaireCategory 
-} from '@/types/questionnaire';
+import type { QuestionnaireResult as QuestionnaireResultType } from '@/types/questionnaire';
 
 export const QuestionnaireResult = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
@@ -40,7 +35,7 @@ export const QuestionnaireResult = () => {
   const [result, setResult] = useState<QuestionnaireResultType | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [apiResultsAvailable, setApiResultsAvailable] = useState(false);
+  const [savedToServer, setSavedToServer] = useState<boolean>(false);
 
   useEffect(() => {
     const loadResult = async () => {
@@ -56,6 +51,10 @@ export const QuestionnaireResult = () => {
 
         const submission = JSON.parse(decodeURIComponent(dataParam));
         const category = getQuestionnaireCategory(categoryId);
+
+        // 서버 저장 상태 확인 (URL 파라미터에서)
+        const serverSaved = searchParams.get('saved') === 'true';
+        setSavedToServer(serverSaved);
 
         if (!category) {
           setError('카테고리를 찾을 수 없습니다.');
@@ -80,20 +79,6 @@ export const QuestionnaireResult = () => {
         };
 
         setResult(questionnaireResult);
-
-        // API에서 저장된 결과들을 확인해보기
-        try {
-          const categoryKey = submission.category as QuestionnaireCategory;
-          const apiResponse = await getAllCategoriesQuestionnaireResults([
-            categoryKey,
-          ]);
-          const koreanCategoryName = getCategoryKoreanName(String(categoryKey));
-          if (apiResponse && apiResponse[koreanCategoryName] && apiResponse[koreanCategoryName].length > 0) {
-            setApiResultsAvailable(true);
-          }
-        } catch (apiError) {
-          // API 실패는 무시하고 로컬 결과만 표시
-        }
       } catch (err) {
         console.error('결과 로딩 실패:', err);
         setError('결과를 불러오는 중 오류가 발생했습니다.');
@@ -861,10 +846,18 @@ export const QuestionnaireResult = () => {
                 <div>
                   검사 완료 시간: {result.submittedAt.toLocaleString('ko-KR')}
                 </div>
-                {apiResultsAvailable && (
+                {savedToServer && (
                   <div className='mt-2 flex items-center justify-center text-green-600'>
                     <CheckCircle className='h-4 w-4 mr-1' />
                     <span>결과가 서버에 안전하게 저장되었습니다</span>
+                  </div>
+                )}
+                {!savedToServer && (
+                  <div className='mt-2 flex items-center justify-center text-orange-600'>
+                    <AlertTriangle className='h-4 w-4 mr-1' />
+                    <span>
+                      서버 저장에 실패했지만 로컬 결과는 정상 표시됩니다
+                    </span>
                   </div>
                 )}
               </div>
