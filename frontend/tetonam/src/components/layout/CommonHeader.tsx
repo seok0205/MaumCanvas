@@ -1,6 +1,5 @@
 import { Alert, AlertDescription } from '@/components/ui/feedback/alert';
 import { Button } from '@/components/ui/interactive/button';
-import { SidebarTrigger } from '@/components/ui/navigation/sidebar';
 import { getUserRoleLabel } from '@/constants/userRoles';
 import { useAuthActions } from '@/hooks/useAuthActions';
 import { getPrimaryRole } from '@/utils/userRoleMapping';
@@ -95,7 +94,7 @@ export const CommonHeader = ({
       <header className='border-b border-border/50 bg-card/80 shadow-card backdrop-blur-sm rounded-2xl mx-4 mt-4'>
         <div className='flex items-center justify-between px-4 py-4'>
           <div className='flex items-center space-x-4'>
-            {showBackButton ? (
+            {showBackButton && (
               <Button
                 variant='ghost'
                 size='sm'
@@ -105,8 +104,6 @@ export const CommonHeader = ({
                 <ArrowLeft className='mr-2 h-4 w-4' />
                 {backButtonText}
               </Button>
-            ) : (
-              <SidebarTrigger className='mr-2' />
             )}
 
             <div className='flex items-center space-x-2'>
