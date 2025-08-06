@@ -86,7 +86,61 @@ def hallucination_check_node(state: GraphState, llm):
     generation = state["generation"]
     prompt = ChatPromptTemplate.from_template(prompts["hallucination_check"])
     chain = prompt | llm | StrOutputParser()
-    check_result = chain.invoke({"context": "\n\n".join(contexts), "generation": generation})
-    
+    check_result = chain.invoke(
+        {"context": "\n\n".join(contexts), "generation": generation}
+    )
+
     state["hallucination_check"] = check_result.lower()
     return state
+
+
+# ---Conditional Edges---
+def decide_after_relevance_check(state: GraphState):
+    """관계성 검사 후 분기 결정
+    'yes'일 경우 질문 분해로, 'no'일 경우 END로 이동
+    """
+    if state["relevance_check"] == "yes":
+        return "decompose_query"
+    else:
+        return END
+
+
+def decide_after_hallucination_check(state: GraphState):
+    """환각 검사 후 분기 결정
+    'yes'일 경우 환각 존재 답변 재생성으로, 'no'일 경우 END로 이동
+    """
+    if state["hallucination_check"] == "yes":
+        return "generate_answer"
+    else:
+        return END
+
+
+# ---Graph Definition---
+def create_graph(llm, retriever):
+    """Graph 생성 함수
+    각 노드와 엣지를 정의하여 StateGraph를 생성
+    """
+    workflow = StateGraph(GraphState)
+
+    # add nodes
+    workflow.add_node("relevance_check", lambda state: relevance_check_node(state, llm))
+    workflow.add_node("decompose_query", lambda state: decompose_query_node(state, llm))
+    workflow.add_node("retrieve", lambda state: retrieve_node(state, retriever))
+    workflow.add_node("generate_answer", lambda state: generate_node(state, llm))
+    workflow.add_node(
+        "hallucination_check", lambda state: hallucination_check_node(state, llm)
+    )
+
+    # add edges
+    workflow.set_entry_point("relevance_check")
+    workflow.add_conditional_edges("relevance_check", decide_after_relevance_check)
+    workflow.add_edge("decompose_query", "retrieve")
+    workflow.add_edge("retrieve", "generate_answer")
+    workflow.add_edge("generate_answer", "hallucination_check")
+    workflow.add_conditional_edges(
+        "hallucination_check",
+        decide_after_hallucination_check,
+        {"generate_answer": "generate_answer", END: END},
+    )
+
+    return workflow.compile()
