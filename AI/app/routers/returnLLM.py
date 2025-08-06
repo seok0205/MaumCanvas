@@ -2,7 +2,7 @@ from fastapi import APIRouter, Request
 from app.schemas.schema import AnalysisResponse, AnalysisRequest
 from app.rag.state import GraphState
 
-router = APIRouter(prefix="/llm", tags=["llm"])
+router = APIRouter(tags=["llm"])
 
 
 @router.post("/llm")
