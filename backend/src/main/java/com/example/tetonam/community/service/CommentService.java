@@ -35,24 +35,28 @@ public class CommentService {
     private final UserRepository userRepository;
 
     // 댓글 작성 api
-    public Long writeComment(Long community_id,CommentWriteDto dto, String email) {
+    public Comment writeComment(Long community_id,CommentWriteDto dto, String email) {
         User author = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("일치하는 정보가 없습니다"));
+                .orElseThrow(() -> new BoardHandler(ErrorStatus.USER_NOT_FOUND));
         Community community = communityRepository.findById(community_id)
-                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다"));
+                .orElseThrow(() -> new BoardHandler(ErrorStatus.POST_LIST_EMPTY));
         Comment comment = Comment.builder()
                 .content(dto.getContent())
                 .author(author)
                 .community(community)
                 .build();
         commentRepository.save(comment);
-        return comment.getId();
+        return comment;
     }
 
     @Transactional
-    public void deleteComment(Long id){
-        if (!commentRepository.existsById(id)){
-            throw new IllegalArgumentException("댓글이 존재하지 않습니다");
+    public void deleteComment(Long id, String email){
+        Comment comment = commentRepository.findById(id)
+                        .orElseThrow(() -> new BoardHandler(ErrorStatus.COMMENT_LIST_EMPTY));
+        User user = userRepository.findByEmail(email)
+                        .orElseThrow(() -> new BoardHandler(ErrorStatus.USER_NOT_FOUND));
+        if(!user.equals(comment.getAuthor())){
+            throw new BoardHandler(ErrorStatus.USER_NOT_MATCH);
         }
         commentRepository.deleteById(id);
     }

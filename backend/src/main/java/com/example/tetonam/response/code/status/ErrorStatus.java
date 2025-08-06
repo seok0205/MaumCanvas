@@ -37,6 +37,7 @@ public enum ErrorStatus implements BaseErrorCode {
     USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER4002", "해당 유저가 없습니다"),
     USER_NOT_AUTHORITY(HttpStatus.UNAUTHORIZED, "USER4002", "권한이 없습니다"),
     USER_INVALID_CREDENTIALS(HttpStatus.BAD_REQUEST, "USER4003", "로그인 정보가 일치하지 않습니다."),
+    USER_NOT_MATCH(HttpStatus.UNAUTHORIZED, "USER4004", "접근 권한이 없습니다."),
 
     // mail 응답
     MAIL_SEND_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "MAIL5000", "이메일 전송에 에러가 발생했습니다."),
@@ -57,8 +58,8 @@ public enum ErrorStatus implements BaseErrorCode {
     ALREADY_RESERVED(HttpStatus.BAD_REQUEST,"COUNSELING4000","이미 예약된 시간입니다."),
     NOTING_COUNSELING(HttpStatus.BAD_REQUEST,"COUNSELING4001","상담예약이 없습니다."),
 
-    POST_LIST_EMPTY(HttpStatus.BAD_REQUEST, "BOARD4000", "없는 게시글입니다.");
-
+    POST_LIST_EMPTY(HttpStatus.BAD_REQUEST, "BOARD4000", "없는 게시글입니다."),
+    COMMENT_LIST_EMPTY(HttpStatus.BAD_REQUEST, "BOARD4001", "댓글을 찾을 수 없습니다.");
 
 
     private final HttpStatus httpStatus;
