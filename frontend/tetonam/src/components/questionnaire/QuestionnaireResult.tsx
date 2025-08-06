@@ -105,6 +105,62 @@ export const QuestionnaireResult = () => {
     }
   };
 
+  // 공통 결과 표시 컴포넌트
+  const renderResultDisplay = (colorTheme: 'blue' | 'yellow' | 'gray') => {
+    const themeClasses = {
+      blue: {
+        bg: 'bg-blue-50',
+        iconBg: 'bg-blue-200',
+        textPrimary: 'text-blue-800',
+        textSecondary: 'text-blue-700',
+      },
+      yellow: {
+        bg: 'bg-yellow-50',
+        iconBg: 'bg-yellow-200',
+        textPrimary: 'text-yellow-800',
+        textSecondary: 'text-yellow-700',
+      },
+      gray: {
+        bg: 'bg-gray-50',
+        iconBg: 'bg-gray-200',
+        textPrimary: 'text-gray-800',
+        textSecondary: 'text-gray-700',
+      },
+    };
+
+    const theme = themeClasses[colorTheme];
+
+    return (
+      <div className={`${theme.bg} p-4 rounded-lg`}>
+        <div className='flex items-center gap-4 mb-4'>
+          <div className={`${theme.iconBg} rounded-full p-4`}>
+            {getLevelIcon(result!.level.level)}
+          </div>
+          <div>
+            <h3 className={`text-xl font-bold ${theme.textPrimary}`}>
+              {result!.level.level}
+            </h3>
+            <p className={theme.textSecondary}>
+              {typeof result!.score === 'number'
+                ? `총점: ${result!.score}점`
+                : `검사결과: ${result!.score}`}
+            </p>
+          </div>
+        </div>
+        <p className={`${theme.textPrimary} text-sm leading-relaxed mb-4`}>
+          {result!.level.description}
+        </p>
+        {result!.level.recommendation && (
+          <div className='bg-orange-50 border border-orange-200 p-3 rounded'>
+            <p className='text-orange-800 text-sm'>
+              <strong>권장사항:</strong> {result!.level.recommendation}
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const renderSuicideRiskResult = () => {
     const category = getQuestionnaireCategory(result!.category);
     return (
@@ -188,34 +244,7 @@ export const QuestionnaireResult = () => {
             <CardTitle className='text-blue-800'>자살위험성 검사결과</CardTitle>
           </CardHeader>
           <CardContent className='p-6'>
-            <div className='grid gap-6 md:grid-cols-2'>
-              <div className='text-center'>
-                <div className='bg-blue-100 rounded-lg p-6 mb-4'>
-                  {getLevelIcon(result!.level.level)}
-                  <h3 className='text-2xl font-bold text-blue-800 mt-2'>
-                    {result!.level.level}
-                  </h3>
-                </div>
-                <p className='text-blue-700 text-sm'>
-                  {typeof result!.score === 'number'
-                    ? `총점: ${result!.score}점`
-                    : `검사결과: ${result!.score}`}
-                </p>
-              </div>
-              <div className='bg-blue-50 p-4 rounded-lg'>
-                <h4 className='font-semibold text-blue-800 mb-2'>검사 결과</h4>
-                <p className='text-blue-700 text-sm leading-relaxed mb-4'>
-                  {result!.level.description}
-                </p>
-                {result!.level.recommendation && (
-                  <div className='bg-orange-50 border border-orange-200 p-3 rounded'>
-                    <p className='text-orange-800 text-sm'>
-                      <strong>권장사항:</strong> {result!.level.recommendation}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
+            <div className='grid gap-4'>{renderResultDisplay('blue')}</div>
           </CardContent>
         </Card>
       </div>
@@ -347,35 +376,7 @@ export const QuestionnaireResult = () => {
             <CardTitle className='text-yellow-800'>불안증상 검사결과</CardTitle>
           </CardHeader>
           <CardContent className='p-6'>
-            <div className='grid gap-4'>
-              <div className='bg-yellow-50 p-4 rounded-lg'>
-                <div className='flex items-center gap-4 mb-4'>
-                  <div className='bg-yellow-200 rounded-full p-4'>
-                    {getLevelIcon(result!.level.level)}
-                  </div>
-                  <div>
-                    <h3 className='text-xl font-bold text-yellow-800'>
-                      {result!.level.level}
-                    </h3>
-                    <p className='text-yellow-700'>
-                      {typeof result!.score === 'number'
-                        ? `총점: ${result!.score}점`
-                        : `검사결과: ${result!.score}`}
-                    </p>
-                  </div>
-                </div>
-                <p className='text-yellow-800 text-sm leading-relaxed mb-4'>
-                  {result!.level.description}
-                </p>
-                {result!.level.recommendation && (
-                  <div className='bg-orange-50 border border-orange-200 p-3 rounded'>
-                    <p className='text-orange-800 text-sm'>
-                      <strong>권장사항:</strong> {result!.level.recommendation}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
+            <div className='grid gap-4'>{renderResultDisplay('yellow')}</div>
           </CardContent>
         </Card>
       </div>
@@ -509,35 +510,7 @@ export const QuestionnaireResult = () => {
             <p className='text-gray-600 text-sm'>우울증상</p>
           </CardHeader>
           <CardContent className='p-6'>
-            <div className='grid gap-4'>
-              <div className='bg-gray-50 p-4 rounded-lg'>
-                <div className='flex items-center gap-4 mb-4'>
-                  <div className='bg-gray-200 rounded-full p-4'>
-                    {getLevelIcon(result!.level.level)}
-                  </div>
-                  <div>
-                    <h3 className='text-xl font-bold text-gray-800'>
-                      {result!.level.level}
-                    </h3>
-                    <p className='text-gray-700'>
-                      {typeof result!.score === 'number'
-                        ? `총점: ${result!.score}점`
-                        : `검사결과: ${result!.score}`}
-                    </p>
-                  </div>
-                </div>
-                <p className='text-gray-800 text-sm leading-relaxed mb-4'>
-                  {result!.level.description}
-                </p>
-                {result!.level.recommendation && (
-                  <div className='bg-orange-50 border border-orange-200 p-3 rounded'>
-                    <p className='text-orange-800 text-sm'>
-                      <strong>권장사항:</strong> {result!.level.recommendation}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
+            <div className='grid gap-4'>{renderResultDisplay('gray')}</div>
           </CardContent>
         </Card>
       </div>
@@ -629,34 +602,7 @@ export const QuestionnaireResult = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className='p-6'>
-            <div className='grid gap-6 md:grid-cols-2'>
-              <div className='text-center'>
-                <div className='bg-blue-100 rounded-lg p-6 mb-4'>
-                  {getLevelIcon(result!.level.level)}
-                  <h3 className='text-2xl font-bold text-blue-800 mt-2'>
-                    {result!.level.level}
-                  </h3>
-                </div>
-                <p className='text-blue-700 text-sm'>
-                  {typeof result!.score === 'number'
-                    ? `총점: ${result!.score}점`
-                    : `검사결과: ${result!.score}`}
-                </p>
-              </div>
-              <div className='bg-blue-50 p-4 rounded-lg'>
-                <h4 className='font-semibold text-blue-800 mb-2'>검사 결과</h4>
-                <p className='text-blue-700 text-sm leading-relaxed mb-4'>
-                  {result!.level.description}
-                </p>
-                {result!.level.recommendation && (
-                  <div className='bg-orange-50 border border-orange-200 p-3 rounded'>
-                    <p className='text-orange-800 text-sm'>
-                      <strong>권장사항:</strong> {result!.level.recommendation}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
+            <div className='grid gap-4'>{renderResultDisplay('blue')}</div>
           </CardContent>
         </Card>
       </div>
