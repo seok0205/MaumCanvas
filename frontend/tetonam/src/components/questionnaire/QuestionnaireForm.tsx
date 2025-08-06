@@ -11,7 +11,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/layout/card';
-import { SidebarProvider } from '@/components/ui/navigation/sidebar';
+import {
+  MobileSidebarToggle,
+  SidebarProvider,
+} from '@/components/ui/navigation/sidebar';
 import { Label } from '@/components/ui/primitives/label';
 import { QUESTIONNAIRE_MESSAGES } from '@/constants/questionnaire';
 import { useQuestionnaireForm } from '@/hooks/useQuestionnaireForm';
@@ -195,6 +198,9 @@ export const QuestionnaireForm = () => {
             </div>
           </main>
         </div>
+
+        {/* 모바일 사이드바 토글 버튼 - 왼쪽 하단 고정 */}
+        <MobileSidebarToggle />
       </SidebarProvider>
     );
   }
@@ -218,6 +224,9 @@ export const QuestionnaireForm = () => {
             </div>
           </main>
         </div>
+
+        {/* 모바일 사이드바 토글 버튼 - 왼쪽 하단 고정 */}
+        <MobileSidebarToggle />
       </SidebarProvider>
     );
   }
@@ -277,6 +286,9 @@ export const QuestionnaireForm = () => {
           </div>
         </main>
       </div>
+
+      {/* 모바일 사이드바 토글 버튼 - 왼쪽 하단 고정 */}
+      <MobileSidebarToggle />
 
       {/* 에러 모달 */}
       <ErrorModal
