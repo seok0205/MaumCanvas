@@ -80,38 +80,75 @@ export default {
           border: 'hsl(var(--sidebar-border))',
           ring: 'hsl(var(--sidebar-ring))',
         },
-        // 청소년 친화적 컬러 팔레트
-        mint: {
-          DEFAULT: 'hsl(var(--mint))',
-          light: 'hsl(var(--mint-light))',
-          dark: 'hsl(var(--mint-dark))',
+        // 청소년 정신건강 플랫폼을 위한 청소년 친화적 컬러 팔레트
+        'youth-orange': {
+          DEFAULT: 'hsl(var(--youth-orange))',
+          50: '#fff8e1',
+          100: '#ffecb3',
+          200: '#ffe082',
+          300: '#ffd54f',
+          400: '#ffca28',
+          500: '#ffc107', // 메인 청소년 오렌지 색상
+          600: '#ffb300',
+          700: '#ffa000',
+          800: '#ff8f00',
+          900: '#ff6f00',
         },
-        yellow: {
-          DEFAULT: 'hsl(var(--yellow))',
-          light: 'hsl(var(--yellow-light))',
-          dark: 'hsl(var(--yellow-dark))',
+        'youth-gold': {
+          DEFAULT: 'hsl(var(--youth-gold))',
+          50: '#fffde7',
+          100: '#fff9c4',
+          200: '#fff59d',
+          300: '#fff176',
+          400: '#ffee58',
+          500: '#ffeb3b',
+          600: '#fdd835',
+          700: '#fbc02d',
+          800: '#f9a825',
+          900: '#f57f17',
         },
-        'light-blue': {
-          DEFAULT: 'hsl(var(--light-blue))',
-          light: 'hsl(var(--light-blue-light))',
-          dark: 'hsl(var(--light-blue-dark))',
+        'youth-yellow': {
+          DEFAULT: 'hsl(var(--youth-yellow))',
+          light: 'hsl(var(--youth-light-yellow))',
+          cream: 'hsl(var(--youth-cream))',
         },
-        lilac: {
-          DEFAULT: 'hsl(var(--lilac))',
-          light: 'hsl(var(--lilac-light))',
-          dark: 'hsl(var(--lilac-dark))',
+        'youth-green': {
+          DEFAULT: 'hsl(var(--youth-green))',
+          50: '#f1f8e9',
+          100: '#dcedc8',
+          200: '#c5e1a5',
+          300: '#aed581',
+          400: '#9ccc65',
+          500: '#8bc34a',
+          600: '#7cb342',
+          700: '#689f38',
+          800: '#558b2f',
+          900: '#33691e',
         },
-        peach: {
-          DEFAULT: 'hsl(var(--peach))',
-          light: 'hsl(var(--peach-light))',
-          dark: 'hsl(var(--peach-dark))',
+        'youth-soft-brown': {
+          DEFAULT: 'hsl(var(--youth-soft-brown))',
         },
+        'youth-light-pink': {
+          DEFAULT: 'hsl(var(--youth-light-pink))',
+        },
+        'youth-light-blue': {
+          DEFAULT: 'hsl(var(--youth-light-blue))',
+        },
+
+        // 상태 기반 텍스트 색상
+        'text-success': 'hsl(var(--text-success))',
+        'text-warning': 'hsl(var(--text-warning))',
+        'text-info': 'hsl(var(--text-info))',
       },
       backgroundImage: {
         'gradient-warm': 'var(--gradient-warm)',
         'gradient-primary': 'var(--gradient-primary)',
         'gradient-subtle': 'var(--gradient-subtle)',
-        'gradient-mint': 'var(--gradient-mint)',
+        'gradient-header': 'var(--gradient-header)',
+        'gradient-youth-warm': 'var(--gradient-warm)',
+        'gradient-youth-primary': 'var(--gradient-primary)',
+        'gradient-youth-header': 'var(--gradient-header)',
+        'gradient-youth-subtle': 'var(--gradient-subtle)',
         'gradient-yellow': 'var(--gradient-yellow)',
         'gradient-blue': 'var(--gradient-blue)',
       },
@@ -120,8 +157,8 @@ export default {
         medium: 'var(--shadow-medium)',
         card: 'var(--shadow-card)',
         hover: 'var(--shadow-hover)',
-        youth: 'var(--shadow-soft)',
-        'youth-hover': 'var(--shadow-hover)',
+        youth: 'var(--shadow-youth)',
+        'youth-hover': 'var(--shadow-youth-hover)',
       },
       transitionTimingFunction: {
         smooth: 'cubic-bezier(0.4, 0, 0.2, 1)',
