@@ -24,7 +24,7 @@ public class SurveyController {
 
     @PostMapping("/questionnaire")
     @Operation(summary = "설문결과 저장 API", description = "설문했던 결과(점수)를 저장합니다.")
-    public ResponseEntity<?> createQuestionnaire(@RequestHeader("Authorization") String token, @RequestParam("score") int score, @RequestParam("category") Category category) {
+    public ResponseEntity<?> createQuestionnaire(@RequestHeader("Authorization") String token, @RequestParam("score") String score, @RequestParam("category") Category category) {
         String email = jwtTokenProvider.getEmail(token.substring(7));
         String result=surveyService.questionnaireCreate(email,score,category);
         return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
