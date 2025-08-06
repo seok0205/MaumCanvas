@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { COUNSELING_CONSTANTS } from '@/constants/counseling';
 import { counselingService } from '@/services/counselingService';
 import type { CounselingReservationRequest, CounselorInfo } from '@/types/api';
+import { isValidCounselorInfo } from '@/types/api';
 import type { CounselingTypeCategory } from '@/types/counselingType';
 
 interface DateOption {
@@ -124,10 +125,28 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
     gcTime: COUNSELING_CONSTANTS.GC_TIME,
   });
 
-  // 상담 예약 뮤테이션
+  // 상담 예약 뮤테이션 - TanStack Query Best Practices 적용
   const reservationMutation = useMutation({
-    mutationFn: (data: CounselingReservationRequest) =>
-      counselingService.reserveCounseling(data),
+    mutationKey: ['counseling', 'reserve'],
+    mutationFn: async (data: CounselingReservationRequest) => {
+      // 추가 검증 로직
+      if (
+        !data.counselorId ||
+        typeof data.counselorId !== 'number' ||
+        data.counselorId <= 0
+      ) {
+        throw new Error('상담사 ID가 유효하지 않습니다.');
+      }
+      if (!data.time || !data.types) {
+        throw new Error('필수 정보가 누락되었습니다.');
+      }
+
+      return counselingService.reserveCounseling(data);
+    },
+    onMutate: async variables => {
+      // 낙관적 업데이트를 위한 이전 상태 저장
+      return { variables };
+    },
     onSuccess: () => {
       toast.success('상담이 성공적으로 예약되었습니다.');
       navigate('/dashboard');
@@ -137,6 +156,9 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
         error.message || '상담 예약에 실패했습니다. 다시 시도해주세요.'
       );
     },
+    // 중복 요청 방지를 위한 설정
+    retry: 1, // 1번만 재시도
+    retryDelay: 1000, // 1초 대기
   });
 
   // 날짜 선택 핸들러
@@ -154,6 +176,12 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
 
   // 상담사 선택 핸들러
   const handleCounselorSelect = useCallback((counselor: CounselorInfo) => {
+    // 상담사 데이터 검증 - 타입 가드 함수 사용
+    if (!isValidCounselorInfo(counselor)) {
+      toast.error('상담사 정보가 올바르지 않습니다.');
+      return;
+    }
+
     setSelectedCounselor(counselor);
   }, []);
 
@@ -167,6 +195,7 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
 
   // 예약 확정 핸들러
   const handleReservationConfirm = useCallback(() => {
+    // 1차 검증: 필수 선택 항목 확인
     if (
       !selectedDate ||
       !selectedTime ||
@@ -177,12 +206,22 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
       return;
     }
 
+    // 2차 검증: counselorId 상세 검증
+    if (
+      !selectedCounselor.id ||
+      typeof selectedCounselor.id !== 'number' ||
+      selectedCounselor.id <= 0
+    ) {
+      toast.error('선택된 상담사 정보가 올바르지 않습니다. 다시 선택해주세요.');
+      return;
+    }
+
     const dateTime =
       format(selectedDate, 'yyyy-MM-dd') + 'T' + selectedTime + ':00';
     const reservationData: CounselingReservationRequest = {
       time: dateTime,
       types: selectedCounselingType.title,
-      CounselorId: selectedCounselor.id,
+      counselorId: selectedCounselor.id, // 소문자 c로 변경
     };
 
     reservationMutation.mutate(reservationData);
