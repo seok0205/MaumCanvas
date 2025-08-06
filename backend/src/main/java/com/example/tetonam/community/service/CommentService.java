@@ -58,12 +58,11 @@ public class CommentService {
     }
 
     @Transactional
-    public Community updatePost(Long id, PostUpdateDto updateCommunity){
-        Community community = communityRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("게시글이 존재하지 않습니다."));
-        community.setTitle(updateCommunity.getTitle());
-        community.setContent(updateCommunity.getContent());
-        community.setUpdatedAt(LocalDateTime.now());
-        return communityRepository.save(community);
+    public Comment updateComment(Long id, CommentWriteDto updateComment){
+        Comment comment = commentRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("게시글이 존재하지 않습니다."));
+        comment.setContent(updateComment.getContent());
+        comment.setUpdatedAt(LocalDateTime.now());
+        return commentRepository.save(comment);
     }
 
     public List<Community> getPosts(Long lastId, int size){
