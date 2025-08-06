@@ -289,10 +289,11 @@ const MobileSidebarToggle = React.forwardRef<
   React.ComponentRef<typeof Button>,
   React.ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
-  const { toggleSidebar } = useSidebar();
+  const { toggleSidebar, openMobile } = useSidebar();
   const isMobile = useIsMobile();
 
-  if (!isMobile) {
+  // 모바일이 아니거나 모바일에서 사이드바가 열려있으면 버튼을 숨김
+  if (!isMobile || openMobile) {
     return null;
   }
 
