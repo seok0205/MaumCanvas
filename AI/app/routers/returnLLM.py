@@ -12,13 +12,15 @@ async def return_LLM(request_body: AnalysisRequest, request: Request):
     """
     rag_graph = request.app.state.rag_graph
 
-    inputs = GraphState(
-        question=request_body.question,
-        category=request_body.category,
-    )
+    inputs = {
+        "original_question": request_body.question,
+        "category": request_body.category,
+    }
 
     final_state = rag_graph.invoke(inputs, {"recursion_limit": 15})
 
     return AnalysisResponse(
         answer=final_state.get("generation", "해석을 생성하지 못했습니다."),
     )
+
+
