@@ -131,9 +131,9 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
     mutationFn: async (data: CounselingReservationRequest) => {
       // 추가 검증 로직
       if (
-        !data.CounselorId ||
-        typeof data.CounselorId !== 'number' ||
-        data.CounselorId <= 0
+        !data.counselorId ||
+        typeof data.counselorId !== 'number' ||
+        data.counselorId <= 0
       ) {
         throw new Error('상담사 ID가 유효하지 않습니다.');
       }
@@ -157,8 +157,7 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
       );
     },
     // 중복 요청 방지를 위한 설정
-    retry: 1, // 1번만 재시도
-    retryDelay: 1000, // 1초 대기
+    retry: false, // 자동 재시도 비활성화
   });
 
   // 날짜 선택 핸들러
@@ -221,7 +220,7 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
     const reservationData: CounselingReservationRequest = {
       time: dateTime,
       types: selectedCounselingType.title,
-      CounselorId: selectedCounselor.id, // 백엔드 DTO와 일치하도록 대문자 C 사용
+      counselorId: selectedCounselor.id, // 백엔드 DTO와 일치하도록 수정
     };
 
     reservationMutation.mutate(reservationData);
