@@ -128,9 +128,12 @@ export const useQuestionnaireForm = ({
       // 성공 시 결과 페이지로 이동
       const resultData = encodeURIComponent(JSON.stringify(submission));
       navigate(`/questionnaire/${categoryId}/result?data=${resultData}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error('설문 제출 실패:', error);
-      setError(QUESTIONNAIRE_MESSAGES.SUBMIT_ERROR_MESSAGE);
+
+      // ✅ 에러 메시지를 더 구체적으로 표시
+      const errorMessage = error.message || QUESTIONNAIRE_MESSAGES.SUBMIT_ERROR_MESSAGE;
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
