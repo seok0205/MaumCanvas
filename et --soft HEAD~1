@@ -1,5 +1,0 @@
-[33m894d910[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m)[m <FE> feat: 청소년 친화적 색상 및 컴포넌트 추가
-[33m39e23ab[m Revert "<FE> feat: 청소년 친화적 색상 시스템 및 컴포넌트 추가"
-[33m382b575[m <FE> refactor: 모바일 사이드바 토글 버튼 로직 수정
-[33m6cd7769[m Merge "<AI>feat: 환각 검사 노드 추가, prompt 일부 수정"
-[33m0e71251[m Merge "<AI>feat: 문맥 검색, LLM 응답 생성 노드 추가(설명 추가)"
