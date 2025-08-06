@@ -39,19 +39,30 @@ export const useAuthStore = create<AuthState>()(
             set({ selectedUserRole: null });
 
             // 백엔드 JWT 토큰의 roles에서 주요 역할 결정 (실제 사용자 역할 우선)
+            console.log(
+              '🔍 [LOGIN DEBUG] tokenResponse.roles:',
+              tokenResponse.roles
+            );
             const primaryRole: UserRole = getPrimaryRole(
               tokenResponse.roles || []
+            );
+            console.log(
+              '🔍 [LOGIN DEBUG] primaryRole from token:',
+              primaryRole
             );
 
             // 사용자 정보 조회 (JWT 토큰 필요)
             const userInfo = await authService.getMyInfo();
+            console.log('🔍 [LOGIN DEBUG] userInfo.roles:', userInfo.roles);
 
-            // 백엔드에서 받은 실제 roles를 우선 사용
-            let finalRole = primaryRole;
-            if (userInfo.roles && userInfo.roles.length > 0) {
-              const backendPrimaryRole = getPrimaryRole(userInfo.roles);
-              finalRole = backendPrimaryRole;
-            }
+            // 백엔드에서 받은 실제 roles를 검증하여 사용
+            const validatedRoles = userInfo.roles.filter((role): role is UserRole => 
+              ['USER', 'COUNSELOR', 'ADMIN'].includes(role)
+            );
+            
+            // 유효한 역할이 없으면 기본값 설정
+            const finalRoles = validatedRoles.length > 0 ? validatedRoles : ['USER'] as UserRole[];
+            console.log('🔍 [LOGIN DEBUG] Validated roles:', finalRoles);
 
             const user: User = {
               id: userInfo.id || `user-${Date.now()}`, // 백엔드에서 ID 제공하지 않는 경우 임시 ID
@@ -62,9 +73,10 @@ export const useAuthStore = create<AuthState>()(
               phone: userInfo.phone,
               school: userInfo.school,
               birthday: userInfo.birthday,
-              roles: [finalRole] as UserRole[], // 최종 확정된 역할 사용
+              roles: finalRoles, // 검증된 roles 배열 사용
               createdAt: new Date().toISOString(),
             };
+            console.log('🔍 [LOGIN DEBUG] Final user object:', user);
 
             // 인증 상태를 먼저 설정하여 다른 컴포넌트들이 인증 상태를 인식할 수 있도록 함
             set({
