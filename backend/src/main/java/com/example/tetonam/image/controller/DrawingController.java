@@ -2,6 +2,7 @@ package com.example.tetonam.image.controller;
 
 
 import com.example.tetonam.counseling.dto.MyCounselingDetailResponseDto;
+import com.example.tetonam.image.dto.CounselingRagRequestDto;
 import com.example.tetonam.image.dto.RecentDrawingResponseDto;
 import com.example.tetonam.image.dto.testDto;
 import com.example.tetonam.image.service.DrawingService;
@@ -52,14 +53,6 @@ public class DrawingController {
 
 
 
-    @GetMapping("/{id}")
-    @Operation(summary = "그림 상세 조회 API", description = "RAG모델을 통해 저장된 그림 상세 설명이 나옵니다")
-    public ResponseEntity<?> detailImage(@RequestHeader("Authorization") String token) {
-        String email = jwtTokenProvider.getEmail(token.substring(7));
-        List<RecentDrawingResponseDto> recentDrawingResponseDtoList=drawingService.showRecentImages(email);
-        return ResponseEntity.ok().body(ApiResponse.onSuccess(recentDrawingResponseDtoList));
-    }
-
     @GetMapping("/counseling/{id}")
     @Operation(summary = "상담의 그림 조회 API", description = "해당 상담의 그림들을 반환합니다")
     public ResponseEntity<?> counselingImage(@RequestHeader("Authorization") String token,@PathVariable Long id) {
@@ -67,6 +60,25 @@ public class DrawingController {
         List<RecentDrawingResponseDto> recentDrawingResponseDtoList=drawingService.showCounselingImage(email,id);
         return ResponseEntity.ok().body(ApiResponse.onSuccess(recentDrawingResponseDtoList));
     }
+
+    @PostMapping("/counseling/rag/{id}")
+    @Operation(summary = "상담사의 코멘트 Rag API", description = "상담사가 적은 코멘트를 Rag모델을 통해 저장합니다.")
+    public ResponseEntity<?> CounselingRag(@RequestHeader("Authorization") String token, @PathVariable Long id, @RequestBody CounselingRagRequestDto counselingRagRequestDto) {
+        String email = jwtTokenProvider.getEmail(token.substring(7));
+        String result=drawingService.counselingRagSave(email,id,counselingRagRequestDto);
+        return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
+    }
+
+
+//    @GetMapping("/{id}")
+//    @Operation(summary = "그림 상세 조회 API", description = "RAG모델을 통해 저장된 그림 상세 설명이 나옵니다")
+//    public ResponseEntity<?> detailImage(@RequestHeader("Authorization") String token) {
+//        String email = jwtTokenProvider.getEmail(token.substring(7));
+//
+//        return ResponseEntity.ok().body(ApiResponse.onSuccess(recentDrawingResponseDtoList));
+//    }
+
+
 
 }
 
