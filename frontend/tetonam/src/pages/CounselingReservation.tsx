@@ -259,7 +259,7 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
                 <div className='flex justify-between items-center'>
                   <span className='text-gray-600'>상담 유형</span>
                   <span className='font-medium'>
-                    {selectedCounselingType.name}
+                    {selectedCounselingType.title}
                   </span>
                 </div>
                 <div className='flex justify-between items-center'>
