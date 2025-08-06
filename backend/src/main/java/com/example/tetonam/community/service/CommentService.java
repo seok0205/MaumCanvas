@@ -35,35 +35,38 @@ public class CommentService {
     private final UserRepository userRepository;
 
     // 댓글 작성 api
-    public Long writeComment(Long community_id,CommentWriteDto dto, String email) {
+    public Comment writeComment(Long community_id,CommentWriteDto dto, String email) {
         User author = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("일치하는 정보가 없습니다"));
+                .orElseThrow(() -> new BoardHandler(ErrorStatus.USER_NOT_FOUND));
         Community community = communityRepository.findById(community_id)
-                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다"));
+                .orElseThrow(() -> new BoardHandler(ErrorStatus.POST_LIST_EMPTY));
         Comment comment = Comment.builder()
                 .content(dto.getContent())
                 .author(author)
                 .community(community)
                 .build();
         commentRepository.save(comment);
-        return comment.getId();
+        return comment;
     }
 
     @Transactional
-    public void deletePost(Long id){
-        if (!communityRepository.existsById(id)){
-            throw new IllegalArgumentException("게시글이 존재하지 않습니다");
+    public void deleteComment(Long id, String email){
+        Comment comment = commentRepository.findById(id)
+                        .orElseThrow(() -> new BoardHandler(ErrorStatus.COMMENT_LIST_EMPTY));
+        User user = userRepository.findByEmail(email)
+                        .orElseThrow(() -> new BoardHandler(ErrorStatus.USER_NOT_FOUND));
+        if(!user.equals(comment.getAuthor())){
+            throw new BoardHandler(ErrorStatus.USER_NOT_MATCH);
         }
-        communityRepository.deleteById(id);
+        commentRepository.deleteById(id);
     }
 
     @Transactional
-    public Community updatePost(Long id, PostUpdateDto updateCommunity){
-        Community community = communityRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("게시글이 존재하지 않습니다."));
-        community.setTitle(updateCommunity.getTitle());
-        community.setContent(updateCommunity.getContent());
-        community.setUpdatedAt(LocalDateTime.now());
-        return communityRepository.save(community);
+    public Comment updateComment(Long id, CommentWriteDto updateComment){
+        Comment comment = commentRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("게시글이 존재하지 않습니다."));
+        comment.setContent(updateComment.getContent());
+        comment.setUpdatedAt(LocalDateTime.now());
+        return commentRepository.save(comment);
     }
 
     public List<Community> getPosts(Long lastId, int size){
