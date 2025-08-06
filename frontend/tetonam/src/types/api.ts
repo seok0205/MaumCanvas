@@ -87,11 +87,25 @@ export interface CounselorInfo {
   counselorName: string;
 }
 
+// 상담사 정보 검증 함수
+export const isValidCounselorInfo = (
+  counselor: any
+): counselor is CounselorInfo => {
+  return (
+    counselor &&
+    typeof counselor === 'object' &&
+    typeof counselor.id === 'number' &&
+    counselor.id > 0 &&
+    typeof counselor.counselorName === 'string' &&
+    counselor.counselorName.trim().length > 0
+  );
+};
+
 // 상담 예약 요청 타입
 export interface CounselingReservationRequest {
   time: string;
   types: string;
-  CounselorId: number;
+  counselorId: number; // 소문자 c로 변경
 }
 
 // 상담 내역 타입
