@@ -89,13 +89,6 @@ export const counselingService = {
     signal?: AbortSignal
   ): Promise<string> => {
     try {
-      // 🚨 디버깅: 실제 전송 데이터 확인
-      console.log('🔍 예약 요청 데이터:', data);
-      console.log('🔍 counselorId 타입:', typeof data.counselorId);
-      console.log('🔍 counselorId 값:', data.counselorId);
-      console.log('🔍 time 값:', data.time);
-      console.log('🔍 types 값:', data.types);
-
       const response = await apiClient.post<ApiResponse<string>>(
         COUNSELING_ENDPOINTS.RESERVE_COUNSELING,
         data,
@@ -140,8 +133,7 @@ export const counselingService = {
       // 🚨 상담 예약 특화 에러 처리
       if (axiosError.response?.data) {
         const apiError = axiosError.response.data;
-        console.log('🔍 백엔드 에러 응답:', apiError);
-        
+
         // 그림 그리기 미완료 에러 특별 처리
         if (apiError.code === 'STUDENT_HAVE_NOT_IMAGE') {
           throw new AuthenticationError(
@@ -149,7 +141,7 @@ export const counselingService = {
             '상담 예약을 위해 그림 그리기를 먼저 완료해주세요.'
           );
         }
-        
+
         // 기타 상담 관련 에러 처리
         if (apiError.code === 'ALREADY_RESERVED') {
           throw new AuthenticationError(
@@ -157,7 +149,7 @@ export const counselingService = {
             '선택한 시간에 이미 예약이 있습니다. 다른 시간을 선택해주세요.'
           );
         }
-        
+
         throw handleApiError(axiosError.response.data);
       }
 

@@ -10,7 +10,6 @@ interface CommunityActivityProps {
 export const CommunityActivity = ({ activities }: CommunityActivityProps) => {
   const handleViewMore = () => {
     // TODO: 더 많은 활동 보기 페이지로 이동
-    console.log('View more activities');
   };
 
   const getActivityIcon = (type: 'contribution' | 'achievement') => {

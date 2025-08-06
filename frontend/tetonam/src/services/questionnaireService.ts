@@ -1,10 +1,13 @@
 import {
+  getCategoryKoreanName,
   getQuestionnaireCategory,
   getQuestionnaireResultLevel,
-  getCategoryKoreanName, // 새로운 매핑 함수 import
 } from '@/constants/questionnaire';
-import type { QuestionnaireCategory, QuestionnaireResult } from '@/types/questionnaire';
-import type { QuestionnaireSubmission } from '@/types/questionnaire';
+import type {
+  QuestionnaireCategory,
+  QuestionnaireResult,
+  QuestionnaireSubmission,
+} from '@/types/questionnaire';
 import { apiClient } from './apiClient';
 
 // 백엔드 DTO와 일치하는 타입 정의
@@ -41,13 +44,6 @@ const submitQuestionnaire = async (
   try {
     // ✅ 영어 카테고리 ID를 한글로 변환 (백엔드 Category enum에 맞춤)
     const koreanCategory = getCategoryKoreanName(submission.category);
-
-    // ✅ 디버깅용 로그
-    console.log('설문 제출 데이터:', {
-      originalCategory: submission.category,
-      koreanCategory,
-      score: submission.score
-    });
 
     // ✅ 백엔드 API 스펙에 맞게 query parameter 방식으로 전송
     // ✅ 백엔드에서 body를 받지 않으므로 null을 명시적으로 전달
@@ -143,7 +139,9 @@ const getAllCategoriesQuestionnaireResults = async (
           // 백엔드 DTO를 프론트엔드 결과 형태로 변환
           results[koreanCategory] = response.data.result.map(item => ({
             category: String(item.category), // 문자열로 변환
-            score: isNaN(parseInt(item.score, 10)) ? item.score : parseInt(item.score, 10), // 자살위험성은 문자열, 나머지는 숫자
+            score: isNaN(parseInt(item.score, 10))
+              ? item.score
+              : parseInt(item.score, 10), // 자살위험성은 문자열, 나머지는 숫자
             createdDate: item.createdDate, // ISO 형식 날짜 문자열 유지
           }));
         } else {

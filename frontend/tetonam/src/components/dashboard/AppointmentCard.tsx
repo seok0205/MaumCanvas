@@ -14,7 +14,6 @@ export const AppointmentCard = ({
 }: AppointmentCardProps) => {
   const handleAppointmentAction = (appointment: Appointment) => {
     // TODO: 실제 상담 액션 구현
-    console.log(`Appointment action: ${appointment.id}`);
   };
 
   const getTitle = () => {

@@ -47,18 +47,16 @@ export const QuickStartSection = ({
         break;
       case '커뮤니티':
         // TODO: 커뮤니티 페이지로 이동
-        console.log('커뮤니티 페이지로 이동');
         break;
       case '내 일정 관리하기':
         // TODO: 일정 관리 페이지로 이동
-        console.log('일정 관리 페이지로 이동');
         break;
       case '학생 상담 시작하기':
         // TODO: 상담 시작 페이지로 이동
-        console.log('상담 시작 페이지로 이동');
         break;
       default:
-        console.log(`Action: ${action.title}`);
+        // 기본 동작 없음
+        break;
     }
   };
 

@@ -218,10 +218,10 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
     // 🚨 중요: 그림 그리기 완료 여부 확인 안내
     const hasDrawing = confirm(
       '상담 예약을 위해서는 그림 그리기를 먼저 완료해야 합니다.\n' +
-      '그림 그리기를 완료하셨나요?\n\n' +
-      '완료하지 않으셨다면 "취소"를 눌러 그림 그리기를 먼저 진행해주세요.'
+        '그림 그리기를 완료하셨나요?\n\n' +
+        '완료하지 않으셨다면 "취소"를 눌러 그림 그리기를 먼저 진행해주세요.'
     );
-    
+
     if (!hasDrawing) {
       toast.info('그림 그리기를 먼저 완료해주세요.');
       // TODO: 그림 그리기 페이지로 리다이렉트
@@ -236,16 +236,6 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
       types: selectedCounselingType.title,
       counselorId: selectedCounselor.id, // 백엔드 DTO와 일치하도록 수정
     };
-
-    // 🚨 디버깅: 예약 데이터 확인
-    console.log('🔍 선택된 상담사:', selectedCounselor);
-    console.log('🔍 최종 예약 데이터:', reservationData);
-    console.log('🔍 counselorId 확인:', {
-      value: reservationData.counselorId,
-      type: typeof reservationData.counselorId,
-      isNumber: typeof reservationData.counselorId === 'number',
-      isPositive: reservationData.counselorId > 0,
-    });
 
     reservationMutation.mutate(reservationData);
   }, [

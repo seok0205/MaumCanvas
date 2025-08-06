@@ -90,10 +90,6 @@ export const usePasswordReset = () => {
       // 현재 인증 시도 횟수 확인
       const currentAttempts = stateRef.current.verificationAttempts;
 
-      console.log(
-        `인증 시도 시작: ${stateRef.current.email} (현재 시도: ${currentAttempts}/${MAX_VERIFICATION_ATTEMPTS})`
-      );
-
       // 인증 시도 제한 체크
       if (currentAttempts >= MAX_VERIFICATION_ATTEMPTS) {
         console.warn(
@@ -114,10 +110,6 @@ export const usePasswordReset = () => {
       // 인증 시도 횟수를 미리 증가시켜서 상태 업데이트
       const newAttempts = currentAttempts + 1;
 
-      console.log(
-        `인증 시도 진행: ${stateRef.current.email} (${newAttempts}/${MAX_VERIFICATION_ATTEMPTS})`
-      );
-
       setState(prev => ({
         ...prev,
         verificationStep: { data: null, isLoading: true, error: null },
@@ -137,9 +129,6 @@ export const usePasswordReset = () => {
 
         if (!ignore) {
           if (uuid) {
-            console.log(
-              `인증 성공: ${stateRef.current.email} (${newAttempts}번째 시도에서 성공)`
-            );
             setState(prev => ({
               ...prev,
               verificationStep: { data: uuid, isLoading: false, error: null },
@@ -274,7 +263,6 @@ export const usePasswordReset = () => {
       verificationStep: { data: null, isLoading: false, error: null }, // 인증 단계 초기화
       resetStep: { data: null, isLoading: false, error: null }, // 재설정 단계 초기화
     }));
-    console.log('비밀번호 재설정 프로세스가 1단계로 초기화되었습니다.');
   }, []);
 
   return {

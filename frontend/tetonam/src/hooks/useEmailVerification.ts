@@ -95,9 +95,6 @@ export const useEmailVerification = (): UseEmailVerificationReturn => {
       // 로깅
       logRef.current.email = email;
       logRef.current.resends += 1;
-      console.log(
-        `이메일 인증 발송 시도: ${email} (${logRef.current.resends}번째)`
-      );
 
       // 재전송 제한 체크
       if (isMaxResendsReached) {
@@ -115,7 +112,6 @@ export const useEmailVerification = (): UseEmailVerificationReturn => {
         // 1단계: 이메일 중복 확인
         await authService.checkEmailDuplicate(email, signal);
         setIsEmailDuplicateChecked(true);
-        console.log(`이메일 중복 확인 완료: ${email}`);
 
         // 2단계: 중복이 아닌 경우 인증메일 발송
         await authService.sendEmailVerification(email, signal);
@@ -129,12 +125,9 @@ export const useEmailVerification = (): UseEmailVerificationReturn => {
           setCanResend(false);
           console.warn(`이메일 재전송 제한 도달: ${email}`);
         }
-
-        console.log(`이메일 인증 발송 성공: ${email}`);
       } catch (error) {
         // AbortError는 사용자에게 표시하지 않음
         if (error instanceof Error && error.name === 'AbortError') {
-          console.log(`이메일 인증 발송 취소됨: ${email}`);
           return;
         }
 
@@ -171,9 +164,6 @@ export const useEmailVerification = (): UseEmailVerificationReturn => {
 
       // 로깅
       logRef.current.attempts += 1;
-      console.log(
-        `이메일 인증 시도: ${email} (${logRef.current.attempts}번째)`
-      );
 
       // 인증 시도 제한 체크
       if (isMaxAttemptsReached) {
@@ -202,7 +192,6 @@ export const useEmailVerification = (): UseEmailVerificationReturn => {
             FORM_MESSAGES.EMAIL_VERIFICATION.VERIFICATION_SUCCESS
           );
           // 인증 성공 시에도 isEmailSent는 유지하여 사용자가 인증 과정을 확인할 수 있도록
-          console.log(`이메일 인증 성공: ${email}`);
         } else {
           setVerificationAttempts(prev => prev + 1);
           setError(FORM_MESSAGES.EMAIL_VERIFICATION.INVALID_CODE);
@@ -217,7 +206,6 @@ export const useEmailVerification = (): UseEmailVerificationReturn => {
       } catch (error) {
         // AbortError는 사용자에게 표시하지 않음
         if (error instanceof Error && error.name === 'AbortError') {
-          console.log(`이메일 인증 취소됨: ${email}`);
           return;
         }
 

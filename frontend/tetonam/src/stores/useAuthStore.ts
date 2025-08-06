@@ -39,34 +39,19 @@ export const useAuthStore = create<AuthState>()(
             set({ selectedUserRole: null });
 
             // 백엔드 JWT 토큰의 role에서 주요 역할 결정 (백엔드는 role 배열 전송)
-            console.log('🔍 [LOGIN DEBUG] tokenResponse:', tokenResponse); // 전체 tokenResponse 확인
-            console.log(
-              '🔍 [LOGIN DEBUG] tokenResponse.role:',
-              tokenResponse.role
-            );
             // 토큰에서 받은 role 배열을 그대로 사용
             const tokenRoles = tokenResponse.role || [];
             const primaryRole: UserRole = getPrimaryRole(tokenRoles);
-            console.log(
-              '🔍 [LOGIN DEBUG] primaryRole from token:',
-              primaryRole
-            );
 
             // JWT 토큰의 role 정보를 사용 (my-info API는 역할 판단에 불필요)
             const finalRoles = tokenRoles.filter((role): role is UserRole =>
               ['USER', 'COUNSELOR', 'ADMIN'].includes(role)
             );
-            console.log('🔍 [LOGIN DEBUG] 토큰 기반 finalRoles:', finalRoles);
 
             // 유효한 역할이 없으면 기본값 설정
             const validatedRoles =
               finalRoles.length > 0 ? finalRoles : (['USER'] as UserRole[]);
-            console.log(
-              '🔍 [LOGIN DEBUG] 최종 validatedRoles:',
-              validatedRoles
-            );
 
-            console.log('🔍 [LOGIN DEBUG] User 객체 생성 시작...');
             // 로그인 시에는 role 정보만 설정하고, 나머지 정보는 필요시 별도 API로 가져옴
             const user: User = {
               id: `user-${Date.now()}`, // 임시 ID
@@ -80,7 +65,6 @@ export const useAuthStore = create<AuthState>()(
               roles: validatedRoles, // 토큰 기반 검증된 roles 배열 사용
               createdAt: new Date().toISOString(),
             };
-            console.log('🔍 [LOGIN DEBUG] User 객체 생성 완료! user:', user);
 
             // 인증 상태를 먼저 설정하여 다른 컴포넌트들이 인증 상태를 인식할 수 있도록 함
             set({

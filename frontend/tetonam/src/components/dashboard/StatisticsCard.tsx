@@ -10,7 +10,6 @@ interface StatisticsCardProps {
 export const StatisticsCard = ({ stats }: StatisticsCardProps) => {
   const handleViewDetails = () => {
     // TODO: 상세 통계 페이지로 이동
-    console.log('View detailed statistics');
   };
 
   return (

@@ -8,21 +8,12 @@ import type { UserRole } from '@/constants/userRoles';
 export const getPrimaryRole = (
   roles: string[] | undefined | null
 ): UserRole => {
-  // 디버깅을 위한 상세 로그
-  console.log('🔍 [getPrimaryRole] 입력값:', roles);
-  console.log(
-    '🔍 [getPrimaryRole] 타입 확인:',
-    typeof roles,
-    Array.isArray(roles)
-  );
-
   // 더 엄격한 유효성 검사
   if (!roles || !Array.isArray(roles) || roles.length === 0) {
     // 개발 환경에서만 경고 출력
     if (process.env['NODE_ENV'] === 'development') {
       console.warn('getPrimaryRole: 유효하지 않은 roles 배열:', roles);
     }
-    console.log('🔍 [getPrimaryRole] 기본값 USER 반환 (빈 배열)');
     return 'USER'; // 기본값
   }
 
@@ -33,28 +24,23 @@ export const getPrimaryRole = (
 
   // 유효한 역할만 필터링
   const validRoles = roles.filter(isValidRole);
-  console.log('🔍 [getPrimaryRole] 유효한 roles:', validRoles);
 
   if (validRoles.length === 0) {
     // 개발 환경에서만 경고 출력
     if (process.env['NODE_ENV'] === 'development') {
       console.warn('getPrimaryRole: 유효한 역할이 없음:', roles);
     }
-    console.log('🔍 [getPrimaryRole] 기본값 USER 반환 (유효한 역할 없음)');
     return 'USER'; // 기본값
   }
 
   // 우선순위: COUNSELOR > ADMIN > USER
   if (validRoles.includes('COUNSELOR')) {
-    console.log('🔍 [getPrimaryRole] COUNSELOR 반환');
     return 'COUNSELOR';
   }
   if (validRoles.includes('ADMIN')) {
-    console.log('🔍 [getPrimaryRole] ADMIN 반환');
     return 'ADMIN';
   }
   if (validRoles.includes('USER')) {
-    console.log('🔍 [getPrimaryRole] USER 반환');
     return 'USER';
   }
 
@@ -62,7 +48,6 @@ export const getPrimaryRole = (
   if (process.env['NODE_ENV'] === 'development') {
     console.warn('getPrimaryRole: 알 수 없는 role들:', validRoles);
   }
-  console.log('🔍 [getPrimaryRole] 기본값 USER 반환 (알 수 없는 역할)');
   return 'USER';
 };
 
