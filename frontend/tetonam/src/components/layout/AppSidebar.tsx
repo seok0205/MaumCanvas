@@ -14,6 +14,7 @@ import {
 import { COUNSELOR_MENU_ITEMS, USER_MENU_ITEMS } from '@/constants/menu';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { getNavLinkClassName } from '@/utils/navigation';
+import { getPrimaryRole } from '@/utils/userRoleMapping';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
@@ -21,9 +22,10 @@ export const AppSidebar = () => {
   const { user } = useAuthStore();
   const { state, toggleSidebar } = useSidebar();
 
-  const menuItems = user?.roles.includes('USER')
-    ? USER_MENU_ITEMS
-    : COUNSELOR_MENU_ITEMS;
+  // getPrimaryRole을 사용하여 올바른 메뉴 결정
+  const primaryRole = getPrimaryRole(user?.roles);
+  const menuItems =
+    primaryRole === 'COUNSELOR' ? COUNSELOR_MENU_ITEMS : USER_MENU_ITEMS;
 
   return (
     <Sidebar className='pr-2 transition-all duration-300' collapsible='icon'>

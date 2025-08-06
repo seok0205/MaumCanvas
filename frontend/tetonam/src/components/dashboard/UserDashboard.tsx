@@ -29,7 +29,7 @@ export const UserDashboard = ({ user }: UserDashboardProps) => {
       {/* 퀵 시작 섹션 */}
       <QuickStartSection
         actions={DASHBOARD_CONSTANTS.QUICK_ACTIONS.USER}
-        userRole='USER' // 임시로 기존 값 사용
+        userRole={primaryRole === 'COUNSELOR' ? 'COUNSELOR' : 'USER'}
       />
       {/* 상담 관리 섹션 */}
       <div className='grid grid-cols-1 lg:grid-cols-1 gap-6'>
@@ -39,8 +39,10 @@ export const UserDashboard = ({ user }: UserDashboardProps) => {
       {/* 자가 진단 결과 섹션 */}
       <SelfDiagnosisCard />
       {/* 오늘의 팁 */}
-      <DailyTips tips={DAILY_TIPS.USER} userRole='USER' />{' '}
-      {/* 임시로 기존 값 사용 */}
+      <DailyTips
+        tips={DAILY_TIPS.USER}
+        userRole={primaryRole === 'COUNSELOR' ? 'COUNSELOR' : 'USER'}
+      />
     </div>
   );
 };

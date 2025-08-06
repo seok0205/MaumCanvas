@@ -52,7 +52,7 @@ export const CounselorDashboard = ({ user }: CounselorDashboardProps) => {
       {/* 퀵 시작 섹션 */}
       <QuickStartSection
         actions={DASHBOARD_CONSTANTS.QUICK_ACTIONS.COUNSELOR}
-        userRole='COUNSELOR' // 임시로 기존 값 사용
+        userRole={primaryRole === 'COUNSELOR' ? 'COUNSELOR' : 'USER'}
       />
 
       {/* 내 활동 섹션 */}
@@ -61,7 +61,7 @@ export const CounselorDashboard = ({ user }: CounselorDashboardProps) => {
         <div>
           <AppointmentCard
             appointments={MOCK_APPOINTMENTS.COUNSELOR}
-            userRole='COUNSELOR' // 임시로 기존 값 사용
+            userRole={primaryRole === 'COUNSELOR' ? 'COUNSELOR' : 'USER'}
           />
         </div>
 
@@ -79,8 +79,10 @@ export const CounselorDashboard = ({ user }: CounselorDashboardProps) => {
         </div>
         {/* 오늘의 팁 */}
         <div>
-          <DailyTips tips={DAILY_TIPS.COUNSELOR} userRole='COUNSELOR' />{' '}
-          {/* 임시로 기존 값 사용 */}
+          <DailyTips
+            tips={DAILY_TIPS.COUNSELOR}
+            userRole={primaryRole === 'COUNSELOR' ? 'COUNSELOR' : 'USER'}
+          />
         </div>
       </div>
     </div>
