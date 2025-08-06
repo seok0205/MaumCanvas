@@ -18,8 +18,7 @@ async def lifespan(app: FastAPI):
     # 서버 종료 시 리소스 정리
     app.state.rag_graph = None
 
-
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 app.include_router(example.router)
 app.include_router(predict.router)
