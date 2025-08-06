@@ -43,7 +43,7 @@ function App() {
 
   return (
     <div
-      className={`min-h-screen bg-background font-sans antialiased ${
+      className={`min-h-screen bg-warm-gradient font-sans antialiased ${
         isLoaded ? 'font-loaded' : isError ? 'font-fallback' : 'font-loading'
       }`}
     >

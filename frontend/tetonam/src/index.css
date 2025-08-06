@@ -67,8 +67,15 @@
 @layer base {
   :root {
     /* 기본 색상 팔레트 - 더 깊이감 있는 톤으로 조정 */
-    --background: 0 0% 98%; /* 매우 밝은 회색 */
+    --background: 48 100% 96%; /* 따뜻한 크림색 기본 */
     --foreground: 220 10% 15%; /* 진한 회색 */
+    
+    /* 따뜻한 배경 그라디언트 */
+    --warm-background-gradient: linear-gradient(135deg, 
+      hsl(48, 100%, 96%) 0%, 
+      hsl(45, 85%, 94%) 30%, 
+      hsl(40, 90%, 95%) 60%, 
+      hsl(35, 95%, 93%) 100%);
     --card: 0 0% 100%; /* 순백 */
     --card-foreground: 220 10% 15%;
     --popover: 0 0% 100%;
@@ -162,8 +169,15 @@
   }
 
   .dark {
-    --background: 220 10% 8%; /* 어두운 배경 */
+    --background: 45 25% 9%; /* 어두운 따뜻한 색상 기본 */
     --foreground: 0 0% 98%; /* 밝은 텍스트 */
+    
+    /* 다크모드 따뜻한 배경 그라디언트 */
+    --warm-background-gradient: linear-gradient(135deg, 
+      hsl(45, 25%, 9%) 0%, 
+      hsl(40, 20%, 8%) 30%, 
+      hsl(35, 30%, 10%) 60%, 
+      hsl(30, 25%, 8%) 100%);
     --card: 220 10% 12%; /* 어두운 카드 */
     --card-foreground: 0 0% 98%;
     --popover: 220 10% 12%;
@@ -367,6 +381,11 @@
 }
 
 @layer utilities {
+  /* 따뜻한 배경 그라디언트 유틸리티 */
+  .bg-warm-gradient {
+    background: var(--warm-background-gradient);
+  }
+
   /* 새로운 그라디언트 유틸리티 */
   .bg-gradient-mint {
     background: var(--gradient-mint);
