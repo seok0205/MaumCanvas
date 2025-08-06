@@ -2,6 +2,7 @@ package com.example.tetonam.counseling.controller;
 
 import com.example.tetonam.counseling.dto.CounselingPossibleCounselorResponseDto;
 import com.example.tetonam.counseling.dto.CounselingReserveRequestDto;
+import com.example.tetonam.counseling.dto.MyCounselingDetailResponseDto;
 import com.example.tetonam.counseling.dto.MyCounselingListResponseDto;
 import com.example.tetonam.counseling.service.CounselingService;
 import com.example.tetonam.response.ApiResponse;
@@ -44,10 +45,18 @@ public class CounselingController {
     }
 
     @GetMapping("/my-counseling")
-    @Operation(summary = "내 상담내역 조회 API", description = "나의 상담내역을 반환합니다")
+    @Operation(summary = "내 상담내역 전체 조회 API", description = "나의 전체 상담내역을 반환합니다")
     public ResponseEntity<?> showMyCounselingList(@RequestHeader("Authorization") String token) {
         String email = jwtTokenProvider.getEmail(token.substring(7));
         List<MyCounselingListResponseDto> result=counselingService.showMyCounselingList(email);
+        return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
+    }
+
+    @GetMapping("/my-counseling/{id}")
+    @Operation(summary = "내 상담내역 상세 조회 API", description = "나의 상담내역을 상세 조회합니다")
+    public ResponseEntity<?> showMyCounselingDetail(@RequestHeader("Authorization") String token,@PathVariable Long id) {
+        String email = jwtTokenProvider.getEmail(token.substring(7));
+         MyCounselingDetailResponseDto result=counselingService.showMyCounselingDetail(email,id);
         return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
     }
 

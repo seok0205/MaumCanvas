@@ -1,6 +1,8 @@
 package com.example.tetonam.image.controller;
 
 
+import com.example.tetonam.counseling.dto.MyCounselingDetailResponseDto;
+import com.example.tetonam.image.dto.RecentDrawingResponseDto;
 import com.example.tetonam.image.dto.testDto;
 import com.example.tetonam.image.service.DrawingService;
 import com.example.tetonam.response.ApiResponse;
@@ -39,6 +41,17 @@ public class DrawingController {
         String result=drawingService.createDrawing(email,multipartFileList);
         return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
     }
+
+    @GetMapping("/recent-images")
+    @Operation(summary = "최근 그림 조회 API", description = "내가 검사한 최근 그림이 나옵니다")
+    public ResponseEntity<?> showRecentImages(@RequestHeader("Authorization") String token) {
+        String email = jwtTokenProvider.getEmail(token.substring(7));
+        List<RecentDrawingResponseDto> recentDrawingResponseDtoList=drawingService.showRecentImages(email);
+        return ResponseEntity.ok().body(ApiResponse.onSuccess(recentDrawingResponseDtoList));
+    }
+
+
+
 }
 
 
