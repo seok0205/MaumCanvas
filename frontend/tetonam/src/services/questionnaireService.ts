@@ -3,34 +3,26 @@ import {
   getQuestionnaireResultLevel,
 } from '@/constants/questionnaire';
 import type { QuestionnaireCategory, QuestionnaireResult } from '@/types/api';
-import { QuestionnaireSubmission } from '@/types/questionnaire';
+import type { QuestionnaireSubmission } from '@/types/questionnaire';
 import { apiClient } from './apiClient';
 
-export interface QuestionnaireApiResponse {
+interface QuestionnaireApiResponse {
   isSuccess: boolean;
+  code: string;
   message: string;
-  result?: {
-    id: string;
-    category: string;
-    score: number;
-    submittedAt: string;
-  };
+  result: string | null;
 }
 
 // 카테고리별 결과 타입 정의
 type CategoryResults = Record<QuestionnaireCategory, QuestionnaireResult[]>;
 
-export const submitQuestionnaire = async (
+const submitQuestionnaire = async (
   submission: QuestionnaireSubmission
 ): Promise<QuestionnaireApiResponse> => {
   try {
+    // ✅ 백엔드 API 스펙에 맞게 query parameter 방식으로 전송
     const response = await apiClient.post<QuestionnaireApiResponse>(
-      '/api/mind/questionnaire',
-      {
-        category: submission.category,
-        score: submission.score,
-        responses: submission.responses,
-      }
+      `/api/mind/questionnaire?score=${submission.score}&category=${encodeURIComponent(submission.category)}`
     );
 
     return response.data;
@@ -40,7 +32,7 @@ export const submitQuestionnaire = async (
   }
 };
 
-export const calculateQuestionnaireResult = (
+const calculateQuestionnaireResult = (
   submission: QuestionnaireSubmission
 ): QuestionnaireResult => {
   const category = getQuestionnaireCategory(submission.category);
@@ -60,27 +52,27 @@ export const calculateQuestionnaireResult = (
   };
 };
 
-export const submitQuestionnaireAndGetResult = async (
+const submitQuestionnaireAndGetResult = async (
   submission: QuestionnaireSubmission
 ): Promise<QuestionnaireResult> => {
   try {
-    // API로 결과 제출
+    // ✅ API로 결과 제출
     await submitQuestionnaire(submission);
 
-    // 로컬에서 결과 계산하여 반환
+    // ✅ 로컬에서 결과 계산하여 반환
     return calculateQuestionnaireResult(submission);
   } catch (error) {
     console.error('설문지 처리 실패:', error);
-    // API 실패 시에도 로컬 결과는 반환
+    // ✅ API 실패 시에도 로컬 결과는 반환
     return calculateQuestionnaireResult(submission);
   }
 };
 
-export const getAllCategoriesQuestionnaireResults = async (
+const getAllCategoriesQuestionnaireResults = async (
   categories: QuestionnaireCategory[]
 ): Promise<CategoryResults> => {
   try {
-    // 각 카테고리별로 결과를 가져오는 API 호출
+    // ✅ 각 카테고리별로 결과를 가져오는 API 호출
     const results: CategoryResults = {
       스트레스: [],
       우울: [],
@@ -88,8 +80,7 @@ export const getAllCategoriesQuestionnaireResults = async (
       자살: [],
     };
 
-    // 실제 API 구현 시에는 각 카테고리별로 API 호출
-    // 현재는 임시로 빈 배열 반환
+    // ✅ 실제 API 구현 시에는 각 카테고리별로 API 호출
     for (const category of categories) {
       try {
         const response = await apiClient.get<QuestionnaireResult[]>(
@@ -107,4 +98,12 @@ export const getAllCategoriesQuestionnaireResults = async (
     console.error('설문 결과 조회 실패:', error);
     throw new Error('설문 결과를 가져오는데 실패했습니다.');
   }
+};
+
+// ✅ Named exports 사용 (가이드라인 준수)
+export {
+  calculateQuestionnaireResult,
+  getAllCategoriesQuestionnaireResults,
+  submitQuestionnaire,
+  submitQuestionnaireAndGetResult,
 };
