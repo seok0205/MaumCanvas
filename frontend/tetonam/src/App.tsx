@@ -9,6 +9,7 @@ import { useFontLoading } from '@/hooks/useFontLoading';
 import { CounselingReservation } from '@/pages/CounselingReservation';
 import { Dashboard } from '@/pages/Dashboard';
 import { Diagnosis } from '@/pages/Diagnosis';
+import { DrawingDiagnosis } from '@/pages/DrawingDiagnosis';
 import { ForgotPassword } from '@/pages/ForgotPassword';
 import { Index } from '@/pages/Index';
 import { Login } from '@/pages/Login';
@@ -71,6 +72,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Diagnosis />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/diagnosis/drawing'
+              element={
+                <ProtectedRoute>
+                  <DrawingDiagnosis />
                 </ProtectedRoute>
               }
             />
