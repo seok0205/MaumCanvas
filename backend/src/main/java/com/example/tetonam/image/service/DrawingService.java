@@ -1,5 +1,7 @@
 package com.example.tetonam.image.service;
 
+import com.example.tetonam.counseling.domain.CounselingImage;
+import com.example.tetonam.counseling.repository.CounselingImageRepository;
 import com.example.tetonam.exception.handler.CounselingHandler;
 import com.example.tetonam.exception.handler.UserHandler;
 import com.example.tetonam.image.domain.Drawing;
@@ -36,6 +38,7 @@ public class DrawingService {
     @Value("${ai.server.url}")
     private String AI_SERVER_URL;
 
+    private final CounselingImageRepository counselingImageRepository;
     @Transactional
     public String createDrawing(String email, List<MultipartFile> multipartFile) {
         User user = userRepository.findByEmail(email)
@@ -83,5 +86,15 @@ public class DrawingService {
         DrawingList drawingList=drawingListRepository.findLatestByUser(user)
                 .orElseThrow(()-> new CounselingHandler(ErrorStatus.STUDENT_HAVE_NOT_IMAGE));
         return drawingList.getDrawings().stream().map(RecentDrawingResponseDto::toDto).toList();
+    }
+
+    public List<RecentDrawingResponseDto> showCounselingImage(String email, Long id) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+        CounselingImage counselingImage=counselingImageRepository.findByCounselingId(id);
+        if(!counselingImage.getCounseling().getStudent().equals(user)&&!counselingImage.getCounseling().getCounselor().equals(user)){
+            throw new CounselingHandler(ErrorStatus.COUNSELING_IS_NOT_AUTHORITY);
+        }
+        return counselingImage.getDrawingList().getDrawings().stream().map(RecentDrawingResponseDto::toDto).toList();
     }
 }
