@@ -394,6 +394,18 @@ export const getQuestionnaireCategory = (
   return QUESTIONNAIRE_CATEGORIES.find(category => category.id === id);
 };
 
+// 영어 ID를 한글 카테고리명으로 변환 (백엔드 Category enum 매핑)
+export const getCategoryKoreanName = (englishId: string): string => {
+  const categoryMap: Record<string, string> = {
+    'ptsd': '스트레스',  // 외상 후 스트레스 -> 스트레스로 매핑
+    'depression': '우울',
+    'anxiety': '불안',
+    'suicide-risk': '자살'
+  };
+
+  return categoryMap[englishId] || englishId;
+};
+
 export const getQuestionnaireResultLevel = (
   category: QuestionnaireCategory,
   score: number
