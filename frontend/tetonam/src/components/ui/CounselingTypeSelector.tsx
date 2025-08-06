@@ -25,24 +25,21 @@ export const CounselingTypeSelector = ({
           상담 유형 선택
         </h2>
         <p className='text-sm text-gray-600'>
-          원하시는 상담 유형을 선택해주세요. 각 항목에 마우스를 올리면 자세한
-          설명을 볼 수 있습니다.
+          원하시는 상담 유형을 선택해주세요. 선택된 상담 유형의 세부 내용은
+          아래에서 확인할 수 있습니다.
         </p>
       </div>
 
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+      <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-3'>
         {categories.map(category =>
           category.items.map(item => (
-            <div key={item.id} className='space-y-1'>
-              <div className='text-xs font-medium text-gray-500 px-1'>
-                {category.title}
-              </div>
-              <CounselingTypeCard
-                item={item}
-                isSelected={selectedType?.id === item.id}
-                onSelect={onTypeSelect}
-              />
-            </div>
+            <CounselingTypeCard
+              key={item.id}
+              item={item}
+              categoryTitle={category.title}
+              isSelected={selectedType?.id === item.id}
+              onSelect={onTypeSelect}
+            />
           ))
         )}
       </div>
