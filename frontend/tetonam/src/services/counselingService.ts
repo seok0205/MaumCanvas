@@ -5,6 +5,7 @@ import type {
   CounselorInfo,
   UpcomingCounseling,
 } from '@/types/api';
+import { isValidUpcomingCounseling } from '@/types/api';
 import { AuthenticationError } from '@/types/auth';
 import {
   handleApiError,
@@ -14,7 +15,7 @@ import {
 import type { AxiosError } from 'axios';
 import { apiClient } from './apiClient';
 
-const BASE_URL = 'https://i13e108.p.ssafy.io';
+// const BASE_URL = 'https://i13e108.p.ssafy.io'; // 현재 사용하지 않음
 
 // 상담 관련 API 엔드포인트
 const COUNSELING_ENDPOINTS = {
@@ -301,7 +302,7 @@ export const counselingService = {
     }
   },
 
-  // 다가오는 상담 조회 (my-counseling-recent API)
+  // 다가오는 상담 조회 (my-counseling-recent API) - 개선된 버전
   getUpcomingCounseling: async (
     signal?: AbortSignal
   ): Promise<UpcomingCounseling | null> => {
@@ -316,31 +317,51 @@ export const counselingService = {
         }
       );
 
+      // 응답 성공 여부 확인
       if (!response.data.isSuccess) {
         // 상담예약이 없는 경우는 null을 반환 (에러가 아님)
         if (response.data.code === 'COUNSELING4001') {
           return null;
         }
+
+        // 기타 API 에러 처리
         throw new AuthenticationError(
           response.data.code || 'UPCOMING_COUNSELING_FETCH_FAILED',
-          '다가오는 상담 조회에 실패했습니다. 다시 시도해주세요.'
+          response.data.message ||
+            '다가오는 상담 조회에 실패했습니다. 다시 시도해주세요.'
         );
       }
 
-      return response.data.result;
+      // 응답 데이터 타입 검증
+      const result = response.data.result;
+      if (result && !isValidUpcomingCounseling(result)) {
+        console.warn('Invalid upcoming counseling data received:', result);
+        throw new AuthenticationError(
+          'INVALID_DATA_FORMAT',
+          '잘못된 형식의 데이터를 받았습니다. 다시 시도해주세요.'
+        );
+      }
+
+      return result;
     } catch (error) {
+      // AuthenticationError는 그대로 재전파
       if (error instanceof AuthenticationError) {
         throw error;
       }
+
+      // 요청 취소된 경우
       if (error instanceof Error && error.name === 'AbortError') {
         throw new AuthenticationError('ABORTED', '요청이 취소되었습니다.');
       }
 
-      // 네트워크 에러 처리
+      // Axios 에러 처리
       const axiosError = error as AxiosError<ApiResponse<null>>;
+
+      // 네트워크 에러 세분화
       if (
         axiosError.code === 'NETWORK_ERROR' ||
-        axiosError.code === 'ERR_NETWORK'
+        axiosError.code === 'ERR_NETWORK' ||
+        axiosError.code === 'ECONNABORTED'
       ) {
         throw new AuthenticationError(
           'NETWORK_ERROR',
@@ -348,24 +369,47 @@ export const counselingService = {
         );
       }
 
-      // API 에러 처리
+      // 타임아웃 에러
+      if (axiosError.code === 'ECONNABORTED') {
+        throw new AuthenticationError(
+          'TIMEOUT_ERROR',
+          '요청 시간이 초과되었습니다. 다시 시도해주세요.'
+        );
+      }
+
+      // API 응답 에러 처리
       if (axiosError.response?.data) {
         const apiError = axiosError.response.data;
         switch (apiError.code) {
           case 'COUNSELING4001': // 상담예약이 없습니다
             return null; // 상담예약이 없는 경우는 null 반환
           case 'COMMON400': // 잘못된 요청입니다
+            throw new AuthenticationError(
+              'BAD_REQUEST',
+              '잘못된 요청입니다. 페이지를 새로고침하고 다시 시도해주세요.'
+            );
           case 'COMMON401': // 인증이 필요합니다
+            throw new AuthenticationError(
+              'UNAUTHORIZED',
+              '로그인이 필요합니다. 다시 로그인해주세요.'
+            );
           case 'COMMON403': // 금지된 요청입니다
+            throw new AuthenticationError('FORBIDDEN', '접근 권한이 없습니다.');
           case 'COMMON500': // 서버 에러
+            throw new AuthenticationError(
+              'SERVER_ERROR',
+              '서버에 일시적인 문제가 발생했습니다. 잠시 후 다시 시도해주세요.'
+            );
           default:
             throw new AuthenticationError(
               apiError.code || 'UPCOMING_COUNSELING_FETCH_FAILED',
-              '다가오는 상담 조회에 실패했습니다. 다시 시도해주세요.'
+              apiError.message ||
+                '다가오는 상담 조회에 실패했습니다. 다시 시도해주세요.'
             );
         }
       }
 
+      // 기타 모든 에러
       throw new AuthenticationError(
         'UPCOMING_COUNSELING_FETCH_FAILED',
         '다가오는 상담 조회에 실패했습니다. 다시 시도해주세요.'

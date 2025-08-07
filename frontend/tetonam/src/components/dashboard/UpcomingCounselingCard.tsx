@@ -1,11 +1,9 @@
 import { Button } from '@/components/ui/interactive/button';
 import { Card } from '@/components/ui/layout/card';
 import { useUpcomingCounseling } from '@/hooks/useUpcomingCounseling';
-import type { CounselingStatus } from '@/types/api';
-import {
-  isValidDateString,
-  safeParseCounseling,
-} from '@/utils/counselingValidation';
+import type { CounselingStatus, UpcomingCounseling } from '@/types/api';
+import { isValidUpcomingCounseling } from '@/types/api';
+import { isValidDateString } from '@/utils/counselingValidation';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { AlertCircle, Calendar, Clock, RefreshCw, User } from 'lucide-react';
@@ -72,13 +70,52 @@ export const UpcomingCounselingCard = memo(() => {
     retryCount,
     maxRetries,
     refetch,
+    isRetrying,
   } = useUpcomingCounseling();
 
   const handleRefresh = useCallback(async () => {
     await refetch();
   }, [refetch]);
 
-  // 로딩 상태
+  // 데이터 유효성 검사 함수 개선 - 더 구체적인 검증과 로깅
+  const validateCounselingData = useCallback((data: unknown) => {
+    if (!data) {
+      console.debug('No counseling data provided');
+      return null;
+    }
+
+    // 타입 가드를 사용한 유효성 검사
+    if (!isValidUpcomingCounseling(data)) {
+      console.warn('Invalid counseling data structure:', {
+        received: data,
+        expected: 'UpcomingCounseling interface',
+        timestamp: new Date().toISOString(),
+      });
+      return null;
+    }
+
+    // 추가 비즈니스 로직 검증
+    const counselingData = data as UpcomingCounseling;
+
+    // 날짜가 과거인지 확인 (선택적 경고)
+    try {
+      const counselingDate = new Date(counselingData.time);
+      const now = new Date();
+
+      if (counselingDate < now) {
+        console.info('Counseling date is in the past:', {
+          counselingDate: counselingDate.toISOString(),
+          currentDate: now.toISOString(),
+        });
+      }
+    } catch (error) {
+      console.warn('Failed to parse counseling date:', counselingData.time);
+    }
+
+    return counselingData;
+  }, []);
+
+  // 로딩 상태 개선
   if (isLoading && !upcomingCounseling) {
     return (
       <Card className='p-6'>
@@ -86,10 +123,18 @@ export const UpcomingCounselingCard = memo(() => {
           <h3 className='text-lg font-semibold text-foreground'>
             다가오는 상담
           </h3>
+          {isRetrying && retryCount > 0 && (
+            <div className='flex items-center text-sm text-muted-foreground'>
+              <RefreshCw className='h-4 w-4 animate-spin mr-1' />
+              재시도 중... ({retryCount}/{maxRetries})
+            </div>
+          )}
         </div>
         <div className='text-center py-8'>
           <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-3'></div>
-          <p className='text-muted-foreground'>상담 정보를 불러오는 중...</p>
+          <p className='text-muted-foreground'>
+            {isRetrying ? '재시도 중...' : '상담 정보를 불러오는 중...'}
+          </p>
         </div>
       </Card>
     );
@@ -163,7 +208,7 @@ export const UpcomingCounselingCard = memo(() => {
     );
   }
 
-  // 상담이 없는 경우 - 새로고침 버튼 제거
+  // 상담이 없는 경우
   if (!upcomingCounseling) {
     return (
       <Card className='p-6'>
@@ -171,17 +216,34 @@ export const UpcomingCounselingCard = memo(() => {
           <h3 className='text-lg font-semibold text-foreground'>
             다가오는 상담
           </h3>
+          <Button
+            onClick={handleRefresh}
+            variant='ghost'
+            size='sm'
+            className='text-muted-foreground hover:text-foreground'
+            disabled={isLoading}
+          >
+            <RefreshCw
+              className={`w-3 h-3 mr-1 ${isLoading ? 'animate-spin' : ''}`}
+            />
+            새로고침
+          </Button>
         </div>
         <div className='text-center py-8'>
           <Calendar className='w-12 h-12 text-muted-foreground mx-auto mb-3' />
-          <p className='text-muted-foreground'>예정된 상담 일정이 없습니다</p>
+          <p className='text-muted-foreground mb-2'>
+            예정된 상담 일정이 없습니다
+          </p>
+          <p className='text-sm text-muted-foreground'>
+            상담을 예약하거나 새로고침으로 최신 정보를 확인하세요
+          </p>
         </div>
       </Card>
     );
   }
 
-  // 상담 정보 유효성 검사 및 안전한 파싱 - 새로고침 버튼 제거
-  const validatedCounseling = safeParseCounseling(upcomingCounseling);
+  // 개선된 데이터 유효성 검사 - validateCounselingData 함수 활용
+  const validatedCounseling = validateCounselingData(upcomingCounseling);
   if (!validatedCounseling) {
     return (
       <Card className='p-6'>
@@ -189,21 +251,28 @@ export const UpcomingCounselingCard = memo(() => {
           <h3 className='text-lg font-semibold text-foreground'>
             다가오는 상담
           </h3>
+          <Button
+            onClick={handleRefresh}
+            variant='ghost'
+            size='sm'
+            className='text-destructive hover:text-destructive/80'
+          >
+            <RefreshCw className='w-3 h-3 mr-1' />
+            다시 로드
+          </Button>
         </div>
         <div className='text-center py-8'>
           <AlertCircle className='w-12 h-12 text-yellow-500 mx-auto mb-3' />
-          <p className='text-muted-foreground'>
-            상담 정보를 처리할 수 없습니다
-          </p>
-          <p className='text-sm text-muted-foreground mt-2'>
-            데이터 형식에 문제가 있을 수 있습니다
+          <p className='text-muted-foreground mb-2'>데이터 형식 오류</p>
+          <p className='text-sm text-muted-foreground'>
+            잘못된 형식의 데이터를 받았습니다. 다시 로드해주세요.
           </p>
         </div>
       </Card>
     );
   }
 
-  // 상담 정보 표시 - 새로고침 버튼 제거
+  // 정상적인 상담 정보 표시 - 개선된 유효성 검사 적용
   const { date, time } = formatDateTime(validatedCounseling.time);
 
   return (

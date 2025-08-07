@@ -2,6 +2,11 @@ import { counselingService } from '@/services/counselingService';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { UpcomingCounseling } from '@/types/api';
 import { AuthenticationError } from '@/types/auth';
+import {
+  createErrorLogData,
+  generateUserFriendlyMessage,
+  isRetryableError as isErrorRetryable,
+} from '@/utils/counselingErrorHandler';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface UseUpcomingCounselingReturn {
@@ -11,10 +16,12 @@ interface UseUpcomingCounselingReturn {
   retryCount: number;
   maxRetries: number;
   refetch: () => Promise<void>;
+  isRetrying: boolean;
 }
 
-const MAX_RETRIES = 5;
-const RETRY_DELAY = 2000; // 2초
+const MAX_RETRIES = 3; // 5에서 3으로 줄임 (더 빠른 실패)
+const RETRY_DELAY = 1500; // 2초에서 1.5초로 줄임
+const RETRY_BACKOFF_MULTIPLIER = 1.5; // 지수적 백오프
 
 export const useUpcomingCounseling = (): UseUpcomingCounselingReturn => {
   const [upcomingCounseling, setUpcomingCounseling] =
@@ -22,6 +29,7 @@ export const useUpcomingCounseling = (): UseUpcomingCounselingReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [isRetrying, setIsRetrying] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -53,6 +61,7 @@ export const useUpcomingCounseling = (): UseUpcomingCounselingReturn => {
       try {
         setIsLoading(true);
         setError(null);
+        setIsRetrying(isRetry);
 
         const result = await counselingService.getUpcomingCounseling(
           abortControllerRef.current.signal
@@ -67,27 +76,51 @@ export const useUpcomingCounseling = (): UseUpcomingCounselingReturn => {
         }
 
         const errorMessage =
-          err instanceof Error
+          err instanceof AuthenticationError
             ? err.message
-            : '알 수 없는 오류가 발생했습니다.';
+            : err instanceof Error
+              ? err.message
+              : '알 수 없는 오류가 발생했습니다.';
+
         setError(errorMessage);
 
-        // 네트워크 에러이고 재시도 횟수가 남아있다면 자동 재시도
+        // 재시도 가능한 에러이고 재시도 횟수가 남아있다면 자동 재시도
         if (
           err instanceof AuthenticationError &&
-          (err.code === 'NETWORK_ERROR' || err.code === 'ERR_NETWORK') &&
+          isErrorRetryable(err) &&
           retryCount < MAX_RETRIES &&
           !isRetry
         ) {
           setRetryCount(prev => prev + 1);
 
-          // 지연 후 재시도 (타이머 참조 저장)
+          // 에러 로깅 (개발 환경에서만)
+          if (process.env['NODE_ENV'] === 'development') {
+            console.warn(
+              'Retrying upcoming counseling fetch:',
+              createErrorLogData(err, {
+                retryCount: retryCount + 1,
+                maxRetries: MAX_RETRIES,
+              })
+            );
+          }
+
+          // 지수적 백오프로 지연 후 재시도
+          const delay =
+            RETRY_DELAY * Math.pow(RETRY_BACKOFF_MULTIPLIER, retryCount);
           timeoutRef.current = setTimeout(() => {
             fetchUpcomingCounseling(true);
-          }, RETRY_DELAY);
+          }, delay);
+        } else if (err instanceof AuthenticationError) {
+          // 재시도할 수 없는 에러인 경우 사용자 친화적 메시지 적용
+          const userMessage = generateUserFriendlyMessage(err, {
+            retryCount,
+            maxRetries: MAX_RETRIES,
+          });
+          setError(userMessage);
         }
       } finally {
         setIsLoading(false);
+        setIsRetrying(false);
       }
     },
     [retryCount, isAuthenticated, user]
@@ -124,5 +157,6 @@ export const useUpcomingCounseling = (): UseUpcomingCounselingReturn => {
     retryCount,
     maxRetries: MAX_RETRIES,
     refetch,
+    isRetrying,
   };
 };

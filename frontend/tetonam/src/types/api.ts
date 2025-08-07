@@ -120,13 +120,37 @@ export interface CounselingHistory {
 export type CounselingStatus = 'OPEN' | 'CLOSE' | 'CANCEL';
 
 // 다가오는 상담 타입 (my-counseling-recent API 응답)
+// 백엔드 MyCounselingListResponseDto와 완전히 일치하도록 수정
 export interface UpcomingCounseling {
   readonly id: number;
   readonly counselor: string;
-  readonly time: string; // ISO 8601 형식의 날짜 문자열
+  readonly time: string; // ISO 8601 형식의 날짜 문자열 (LocalDateTime에서 변환)
   readonly type: string;
   readonly status: CounselingStatus;
 }
+
+// 타입 가드 함수들
+export const isValidCounselingStatus = (
+  status: string
+): status is CounselingStatus => {
+  return ['OPEN', 'CLOSE', 'CANCEL'].includes(status);
+};
+
+export const isValidUpcomingCounseling = (
+  data: unknown
+): data is UpcomingCounseling => {
+  if (!data || typeof data !== 'object') return false;
+
+  const obj = data as Record<string, unknown>;
+  return (
+    typeof obj['id'] === 'number' &&
+    typeof obj['counselor'] === 'string' &&
+    typeof obj['time'] === 'string' &&
+    typeof obj['type'] === 'string' &&
+    typeof obj['status'] === 'string' &&
+    isValidCounselingStatus(obj['status'])
+  );
+};
 
 // 상담 유형 타입 (확장 가능)
 export type CounselingType =
