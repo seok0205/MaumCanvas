@@ -12,6 +12,7 @@ import com.example.tetonam.util.WebClientUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
@@ -70,13 +71,14 @@ public class DrawingController {
     }
 
 
-//    @GetMapping("/{id}")
-//    @Operation(summary = "그림 상세 조회 API", description = "RAG모델을 통해 저장된 그림 상세 설명이 나옵니다")
-//    public ResponseEntity<?> detailImage(@RequestHeader("Authorization") String token) {
-//        String email = jwtTokenProvider.getEmail(token.substring(7));
-//
-//        return ResponseEntity.ok().body(ApiResponse.onSuccess(recentDrawingResponseDtoList));
-//    }
+    @GetMapping("/counseling/rag/{id}")
+    @Operation(summary = "그림 상세 조회 API", description = "RAG모델을 통해 저장된 그림 상세 설명이 나옵니다")
+    public ResponseEntity<?> detailImage(@RequestHeader("Authorization") String token,@PathVariable Long id) {
+        String email = jwtTokenProvider.getEmail(token.substring(7));
+        String result=drawingService.showCounselingRag(email,id);
+
+        return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
+    }
 
 
 

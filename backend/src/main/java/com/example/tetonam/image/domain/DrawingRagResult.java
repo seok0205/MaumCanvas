@@ -17,7 +17,7 @@ public class DrawingRagResult {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String drawingRagResult;
 
     @JoinColumn(name="drawing_id")
