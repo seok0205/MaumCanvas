@@ -14,6 +14,7 @@ import { CounselingReservation } from '@/pages/CounselingReservation';
 import { Dashboard } from '@/pages/Dashboard';
 import { Diagnosis } from '@/pages/Diagnosis';
 import { DrawingDiagnosis } from '@/pages/DrawingDiagnosis';
+import { DrawingCanvas } from '@/pages/DrawingCanvas';
 import { ForgotPassword } from '@/pages/ForgotPassword';
 import { Index } from '@/pages/Index';
 import { Login } from '@/pages/Login';
@@ -65,6 +66,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <DrawingDiagnosis />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/diagnosis/drawing/canvas'
+              element={
+                <ProtectedRoute>
+                  <DrawingCanvas />
                 </ProtectedRoute>
               }
             />
