@@ -242,15 +242,8 @@ export const convertLocalDateTimeArrayToISO = (timeArray: number[]): string => {
 
     return date.toISOString();
   } catch (error) {
-    console.error('Failed to convert LocalDateTime array to ISO:', {
-      timeArray,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      timestamp: new Date().toISOString(),
-    });
-
     // 실패 시 더 안전한 fallback: 현재 UTC 시간
     const fallbackDate = new Date();
-    console.warn('Using fallback date:', fallbackDate.toISOString());
     return fallbackDate.toISOString();
   }
 };
