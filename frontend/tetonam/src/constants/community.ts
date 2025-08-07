@@ -65,28 +65,34 @@ export const COMMUNITY_CATEGORIES: Array<{
   icon?: string;
 }> = [
   {
+    value: 'GENERAL',
+    label: '일반',
+    description: '일반적인 주제에 대한 자유로운 이야기',
+    icon: '💬',
+  },
+  {
     value: 'STUDY',
-    label: '스터디',
+    label: '학업',
     description: '공부 관련 정보와 스터디 모집',
     icon: '📚',
   },
   {
-    value: 'HOBBY',
-    label: '취미',
-    description: '취미와 여가 활동 공유',
-    icon: '🎨',
+    value: 'FRIENDSHIP',
+    label: '친구관계',
+    description: '친구 관계와 인간관계에 대한 이야기',
+    icon: '👫',
   },
   {
-    value: 'TALK',
-    label: '수다',
-    description: '자유로운 이야기와 소통',
-    icon: '💬',
+    value: 'FAMILY',
+    label: '가족',
+    description: '가족 관계와 가정에 대한 이야기',
+    icon: '👨‍👩‍👧‍�',
   },
   {
-    value: 'QNA',
-    label: '질문답변',
-    description: '궁금한 것을 묻고 답하기',
-    icon: '❓',
+    value: 'SECRET',
+    label: '비밀상담게시판',
+    description: '익명으로 고민을 나누는 비밀 상담',
+    icon: '🔒',
   },
 ] as const;
 

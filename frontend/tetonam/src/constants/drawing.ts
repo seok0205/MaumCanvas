@@ -1,4 +1,4 @@
-const BASE_URL = 'https://i13e108.p.ssafy.io';
+// const BASE_URL = 'https://i13e108.p.ssafy.io';
 
 // Drawing API 엔드포인트 상수
 export const DRAWING_ENDPOINTS = {
