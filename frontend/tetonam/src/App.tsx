@@ -1,10 +1,11 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Toaster } from 'sonner';
 
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { QuestionnaireForm } from '@/components/questionnaire/QuestionnaireForm';
 import { QuestionnaireResult } from '@/components/questionnaire/QuestionnaireResult';
+import { queryClient } from '@/config/queryClient';
 import { useFontLoading } from '@/hooks/useFontLoading';
 import { CounselingReservation } from '@/pages/CounselingReservation';
 import { Dashboard } from '@/pages/Dashboard';
@@ -18,25 +19,6 @@ import { Onboarding } from '@/pages/Onboarding';
 import { Register } from '@/pages/Register';
 import { Unauthorized } from '@/pages/Unauthorized';
 import { UserRoleSelection } from '@/pages/UserRoleSelection';
-
-// React Query 클라이언트 설정
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5분
-      gcTime: 10 * 60 * 1000, // 10분
-      retry: 3,
-      retryDelay: 2000, // 2초
-      refetchOnWindowFocus: false, // 윈도우 포커스 시 자동 재요청 비활성화
-      refetchOnReconnect: false, // 네트워크 재연결 시 자동 재요청 비활성화 (깜빡거림 방지)
-      refetchOnMount: true, // 컴포넌트 마운트 시 재요청 활성화
-    },
-    mutations: {
-      retry: 1,
-      retryDelay: 1000,
-    },
-  },
-});
 
 function App() {
   const { isLoaded, isError } = useFontLoading('Pretendard');
