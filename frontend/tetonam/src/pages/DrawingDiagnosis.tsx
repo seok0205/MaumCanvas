@@ -1,11 +1,13 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { CommonHeader } from '@/components/layout/CommonHeader';
 import { DrawingDiagnosisCard } from '@/components/ui/drawing/DrawingDiagnosisCard';
 import { PenIcon } from '@/components/ui/icons/PenIcon';
 import { UploadIcon } from '@/components/ui/icons/UploadIcon';
+import { ImageUploadModal } from '@/components/ui/modals/ImageUploadModal';
 import {
   MobileSidebarToggle,
   SidebarProvider,
@@ -15,6 +17,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 export const DrawingDiagnosis = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   const handleStartDrawing = useCallback(() => {
     // TODO: 그림 그리기 페이지로 이동
@@ -22,9 +25,21 @@ export const DrawingDiagnosis = () => {
   }, [navigate]);
 
   const handleUploadDrawing = useCallback(() => {
-    // TODO: 그림 업로드 페이지로 이동
-    navigate('/diagnosis/drawing/upload');
-  }, [navigate]);
+    setIsUploadModalOpen(true);
+  }, []);
+
+  const handleUploadSuccess = useCallback((result: string) => {
+    toast.success('그림이 성공적으로 업로드되었습니다!', {
+      description: 'AI 분석이 시작됩니다. 잠시만 기다려주세요.',
+    });
+    console.log('Upload result:', result);
+    // TODO: 결과 페이지로 이동하거나 추가 작업 수행
+    // navigate('/diagnosis/results');
+  }, []);
+
+  const handleCloseUploadModal = useCallback(() => {
+    setIsUploadModalOpen(false);
+  }, []);
 
   if (!user) {
     return <div>로딩 중...</div>;
@@ -100,6 +115,13 @@ export const DrawingDiagnosis = () => {
 
         {/* 모바일 사이드바 토글 버튼 */}
         <MobileSidebarToggle />
+
+        {/* 그림 업로드 모달 */}
+        <ImageUploadModal
+          isOpen={isUploadModalOpen}
+          onClose={handleCloseUploadModal}
+          onSuccess={handleUploadSuccess}
+        />
       </div>
     </SidebarProvider>
   );

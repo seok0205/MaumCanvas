@@ -24,5 +24,5 @@ export type RecentDrawingsResponse = RecentDrawingResponse[];
 export type CounselingImagesResponse = RecentDrawingResponse[];
 export type CounselingRagResponse = string;
 
-// Drawing 카테고리 타입 (백엔드의 Drawing Category enum에 맞춤)
-export type DrawingCategory = 'HOME' | 'TREE' | 'HUMAN' | 'HUMAN2';
+// Drawing 카테고리 타입 (백엔드의 DrawingCategory enum에 정확히 맞춤)
+export type DrawingCategory = 'HOME' | 'TREE' | 'PERSON1' | 'PERSON2';

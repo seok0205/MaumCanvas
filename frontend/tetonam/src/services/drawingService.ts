@@ -53,12 +53,34 @@ export const drawingService = {
       const axiosError = error as AxiosError<ApiResponse<null>>;
 
       if (axiosError.response?.data) {
-        throw new AuthenticationError(
-          axiosError.response.data.code ||
-            DRAWING_ERROR_CODES.DRAWING_UPLOAD_ERROR,
-          axiosError.response.data.message ||
-            '그림 업로드 중 오류가 발생했습니다.'
-        );
+        const errorCode = axiosError.response.data.code;
+        const errorMessage = axiosError.response.data.message;
+
+        // 백엔드 에러 코드에 따른 구체적 처리
+        switch (errorCode) {
+          case 'IMAGE4000':
+            throw new AuthenticationError(
+              errorCode,
+              errorMessage ||
+                '잘못된 형식의 파일입니다. 이미지 파일(JPEG, PNG, GIF)만 업로드 가능합니다.'
+            );
+          case 'IMAGE5000':
+            throw new AuthenticationError(
+              errorCode,
+              errorMessage ||
+                '이미지 저장에 실패했습니다. 잠시 후 다시 시도해주세요.'
+            );
+          case 'USER_NOT_FOUND':
+            throw new AuthenticationError(
+              errorCode,
+              '사용자 인증에 실패했습니다. 다시 로그인해주세요.'
+            );
+          default:
+            throw new AuthenticationError(
+              errorCode || DRAWING_ERROR_CODES.DRAWING_UPLOAD_ERROR,
+              errorMessage || '그림 업로드 중 오류가 발생했습니다.'
+            );
+        }
       }
 
       throw new AuthenticationError(
