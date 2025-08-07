@@ -3,6 +3,7 @@ package com.example.tetonam.counseling.service;
 
 import com.example.tetonam.counseling.domain.Counseling;
 import com.example.tetonam.counseling.domain.CounselingImage;
+import com.example.tetonam.counseling.domain.enums.Status;
 import com.example.tetonam.counseling.dto.CounselingPossibleCounselorResponseDto;
 import com.example.tetonam.counseling.dto.CounselingReserveRequestDto;
 import com.example.tetonam.counseling.dto.MyCounselingDetailResponseDto;
@@ -90,9 +91,14 @@ public class CounselingService {
     public MyCounselingListResponseDto showMyRecentCounseling(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
-        Counseling counseling=counselingRepository.findFirstByStudentOrderByReservationTimeDesc(user)
-                .orElseThrow(()->new CounselingHandler(ErrorStatus.NOTING_COUNSELING));
-
+        Counseling counseling=null;
+        if(User.hasRole(user,Role.COUNSELOR)){
+            counseling = counselingRepository.findFirstByCounselorAndStatusOrderByReservationTimeAsc(user, Status.OPEN)
+                    .orElseThrow(() -> new CounselingHandler(ErrorStatus.NOTING_COUNSELING));
+        }else if(User.hasRole(user,Role.USER)) {
+            counseling = counselingRepository.findFirstByStudentAndStatusOrderByReservationTimeAsc(user, Status.OPEN)
+                    .orElseThrow(() -> new CounselingHandler(ErrorStatus.NOTING_COUNSELING));
+        }
         return MyCounselingListResponseDto.toDto(counseling);
 
     }
