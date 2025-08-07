@@ -30,6 +30,7 @@ public enum ErrorStatus implements BaseErrorCode {
     REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "TOKEN4007","Refresh Token이 만료되었습니다."),
     NO_AUTHENTICATION_INFORMATION(HttpStatus.UNAUTHORIZED,"TOKEN4008","인증 정보가 없는 토큰입니다."),
 
+
     // user 응답
     USER_ID_IN_USE(HttpStatus.BAD_REQUEST, "USER4000", "사용중인 이메일 입니다."),
     USER_ID_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER4004", "아이디를 잘못 입력했습니다"),
@@ -57,18 +58,13 @@ public enum ErrorStatus implements BaseErrorCode {
     //상담 예약 응답
     ALREADY_RESERVED(HttpStatus.BAD_REQUEST,"COUNSELING4000","이미 예약된 시간입니다."),
     NOTING_COUNSELING(HttpStatus.BAD_REQUEST,"COUNSELING4001","상담예약이 없습니다."),
-    COUNSELING_IS_NOT_AUTHORITY(HttpStatus.UNAUTHORIZED,"COUNSELING4002","권한이 없는 예약입니다."),
-    STUDENT_HAVE_NOT_IMAGE(HttpStatus.BAD_REQUEST,"COUNSELING4003","학생이 그림을 그리지 않았습니다. (그림을 먼저 그려주세요)"),
-
-    //사진관련
-    DRAWING_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR,"DRAWING5000","해당 이미지를 찾을 수없습니다."),
-    DRAWING_NOT_VALID(HttpStatus.UNAUTHORIZED,"DRAWING4000","해당 이미지에 권한이 없습니다."),
-    NOT_FOUND_RAG(HttpStatus.INTERNAL_SERVER_ERROR,"DRAWING5001","RAG서버 결과가 저장되지 않았습니다."),
-    ALREADY_RAG(HttpStatus.INTERNAL_SERVER_ERROR,"DRAWING5002","이미 RAG서버 결과가 저장되어 있습니다."),
-    NOT_FOUND_OBJECT(HttpStatus.INTERNAL_SERVER_ERROR,"DRAWING5003","객체탐지 AI서버 결과가 저장되지 않았습니다."),
 
     POST_LIST_EMPTY(HttpStatus.BAD_REQUEST, "BOARD4000", "없는 게시글입니다."),
-    COMMENT_LIST_EMPTY(HttpStatus.BAD_REQUEST, "BOARD4001", "댓글을 찾을 수 없습니다.");
+    COMMENT_LIST_EMPTY(HttpStatus.BAD_REQUEST, "BOARD4001", "댓글을 찾을 수 없습니다."),
+
+    //아고라
+    CERTIFICATE_EMPTY(HttpStatus.UNAUTHORIZED, "AGORA4000", "인증 정보에 문제가 발생했습니다.")
+    ;
 
 
     private final HttpStatus httpStatus;

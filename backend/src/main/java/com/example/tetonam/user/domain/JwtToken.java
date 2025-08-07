@@ -1,4 +1,4 @@
-package com.example.tetonam.user.dto;
+package com.example.tetonam.user.domain;
 
 import com.example.tetonam.user.domain.enums.Role;
 import lombok.AllArgsConstructor;
@@ -16,6 +16,5 @@ public class JwtToken {
   private String refreshToken;
   private Long refreshTokenExpirationTime;
   private List<Role> role;
-
 
 }

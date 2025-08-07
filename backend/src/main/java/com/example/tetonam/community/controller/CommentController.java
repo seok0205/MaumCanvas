@@ -3,21 +3,16 @@ package com.example.tetonam.community.controller;
 import com.example.tetonam.community.domain.Comment;
 import com.example.tetonam.community.dto.CommentListDto;
 import com.example.tetonam.community.dto.CommentWriteDto;
-import com.example.tetonam.community.dto.PostListDto;
-import com.example.tetonam.community.repository.CommunityRepository;
 import com.example.tetonam.community.repository.CommentRepository;
 import com.example.tetonam.community.service.CommentService;
 import com.example.tetonam.community.service.CommunityService;
 import com.example.tetonam.response.ApiResponse;
-import com.example.tetonam.user.repository.UserRepository;
 import com.example.tetonam.user.token.JwtTokenProvider;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -26,10 +21,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/community/{community_id}/comments")
 public class CommentController {
-    private final CommunityService communityService;
     private final CommentService commentService;
     private final JwtTokenProvider jwtTokenProvider;
-    private final CommentRepository commentRepository;
 
     @GetMapping
     @Operation(summary = "게시글 내 댓글 전체 조회", description = "정해진 한건의 게시글의 댓글을 전부 가져옵니다")
