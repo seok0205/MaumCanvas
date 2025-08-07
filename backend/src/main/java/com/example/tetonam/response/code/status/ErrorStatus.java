@@ -72,7 +72,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
     //아고라
     CERTIFICATE_EMPTY(HttpStatus.UNAUTHORIZED, "AGORA4000", "인증 정보에 문제가 발생했습니다.");
-    ;
+
 
 
     private final HttpStatus httpStatus;
