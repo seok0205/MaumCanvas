@@ -1,23 +1,33 @@
+const BASE_URL = 'https://i13e108.p.ssafy.io';
+
 // 인증 관련 상수 - 백엔드 API 문서 기반
 export const AUTH_CONSTANTS = {
-  // Mock 데이터 (개발용)
-  MOCK_TOKEN: 'mock-jwt-token',
-  MOCK_VERIFICATION_CODE: '123456',
-
   // API 엔드포인트 - 실제 백엔드 엔드포인트
   ENDPOINTS: {
     LOGIN: '/api/user/sign-in',
+    // LOGIN: `${BASE_URL}/api/user/sign-in`,
     REGISTER: '/api/user/sign-up',
+    // REGISTER: `${BASE_URL}/api/user/sign-up`,
     PASSWORD_RESET: '/api/user/password',
+    // PASSWORD_RESET: `${BASE_URL}/api/user/password`,
     TOKEN_REISSUE: '/api/user/token/reissue',
+    // TOKEN_REISSUE: `${BASE_URL}/api/user/token/reissue`,
     EMAIL_DUPLICATE_CHECK: '/api/user/email-duplicate-check',
+    // EMAIL_DUPLICATE_CHECK: `${BASE_URL}/api/user/email-duplicate-check`,
     NICKNAME_DUPLICATE_CHECK: '/api/user/nickname-duplicate-check',
+    // NICKNAME_DUPLICATE_CHECK: `${BASE_URL}/api/user/nickname-duplicate-check`,
     EMAIL_SEND: '/api/mail/send',
+    // EMAIL_SEND: `${BASE_URL}/api/mail/send`,
     EMAIL_AUTH_CHECK: '/api/mail/auth-check',
+    // EMAIL_AUTH_CHECK: `${BASE_URL}/api/mail/auth-check`,
     MY_INFO: '/api/user/my-info',
+    // MY_INFO: `${BASE_URL}/api/user/my-info`,
     MY_NICKNAME: '/api/user/my-nickname',
+    // MY_NICKNAME: `${BASE_URL}/api/user/my-nickname`,
     MY_PASSWORD_UPDATE: '/api/user/mypage-password',
+    // MY_PASSWORD_UPDATE: `${BASE_URL}/api/user/mypage-password`,
     MY_NICKNAME_UPDATE: '/api/user/mypage-nickname',
+    // MY_NICKNAME_UPDATE: `${BASE_URL}/api/user/mypage-nickname`,
   },
 
   // 로컬 스토리지 키

@@ -14,13 +14,20 @@ import {
 import type { AxiosError } from 'axios';
 import { apiClient } from './apiClient';
 
+const BASE_URL = 'https://i13e108.p.ssafy.io';
+
 // 상담 관련 API 엔드포인트
 const COUNSELING_ENDPOINTS = {
   GET_AVAILABLE_COUNSELORS: '/api/counseling',
+  // GET_AVAILABLE_COUNSELORS: `${BASE_URL}/api/counseling`,
   RESERVE_COUNSELING: '/api/counseling',
+  // RESERVE_COUNSELING: `${BASE_URL}/api/counseling`,
   GET_MY_COUNSELING: '/api/counseling/my-counseling',
+  // GET_MY_COUNSELING: `${BASE_URL}/api/counseling/my-counseling`,
   GET_RECENT_COUNSELING: '/api/counseling/my-counseling-recent',
+  // GET_RECENT_COUNSELING: `${BASE_URL}/api/counseling/my-counseling-recent`,
   GET_UPCOMING_COUNSELING: '/api/counseling/my-counseling-recent',
+  // GET_UPCOMING_COUNSELING: `${BASE_URL}/api/counseling/my-counseling-recent`,
 } as const;
 
 // 상담 관련 API 서비스

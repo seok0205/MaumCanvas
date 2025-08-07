@@ -1,13 +1,19 @@
+const BASE_URL = 'https://i13e108.p.ssafy.io';
+
 // Drawing API 엔드포인트 상수
 export const DRAWING_ENDPOINTS = {
   // 그림 저장 (4장의 그림 업로드)
   CREATE_DRAWING: '/api/image',
+  // CREATE_DRAWING: `${BASE_URL}/api/image`,
   // 최근 그림 조회
   RECENT_IMAGES: '/api/image/recent-images',
+  // RECENT_IMAGES: `${BASE_URL}/api/image/recent-images`,
   // 상담의 그림 조회
   COUNSELING_IMAGES: '/api/image/counseling',
+  // COUNSELING_IMAGES: `${BASE_URL}/api/image/counseling`,
   // 상담사 코멘트 RAG
   COUNSELING_RAG: '/api/image/counseling/rag',
+  // COUNSELING_RAG: `${BASE_URL}/api/image/counseling/rag`,
 } as const;
 
 // Drawing 관련 에러 코드

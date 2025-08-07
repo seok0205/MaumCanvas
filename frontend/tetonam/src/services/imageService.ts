@@ -11,9 +11,12 @@ export interface HTPImageFiles {
   humanImageSecondUrl: File;
 }
 
+const BASE_URL = 'https://i13e108.p.ssafy.io';
+
 // 이미지 관련 API 엔드포인트
 const IMAGE_ENDPOINTS = {
   UPLOAD_HTP_IMAGES: '/api/image',
+  // UPLOAD_HTP_IMAGES: `${BASE_URL}/api/image`,
 } as const;
 
 // 이미지 업로드 관련 API 서비스
