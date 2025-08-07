@@ -1,6 +1,7 @@
 package com.example.tetonam.counseling.repository;
 
 import com.example.tetonam.counseling.domain.Counseling;
+import com.example.tetonam.counseling.domain.enums.Status;
 import com.example.tetonam.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -25,6 +26,10 @@ public interface CounselingRepository extends JpaRepository<Counseling,Long> {
             "c.reservationTime ASC")
     List<Counseling> findByStudentOrderByReservationTimeAsc(User student);
 
-    Optional<Counseling> findFirstByStudentOrderByReservationTimeDesc(User student);
 
+    // 다가오는 예약 가져오기 OPEN만 학생
+    Optional<Counseling> findFirstByStudentAndStatusOrderByReservationTimeAsc(User user, Status status);
+
+    // 다가오는 예약 가져오기 OPEN만 상담사
+    Optional<Counseling> findFirstByCounselorAndStatusOrderByReservationTimeAsc(User user, Status status);
 }
