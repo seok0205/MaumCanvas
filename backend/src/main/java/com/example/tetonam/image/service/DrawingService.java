@@ -19,9 +19,11 @@ import com.example.tetonam.image.repository.DrawingResultRepository;
 import com.example.tetonam.image.service.enums.DrawingCategory;
 import com.example.tetonam.response.code.status.ErrorStatus;
 import com.example.tetonam.user.domain.User;
+import com.example.tetonam.user.domain.enums.Role;
 import com.example.tetonam.user.repository.UserRepository;
 import com.example.tetonam.util.WebClientUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DrawingService {
@@ -116,7 +119,7 @@ public class DrawingService {
                                     .drawingRagResult(result)
                             .build());
                 }, error -> {
-                    error.printStackTrace();
+                    log.error("RAG 저장 중 에러 발생", error);
                 });
     }
 
@@ -127,10 +130,31 @@ public class DrawingService {
         Drawing drawing=drawingRepository.findById(id)
                 .orElseThrow(()-> new DrawingHandler(ErrorStatus.DRAWING_NOT_FOUND));
         if(!drawing.getDrawingList().getUser().equals(user)){
-            throw new DrawingHandler(ErrorStatus.DRAWING_NOT_VALID);
+            throw new DrawingHandler(ErrorStatus.ALREADY_RAG);
         }
+
+        // 이미 생성되어있을 때
+        if(drawing.getDrawingRagResult()!=null){
+            throw new DrawingHandler(ErrorStatus.ALREADY_RAG);
+        }
+        // 여기 예외처리 해줘야할듯 이미 생성됐을시
 
         drawingRagResult(drawing,counselingRagRequestDto.getComment(),drawing.getDrawingCategory().toString());
         return "저장되었습니다.";
+    }
+
+    public String showCounselingRag(String email, Long id) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+
+        DrawingRagResult drawingRagResult=drawingRagResultRepository.findById(id)
+                .orElseThrow(()->new DrawingHandler(ErrorStatus.NOT_FOUND_RAG));
+
+        if (!user.hasRole(user, Role.COUNSELOR)&&drawingRagResult.getDrawing().getDrawingList().getUser()!=user){
+            throw new DrawingHandler(ErrorStatus.DRAWING_NOT_VALID);
+        }
+
+
+        return drawingRagResult.getDrawingRagResult();
     }
 }

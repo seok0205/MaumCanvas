@@ -10,6 +10,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Getter
 @NoArgsConstructor
@@ -34,6 +36,8 @@ public class Drawing extends BaseTime {
     @ManyToOne(fetch = FetchType.LAZY)
     private DrawingList drawingList;
 
+    @OneToOne(mappedBy = "drawing", cascade = CascadeType.ALL, orphanRemoval = true)
+    private DrawingRagResult drawingRagResult;
 
 
 }

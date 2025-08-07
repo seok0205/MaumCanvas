@@ -63,6 +63,8 @@ public enum ErrorStatus implements BaseErrorCode {
     //사진관련
     DRAWING_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR,"DRAWING5000","해당 이미지를 찾을 수없습니다."),
     DRAWING_NOT_VALID(HttpStatus.UNAUTHORIZED,"DRAWING4000","해당 이미지에 권한이 없습니다."),
+    NOT_FOUND_RAG(HttpStatus.INTERNAL_SERVER_ERROR,"DRAWING5001","RAG서버 결과가 저장되지 않았습니다."),
+    ALREADY_RAG(HttpStatus.INTERNAL_SERVER_ERROR,"DRAWING5002","이미 RAG서버 결과가 저장되어 있습니다."),
 
     POST_LIST_EMPTY(HttpStatus.BAD_REQUEST, "BOARD4000", "없는 게시글입니다."),
     COMMENT_LIST_EMPTY(HttpStatus.BAD_REQUEST, "BOARD4001", "댓글을 찾을 수 없습니다.");
