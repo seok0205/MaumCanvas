@@ -1,7 +1,7 @@
 package com.example.tetonam.user.controller;
 
 
-import com.example.tetonam.user.domain.JwtToken;
+import com.example.tetonam.user.dto.JwtToken;
 import com.example.tetonam.user.domain.School;
 import com.example.tetonam.user.dto.*;
 import com.example.tetonam.user.service.UserService;
@@ -24,6 +24,19 @@ public class UserController {
     private final UserService userService;
 
     private final JwtTokenProvider jwtTokenProvider;
+
+
+    /**
+     * 메인화면 정보반환
+     * @return
+     */
+    @GetMapping("/home-my-info")
+    @Operation(summary = "메인화면 유저정보 API", description = "메인화면에 표시할 유저정보를 반환합니다.")
+    public ResponseEntity<?> mainPageMyInfo(@RequestHeader("Authorization") String token) {
+        String email = jwtTokenProvider.getEmail(token.substring(7));
+        MainMyInfoResponseDto myInfo=userService.mainPageMyInfo(email);
+        return ResponseEntity.ok().body(ApiResponse.onSuccess(myInfo));
+    }
 
     /**
      * 학교 전체 목록 반환

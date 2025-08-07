@@ -2,7 +2,7 @@ package com.example.tetonam.user.token;
 
 
 import com.example.tetonam.exception.handler.TokenHandler;
-import com.example.tetonam.user.domain.JwtToken;
+import com.example.tetonam.user.dto.JwtToken;
 import com.example.tetonam.response.code.status.ErrorStatus;
 import com.example.tetonam.user.domain.enums.Role;
 import lombok.extern.slf4j.Slf4j;
