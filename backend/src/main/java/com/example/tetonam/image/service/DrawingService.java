@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -147,7 +148,7 @@ public class DrawingService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
 
-        DrawingRagResult drawingRagResult=drawingRagResultRepository.findById(id)
+       DrawingRagResult drawingRagResult=drawingRagResultRepository.findByDrawing(id)
                 .orElseThrow(()->new DrawingHandler(ErrorStatus.NOT_FOUND_RAG));
 
         if (!user.hasRole(user, Role.COUNSELOR)&&drawingRagResult.getDrawing().getDrawingList().getUser()!=user){
@@ -157,4 +158,13 @@ public class DrawingService {
 
         return drawingRagResult.getDrawingRagResult();
     }
+
+    public String objectDetectionImage(String email, Long id) {
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+        DrawingResult drawingResult=drawingResultRepository.findByDrawing(id)
+                .orElseThrow(() -> new DrawingHandler(ErrorStatus.NOT_FOUND_OBJECT));
+        return drawingResult.getDrawingResult();
+    }
+
 }
