@@ -73,9 +73,19 @@ public class DrawingController {
 
     @GetMapping("/counseling/rag/{id}")
     @Operation(summary = "그림 상세 조회 API", description = "RAG모델을 통해 저장된 그림 상세 설명이 나옵니다")
-    public ResponseEntity<?> detailImage(@RequestHeader("Authorization") String token,@PathVariable Long id) {
+    public ResponseEntity<?> detailRagImage(@RequestHeader("Authorization") String token,@PathVariable Long id) {
         String email = jwtTokenProvider.getEmail(token.substring(7));
         String result=drawingService.showCounselingRag(email,id);
+
+        return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
+    }
+
+    @GetMapping("/counseling/ai/{id}")
+    @PreAuthorize("hasRole('COUNSELOR')")
+    @Operation(summary = "객체탐지 ai 조회 API", description = "객체 탐지 모델을 통해 저장된 그림 탐지 내용이 나옵니다")
+    public ResponseEntity<?> objectDetectionImage(@RequestHeader("Authorization") String token,@PathVariable Long id) {
+        String email = jwtTokenProvider.getEmail(token.substring(7));
+        String result=drawingService.objectDetectionImage(email,id);
 
         return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
     }
