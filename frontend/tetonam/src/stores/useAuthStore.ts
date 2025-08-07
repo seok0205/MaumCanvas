@@ -3,7 +3,6 @@ import { authService } from '@/services/authService';
 import type { AuthError } from '@/types/auth';
 import type { AuthState } from '@/types/store';
 import type { User } from '@/types/user';
-import { getPrimaryRole } from '@/utils/userRoleMapping';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
@@ -38,10 +37,9 @@ export const useAuthStore = create<AuthState>()(
             // 로그인 시 이전 선택된 역할 초기화 (백엔드 실제 역할 우선)
             set({ selectedUserRole: null });
 
-            // 백엔드 JWT 토큰의 role에서 주요 역할 결정 (백엔드는 role 배열 전송)
+            // 백엔드 JWT 토큰의 role 정보를 사용 (모든 역할 정보 보존)
             // 토큰에서 받은 role 배열을 그대로 사용
             const tokenRoles = tokenResponse.role || [];
-            const primaryRole: UserRole = getPrimaryRole(tokenRoles);
 
             // JWT 토큰의 role 정보를 사용 (my-info API는 역할 판단에 불필요)
             const finalRoles = tokenRoles.filter((role): role is UserRole =>
