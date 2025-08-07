@@ -71,6 +71,11 @@ public class User extends BaseTime implements UserDetails {
     this.password = password;
   }
 
+  public static boolean hasRole(UserDetails user, Role role) {
+    return user.getAuthorities().stream()
+            .anyMatch(auth -> auth.getAuthority().equals(role.getRoleName()));
+  }
+
   @Override
   public String getUsername() {
     return this.email;

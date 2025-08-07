@@ -3,7 +3,7 @@ package com.example.tetonam.user.service;
 
 import com.example.tetonam.exception.handler.UserHandler;
 import com.example.tetonam.exception.handler.TokenHandler;
-import com.example.tetonam.user.domain.JwtToken;
+import com.example.tetonam.user.dto.JwtToken;
 import com.example.tetonam.user.domain.School;
 import com.example.tetonam.user.domain.User;
 import com.example.tetonam.user.dto.*;
@@ -48,6 +48,7 @@ public class UserService {
             Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
             // 3. 인증 정보를 기반으로 JWT 토큰 생성
+//            JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
             JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
 
             // Refresh Token을 Redis에 저장
@@ -198,5 +199,11 @@ public class UserService {
 
     public List<School> schoolSearch(String name) {
         return schoolRepository.findByNameContaining(name);
+    }
+
+    public MainMyInfoResponseDto mainPageMyInfo(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+        return MainMyInfoResponseDto.toDto(user);
     }
 }
