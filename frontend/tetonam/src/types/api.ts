@@ -119,12 +119,20 @@ export interface CounselingHistory {
 // 상담 상태 enum - 백엔드와 일치
 export type CounselingStatus = 'OPEN' | 'CLOSE' | 'CANCEL';
 
-// 다가오는 상담 타입 (my-counseling-recent API 응답)
-// 백엔드 MyCounselingListResponseDto와 완전히 일치하도록 수정
+// 백엔드에서 받는 원시 상담 데이터 (LocalDateTime이 배열로 직렬화됨)
+export interface RawUpcomingCounseling {
+  readonly id: number;
+  readonly counselor: string;
+  readonly time: number[]; // LocalDateTime이 [년, 월, 일, 시, 분] 배열로 직렬화됨
+  readonly type: string;
+  readonly status: CounselingStatus;
+}
+
+// 다가오는 상담 타입 (프론트엔드에서 사용하는 변환된 형태)
 export interface UpcomingCounseling {
   readonly id: number;
   readonly counselor: string;
-  readonly time: string; // ISO 8601 형식의 날짜 문자열 (LocalDateTime에서 변환)
+  readonly time: string; // ISO 8601 형식의 날짜 문자열
   readonly type: string;
   readonly status: CounselingStatus;
 }
@@ -136,6 +144,26 @@ export const isValidCounselingStatus = (
   return ['OPEN', 'CLOSE', 'CANCEL'].includes(status);
 };
 
+// 백엔드 원시 데이터 타입 가드
+export const isValidRawUpcomingCounseling = (
+  data: unknown
+): data is RawUpcomingCounseling => {
+  if (!data || typeof data !== 'object') return false;
+
+  const obj = data as Record<string, unknown>;
+  return (
+    typeof obj['id'] === 'number' &&
+    typeof obj['counselor'] === 'string' &&
+    Array.isArray(obj['time']) &&
+    obj['time'].length >= 5 &&
+    obj['time'].every((item: unknown) => typeof item === 'number') &&
+    typeof obj['type'] === 'string' &&
+    typeof obj['status'] === 'string' &&
+    isValidCounselingStatus(obj['status'])
+  );
+};
+
+// 변환된 프론트엔드 데이터 타입 가드
 export const isValidUpcomingCounseling = (
   data: unknown
 ): data is UpcomingCounseling => {
@@ -150,6 +178,94 @@ export const isValidUpcomingCounseling = (
     typeof obj['status'] === 'string' &&
     isValidCounselingStatus(obj['status'])
   );
+};
+
+// LocalDateTime 배열을 ISO 8601 문자열로 변환하는 함수 (개선된 버전)
+export const convertLocalDateTimeArrayToISO = (timeArray: number[]): string => {
+  try {
+    if (!Array.isArray(timeArray) || timeArray.length < 5) {
+      throw new Error(
+        'Invalid time array format - minimum 5 elements required'
+      );
+    }
+
+    // 배열에서 안전하게 값 추출 (Jackson 형식: [year, month, day, hour, minute, second?, nanosecond?])
+    const year = timeArray[0];
+    const month = timeArray[1];
+    const day = timeArray[2];
+    const hour = timeArray[3];
+    const minute = timeArray[4];
+    const second = timeArray[5] || 0; // 선택적 요소
+    const nanosecond = timeArray[6] || 0; // 선택적 요소
+
+    // 값들이 유효한 숫자인지 확인
+    if (
+      typeof year !== 'number' ||
+      typeof month !== 'number' ||
+      typeof day !== 'number' ||
+      typeof hour !== 'number' ||
+      typeof minute !== 'number' ||
+      typeof second !== 'number' ||
+      typeof nanosecond !== 'number'
+    ) {
+      throw new Error('Invalid number values in time array');
+    }
+
+    // 값 범위 검증
+    if (
+      year < 1900 ||
+      year > 3000 ||
+      month < 1 ||
+      month > 12 ||
+      day < 1 ||
+      day > 31 ||
+      hour < 0 ||
+      hour > 23 ||
+      minute < 0 ||
+      minute > 59 ||
+      second < 0 ||
+      second > 59
+    ) {
+      throw new Error('Date values out of valid range');
+    }
+
+    // UTC 기준으로 Date 생성 (타임존 문제 해결)
+    // 백엔드에서 오는 월은 1부터 시작하므로 -1 해야 함
+    const millisecond = Math.floor(nanosecond / 1000000); // 나노초를 밀리초로 변환
+    const date = new Date(
+      Date.UTC(year, month - 1, day, hour, minute, second, millisecond)
+    );
+
+    if (isNaN(date.getTime())) {
+      throw new Error('Invalid date created from time array');
+    }
+
+    return date.toISOString();
+  } catch (error) {
+    console.error('Failed to convert LocalDateTime array to ISO:', {
+      timeArray,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString(),
+    });
+
+    // 실패 시 더 안전한 fallback: 현재 UTC 시간
+    const fallbackDate = new Date();
+    console.warn('Using fallback date:', fallbackDate.toISOString());
+    return fallbackDate.toISOString();
+  }
+};
+
+// 원시 데이터를 프론트엔드용으로 변환하는 함수
+export const transformRawToCounseling = (
+  raw: RawUpcomingCounseling
+): UpcomingCounseling => {
+  return {
+    id: raw.id,
+    counselor: raw.counselor,
+    time: convertLocalDateTimeArrayToISO(raw.time),
+    type: raw.type,
+    status: raw.status,
+  };
 };
 
 // 상담 유형 타입 (확장 가능)

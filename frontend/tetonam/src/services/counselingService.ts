@@ -3,9 +3,14 @@ import type {
   CounselingHistory,
   CounselingReservationRequest,
   CounselorInfo,
+  RawUpcomingCounseling,
   UpcomingCounseling,
 } from '@/types/api';
-import { isValidUpcomingCounseling } from '@/types/api';
+import {
+  isValidRawUpcomingCounseling,
+  isValidUpcomingCounseling,
+  transformRawToCounseling,
+} from '@/types/api';
 import { AuthenticationError } from '@/types/auth';
 import {
   handleApiError,
@@ -307,7 +312,12 @@ export const counselingService = {
     signal?: AbortSignal
   ): Promise<UpcomingCounseling | null> => {
     try {
-      const response = await apiClient.get<ApiResponse<UpcomingCounseling>>(
+      console.log('[CounselingService] Fetching upcoming counseling data...', {
+        timestamp: new Date().toISOString(),
+        endpoint: COUNSELING_ENDPOINTS.GET_UPCOMING_COUNSELING,
+      });
+
+      const response = await apiClient.get<ApiResponse<RawUpcomingCounseling>>(
         COUNSELING_ENDPOINTS.GET_UPCOMING_COUNSELING,
         {
           headers: {
@@ -317,14 +327,33 @@ export const counselingService = {
         }
       );
 
+      console.log('[CounselingService] Raw API response:', {
+        status: response.status,
+        statusText: response.statusText,
+        isSuccess: response.data.isSuccess,
+        code: response.data.code,
+        message: response.data.message,
+        hasResult: !!response.data.result,
+        resultType: typeof response.data.result,
+        timestamp: new Date().toISOString(),
+      });
+
       // 응답 성공 여부 확인
       if (!response.data.isSuccess) {
         // 상담예약이 없는 경우는 null을 반환 (에러가 아님)
         if (response.data.code === 'COUNSELING4001') {
+          console.info(
+            '[CounselingService] No upcoming counseling found (expected case)'
+          );
           return null;
         }
 
         // 기타 API 에러 처리
+        console.error('[CounselingService] API returned error:', {
+          code: response.data.code,
+          message: response.data.message,
+        });
+
         throw new AuthenticationError(
           response.data.code || 'UPCOMING_COUNSELING_FETCH_FAILED',
           response.data.message ||
@@ -332,30 +361,115 @@ export const counselingService = {
         );
       }
 
-      // 응답 데이터 타입 검증
-      const result = response.data.result;
-      if (result && !isValidUpcomingCounseling(result)) {
-        console.warn('Invalid upcoming counseling data received:', result);
+      // 백엔드 원시 데이터 타입 검증
+      const rawResult = response.data.result;
+      if (!rawResult) {
+        console.info(
+          '[CounselingService] No counseling data in successful response'
+        );
+        return null;
+      }
+
+      console.log('[CounselingService] Raw counseling data structure:', {
+        data: rawResult,
+        timeType: typeof rawResult.time,
+        timeIsArray: Array.isArray(rawResult.time),
+        timeLength: Array.isArray(rawResult.time)
+          ? rawResult.time.length
+          : 'N/A',
+        timeValue: rawResult.time,
+        timestamp: new Date().toISOString(),
+      });
+
+      if (!isValidRawUpcomingCounseling(rawResult)) {
+        console.error('[CounselingService] Raw data validation failed:', {
+          received: rawResult,
+          expectedFormat: 'RawUpcomingCounseling interface',
+        });
+
         throw new AuthenticationError(
           'INVALID_DATA_FORMAT',
           '잘못된 형식의 데이터를 받았습니다. 다시 시도해주세요.'
         );
       }
 
-      return result;
+      console.log(
+        '[CounselingService] Raw data validation passed, transforming...'
+      );
+
+      // 원시 데이터를 프론트엔드용으로 변환
+      const transformedResult = transformRawToCounseling(rawResult);
+
+      console.log('[CounselingService] Data transformation completed:', {
+        originalTime: rawResult.time,
+        transformedTime: transformedResult.time,
+        transformationSuccess: true,
+        timestamp: new Date().toISOString(),
+      });
+
+      // 변환된 데이터 검증
+      if (!isValidUpcomingCounseling(transformedResult)) {
+        console.error(
+          '[CounselingService] Transformed data validation failed:',
+          {
+            raw: rawResult,
+            transformed: transformedResult,
+            validationRules: 'isValidUpcomingCounseling',
+          }
+        );
+
+        throw new AuthenticationError(
+          'DATA_TRANSFORMATION_FAILED',
+          '데이터 변환에 실패했습니다. 다시 시도해주세요.'
+        );
+      }
+
+      console.log(
+        '[CounselingService] Successfully processed upcoming counseling data:',
+        {
+          id: transformedResult.id,
+          counselor: transformedResult.counselor,
+          time: transformedResult.time,
+          formattedDate: new Date(transformedResult.time).toLocaleString(
+            'ko-KR'
+          ),
+          success: true,
+          timestamp: new Date().toISOString(),
+        }
+      );
+
+      return transformedResult;
     } catch (error) {
       // AuthenticationError는 그대로 재전파
       if (error instanceof AuthenticationError) {
+        console.error(
+          '[CounselingService] Authentication/Business logic error:',
+          {
+            code: error.code,
+            message: error.message,
+            timestamp: new Date().toISOString(),
+          }
+        );
         throw error;
       }
 
       // 요청 취소된 경우
       if (error instanceof Error && error.name === 'AbortError') {
+        console.warn('[CounselingService] Request was aborted');
         throw new AuthenticationError('ABORTED', '요청이 취소되었습니다.');
       }
 
       // Axios 에러 처리
       const axiosError = error as AxiosError<ApiResponse<null>>;
+
+      console.error('[CounselingService] Axios error occurred:', {
+        code: axiosError.code,
+        message: axiosError.message,
+        status: axiosError.response?.status,
+        statusText: axiosError.response?.statusText,
+        responseData: axiosError.response?.data,
+        timestamp: new Date().toISOString(),
+      });
 
       // 네트워크 에러 세분화
       if (
