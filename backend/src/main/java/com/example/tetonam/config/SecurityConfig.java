@@ -54,7 +54,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         // ✅ 여기에 허용할 Origin 명시
-        config.setAllowedOrigins(List.of(
+        config.setAllowedOriginPatterns(List.of(
             "http://localhost:3000",              // 🔥 로컬 개발용
             "https://i13e108.p.ssafy.io"          // 🔐 배포 도메인용
         ));
