@@ -1,10 +1,8 @@
 import { communityService } from '@/services/communityService';
-import type { Community, CommunityCategory } from '@/types/community';
+import type { Community } from '@/types/community';
 import { useInfiniteQuery } from '@tanstack/react-query';
 
 interface UseCommunityPostsParams {
-  category?: CommunityCategory;
-  sort?: 'latest' | 'popular';
   size?: number;
 }
 
@@ -15,23 +13,15 @@ interface PostsPage {
 }
 
 export const useCommunityPosts = ({
-  category,
-  sort = 'latest',
   size = 10,
 }: UseCommunityPostsParams = {}) => {
   return useInfiniteQuery({
-    queryKey: ['community', 'posts', { category, sort, size }],
+    queryKey: ['community', 'posts', { size }],
     queryFn: async ({ pageParam = undefined, signal }) => {
       const queryParams: any = {
-        sort,
         lastId: pageParam,
         size,
       };
-
-      // category가 있을 때만 추가
-      if (category) {
-        queryParams.category = category;
-      }
 
       const posts = await communityService.getPosts(queryParams, signal);
 

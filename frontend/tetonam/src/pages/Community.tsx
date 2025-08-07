@@ -1,12 +1,4 @@
-import {
-  Calendar,
-  Eye,
-  Filter,
-  MessageCircle,
-  Plus,
-  Search,
-  User,
-} from 'lucide-react';
+import { Calendar, Eye, MessageCircle, Plus, Search, User } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -14,19 +6,11 @@ import { Badge } from '@/components/ui/data-display/badge';
 import { Alert, AlertDescription } from '@/components/ui/feedback/alert';
 import { LoadingSpinner } from '@/components/ui/feedback/loading-spinner';
 import { Input } from '@/components/ui/forms/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/forms/select';
 import { Button } from '@/components/ui/interactive/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/layout/card';
 import { useCommunityPosts } from '@/hooks/useCommunityPosts';
 import { useAuthStore } from '@/stores/useAuthStore';
-import type { Community, CommunityCategory } from '@/types/community';
-import { CATEGORY_LABELS } from '@/types/community';
+import type { Community } from '@/types/community';
 import { cn } from '@/utils/cn';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -39,12 +23,8 @@ export const CommunityPage = ({}: CommunityPageProps) => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
 
-  // 상태 관리
-  const [selectedCategory, setSelectedCategory] = useState<
-    CommunityCategory | 'ALL'
-  >('ALL');
+  // 상태 관리 (검색 기능만 유지)
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<'latest' | 'popular'>('latest');
 
   // 게시글 데이터 fetching
   const {
@@ -55,10 +35,7 @@ export const CommunityPage = ({}: CommunityPageProps) => {
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-  } = useCommunityPosts({
-    ...(selectedCategory !== 'ALL' && { category: selectedCategory }),
-    sort: sortBy,
-  });
+  } = useCommunityPosts({});
 
   // 새 글 작성
   const handleCreatePost = () => {
@@ -68,11 +45,6 @@ export const CommunityPage = ({}: CommunityPageProps) => {
   // 게시글 클릭
   const handlePostClick = (postId: number) => {
     navigate(`/community/${postId}`);
-  };
-
-  // 카테고리 필터링
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category as CommunityCategory | 'ALL');
   };
 
   // 더 보기
@@ -135,55 +107,6 @@ export const CommunityPage = ({}: CommunityPageProps) => {
         <Card className='mb-8 border-0 shadow-lg bg-white/80 backdrop-blur-sm'>
           <CardHeader className='pb-4'>
             <div className='flex flex-col lg:flex-row gap-4'>
-              {/* 카테고리 필터 */}
-              <div className='flex-1'>
-                <div className='flex items-center gap-2 mb-2'>
-                  <Filter className='w-4 h-4 text-slate-600' />
-                  <span className='text-sm font-medium text-slate-700'>
-                    카테고리
-                  </span>
-                </div>
-                <Select
-                  value={selectedCategory}
-                  onValueChange={handleCategoryChange}
-                >
-                  <SelectTrigger className='w-full border-slate-200 focus:border-orange-400 focus:ring-orange-400/20'>
-                    <SelectValue placeholder='카테고리 선택' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='ALL'>전체</SelectItem>
-                    {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* 정렬 */}
-              <div className='flex-1'>
-                <div className='flex items-center gap-2 mb-2'>
-                  <span className='text-sm font-medium text-slate-700'>
-                    정렬
-                  </span>
-                </div>
-                <Select
-                  value={sortBy}
-                  onValueChange={(value: 'latest' | 'popular') =>
-                    setSortBy(value)
-                  }
-                >
-                  <SelectTrigger className='w-full border-slate-200 focus:border-orange-400 focus:ring-orange-400/20'>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='latest'>최신순</SelectItem>
-                    <SelectItem value='popular'>인기순</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
               {/* 검색 */}
               <div className='flex-1'>
                 <div className='flex items-center gap-2 mb-2'>
@@ -235,7 +158,7 @@ export const CommunityPage = ({}: CommunityPageProps) => {
                                   'bg-orange-100 text-orange-700'
                               )}
                             >
-                              {CATEGORY_LABELS[post.category]}
+                              {post.category}
                             </Badge>
                           </div>
                           <h3 className='text-lg font-semibold text-slate-800 mb-2 line-clamp-1'>

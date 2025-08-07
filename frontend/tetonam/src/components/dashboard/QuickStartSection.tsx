@@ -46,7 +46,7 @@ export const QuickStartSection = ({
         navigate('/counseling-reservation');
         break;
       case '커뮤니티':
-        // TODO: 커뮤니티 페이지로 이동
+        navigate('/community');
         break;
       case '내 일정 관리하기':
         // TODO: 일정 관리 페이지로 이동

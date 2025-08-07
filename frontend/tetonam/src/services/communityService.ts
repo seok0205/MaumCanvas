@@ -37,8 +37,6 @@ export const communityService = {
     try {
       const params = new URLSearchParams();
 
-      if (query.sort) params.append('sort', query.sort);
-      if (query.category) params.append('category', query.category);
       if (query.lastId) params.append('lastId', query.lastId.toString());
       if (query.size) params.append('size', query.size.toString());
 
