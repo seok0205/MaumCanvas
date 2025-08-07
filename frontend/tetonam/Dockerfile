@@ -1,46 +1,25 @@
-# Build stage
+# 빌드 전용 Dockerfile
 FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Enable pnpm
+# pnpm 설치 (corepack 사용 가능)
 RUN corepack enable
 
-# Copy package files
+# 종속성 설치
 COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
-# Install dependencies (with cache mount)
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-    pnpm install --frozen-lockfile
-
-# Copy source code
+# 소스 복사 및 빌드
 COPY . .
+RUN pnpm run build
 
-# Build the application (with cache mount)
-RUN --mount=type=cache,id=build,target=/app/.cache \
-    pnpm run build
+FROM nginx:stable-alpine
 
-# Production stage
-FROM nginx:alpine AS production
-
-# Create SSL directories
-# RUN mkdir -p /etc/ssl/certs /etc/ssl/private
-
-# Copy SSL certificates (will be mounted at runtime)
-# COPY ssl/i13e108.p.ssafy.io.crt /etc/ssl/certs/
-# COPY ssl/i13e108.p.ssafy.io.key /etc/ssl/private/
-
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Validate nginx configuration syntax
-RUN nginx -t
-
-# Copy built assets from builder stage
+# Nginx 기본 index.html 경로로 빌드 결과 복사
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Expose ports
-EXPOSE 3000
+# (선택) Nginx 커스텀 설정 사용 시
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Nginx 실행 (기본값으로 CMD 설정되어 있음)

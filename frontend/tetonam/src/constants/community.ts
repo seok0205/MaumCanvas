@@ -1,3 +1,5 @@
+// const BASE_URL = 'https://i13e108.p.ssafy.io';
+
 // 커뮤니티 관련 상수 정의
 import type { CommunityCategory, PostSortType } from '@/types/community';
 
@@ -5,20 +7,33 @@ import type { CommunityCategory, PostSortType } from '@/types/community';
 export const COMMUNITY_ENDPOINTS = {
   // 게시글 관련
   GET_POSTS: '/api/community',
+  // GET_POSTS: `${BASE_URL}/api/community`,
   GET_POST_BY_ID: (id: number) => `/api/community/${id}`,
+  // GET_POST_BY_ID: (id: number) => `${BASE_URL}/api/community/${id}`,
   CREATE_POST: '/api/community',
+  // CREATE_POST: `${BASE_URL}/api/community`,
   UPDATE_POST: (id: number) => `/api/community/${id}`,
+  // UPDATE_POST: (id: number) => `${BASE_URL}/api/community/${id}`,
   DELETE_POST: (id: number) => `/api/community/${id}`,
+  // DELETE_POST: (id: number) => `${BASE_URL}/api/community/${id}`,
 
   // 댓글 관련
   GET_COMMENTS: (communityId: number) =>
     `/api/community/${communityId}/comments`,
+  // GET_COMMENTS: (communityId: number) =>
+  //   `${BASE_URL}/api/community/${communityId}/comments`,
   CREATE_COMMENT: (communityId: number) =>
     `/api/community/${communityId}/comments`,
+  // CREATE_COMMENT: (communityId: number) =>
+  //   `${BASE_URL}/api/community/${communityId}/comments`,
   UPDATE_COMMENT: (communityId: number, commentId: number) =>
     `/api/community/${communityId}/comments/${commentId}`,
+  // UPDATE_COMMENT: (communityId: number, commentId: number) =>
+  //   `${BASE_URL}/api/community/${communityId}/comments/${commentId}`,
   DELETE_COMMENT: (communityId: number, commentId: number) =>
     `/api/community/${communityId}/comments/${commentId}`,
+  // DELETE_COMMENT: (communityId: number, commentId: number) =>
+  //   `${BASE_URL}/api/community/${communityId}/comments/${commentId}`,
 } as const;
 
 // 커뮤니티 기본 설정
