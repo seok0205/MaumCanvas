@@ -3,6 +3,7 @@ package com.example.tetonam.community.service;
 import com.example.tetonam.community.dto.PostListDto;
 import com.example.tetonam.community.domain.Category;
 import com.example.tetonam.community.domain.Community;
+import com.example.tetonam.community.dto.PostPageDto;
 import com.example.tetonam.community.dto.PostUpdateDto;
 import com.example.tetonam.community.dto.PostWriteDto;
 import com.example.tetonam.community.repository.CommunityRepository;
@@ -12,6 +13,7 @@ import com.example.tetonam.user.domain.User;
 import com.example.tetonam.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -35,30 +37,30 @@ public class CommunityService {
      * - 정렬 조건: latest, popular
      * - 카테고리 필터링 가능
      */
-    public List<PostListDto> getAllPosts(String sort, Category category) {
-        List<Community> posts;
-
-        if (category != null) {
-            posts = "popular".equalsIgnoreCase(sort)        // 문자 비교하여 popular이면
-                    ? communityRepository.findByCategoryOrderByViewCountDesc(category)
-                    : communityRepository.findByCategoryOrderByCreatedAtDesc(category);
-        } else {
-            posts = "popular".equalsIgnoreCase(sort)
-                    ? communityRepository.findAllByOrderByViewCountDesc()
-                    : communityRepository.findAllByOrderByCreatedAtDesc();
-        }
-
-        // 게시글 아무것도 없으면 예외 발생
-        if (posts.isEmpty()) {
-            log.info("[getAllPosts] 조회된 게시글이 없습니다. (정렬: {}, 카테고리: {})", sort, category);
-            throw new BoardHandler(ErrorStatus.POST_LIST_EMPTY);
-        }
-
-        log.info("[getAllPosts] 게시글 {}건 조회됨 (정렬: {}, 카테고리: {})", posts.size(), sort, category);
-        return posts.stream()
-                .map(PostListDto::from)
-                .collect(Collectors.toList());
-    }
+//    public List<PostListDto> getAllPosts(String sort, Category category) {
+//        List<Community> posts;
+//
+//        if (category != null) {
+//            posts = "popular".equalsIgnoreCase(sort)        // 문자 비교하여 popular이면
+//                    ? communityRepository.findByCategoryOrderByViewCountDesc(category)
+//                    : communityRepository.findByCategoryOrderByCreatedAtDesc(category);
+//        } else {
+//            posts = "popular".equalsIgnoreCase(sort)
+//                    ? communityRepository.findAllByOrderByViewCountDesc()
+//                    : communityRepository.findAllByOrderByCreatedAtDesc();
+//        }
+//
+//        // 게시글 아무것도 없으면 예외 발생
+//        if (posts.isEmpty()) {
+//            log.info("[getAllPosts] 조회된 게시글이 없습니다. (정렬: {}, 카테고리: {})", sort, category);
+//            throw new BoardHandler(ErrorStatus.POST_LIST_EMPTY);
+//        }
+//
+//        log.info("[getAllPosts] 게시글 {}건 조회됨 (정렬: {}, 카테고리: {})", posts.size(), sort, category);
+//        return posts.stream()
+//                .map(PostListDto::from)
+//                .collect(Collectors.toList());
+//    }
     // PostId로 게시글 정보 다 가져오기(게시글 상세 조회)
     public PostListDto getPostById(Long id) {
         Community community = communityRepository.findById(id)
@@ -68,7 +70,7 @@ public class CommunityService {
 
 
     // 글 작성 api
-    public Community writePost(PostWriteDto dto, String email) {
+    public PostWriteDto writePost(PostWriteDto dto, String email) {
         User author = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BoardHandler(ErrorStatus.USER_NOT_FOUND));
         Community community = Community.builder()
@@ -78,7 +80,8 @@ public class CommunityService {
                 .category(dto.getCategory())
                 .build();
         communityRepository.save(community);
-        return community;
+        dto.setNickname(author.getNickname());
+        return dto;
     }
 
     @Transactional
@@ -114,5 +117,14 @@ public class CommunityService {
         }
         Pageable pageable = PageRequest.of(0, size);
         return communityRepository.findByIdLessThanOrderByIdDesc(lastId, pageable);
+    }
+
+    public Page<PostPageDto> getPostPage(int page, int size){
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PostPageDto> communityPage = communityRepository.findAllWithAuthorNickname(pageable);
+        if (communityPage.isEmpty()) {
+            throw new BoardHandler(ErrorStatus.POST_LIST_EMPTY);
+        }
+        return communityPage;
     }
 }

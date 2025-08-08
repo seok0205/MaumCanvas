@@ -2,6 +2,7 @@ package com.example.tetonam.community.controller;
 
 import com.example.tetonam.community.domain.Community;
 import com.example.tetonam.community.dto.PostListDto;
+import com.example.tetonam.community.dto.PostPageDto;
 import com.example.tetonam.community.dto.PostUpdateDto;
 import com.example.tetonam.community.dto.PostWriteDto;
 import com.example.tetonam.community.service.CommunityService;
@@ -10,6 +11,7 @@ import com.example.tetonam.user.token.JwtTokenProvider;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,8 +42,7 @@ public class CommunityController {
     public ResponseEntity<?> createPost(@RequestBody PostWriteDto dto, @RequestHeader("Authorization") String token) {
         String jwt = token.substring(7);
         String email = jwtTokenProvider.getEmail(jwt);
-        Community community = communityService.writePost(dto, email);
-        return ResponseEntity.ok().body(ApiResponse.onSuccess(PostWriteDto.toDto(community)));
+        return ResponseEntity.ok().body(ApiResponse.onSuccess(communityService.writePost(dto, email)));
     }
 
     @DeleteMapping("/{id}")
@@ -66,5 +67,11 @@ public class CommunityController {
     @Operation(summary = "게시판 10개 단위 조회 API", description = "10개 단위로 커서를 활용하여 조회합니다")
     public ResponseEntity<List<Community>> getPosts(@RequestParam(required = false) Long lastId, @RequestParam(defaultValue = "10") int size){
         return ResponseEntity.ok(communityService.getPosts(lastId, size));
+    }
+
+    @GetMapping("/page/{number}")
+    @Operation(summary = "페이지별 조회", description = "10개 단위 조회로 작성")
+    public ResponseEntity<?> getPostPage(@PathVariable int number){
+        return ResponseEntity.ok(communityService.getPostPage(number, 10));
     }
 }
