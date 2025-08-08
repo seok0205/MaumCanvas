@@ -7,6 +7,8 @@ import type { CommunityCategory, PostSortType } from '@/types/community';
 export const COMMUNITY_ENDPOINTS = {
   // 게시글 관련
   GET_POSTS: '/api/community',
+  // 페이지네이션(페이지 번호 기반)
+  GET_POSTS_PAGE: (page: number) => `/api/community/page/${page}`,
   // GET_POSTS: `${BASE_URL}/api/community`,
   GET_POST_BY_ID: (id: number) => `/api/community/${id}`,
   // GET_POST_BY_ID: (id: number) => `${BASE_URL}/api/community/${id}`,

@@ -1,5 +1,5 @@
 import { communityService } from '@/services/communityService';
-import type { Community } from '@/types/community';
+import type { PostListResponse } from '@/types/community';
 import { useInfiniteQuery } from '@tanstack/react-query';
 
 interface UseCommunityPostsParams {
@@ -7,37 +7,26 @@ interface UseCommunityPostsParams {
 }
 
 interface PostsPage {
-  posts: Community[];
-  lastId?: number;
+  posts: PostListResponse[];
+  page: number;
   hasNext: boolean;
 }
 
 export const useCommunityPosts = ({
   size = 10,
 }: UseCommunityPostsParams = {}) => {
-  return useInfiniteQuery({
+  return useInfiniteQuery<PostsPage, unknown, { pages: PostsPage[]; posts: PostListResponse[]; hasNextPage: boolean }>({
     queryKey: ['community', 'posts', { size }],
-    queryFn: async ({ pageParam = undefined, signal }) => {
-      const queryParams: any = {
-        lastId: pageParam,
-        size,
-      };
-
-      const posts = await communityService.getPosts(queryParams, signal);
-
-      const lastId =
-        posts && posts.length > 0 ? posts[posts.length - 1]?.id : undefined;
-      const hasNext = posts ? posts.length === size : false;
-
-      return {
-        posts: posts || [],
-        lastId,
-        hasNext,
-      } as PostsPage;
+  queryFn: async ({ pageParam = 0 as number, signal }) => {
+      const posts = await communityService.getPosts(
+    { lastId: pageParam as number, size },
+        signal
+      );
+      const hasNext = Array.isArray(posts) && posts.length === size;
+      return { posts: posts || [], page: pageParam as number, hasNext };
     },
-    getNextPageParam: lastPage =>
-      lastPage.hasNext ? lastPage.lastId : undefined,
-    initialPageParam: undefined as number | undefined,
+    getNextPageParam: lastPage => (lastPage.hasNext ? lastPage.page + 1 : undefined),
+    initialPageParam: 0 as number,
     select: data => {
       // 모든 페이지의 게시글들을 평평하게 만들어 반환
       const allPosts = data.pages.flatMap(page => page.posts);

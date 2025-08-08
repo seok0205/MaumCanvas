@@ -27,34 +27,44 @@ export const communityService = {
   // === 게시글 관련 API ===
 
   /**
-   * 게시글 목록 조회 (페이지네이션)
-   * 백엔드: GET /community -> List<Community> 직접 반환 (ApiResponse 래핑 없음)
+   * 게시글 목록 조회 (페이지 번호 기반)
+   * 백엔드: GET /community/page/{number} -> Page<PostPageDto> 직렬화된 배열 형태 반환 가능
+   * 프론트 목록 카드에서 author 전체를 요구하지 않도록 최소 필드만 사용합니다.
    */
   getPosts: async (
     query: PostListQuery = {},
     signal?: AbortSignal
-  ): Promise<Community[]> => {
+  ): Promise<PostListResponse[]> => {
     try {
-      const params = new URLSearchParams();
+      // 페이지 번호는 커서 기반 파라미터 대신 number를 사용 (기본 0페이지)
+      const pageNumber = query.lastId ? Number(query.lastId) : 0;
+      const response = await apiClient.get<any>(
+        COMMUNITY_ENDPOINTS.GET_POSTS_PAGE(pageNumber),
+        {
+          ...(signal && { signal }),
+        }
+      );
 
-      if (query.lastId) params.append('lastId', query.lastId.toString());
-      if (query.size) params.append('size', query.size.toString());
+      // Spring의 Page 직렬화는 { content: T[], ... } 또는 바로 배열일 수 있음.
+      const data = response.data;
+      const items: any[] = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.content)
+          ? data.content
+          : [];
 
-      const url = `${COMMUNITY_ENDPOINTS.GET_POSTS}${params.toString() ? '?' + params.toString() : ''}`;
-
-      // 백엔드가 List<Community>를 직접 반환하므로 ApiResponse 래핑 없음
-      const response = await apiClient.get<Community[]>(url, {
-        ...(signal && { signal }),
-      });
-
-      if (!response.data) {
-        throw new AuthenticationError(
-          'POST_FETCH_FAILED',
-          COMMUNITY_ERROR_MESSAGES.POST_FETCH_FAILED
-        );
-      }
-
-      return response.data;
+      // PostPageDto는 id,title,nickname,category만 포함하므로 상세 화면 데이터가 아님.
+      // 목록 컴포넌트에서는 title/category/nickname만 사용하도록 했고, createdAt/viewCount는 없을 수 있음.
+      return items.map(item => ({
+        id: item.id,
+        title: item.title,
+        content: '',
+        category: item.category,
+        nickname: item.nickname,
+        viewCount: item.viewCount ?? 0,
+        createdAt: item.createdAt ?? new Date().toISOString(),
+        updatedAt: item.updatedAt ?? new Date().toISOString(),
+      })) as PostListResponse[];
     } catch (error) {
       if (error instanceof AuthenticationError) {
         throw error;
@@ -66,7 +76,6 @@ export const communityService = {
         );
       }
 
-      // 네트워크 에러 처리
       const axiosError = error as AxiosError<ApiResponse<null>>;
       if (
         axiosError.code === 'NETWORK_ERROR' ||
@@ -75,12 +84,10 @@ export const communityService = {
         throw handleNetworkError(axiosError);
       }
 
-      // HTTP 상태 코드 기반 에러 처리
       if (axiosError.response?.status) {
         throw handleHttpError(axiosError.response.status);
       }
 
-      // API 에러 처리
       if (axiosError.response?.data) {
         throw handleApiError(axiosError.response.data);
       }
@@ -100,7 +107,7 @@ export const communityService = {
     signal?: AbortSignal
   ): Promise<PostListResponse> => {
     try {
-      const response = await apiClient.get<ApiResponse<PostListResponse>>(
+      const response = await apiClient.get<ApiResponse<any>>(
         COMMUNITY_ENDPOINTS.GET_POST_BY_ID(id),
         {
           ...(signal && { signal }),
@@ -114,7 +121,19 @@ export const communityService = {
         );
       }
 
-      return response.data.result;
+      const raw = response.data.result as any;
+      const normalized: PostListResponse = {
+        id: raw.id,
+        title: raw.title,
+        content: raw.content ?? '',
+        category: raw.category,
+        nickname: raw.nickname,
+        viewCount: raw.viewCount ?? 0,
+        createdAt: raw.createdAt || raw.createdDate || new Date().toISOString(),
+        updatedAt: raw.updatedAt || raw.modifiedDate || raw.updatedDate || new Date().toISOString(),
+      };
+
+      return normalized;
     } catch (error) {
       if (error instanceof AuthenticationError) {
         throw error;
@@ -444,12 +463,13 @@ export const communityService = {
     signal?: AbortSignal
   ): Promise<Comment> => {
     try {
+      // 백엔드가 @RequestBody String commentBody를 기대하므로 순수 텍스트로 전송
       const response = await apiClient.post<ApiResponse<Comment>>(
         COMMUNITY_ENDPOINTS.CREATE_COMMENT(communityId),
-        data,
+        data.content,
         {
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'text/plain; charset=utf-8',
           },
           ...(signal && { signal }),
         }
@@ -518,10 +538,10 @@ export const communityService = {
     try {
       const response = await apiClient.put<ApiResponse<Comment>>(
         COMMUNITY_ENDPOINTS.UPDATE_COMMENT(communityId, commentId),
-        data,
+        data.content,
         {
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'text/plain; charset=utf-8',
           },
           ...(signal && { signal }),
         }

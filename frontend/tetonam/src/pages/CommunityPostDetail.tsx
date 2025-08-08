@@ -93,7 +93,7 @@ export const CommunityPostDetail = () => {
         <div className='container mx-auto px-4 py-8'>
           <Alert variant='destructive'>
             <AlertDescription>
-              게시글을 불러오는 중 오류가 발생했습니다. {error?.message}
+              게시글을 불러오는 중 오류가 발생했습니다. {(error as any)?.message}
             </AlertDescription>
           </Alert>
         </div>

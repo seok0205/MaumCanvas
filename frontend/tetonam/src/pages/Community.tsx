@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/interactive/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/layout/card';
 import { useCommunityPosts } from '@/hooks/useCommunityPosts';
 import { useAuthStore } from '@/stores/useAuthStore';
-import type { Community } from '@/types/community';
+import type { PostListResponse } from '@/types/community';
 import { cn } from '@/utils/cn';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -72,7 +72,7 @@ export const CommunityPage = ({}: CommunityPageProps) => {
         <div className='container mx-auto px-4 py-8'>
           <Alert variant='destructive'>
             <AlertDescription>
-              게시글을 불러오는 중 오류가 발생했습니다. {error?.message}
+              게시글을 불러오는 중 오류가 발생했습니다. {(error as any)?.message}
             </AlertDescription>
           </Alert>
         </div>
@@ -130,7 +130,7 @@ export const CommunityPage = ({}: CommunityPageProps) => {
         <div className='space-y-4'>
           {posts && posts.posts.length > 0 ? (
             <>
-              {posts.posts.map((post: Community) => (
+              {posts.posts.map((post: PostListResponse) => (
                 <Card
                   key={post.id}
                   className='border-0 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm cursor-pointer hover:scale-[1.02]'
@@ -175,17 +175,12 @@ export const CommunityPage = ({}: CommunityPageProps) => {
                         <div className='flex items-center gap-4 text-sm text-slate-500'>
                           <div className='flex items-center gap-1'>
                             <User className='w-4 h-4' />
-                            <span>{post.author?.nickname}</span>
-                            {post.author?.school?.name && (
-                              <span className='text-slate-400'>
-                                · {post.author.school.name}
-                              </span>
-                            )}
+                            <span>{post.nickname}</span>
                           </div>
                           <div className='flex items-center gap-1'>
                             <Calendar className='w-4 h-4' />
                             <span>
-                              {formatDistanceToNow(new Date(post.createdAt), {
+                              {formatDistanceToNow(new Date(post.createdAt || new Date().toISOString()), {
                                 addSuffix: true,
                                 locale: ko,
                               })}
@@ -195,7 +190,7 @@ export const CommunityPage = ({}: CommunityPageProps) => {
                         <div className='flex items-center gap-4 text-sm text-slate-500'>
                           <div className='flex items-center gap-1'>
                             <Eye className='w-4 h-4' />
-                            <span>{post.viewCount}</span>
+                            <span>{post.viewCount ?? 0}</span>
                           </div>
                           <div className='flex items-center gap-1'>
                             <MessageCircle className='w-4 h-4' />
