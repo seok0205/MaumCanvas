@@ -3,6 +3,10 @@ plugins {
 //    id 'org.springframework.boot' version '3.4.5'
     id 'org.springframework.boot' version '3.3.1'
     id 'io.spring.dependency-management' version '1.1.7'
+
+// sonarqube plugin
+    id "org.sonarqube" version "4.4.1.3373"
+    id "jacoco"
 }
 
 group = 'com.TeToNam'
@@ -63,4 +67,21 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+  reports {
+    xml.required.set(true)  // SonarQube가 보는 리포트
+    html.required.set(true)
+  }
+}
+
+sonar {
+  properties {
+    property "sonar.projectKey", "backend_app"
+    property "sonar.projectName", "Backend App"
+    property "sonar.java.binaries", "build/classes"
+    // sonar.host.url / sonar.login 값은 Jenkins가 넣어줌
+  }
 }
