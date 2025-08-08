@@ -1,7 +1,6 @@
 package com.example.tetonam.community.service;
 
 import com.example.tetonam.community.dto.PostListDto;
-import com.example.tetonam.community.domain.Category;
 import com.example.tetonam.community.domain.Community;
 import com.example.tetonam.community.dto.PostPageDto;
 import com.example.tetonam.community.dto.PostUpdateDto;
@@ -21,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -96,7 +94,7 @@ public class CommunityService {
         communityRepository.deleteById(id);
     }
 
-    public Community updatePost(Long id, PostUpdateDto updateCommunity, String email){
+    public PostUpdateDto updatePost(Long id, PostUpdateDto updateCommunity, String email){
         Community community = communityRepository.findById(id)
                 .orElseThrow(()-> new BoardHandler(ErrorStatus.POST_LIST_EMPTY));
         User user = userRepository.findByEmail(email)
@@ -104,11 +102,11 @@ public class CommunityService {
         if(!user.equals(community.getAuthor())){
             throw new BoardHandler(ErrorStatus.USER_NOT_MATCH);
         }
+
         community.setTitle(updateCommunity.getTitle());
         community.setContent(updateCommunity.getContent());
-        community.setUpdatedAt(LocalDateTime.now());
         communityRepository.save(community);
-        return community;
+        return PostUpdateDto.toDto(community);
     }
 
     public List<Community> getPosts(Long lastId, int size){

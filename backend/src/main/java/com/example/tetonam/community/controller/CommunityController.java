@@ -59,8 +59,7 @@ public class CommunityController {
     public ResponseEntity<?> updatePost(@PathVariable Long id, @RequestBody PostUpdateDto updatedCommunity, @RequestHeader("Authorization") String token){
         String jwt = token.substring(7);
         String email = jwtTokenProvider.getEmail(jwt);
-        Community updateCommunity = communityService.updatePost(id, updatedCommunity, email);
-        return ResponseEntity.ok().body(ApiResponse.onSuccess(PostUpdateDto.toDto(updateCommunity)));
+        return ResponseEntity.ok().body(ApiResponse.onSuccess(communityService.updatePost(id, updatedCommunity, email)));
     }
 
     @GetMapping
