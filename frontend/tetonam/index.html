@@ -1,11 +1,34 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MaumCanvas</title>
-    <meta name="description" content="Tetonam Project" />
+    <meta
+      name="description"
+      content="마음캔버스 - AI 기반 심리 진단 및 상담 서비스"
+    />
     <meta name="author" content="Tetonam" />
+
+    <!-- Performance optimizations -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+
+    <!-- Preload critical fonts -->
+    <link
+      rel="preload"
+      href="/fonts/Pretendard-Regular.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/Pretendard-Medium.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
 
     <!-- Critical font-face: define early to avoid FOUT before app CSS loads -->
     <style id="critical-fonts">
@@ -57,36 +80,23 @@
     <!-- Global CSS early load to reduce FOUC -->
     <link rel="stylesheet" href="/src/index.css" />
 
-    <!-- Pretendard Font Preload - FOUT 방지 -->
-    <link
-      rel="preload"
-      href="/fonts/Pretendard-Regular.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <link
-      rel="preload"
-      href="/fonts/Pretendard-Medium.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <link
-      rel="preload"
-      href="/fonts/Pretendard-Bold.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="/MaumCanvasLogo.png" />
     <link rel="apple-touch-icon" href="/MaumCanvasLogo.png" />
 
-    <meta property="og:title" content="MaumCanvas" />
-    <meta property="og:description" content="Tetonam Project" />
+    <!-- Mobile Web App -->
+    <meta name="theme-color" content="#10b981" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="MaumCanvas" />
+    <!-- Open Graph -->
+    <meta property="og:title" content="마음캔버스 - MaumCanvas" />
+    <meta
+      property="og:description"
+      content="AI 기반 심리 진단 및 상담 서비스"
+    />
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ko_KR" />
     <!-- <meta property="og:image" content="https://i13e108.p.ssafy.io/" /> -->
   </head>
 
