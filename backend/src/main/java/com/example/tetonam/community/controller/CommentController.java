@@ -34,10 +34,10 @@ public class CommentController {
     //글 작성
     @PostMapping
     @Operation(summary = "댓글 작성 API", description = "작성한 댓글을 등록합니다")
-    public ResponseEntity<?> createComment(@RequestBody CommentWriteDto dto, @RequestHeader("Authorization") String token, @PathVariable Long community_id) {
+    public ResponseEntity<?> createComment(@RequestBody String commentBody, @RequestHeader("Authorization") String token, @PathVariable Long community_id) {
         String jwt = token.substring(7);
         String email = jwtTokenProvider.getEmail(jwt);
-        Comment comment = commentService.writeComment(community_id, dto, email);
+        Comment comment = commentService.writeComment(community_id, commentBody, email);
         return ResponseEntity.ok(ApiResponse.onSuccess(CommentWriteDto.toDto(comment)));
     }
 

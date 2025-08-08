@@ -76,6 +76,7 @@ public class CommunityService {
                 .content(dto.getContent())
                 .author(author)
                 .category(dto.getCategory())
+                .nickname(author.getNickname())
                 .build();
         communityRepository.save(community);
         dto.setNickname(author.getNickname());
@@ -109,17 +110,19 @@ public class CommunityService {
         return PostUpdateDto.toDto(community);
     }
 
-    public List<Community> getPosts(Long lastId, int size){
-        if(lastId == null){
-            lastId = Long.MAX_VALUE;
-        }
-        Pageable pageable = PageRequest.of(0, size);
-        return communityRepository.findByIdLessThanOrderByIdDesc(lastId, pageable);
-    }
 
     public Page<PostPageDto> getPostPage(int page, int size){
         Pageable pageable = PageRequest.of(page, size);
         Page<PostPageDto> communityPage = communityRepository.findAllWithAuthorNickname(pageable);
+        if (communityPage.isEmpty()) {
+            throw new BoardHandler(ErrorStatus.POST_LIST_EMPTY);
+        }
+        return communityPage;
+    }
+    public Page<PostPageDto> getPostPageById(int page, int size, String nickname){
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<PostPageDto> communityPage = communityRepository.findByNicknameWithAuthorNickname(nickname, pageable);
         if (communityPage.isEmpty()) {
             throw new BoardHandler(ErrorStatus.POST_LIST_EMPTY);
         }
