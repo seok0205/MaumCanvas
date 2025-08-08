@@ -25,7 +25,7 @@ export const UserDashboard = ({ user }: UserDashboardProps) => {
   return (
     <div className={`${paddingClass} space-y-6`}>
       {/* 환영 메시지 */}
-      <WelcomeSection userName={user.name} userRole={primaryRole} />
+      <WelcomeSection userRole={primaryRole} />
       {/* 퀵 시작 섹션 */}
       <QuickStartSection
         actions={DASHBOARD_CONSTANTS.QUICK_ACTIONS.USER}

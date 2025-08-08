@@ -61,7 +61,7 @@ export interface JwtTokenResponse {
   role: string[]; // 실제 백엔드에서는 role 배열로 제공
 }
 
-// 사용자 정보 응답 타입
+// 사용자 정보 응답 타입 (마이페이지용)
 export interface UserInfoResponse {
   name: string;
   birthday: string;
@@ -71,6 +71,12 @@ export interface UserInfoResponse {
   gender: string;
   nickname: string;
   // role 필드 없음 - 마이페이지 표시용이므로 역할 정보 불필요
+}
+
+// 메인 화면 사용자 정보 응답 타입 (MainMyInfoResponseDto와 일치)
+export interface MainMyInfoResponse {
+  readonly name: string;
+  readonly nickname: string;
 }
 
 // 회원가입 응답 타입

@@ -644,7 +644,7 @@ export const QuestionnaireResult = () => {
           <AppSidebar />
           <div className='flex flex-1 flex-col'>
             <CommonHeader
-              user={{ name: null, roles: [] }}
+              user={{ roles: [] }}
               showUserInfo={false}
               showLogout={false}
               showBackButton={true}
@@ -681,7 +681,7 @@ export const QuestionnaireResult = () => {
           <AppSidebar />
           <div className='flex flex-1 flex-col'>
             <CommonHeader
-              user={{ name: null, roles: [] }}
+              user={{ roles: [] }}
               showUserInfo={false}
               showLogout={false}
               showBackButton={true}
@@ -712,7 +712,7 @@ export const QuestionnaireResult = () => {
           <AppSidebar />
           <div className='flex flex-1 flex-col'>
             <CommonHeader
-              user={{ name: null, roles: [] }}
+              user={{ roles: [] }}
               showUserInfo={false}
               showLogout={false}
               showBackButton={true}
@@ -752,7 +752,7 @@ export const QuestionnaireResult = () => {
         <AppSidebar />
         <div className='flex flex-1 flex-col'>
           <CommonHeader
-            user={{ name: null, roles: [] }}
+            user={{ roles: [] }}
             showUserInfo={false}
             showLogout={false}
             showBackButton={true}

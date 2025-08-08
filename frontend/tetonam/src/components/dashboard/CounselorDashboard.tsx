@@ -46,7 +46,7 @@ export const CounselorDashboard = ({ user }: CounselorDashboardProps) => {
     <div className={`${paddingClass} space-y-8`}>
       {/* 환영 메시지 */}
       <div>
-        <WelcomeSection userName={user.name} userRole={primaryRole} />
+        <WelcomeSection userRole={primaryRole} />
       </div>
 
       {/* 퀵 시작 섹션 */}
