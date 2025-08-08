@@ -15,10 +15,12 @@ public class PostPageDto {
     private String nickname;
     private Category category;
 
-    public PostPageDto(Long id, String title, String nickname,Category category) {
-        this.id = id;
-        this.title = title;
-        this.nickname = nickname;
-        this.category = category;
+    public static PostPageDto toDto(Community community){
+        return PostPageDto.builder()
+                .id(community.getId())
+                .title(community.getTitle())
+                .nickname(community.getNickname())
+                .category(community.getCategory())
+                .build();
     }
 }

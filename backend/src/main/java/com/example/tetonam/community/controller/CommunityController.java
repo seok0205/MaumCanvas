@@ -68,9 +68,9 @@ public class CommunityController {
     public ResponseEntity<?> getPostPage(@PathVariable int number){
         return ResponseEntity.ok(communityService.getPostPage(number, 10));
     }
-    @GetMapping("/page/{number}/id/{id}")
+    @GetMapping("/page/{number}/name/{nickname}")
     @Operation(summary = "아이디로 게시글 검색", description = "아이디로 게시글을 검색합니다.")
-    public ResponseEntity<?> getPostPageById(@PathVariable int number, @PathVariable String id){
-        return ResponseEntity.ok(communityService.getPostPageById(number, 10, id));
+    public ResponseEntity<?> getPostPageById(@PathVariable int number, @PathVariable String nickname){
+        return ResponseEntity.ok(communityService.getPostPageById(number, 10, nickname));
     }
 }

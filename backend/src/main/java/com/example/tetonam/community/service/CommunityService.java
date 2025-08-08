@@ -113,19 +113,19 @@ public class CommunityService {
 
     public Page<PostPageDto> getPostPage(int page, int size){
         Pageable pageable = PageRequest.of(page, size);
-        Page<PostPageDto> communityPage = communityRepository.findAllWithAuthorNickname(pageable);
+        Page<Community> communityPage = communityRepository.findAllByOrderByIdDesc(pageable);
         if (communityPage.isEmpty()) {
             throw new BoardHandler(ErrorStatus.POST_LIST_EMPTY);
         }
-        return communityPage;
+        return communityPage.map(PostPageDto::toDto);
     }
     public Page<PostPageDto> getPostPageById(int page, int size, String nickname){
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<PostPageDto> communityPage = communityRepository.findByNicknameWithAuthorNickname(nickname, pageable);
+        Page<Community> communityPage = communityRepository.findByNicknameOrderByIdDesc(nickname, pageable);
         if (communityPage.isEmpty()) {
             throw new BoardHandler(ErrorStatus.POST_LIST_EMPTY);
         }
-        return communityPage;
+        return communityPage.map(PostPageDto::toDto);
     }
 }

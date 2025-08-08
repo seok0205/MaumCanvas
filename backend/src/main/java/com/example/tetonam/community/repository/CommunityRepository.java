@@ -38,11 +38,9 @@ public interface  CommunityRepository extends JpaRepository<Community, Long> {
      * 키워드 검색 (제목에 포함되는 값)
      * - 확장 가능성 예시용
      */
-    @Query("SELECT new com.example.tetonam.community.dto.PostPageDto(c.id, c.title, u.nickname, c.category) " +
-            "FROM Community c JOIN c.author u ORDER BY c.createdDate DESC")
-    Page<PostPageDto> findAllWithAuthorNickname(Pageable pageable);
-    @Query("SELECT new com.example.tetonam.community.dto.PostPageDto(c.id, c.title, u.nickname, c.category) " +
-            "FROM Community c JOIN c.author u ORDER BY c.createdDate DESC")
-    Page<PostPageDto> findByNicknameWithAuthorNickname(String nickname, Pageable pageable);
+
+    Page<Community> findAllByOrderByIdDesc(Pageable pageable);
+
+    Page<Community> findByNicknameOrderByIdDesc(String nickname, Pageable pageable);
 
 }
