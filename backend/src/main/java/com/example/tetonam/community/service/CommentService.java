@@ -32,15 +32,16 @@ public class CommentService {
     private final UserRepository userRepository;
 
     // 댓글 작성 api
-    public Comment writeComment(Long community_id,CommentWriteDto dto, String email) {
+    public Comment writeComment(Long community_id,String commentBody, String email) {
         User author = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BoardHandler(ErrorStatus.USER_NOT_FOUND));
         Community community = communityRepository.findById(community_id)
                 .orElseThrow(() -> new BoardHandler(ErrorStatus.POST_LIST_EMPTY));
         Comment comment = Comment.builder()
-                .content(dto.getContent())
+                .content(commentBody)
                 .author(author)
                 .community(community)
+                .nickname(author.getNickname())
                 .build();
         commentRepository.save(comment);
         return comment;

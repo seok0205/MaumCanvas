@@ -31,6 +31,8 @@ public class Community extends BaseTime {
 
     private int viewCount;
 
+    private String nickname;
+
 
     public void setTitle(String title){ this.title = title;}
     public void setContent(String content){ this.content = content;}

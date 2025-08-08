@@ -24,8 +24,7 @@ public interface  CommunityRepository extends JpaRepository<Community, Long> {
      * - 사용 예: 최신순 정렬 시 category 없이 전체 게시글 보기
      */
 
-    //커서 사용으로 게시글 조회할거라 새로운 정렬 생성
-    List<Community> findByIdLessThanOrderByIdDesc(Long lastId, Pageable pageable);
+
     /**
      * 특정 카테고리의 게시글을 최신순 정렬
      */
@@ -42,5 +41,8 @@ public interface  CommunityRepository extends JpaRepository<Community, Long> {
     @Query("SELECT new com.example.tetonam.community.dto.PostPageDto(c.id, c.title, u.nickname, c.category) " +
             "FROM Community c JOIN c.author u ORDER BY c.createdDate DESC")
     Page<PostPageDto> findAllWithAuthorNickname(Pageable pageable);
+    @Query("SELECT new com.example.tetonam.community.dto.PostPageDto(c.id, c.title, u.nickname, c.category) " +
+            "FROM Community c JOIN c.author u ORDER BY c.createdDate DESC")
+    Page<PostPageDto> findByNicknameWithAuthorNickname(String nickname, Pageable pageable);
 
 }

@@ -62,15 +62,15 @@ public class CommunityController {
         return ResponseEntity.ok().body(ApiResponse.onSuccess(communityService.updatePost(id, updatedCommunity, email)));
     }
 
-    @GetMapping
-    @Operation(summary = "게시판 10개 단위 조회 API", description = "10개 단위로 커서를 활용하여 조회합니다")
-    public ResponseEntity<List<Community>> getPosts(@RequestParam(required = false) Long lastId, @RequestParam(defaultValue = "10") int size){
-        return ResponseEntity.ok(communityService.getPosts(lastId, size));
-    }
 
     @GetMapping("/page/{number}")
     @Operation(summary = "페이지별 조회", description = "10개 단위 조회로 작성")
     public ResponseEntity<?> getPostPage(@PathVariable int number){
         return ResponseEntity.ok(communityService.getPostPage(number, 10));
+    }
+    @GetMapping("/page/{number}/id/{id}")
+    @Operation(summary = "아이디로 게시글 검색", description = "아이디로 게시글을 검색합니다.")
+    public ResponseEntity<?> getPostPageById(@PathVariable int number, @PathVariable String id){
+        return ResponseEntity.ok(communityService.getPostPageById(number, 10, id));
     }
 }
