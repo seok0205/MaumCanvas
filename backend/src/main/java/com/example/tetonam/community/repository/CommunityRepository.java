@@ -41,6 +41,6 @@ public interface  CommunityRepository extends JpaRepository<Community, Long> {
 
     Page<Community> findAllByOrderByIdDesc(Pageable pageable);
 
-    Page<Community> findByNicknameOrderByIdDesc(String nickname, Pageable pageable);
+    Page<Community> findALLByNicknameOrderByIdDesc(String nickname, Pageable pageable);
 
 }
