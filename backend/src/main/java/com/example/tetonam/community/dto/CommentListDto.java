@@ -15,13 +15,11 @@ import java.time.LocalDateTime;
 public class CommentListDto {
     private String content;
     private String nickname;
-    private LocalDateTime updatedAt;
 
     public static CommentListDto toDto(Comment comment){
         return CommentListDto.builder()
                 .content(comment.getContent())
                 .nickname(comment.getAuthor().getNickname())
-                .updatedAt(comment.getUpdatedAt())
                 .build();
     }
 }

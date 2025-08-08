@@ -2,6 +2,7 @@ package com.example.tetonam.community.dto;
 
 import com.example.tetonam.community.domain.Category;
 import com.example.tetonam.community.domain.Community;
+import com.example.tetonam.util.BaseTime;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -9,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder        // Lombok 사용으로 생성자 및 getter 자동 생성
-public class PostListDto {
+public class PostListDto extends BaseTime {
 
     private Long id;
     private String title;
@@ -17,8 +18,6 @@ public class PostListDto {
     private Category category;
     private String nickname;
     private int viewCount;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 
     /**
      * Community 엔티티를 PostListDto DTO로 변환
@@ -31,8 +30,6 @@ public class PostListDto {
                 .category(community.getCategory())
                 .nickname(community.getAuthor().getNickname())
                 .viewCount(community.getViewCount())
-                .createdAt(community.getCreatedAt())
-                .updatedAt(community.getUpdatedAt())
                 .build();
     }
 }

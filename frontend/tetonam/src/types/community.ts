@@ -2,9 +2,14 @@
 import type { ApiResponse } from './api';
 
 // 커뮤니티 카테고리 타입 (백엔드 enum과 일치)
-export type CommunityCategory = 'STUDY' | 'HOBBY' | 'TALK' | 'QNA';
+export type CommunityCategory =
+  | 'GENERAL'
+  | 'STUDY'
+  | 'FRIENDSHIP'
+  | 'FAMILY'
+  | 'SECRET';
 
-// 게시글 기본 타입
+// 게시글 기본 타입 (백엔드 Community 엔티티와 일치)
 export interface Community {
   readonly id: number;
   title: string;
@@ -12,7 +17,12 @@ export interface Community {
   author: {
     readonly id: number;
     nickname: string;
-    school?: string;
+    name: string;
+    email: string;
+    school?: {
+      id: number;
+      name: string;
+    } | null;
   };
   category: CommunityCategory;
   viewCount: number;
@@ -27,7 +37,12 @@ export interface Comment {
   author: {
     readonly id: number;
     nickname: string;
-    school?: string;
+    name: string;
+    email: string;
+    school?: {
+      id: number;
+      name: string;
+    } | null;
   };
   readonly communityId: number;
   readonly createdAt: string; // ISO 8601 형식
@@ -54,32 +69,23 @@ export interface CommentWriteRequest {
   content: string;
 }
 
-// 게시글 목록 조회 응답 (PostListDto)
+// 게시글 목록 조회 응답 (PostListDto - 백엔드와 일치)
 export interface PostListResponse {
   readonly id: number;
   title: string;
   content: string;
-  author: {
-    readonly id: number;
-    nickname: string;
-    school?: string;
-  };
   category: CommunityCategory;
+  nickname: string; // 백엔드 PostListDto와 일치 (nickname만 포함)
   viewCount: number;
-  commentCount?: number; // 댓글 수 (선택적)
   readonly createdAt: string;
   readonly updatedAt: string;
 }
 
-// 댓글 목록 조회 응답 (CommentListDto)
+// 댓글 목록 조회 응답 (CommentListDto - 백엔드와 일치)
 export interface CommentListResponse {
   readonly id: number;
   content: string;
-  author: {
-    readonly id: number;
-    nickname: string;
-    school?: string;
-  };
+  nickname: string; // 백엔드 CommentListDto와 일치 (nickname만 포함)
   readonly communityId: number;
   readonly createdAt: string;
   readonly updatedAt: string;
@@ -122,7 +128,9 @@ export interface PostListQuery {
 export const isValidCommunityCategory = (
   category: any
 ): category is CommunityCategory => {
-  return ['STUDY', 'HOBBY', 'TALK', 'QNA'].includes(category);
+  return ['GENERAL', 'STUDY', 'FRIENDSHIP', 'FAMILY', 'SECRET'].includes(
+    category
+  );
 };
 
 // 정렬 타입 유효성 검사
@@ -188,10 +196,11 @@ export const COMMUNITY_LIMITS = {
 
 // 카테고리 라벨 매핑
 export const CATEGORY_LABELS: Record<CommunityCategory, string> = {
-  STUDY: '스터디',
-  HOBBY: '취미',
-  TALK: '수다',
-  QNA: '질문답변',
+  GENERAL: '일반',
+  STUDY: '학업',
+  FRIENDSHIP: '친구관계',
+  FAMILY: '가족',
+  SECRET: '비밀상담게시판',
 } as const;
 
 // 정렬 라벨 매핑

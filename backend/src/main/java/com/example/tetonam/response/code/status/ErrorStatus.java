@@ -69,7 +69,11 @@ public enum ErrorStatus implements BaseErrorCode {
 
     //게시판 관련
     POST_LIST_EMPTY(HttpStatus.BAD_REQUEST, "BOARD4000", "없는 게시글입니다."),
-    COMMENT_LIST_EMPTY(HttpStatus.BAD_REQUEST, "BOARD4001", "댓글을 찾을 수 없습니다.");
+    COMMENT_LIST_EMPTY(HttpStatus.BAD_REQUEST, "BOARD4001", "댓글을 찾을 수 없습니다."),
+
+    //아고라
+    CERTIFICATE_EMPTY(HttpStatus.UNAUTHORIZED, "AGORA4000", "인증 정보에 문제가 발생했습니다.");
+
 
 
     private final HttpStatus httpStatus;

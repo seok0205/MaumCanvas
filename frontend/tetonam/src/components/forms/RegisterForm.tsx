@@ -309,7 +309,18 @@ export const RegisterForm = () => {
         throw new Error('학교를 선택해주세요.');
       }
 
-      const success = await register({
+      // 이메일 인증 완료 확인
+      if (!isEmailVerified) {
+        throw new Error('이메일 인증을 완료해주세요.');
+      }
+
+      // 닉네임 중복 체크 완료 확인
+      if (!nicknameVerified || form.watch('nickname') !== verifiedNickname) {
+        throw new Error('닉네임 중복 체크를 완료해주세요.');
+      }
+
+      // 백엔드 구조에 맞게 데이터 준비
+      const registerData = {
         name: data.name,
         email: data.email,
         password: data.password,
@@ -320,8 +331,10 @@ export const RegisterForm = () => {
           name: selectedSchool.name,
         },
         birthday: data.birthDate,
-        role: selectedUserRole, // 단일 role로 직접 전송
-      });
+        roles: [selectedUserRole],
+      };
+
+      const success = await register(registerData);
 
       if (!success) {
         throw new Error('회원가입에 실패했습니다.');
@@ -336,7 +349,6 @@ export const RegisterForm = () => {
     onError: () => {
       setRegisterResult({ isSuccess: false });
       setShowRegisterResultModal(true);
-      // 에러 메시지는 모달에서 처리
     },
   });
 

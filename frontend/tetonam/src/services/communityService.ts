@@ -28,6 +28,7 @@ export const communityService = {
 
   /**
    * 게시글 목록 조회 (페이지네이션)
+   * 백엔드: GET /community -> List<Community> 직접 반환 (ApiResponse 래핑 없음)
    */
   getPosts: async (
     query: PostListQuery = {},
@@ -36,25 +37,24 @@ export const communityService = {
     try {
       const params = new URLSearchParams();
 
-      if (query.sort) params.append('sort', query.sort);
-      if (query.category) params.append('category', query.category);
       if (query.lastId) params.append('lastId', query.lastId.toString());
       if (query.size) params.append('size', query.size.toString());
 
       const url = `${COMMUNITY_ENDPOINTS.GET_POSTS}${params.toString() ? '?' + params.toString() : ''}`;
 
-      const response = await apiClient.get<ApiResponse<Community[]>>(url, {
+      // 백엔드가 List<Community>를 직접 반환하므로 ApiResponse 래핑 없음
+      const response = await apiClient.get<Community[]>(url, {
         ...(signal && { signal }),
       });
 
-      if (!response.data.isSuccess || !response.data.result) {
+      if (!response.data) {
         throw new AuthenticationError(
-          response.data.code || 'POST_FETCH_FAILED',
+          'POST_FETCH_FAILED',
           COMMUNITY_ERROR_MESSAGES.POST_FETCH_FAILED
         );
       }
 
-      return response.data.result;
+      return response.data;
     } catch (error) {
       if (error instanceof AuthenticationError) {
         throw error;

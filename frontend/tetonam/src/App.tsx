@@ -7,10 +7,14 @@ import { QuestionnaireForm } from '@/components/questionnaire/QuestionnaireForm'
 import { QuestionnaireResult } from '@/components/questionnaire/QuestionnaireResult';
 import { queryClient } from '@/config/queryClient';
 import { useFontLoading } from '@/hooks/useFontLoading';
+import { CommunityPage } from '@/pages/Community';
+import { CommunityCreatePost } from '@/pages/CommunityCreatePost';
+import { CommunityPostDetail } from '@/pages/CommunityPostDetail';
 import { CounselingReservation } from '@/pages/CounselingReservation';
 import { Dashboard } from '@/pages/Dashboard';
 import { Diagnosis } from '@/pages/Diagnosis';
 import { DrawingDiagnosis } from '@/pages/DrawingDiagnosis';
+import { DrawingCanvas } from '@/pages/DrawingCanvas';
 import { ForgotPassword } from '@/pages/ForgotPassword';
 import { Index } from '@/pages/Index';
 import { Login } from '@/pages/Login';
@@ -66,6 +70,14 @@ function App() {
               }
             />
             <Route
+              path='/diagnosis/drawing/canvas'
+              element={
+                <ProtectedRoute>
+                  <DrawingCanvas />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path='/mypage'
               element={
                 <ProtectedRoute>
@@ -94,6 +106,30 @@ function App() {
               element={
                 <ProtectedRoute>
                   <CounselingReservation />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/community'
+              element={
+                <ProtectedRoute>
+                  <CommunityPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/community/create'
+              element={
+                <ProtectedRoute>
+                  <CommunityCreatePost />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/community/:id'
+              element={
+                <ProtectedRoute>
+                  <CommunityPostDetail />
                 </ProtectedRoute>
               }
             />

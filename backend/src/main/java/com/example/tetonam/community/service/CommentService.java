@@ -68,7 +68,6 @@ public class CommentService {
             throw new BoardHandler(ErrorStatus.USER_NOT_MATCH);
         }
         comment.setContent(updateComment.getContent());
-        comment.setUpdatedAt(LocalDateTime.now());
         return comment;
     }
 

@@ -2,6 +2,7 @@ package com.example.tetonam.community.domain;
 
 import com.example.tetonam.user.domain.School;
 import com.example.tetonam.user.domain.User;
+import com.example.tetonam.util.BaseTime;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,11 +10,10 @@ import java.time.LocalDateTime;
 
 @Entity     // JPA가 이 클래스를 테이블로 인식
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Comment {
+public class Comment extends BaseTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)     // id를 기본 키로 자동 생성
     private Long id;
@@ -29,19 +29,6 @@ public class Comment {
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")
     private User author;
 
-    private LocalDateTime createdAt;
+    public void setContent(String content) {this.content = content;}
 
-    private LocalDateTime updatedAt;
-
-
-    @PrePersist     // 저장 시 자동 시간 설정
-    public void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = this.createdAt;
-    }
-
-    @PreUpdate      // 수정 시 자동 시간 설정
-    public void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
 }

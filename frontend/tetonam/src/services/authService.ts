@@ -105,13 +105,19 @@ export const authService = {
     signal?: AbortSignal
   ): Promise<RegisterResponse> => {
     try {
+      // API 엔드포인트 확인
+      const endpoint = AUTH_CONSTANTS.ENDPOINTS.REGISTER;
+
+      // 요청 헤더 확인
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+
       const response = await apiClient.post<ApiResponse<RegisterResponse>>(
-        AUTH_CONSTANTS.ENDPOINTS.REGISTER,
-        userData, // 이미 roles 배열이 포함되어 있음
+        endpoint,
+        userData,
         {
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers,
           ...(signal && { signal }),
         }
       );
@@ -147,18 +153,36 @@ export const authService = {
       // API 에러 처리 (백엔드에서 반환하는 에러)
       if (axiosError.response?.data) {
         const apiError = axiosError.response.data;
+
         // 백엔드 API 문서의 에러 코드들에 대한 처리
         switch (apiError.code) {
           case 'USER4000': // 사용중인 이메일 입니다
+            throw new AuthenticationError(
+              apiError.code,
+              '이미 사용 중인 이메일입니다. 다른 이메일을 입력해주세요.'
+            );
           case 'USER4001': // 사용중인 닉네임 입니다
+            throw new AuthenticationError(
+              apiError.code,
+              '이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해주세요.'
+            );
           case 'COMMON400': // 잘못된 요청입니다
+            throw new AuthenticationError(
+              apiError.code,
+              `잘못된 요청입니다: ${apiError.message || '입력 정보를 확인해주세요.'}`
+            );
+          case 'SCHOOL_NOT_FOUND': // 학교를 찾을 수 없습니다
+            throw new AuthenticationError(
+              apiError.code,
+              '선택한 학교를 찾을 수 없습니다. 다시 선택해주세요.'
+            );
           case 'COMMON401': // 인증이 필요합니다
           case 'COMMON403': // 금지된 요청입니다
           case 'COMMON500': // 서버 에러
           default:
             throw new AuthenticationError(
               apiError.code || 'REGISTER_FAILED',
-              '회원가입에 실패했습니다. 다시 시도해주세요.'
+              apiError.message || '회원가입에 실패했습니다. 다시 시도해주세요.'
             );
         }
       }

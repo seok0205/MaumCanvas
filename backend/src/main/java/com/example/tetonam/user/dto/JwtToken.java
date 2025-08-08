@@ -17,5 +17,4 @@ public class JwtToken {
   private Long refreshTokenExpirationTime;
   private List<Role> role;
 
-
 }

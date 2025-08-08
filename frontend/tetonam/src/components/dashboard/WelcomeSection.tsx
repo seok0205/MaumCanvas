@@ -1,11 +1,14 @@
 import type { UserRole } from '@/constants/userRoles';
+import { useUserHomeInfo } from '@/hooks/useUserHomeInfo';
 
 interface WelcomeSectionProps {
-  userName: string;
   userRole: UserRole;
 }
 
-export const WelcomeSection = ({ userName, userRole }: WelcomeSectionProps) => {
+export const WelcomeSection = ({ userRole }: WelcomeSectionProps) => {
+  // API에서 사용자 이름 조회
+  const { userName, isLoading: isUserInfoLoading } = useUserHomeInfo();
+
   const getWelcomeMessage = (name: string, role: UserRole) => {
     const messages = {
       COUNSELOR: `안녕하세요, ${name} 상담사님!`,
@@ -24,6 +27,9 @@ export const WelcomeSection = ({ userName, userRole }: WelcomeSectionProps) => {
     return subtitles[role] || '오늘도 좋은 하루 되세요. 🌈';
   };
 
+  // 로딩 중이거나 사용자 이름이 없을 때 처리
+  const displayName = isUserInfoLoading ? '로딩 중...' : userName || '사용자';
+
   return (
     <div
       className='
@@ -35,7 +41,7 @@ export const WelcomeSection = ({ userName, userRole }: WelcomeSectionProps) => {
       aria-label='환영 메시지'
     >
       <h1 className='text-3xl font-bold text-foreground mb-3 leading-tight'>
-        {getWelcomeMessage(userName, userRole)}
+        {getWelcomeMessage(displayName, userRole)}
       </h1>
       <p className='text-muted-foreground text-lg leading-relaxed'>
         {getSubtitle(userRole)}
