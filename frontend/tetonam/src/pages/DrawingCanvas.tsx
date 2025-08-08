@@ -2,21 +2,7 @@ import type Konva from 'konva';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Layer, Line, Stage } from 'react-konva';
 import { useNavigate } from 'react-router-dom';
-import { toast   // 그리기 종료
-  const handleMouseUp = useCallback(() => {
-    setIsDrawing(false);
-
-    // 히스토리에 현재 상태 저장 (실행취소용)
-    const newHistory = [...history];
-    const currentStepLines = stepsLines[currentStep];
-    if (currentStepLines) {
-      newHistory[currentStep] = [...currentStepLines];
-      setHistory(newHistory);
-
-      // 그리기 완료 후 자동저장 트리거
-      triggerAutoSave();
-    }
-  }, [history, stepsLines, currentStep, triggerAutoSave]);er';
+import { toast } from 'sonner';
 
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { CommonHeader } from '@/components/layout/CommonHeader';
@@ -26,8 +12,12 @@ import {
   MobileSidebarToggle,
   SidebarProvider,
 } from '@/components/ui/navigation/sidebar';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/overlay/tooltip';
-import { useAutoSave } from '@/hooks/useAutoSave';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/overlay/tooltip';
 import { useDrawingLocalStorage } from '@/hooks/useDrawingLocalStorage';
 import { usePageLeaveWarning } from '@/hooks/usePageLeaveWarning';
 import { usePreventDoubleClick } from '@/hooks/usePreventDoubleClick';
@@ -310,13 +300,6 @@ export const DrawingCanvas = () => {
     }
   }, [currentStep, user?.id, saveDrawing]);
 
-  // 자동저장 훅 (30초 후 자동 저장)
-  const { triggerAutoSave } = useAutoSave(
-    handleSave,
-    30000, // 30초
-    [currentLines.length] // 선이 추가될 때마다 트리거
-  );
-
   // 캔버스를 이미지로 변환
   const canvasToFile = useCallback(
     (dataURL: string, fileName: string): File => {
@@ -488,11 +471,17 @@ export const DrawingCanvas = () => {
                     {/* 저장 상태 표시 */}
                     <div className='mt-3 flex flex-col gap-1'>
                       {DRAWING_STEPS.map((step, index) => {
-                        const stepSaveState = saveStates[step.id as DrawingCategory];
+                        const stepSaveState =
+                          saveStates[step.id as DrawingCategory];
                         const isCurrent = index === currentStep;
                         return (
-                          <div key={step.id} className='flex items-center gap-2 text-xs'>
-                            <span className={`${isCurrent ? 'font-semibold text-yellow-600' : 'text-gray-500'}`}>
+                          <div
+                            key={step.id}
+                            className='flex items-center gap-2 text-xs'
+                          >
+                            <span
+                              className={`${isCurrent ? 'font-semibold text-yellow-600' : 'text-gray-500'}`}
+                            >
                               {step.title}
                             </span>
                             {stepSaveState?.status === 'saved' ? (
@@ -675,7 +664,10 @@ export const DrawingCanvas = () => {
                               onClick={handleNextStep}
                               disabled={
                                 currentStep === DRAWING_STEPS.length - 1 ||
-                                saveStates[DRAWING_STEPS[currentStep]?.id as DrawingCategory]?.status !== 'saved'
+                                saveStates[
+                                  DRAWING_STEPS[currentStep]
+                                    ?.id as DrawingCategory
+                                ]?.status !== 'saved'
                               }
                               className='flex items-center gap-2'
                             >
@@ -684,9 +676,14 @@ export const DrawingCanvas = () => {
                             </Button>
                           </div>
                         </TooltipTrigger>
-                        {saveStates[DRAWING_STEPS[currentStep]?.id as DrawingCategory]?.status !== 'saved' && (
+                        {saveStates[
+                          DRAWING_STEPS[currentStep]?.id as DrawingCategory
+                        ]?.status !== 'saved' && (
                           <TooltipContent side='top'>
-                            <p>현재 단계를 임시저장 후 다음 단계로 진행할 수 있습니다</p>
+                            <p>
+                              현재 단계를 임시저장 후 다음 단계로 진행할 수
+                              있습니다
+                            </p>
                           </TooltipContent>
                         )}
                       </Tooltip>
