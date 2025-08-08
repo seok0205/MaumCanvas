@@ -184,7 +184,7 @@ export const QuestionnaireForm = () => {
       <SidebarProvider>
         <AppSidebar />
         <div className='flex-1 flex flex-col'>
-          <CommonHeader user={user || { name: null, roles: [] }} />
+          <CommonHeader user={user || { roles: [] }} />
           <main className={questionnaireStyles.main}>
             <div className={questionnaireStyles.container}>
               <div className='flex items-center justify-center h-64'>
@@ -210,7 +210,7 @@ export const QuestionnaireForm = () => {
       <SidebarProvider>
         <AppSidebar />
         <div className='flex-1 flex flex-col'>
-          <CommonHeader user={user || { name: null, roles: [] }} />
+          <CommonHeader user={user || { roles: [] }} />
           <main className={questionnaireStyles.main}>
             <div className={questionnaireStyles.container}>
               <div className='text-center py-12'>
@@ -235,7 +235,7 @@ export const QuestionnaireForm = () => {
     <SidebarProvider>
       <AppSidebar />
       <div className='flex-1 flex flex-col'>
-        <CommonHeader user={user || { name: null, roles: [] }} />
+        <CommonHeader user={user || { roles: [] }} />
         <main className={questionnaireStyles.main}>
           <div className={questionnaireStyles.container}>
             {/* 헤더 영역 */}

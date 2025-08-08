@@ -2,6 +2,7 @@ import { Alert, AlertDescription } from '@/components/ui/feedback/alert';
 import { Button } from '@/components/ui/interactive/button';
 import { getUserRoleLabel } from '@/constants/userRoles';
 import { useAuthActions } from '@/hooks/useAuthActions';
+import { useUserHomeInfo } from '@/hooks/useUserHomeInfo';
 import { getPrimaryRole } from '@/utils/userRoleMapping';
 import { AlertCircle, ArrowLeft, Heart, LogOut, User, X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
@@ -10,7 +11,6 @@ import { useNavigate } from 'react-router-dom';
 // 타입 정의
 interface CommonHeaderProps {
   user: {
-    name: string | null;
     roles: string[];
   };
   showUserInfo?: boolean;
@@ -33,6 +33,11 @@ export const CommonHeader = ({
   const { logout } = useAuthActions();
   const navigate = useNavigate();
   const [logoutError, setLogoutError] = useState<string | null>(null);
+
+  // 사용자 정보 조회 (이름 가져오기)
+  const { userName, isLoading: isUserInfoLoading } = useUserHomeInfo({
+    enabled: showUserInfo, // showUserInfo가 true일 때만 API 호출
+  });
 
   // 에러 배너 자동 사라짐
   useEffect(() => {
@@ -122,14 +127,17 @@ export const CommonHeader = ({
                   size='sm'
                   onClick={handleMyPageClick}
                   className='flex items-center space-x-2 text-foreground hover:text-foreground hover:bg-accent'
-                  aria-label={`사용자 정보: ${user.name || '알 수 없는 사용자'}, 역할: ${getUserRoleLabel(primaryRole)}`}
+                  aria-label={`사용자 정보: ${userName || '알 수 없는 사용자'}, 역할: ${getUserRoleLabel(primaryRole)}`}
+                  disabled={isUserInfoLoading}
                 >
                   <User
                     className='h-5 w-5 text-muted-foreground'
                     aria-hidden='true'
                   />
                   <span className='max-w-24 truncate font-medium md:max-w-none'>
-                    {user.name || '알 수 없는 사용자'}
+                    {isUserInfoLoading
+                      ? '로딩 중...'
+                      : userName || '알 수 없는 사용자'}
                   </span>
                   <span className='hidden text-muted-foreground sm:inline'>
                     ({getUserRoleLabel(primaryRole)})
