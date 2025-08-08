@@ -67,6 +67,7 @@ public enum ErrorStatus implements BaseErrorCode {
     ALREADY_RAG(HttpStatus.INTERNAL_SERVER_ERROR,"DRAWING5002","이미 RAG서버 결과가 저장되어 있습니다."),
     NOT_FOUND_OBJECT(HttpStatus.INTERNAL_SERVER_ERROR,"DRAWING5003","객체탐지 AI서버 결과가 저장되지 않았습니다."),
 
+    //게시판 관련
     POST_LIST_EMPTY(HttpStatus.BAD_REQUEST, "BOARD4000", "없는 게시글입니다."),
     COMMENT_LIST_EMPTY(HttpStatus.BAD_REQUEST, "BOARD4001", "댓글을 찾을 수 없습니다.");
 
