@@ -107,7 +107,7 @@ export const authService = {
     try {
       const response = await apiClient.post<ApiResponse<RegisterResponse>>(
         AUTH_CONSTANTS.ENDPOINTS.REGISTER,
-        userData, // 이미 roles 배열이 포함되어 있음
+        userData, // roles 배열이 포함되어 백엔드 SignUpDto와 일치
         {
           headers: {
             'Content-Type': 'application/json',

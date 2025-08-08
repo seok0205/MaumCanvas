@@ -33,7 +33,7 @@ export interface RegisterCredentials {
     name: string;
   };
   birthday: string;
-  role: string; // 백엔드와 일치하도록 단일 role로 수정
+  roles: string[]; // 백엔드 SignUpDto와 일치하도록 roles 배열로 수정
 }
 
 export interface ResetPasswordData {

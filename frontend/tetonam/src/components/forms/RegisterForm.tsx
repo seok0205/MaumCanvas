@@ -320,7 +320,7 @@ export const RegisterForm = () => {
           name: selectedSchool.name,
         },
         birthday: data.birthDate,
-        role: selectedUserRole, // 단일 role로 직접 전송
+        roles: [selectedUserRole], // 단일 role을 배열로 변환하여 전송
       });
 
       if (!success) {
