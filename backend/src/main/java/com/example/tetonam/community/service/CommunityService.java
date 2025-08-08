@@ -122,7 +122,7 @@ public class CommunityService {
     public Page<PostPageDto> getPostPageById(int page, int size, String nickname){
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<Community> communityPage = communityRepository.findByNicknameOrderByIdDesc(nickname, pageable);
+        Page<Community> communityPage = communityRepository.findALLByNicknameOrderByIdDesc(nickname, pageable);
         if (communityPage.isEmpty()) {
             throw new BoardHandler(ErrorStatus.POST_LIST_EMPTY);
         }
