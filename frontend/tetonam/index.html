@@ -7,6 +7,42 @@
     <meta name="description" content="Tetonam Project" />
     <meta name="author" content="Tetonam" />
 
+    <!-- Critical font-face: define early to avoid FOUT before app CSS loads -->
+    <style id="critical-fonts">
+      @font-face {
+        font-family: 'Pretendard';
+        src: url('/fonts/Pretendard-Regular.woff2') format('woff2');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+        unicode-range: U+AC00-D7AF, U+0041-005A, U+0061-007A, U+0030-0039;
+      }
+      @font-face {
+        font-family: 'Pretendard';
+        src: url('/fonts/Pretendard-Medium.woff2') format('woff2');
+        font-weight: 500;
+        font-style: normal;
+        font-display: swap;
+        unicode-range: U+AC00-D7AF, U+0041-005A, U+0061-007A, U+0030-0039;
+      }
+      @font-face {
+        font-family: 'Pretendard';
+        src: url('/fonts/Pretendard-Bold.woff2') format('woff2');
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+        unicode-range: U+AC00-D7AF, U+0041-005A, U+0061-007A, U+0030-0039;
+      }
+      /* Optional: reduce synthetic font adjustments to avoid reflow differences */
+      html {
+        font-synthesis-weight: none;
+        font-synthesis-style: none;
+      }
+    </style>
+
+    <!-- Global CSS early load to reduce FOUC -->
+    <link rel="stylesheet" href="/src/index.css" />
+
     <!-- Pretendard Font Preload - FOUT 방지 -->
     <link
       rel="preload"
@@ -40,8 +76,27 @@
     <!-- <meta property="og:image" content="https://i13e108.p.ssafy.io/" /> -->
   </head>
 
-  <body>
+  <body class="font-loading">
     <div id="root"></div>
+    <script>
+      // When all fonts are ready, remove loading state for smoother swap.
+      (function () {
+        try {
+          if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(function () {
+              document.body.classList.remove('font-loading');
+              document.body.classList.add('font-loaded');
+            });
+          } else {
+            // Fallback: ensure we drop loading state quickly even without FontFaceSet
+            window.addEventListener('load', function () {
+              document.body.classList.remove('font-loading');
+              document.body.classList.add('font-loaded');
+            });
+          }
+        } catch (_) {}
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

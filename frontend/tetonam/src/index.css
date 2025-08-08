@@ -280,19 +280,10 @@
     font-feature-settings:
       'rlig' 1,
       'calt' 1;
-    /* 폰트 로딩 상태에 따른 동적 폰트 적용 */
+    /* 기본은 시스템 폰트. Pretendard는 .font-loaded 시점에 적용 */
     font-family:
-      'Pretendard',
-      -apple-system,
-      BlinkMacSystemFont,
-      'Apple SD Gothic Neo',
-      'Noto Sans KR',
-      'Malgun Gothic',
-      'Segoe UI',
-      Roboto,
-      'Helvetica Neue',
-      Arial,
-      sans-serif;
+      -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR',
+      'Malgun Gothic', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   }
 
   /* 부드러운 스크롤 */
