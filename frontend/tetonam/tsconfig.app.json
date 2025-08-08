@@ -33,7 +33,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "types": ["vite/client", "./types/fontaine"]
   },
   "include": ["src"]
 }

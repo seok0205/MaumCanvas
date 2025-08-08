@@ -1,4 +1,5 @@
 import react from '@vitejs/plugin-react';
+import { FontaineTransform } from 'fontaine';
 import path from 'path';
 import { defineConfig } from 'vite';
 
@@ -8,7 +9,22 @@ export default defineConfig(({ mode }) => ({
     host: '::',
     port: 3000,
   },
-  plugins: [react()],
+  plugins: [
+    react(),
+    FontaineTransform.vite({
+      // Prefer local Korean sans as fallbacks, applies to all fonts
+      fallbacks: [
+        'Noto Sans KR',
+        'Malgun Gothic',
+        'BlinkMacSystemFont',
+        'Segoe UI',
+        'Helvetica Neue',
+        'Arial',
+      ],
+      // Resolve font files served from Vite public dir
+      resolvePath: (id: string) => new URL(`./public${id}`, import.meta.url),
+    }),
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
