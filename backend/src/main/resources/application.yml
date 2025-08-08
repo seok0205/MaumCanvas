@@ -46,3 +46,6 @@ cloud:
 ai:
   server:
     url: ${AI_SERVER_URL}
+
+kakao:
+  client_id: ${KAKAO_CLIENT_ID}
