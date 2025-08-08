@@ -33,6 +33,20 @@
         font-display: swap;
         unicode-range: U+AC00-D7AF, U+0041-005A, U+0061-007A, U+0030-0039;
       }
+      /* Metric-overridden fallback to match Pretendard more closely */
+      @font-face {
+        font-family: 'Pretendard Fallback';
+        src:
+          local('Noto Sans KR'), local('Malgun Gothic'), local('Segoe UI'),
+          local('Arial');
+        /* Initial calibrated values to reduce small->large jump; refine if needed */
+        size-adjust: 102%;
+        ascent-override: 88%;
+        descent-override: 12%;
+        line-gap-override: 0%;
+        font-weight: 400 700;
+        font-style: normal;
+      }
       /* Optional: reduce synthetic font adjustments to avoid reflow differences */
       html {
         font-synthesis-weight: none;
