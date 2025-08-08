@@ -301,13 +301,6 @@ export const RegisterForm = () => {
 
   const { handleSubmit, isLoading } = useSubmitButton({
     mutationFn: async (data: RegisterFormData) => {
-      console.log('[RegisterForm] 회원가입 시작 - 검증 상태:', {
-        selectedUserRole,
-        selectedSchool: selectedSchool?.name,
-        isEmailVerified,
-        nicknameVerified,
-      });
-
       if (!selectedUserRole) {
         throw new Error('사용자 역할이 선택되지 않았습니다.');
       }
@@ -341,15 +334,9 @@ export const RegisterForm = () => {
         roles: [selectedUserRole],
       };
 
-      console.log('[RegisterForm] 최종 전송 데이터:', {
-        ...registerData,
-        password: '[HIDDEN]', // 비밀번호는 로그에서 숨김
-      });
-
       const success = await register(registerData);
 
       if (!success) {
-        console.error('[RegisterForm] 회원가입 실패 - success:', success);
         throw new Error('회원가입에 실패했습니다.');
       }
 
@@ -359,8 +346,7 @@ export const RegisterForm = () => {
       setRegisterResult({ isSuccess: true });
       setShowRegisterResultModal(true);
     },
-    onError: error => {
-      console.error('[RegisterForm] 회원가입 에러:', error?.message);
+    onError: () => {
       setRegisterResult({ isSuccess: false });
       setShowRegisterResultModal(true);
     },

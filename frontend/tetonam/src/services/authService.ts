@@ -104,24 +104,14 @@ export const authService = {
     userData: RegisterCredentials,
     signal?: AbortSignal
   ): Promise<RegisterResponse> => {
-    console.log('🌐 [authService] register 함수 진입');
-    console.log(
-      '📥 [authService] 받은 userData:',
-      JSON.stringify(userData, null, 2)
-    );
-
     try {
       // API 엔드포인트 확인
       const endpoint = AUTH_CONSTANTS.ENDPOINTS.REGISTER;
-      console.log('🎯 [authService] API 엔드포인트:', endpoint);
 
       // 요청 헤더 확인
       const headers = {
         'Content-Type': 'application/json',
       };
-      console.log('📋 [authService] 요청 헤더:', headers);
-
-      console.log('🔄 [authService] HTTP POST 요청 시작...');
 
       const response = await apiClient.post<ApiResponse<RegisterResponse>>(
         endpoint,
@@ -132,37 +122,13 @@ export const authService = {
         }
       );
 
-      console.log('📨 [authService] 응답 수신 완료');
-      console.log('📊 [authService] 응답 상태:', response.status);
-      console.log('📋 [authService] 응답 헤더:', response.headers);
-      console.log(
-        '📄 [authService] 응답 데이터:',
-        JSON.stringify(response.data, null, 2)
-      );
-
-      // 응답 구조 검증
-      console.log('🔍 [authService] 응답 구조 검증:');
-      console.log('  - response.data 존재:', !!response.data);
-      console.log('  - response.data.isSuccess:', response.data?.isSuccess);
-      console.log('  - response.data.result 존재:', !!response.data?.result);
-      console.log('  - response.data.code:', response.data?.code);
-      console.log('  - response.data.message:', response.data?.message);
-
       if (!response.data.isSuccess || !response.data.result) {
-        console.error('❌ [authService] 응답 검증 실패');
-        console.error('  - isSuccess:', response.data.isSuccess);
-        console.error('  - result:', response.data.result);
         throw new AuthenticationError(
           response.data.code || 'REGISTER_FAILED',
           '회원가입에 실패했습니다. 다시 시도해주세요.'
         );
       }
 
-      console.log('✅ [authService] 회원가입 성공');
-      console.log(
-        '📤 [authService] 반환 데이터:',
-        JSON.stringify(response.data.result, null, 2)
-      );
       return response.data.result;
     } catch (error) {
       if (error instanceof AuthenticationError) {
@@ -187,7 +153,6 @@ export const authService = {
       // API 에러 처리 (백엔드에서 반환하는 에러)
       if (axiosError.response?.data) {
         const apiError = axiosError.response.data;
-        console.error('회원가입 API 에러:', apiError);
 
         // 백엔드 API 문서의 에러 코드들에 대한 처리
         switch (apiError.code) {
@@ -223,7 +188,6 @@ export const authService = {
       }
 
       // 기타 예상치 못한 에러
-      console.error('회원가입 예상치 못한 에러:', error);
       throw new AuthenticationError(
         'REGISTER_FAILED',
         '회원가입에 실패했습니다. 다시 시도해주세요.'
