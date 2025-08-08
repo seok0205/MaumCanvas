@@ -1,8 +1,22 @@
 import type Konva from 'konva';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Layer, Line, Stage } from 'react-konva';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import { toast   // 그리기 종료
+  const handleMouseUp = useCallback(() => {
+    setIsDrawing(false);
+
+    // 히스토리에 현재 상태 저장 (실행취소용)
+    const newHistory = [...history];
+    const currentStepLines = stepsLines[currentStep];
+    if (currentStepLines) {
+      newHistory[currentStep] = [...currentStepLines];
+      setHistory(newHistory);
+
+      // 그리기 완료 후 자동저장 트리거
+      triggerAutoSave();
+    }
+  }, [history, stepsLines, currentStep, triggerAutoSave]);er';
 
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { CommonHeader } from '@/components/layout/CommonHeader';
@@ -12,18 +26,24 @@ import {
   MobileSidebarToggle,
   SidebarProvider,
 } from '@/components/ui/navigation/sidebar';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/overlay/tooltip';
+import { useAutoSave } from '@/hooks/useAutoSave';
+import { useDrawingLocalStorage } from '@/hooks/useDrawingLocalStorage';
+import { usePageLeaveWarning } from '@/hooks/usePageLeaveWarning';
 import { usePreventDoubleClick } from '@/hooks/usePreventDoubleClick';
 import { drawingService } from '@/services/drawingService';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { AuthenticationError } from '@/types/auth';
-import type { HTPImageFiles } from '@/types/drawing';
+import type { DrawingCategory, HTPImageFiles } from '@/types/drawing';
 import {
   ArrowLeft,
   ArrowRight,
+  CheckCircle,
   Palette,
   Save,
   Trash2,
   Undo,
+  XCircle,
 } from 'lucide-react';
 
 // 캔버스 설정 상수
@@ -99,6 +119,21 @@ export const DrawingCanvas = () => {
   // 더블 클릭 방지 훅
   const { isBlocked, preventDoubleClick } = usePreventDoubleClick();
 
+  // localStorage 관리 훅
+  const {
+    saveDrawing,
+    clearAllDrawings,
+    getSaveStates,
+    hasUnsavedChanges,
+    restoreFromStorage,
+  } = useDrawingLocalStorage(user?.id || '');
+
+  // 페이지 이탈 경고 훅
+  usePageLeaveWarning(
+    hasUnsavedChanges(),
+    '저장되지 않은 그림이 있습니다. 정말 페이지를 떠나시겠습니까?'
+  );
+
   // 현재 단계 상태
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -122,6 +157,20 @@ export const DrawingCanvas = () => {
 
   // 실행취소를 위한 히스토리
   const [history, setHistory] = useState<Array<Array<any>>>([[], [], [], []]);
+
+  // 저장 상태 추적
+  const saveStates = getSaveStates();
+
+  // 컴포넌트 마운트 시 저장된 데이터 복원
+  useEffect(() => {
+    if (user?.id) {
+      const restored = restoreFromStorage();
+      if (Object.keys(restored).length > 0) {
+        setSavedImages(restored);
+        toast.info('이전에 저장된 그림을 복원했습니다.');
+      }
+    }
+  }, [user?.id, restoreFromStorage]);
 
   // 임시저장된 이미지들
   const [savedImages, setSavedImages] = useState<Record<string, string>>({});
@@ -221,9 +270,12 @@ export const DrawingCanvas = () => {
     }
   }, [currentStep]);
 
-  // 임시저장
-  const handleSave = useCallback(() => {
-    if (!stageRef.current) return;
+  // 임시저장 (localStorage 사용)
+  const handleSave = useCallback(async () => {
+    if (!stageRef.current || !user?.id) {
+      toast.error('저장할 수 없습니다.');
+      return;
+    }
 
     const currentStepData = DRAWING_STEPS[currentStep];
     if (!currentStepData) return;
@@ -235,7 +287,12 @@ export const DrawingCanvas = () => {
         pixelRatio: CANVAS_CONFIG.PIXEL_RATIO,
       });
 
-      const stepId = currentStepData.id;
+      const stepId = currentStepData.id as DrawingCategory;
+
+      // localStorage에 저장
+      await saveDrawing(stepId, dataURL);
+
+      // 기존 메모리 저장도 유지 (하위 호환성)
       setSavedImages(prev => ({
         ...prev,
         [stepId]: dataURL,
@@ -244,9 +301,21 @@ export const DrawingCanvas = () => {
       toast.success(`${currentStepData.title} 임시저장 완료!`);
     } catch (error) {
       console.error('Save error:', error);
-      toast.error('임시저장 중 오류가 발생했습니다.');
+
+      if (error instanceof AuthenticationError) {
+        toast.error(error.message);
+      } else {
+        toast.error('임시저장 중 오류가 발생했습니다.');
+      }
     }
-  }, [currentStep]);
+  }, [currentStep, user?.id, saveDrawing]);
+
+  // 자동저장 훅 (30초 후 자동 저장)
+  const { triggerAutoSave } = useAutoSave(
+    handleSave,
+    30000, // 30초
+    [currentLines.length] // 선이 추가될 때마다 트리거
+  );
 
   // 캔버스를 이미지로 변환
   const canvasToFile = useCallback(
@@ -349,6 +418,9 @@ export const DrawingCanvas = () => {
 
       console.log('Drawing submission result:', result);
 
+      // 제출 성공 후 localStorage에서 모든 임시저장 데이터 삭제
+      clearAllDrawings();
+
       // 결과 페이지로 이동하거나 그림 진단 페이지로 돌아가기
       navigate('/diagnosis/drawing');
     } catch (error) {
@@ -411,6 +483,28 @@ export const DrawingCanvas = () => {
                           width: `${((currentStep + 1) / DRAWING_STEPS.length) * 100}%`,
                         }}
                       />
+                    </div>
+
+                    {/* 저장 상태 표시 */}
+                    <div className='mt-3 flex flex-col gap-1'>
+                      {DRAWING_STEPS.map((step, index) => {
+                        const stepSaveState = saveStates[step.id as DrawingCategory];
+                        const isCurrent = index === currentStep;
+                        return (
+                          <div key={step.id} className='flex items-center gap-2 text-xs'>
+                            <span className={`${isCurrent ? 'font-semibold text-yellow-600' : 'text-gray-500'}`}>
+                              {step.title}
+                            </span>
+                            {stepSaveState?.status === 'saved' ? (
+                              <CheckCircle className='w-3 h-3 text-green-500' />
+                            ) : stepSaveState?.status === 'saving' ? (
+                              <div className='w-3 h-3 border border-blue-500 border-t-transparent rounded-full animate-spin' />
+                            ) : (
+                              <XCircle className='w-3 h-3 text-gray-400' />
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
@@ -573,14 +667,30 @@ export const DrawingCanvas = () => {
                       그림 제출하기
                     </ApiButton>
                   ) : (
-                    <Button
-                      onClick={handleNextStep}
-                      disabled={currentStep === DRAWING_STEPS.length - 1}
-                      className='flex items-center gap-2'
-                    >
-                      다음 단계
-                      <ArrowRight className='w-4 h-4' />
-                    </Button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div>
+                            <Button
+                              onClick={handleNextStep}
+                              disabled={
+                                currentStep === DRAWING_STEPS.length - 1 ||
+                                saveStates[DRAWING_STEPS[currentStep]?.id as DrawingCategory]?.status !== 'saved'
+                              }
+                              className='flex items-center gap-2'
+                            >
+                              다음 단계
+                              <ArrowRight className='w-4 h-4' />
+                            </Button>
+                          </div>
+                        </TooltipTrigger>
+                        {saveStates[DRAWING_STEPS[currentStep]?.id as DrawingCategory]?.status !== 'saved' && (
+                          <TooltipContent side='top'>
+                            <p>현재 단계를 임시저장 후 다음 단계로 진행할 수 있습니다</p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    </TooltipProvider>
                   )}
                 </div>
               </div>

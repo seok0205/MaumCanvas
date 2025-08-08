@@ -57,3 +57,31 @@ export const DRAWING_CONFIG = {
     HUMAN_SECOND: 'humanImageSecondUrl',
   },
 } as const;
+
+// localStorage 관련 상수
+export const DRAWING_STORAGE = {
+  // localStorage 키 패턴
+  KEY_PREFIX: 'drawing',
+  KEY_PATTERN: (userId: string, stepId: string) =>
+    `drawing_${userId}_${stepId}`,
+
+  // 자동저장 설정
+  AUTO_SAVE_DELAY: 30000, // 30초
+
+  // 데이터 만료 시간
+  EXPIRY_TIME: 24 * 60 * 60 * 1000, // 24시간
+
+  // 이미지 품질 설정
+  IMAGE_QUALITY: 0.8, // localStorage 용량 최적화
+  IMAGE_FORMAT: 'image/jpeg' as const, // JPEG가 PNG보다 용량 작음
+} as const;
+
+// 저장 상태 타입
+export const SAVE_STATUS = {
+  SAVED: 'saved',
+  UNSAVED: 'unsaved',
+  SAVING: 'saving',
+  ERROR: 'error',
+} as const;
+
+export type SaveStatus = (typeof SAVE_STATUS)[keyof typeof SAVE_STATUS];
