@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 
 @Entity     // JPA가 이 클래스를 테이블로 인식
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -33,5 +32,7 @@ public class Community extends BaseTime {
     private int viewCount;
 
 
+    public void setTitle(String title){ this.title = title;}
+    public void setContent(String content){ this.content = content;}
 }
 

@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 
 @Entity     // JPA가 이 클래스를 테이블로 인식
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -30,5 +29,6 @@ public class Comment extends BaseTime {
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")
     private User author;
 
+    public void setContent(String content) {this.content = content;}
 
 }
