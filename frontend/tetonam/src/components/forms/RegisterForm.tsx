@@ -301,6 +301,13 @@ export const RegisterForm = () => {
 
   const { handleSubmit, isLoading } = useSubmitButton({
     mutationFn: async (data: RegisterFormData) => {
+      console.log('[RegisterForm] 회원가입 시작 - 검증 상태:', {
+        selectedUserRole,
+        selectedSchool: selectedSchool?.name,
+        isEmailVerified,
+        nicknameVerified,
+      });
+
       if (!selectedUserRole) {
         throw new Error('사용자 역할이 선택되지 않았습니다.');
       }
@@ -309,7 +316,18 @@ export const RegisterForm = () => {
         throw new Error('학교를 선택해주세요.');
       }
 
-      const success = await register({
+      // 이메일 인증 완료 확인
+      if (!isEmailVerified) {
+        throw new Error('이메일 인증을 완료해주세요.');
+      }
+
+      // 닉네임 중복 체크 완료 확인
+      if (!nicknameVerified || form.watch('nickname') !== verifiedNickname) {
+        throw new Error('닉네임 중복 체크를 완료해주세요.');
+      }
+
+      // 백엔드 구조에 맞게 데이터 준비
+      const registerData = {
         name: data.name,
         email: data.email,
         password: data.password,
@@ -320,10 +338,18 @@ export const RegisterForm = () => {
           name: selectedSchool.name,
         },
         birthday: data.birthDate,
-        roles: [selectedUserRole], // 단일 role을 배열로 변환하여 전송
+        roles: [selectedUserRole],
+      };
+
+      console.log('[RegisterForm] 최종 전송 데이터:', {
+        ...registerData,
+        password: '[HIDDEN]', // 비밀번호는 로그에서 숨김
       });
 
+      const success = await register(registerData);
+
       if (!success) {
+        console.error('[RegisterForm] 회원가입 실패 - success:', success);
         throw new Error('회원가입에 실패했습니다.');
       }
 
@@ -333,10 +359,10 @@ export const RegisterForm = () => {
       setRegisterResult({ isSuccess: true });
       setShowRegisterResultModal(true);
     },
-    onError: () => {
+    onError: error => {
+      console.error('[RegisterForm] 회원가입 에러:', error?.message);
       setRegisterResult({ isSuccess: false });
       setShowRegisterResultModal(true);
-      // 에러 메시지는 모달에서 처리
     },
   });
 
