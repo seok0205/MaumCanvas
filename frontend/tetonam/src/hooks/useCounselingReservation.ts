@@ -116,8 +116,9 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
       if (!selectedDate || !selectedTime) {
         return Promise.resolve([]);
       }
+      // 백엔드 FORMATTER와 일치하는 yyyyMMddHHmm 형식
       const dateTime =
-        format(selectedDate, 'yyyy-MM-dd') + 'T' + selectedTime + ':00';
+        format(selectedDate, 'yyyyMMdd') + selectedTime.replace(':', '');
       return counselingService.getAvailableCounselors(dateTime);
     },
     enabled: !!(selectedDate && selectedTime),
@@ -229,6 +230,7 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
       return;
     }
 
+    // Spring Boot JSON 역직렬화가 기대하는 ISO 8601 형식
     const dateTime =
       format(selectedDate, 'yyyy-MM-dd') + 'T' + selectedTime + ':00';
     const reservationData: CounselingReservationRequest = {
