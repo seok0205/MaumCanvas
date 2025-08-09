@@ -185,4 +185,3 @@ export const createApiCall = <T>(
 };
 
 export const apiClient = createApiClient();
-export default apiClient;
