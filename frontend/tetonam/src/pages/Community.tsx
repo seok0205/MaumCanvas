@@ -1,7 +1,8 @@
 import { Calendar, Eye, MessageCircle, Plus, Search, User } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { CommonHeader } from '@/components/layout/CommonHeader';
 import { Badge } from '@/components/ui/data-display/badge';
 import { Alert, AlertDescription } from '@/components/ui/feedback/alert';
 import { LoadingSpinner } from '@/components/ui/feedback/loading-spinner';
@@ -37,6 +38,37 @@ export const CommunityPage = ({}: CommunityPageProps) => {
     isFetchingNextPage,
   } = useCommunityPosts({});
 
+  // 무한 스크롤 관찰자
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!sentinelRef.current) return;
+    if (!hasNextPage) return; // 더 불러올 페이지 없으면 관찰 중단
+
+    const el = sentinelRef.current;
+    const observer = new IntersectionObserver(
+      entries => {
+        if (!entries || entries.length === 0) return;
+        const first = entries[0];
+        if (
+          first &&
+          first.isIntersecting &&
+          hasNextPage &&
+          !isFetchingNextPage
+        ) {
+          fetchNextPage();
+        }
+      },
+      {
+        root: null,
+        rootMargin: '0px 0px 240px 0px', // 미리 당겨 로드
+        threshold: 0.1,
+      }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
   // 새 글 작성
   const handleCreatePost = () => {
     navigate('/community/create');
@@ -47,12 +79,7 @@ export const CommunityPage = ({}: CommunityPageProps) => {
     navigate(`/community/${postId}`);
   };
 
-  // 더 보기
-  const handleLoadMore = () => {
-    if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  };
+  // 더보기 버튼 제거 (무한스크롤 전환)
 
   if (isLoading) {
     return (
@@ -72,7 +99,8 @@ export const CommunityPage = ({}: CommunityPageProps) => {
         <div className='container mx-auto px-4 py-8'>
           <Alert variant='destructive'>
             <AlertDescription>
-              게시글을 불러오는 중 오류가 발생했습니다. {(error as any)?.message}
+              게시글을 불러오는 중 오류가 발생했습니다.{' '}
+              {(error as any)?.message}
             </AlertDescription>
           </Alert>
         </div>
@@ -82,25 +110,20 @@ export const CommunityPage = ({}: CommunityPageProps) => {
 
   return (
     <div className='min-h-screen bg-warm-gradient'>
+      <CommonHeader user={user || { roles: [] }} title='커뮤니티' />
       <div className='container mx-auto px-4 py-8 max-w-6xl'>
-        {/* 헤더 */}
-        <div className='mb-8'>
-          <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
-            <div>
-              <h1 className='text-3xl font-bold text-slate-800 mb-2'>
-                커뮤니티
-              </h1>
-              <p className='text-slate-600'>마음을 나누고 함께 성장해요</p>
-            </div>
-            {user && (
-              <Button
-                onClick={handleCreatePost}
-                className='bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500 text-white font-medium px-6 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300'
-              >
-                <Plus className='w-4 h-4 mr-2' />새 글 작성
-              </Button>
-            )}
-          </div>
+        <div className='mb-6 flex items-center justify-between'>
+          <p className='text-slate-600 text-sm sm:text-base font-medium'>
+            마음을 나누고 함께 성장해요
+          </p>
+          {user && (
+            <Button
+              onClick={handleCreatePost}
+              className='bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500 text-white font-medium px-4 py-2 rounded-xl shadow-md hover:shadow-lg transition-all duration-300'
+            >
+              <Plus className='w-4 h-4 mr-2' />새 글 작성
+            </Button>
+          )}
         </div>
 
         {/* 필터 및 검색 */}
@@ -180,10 +203,15 @@ export const CommunityPage = ({}: CommunityPageProps) => {
                           <div className='flex items-center gap-1'>
                             <Calendar className='w-4 h-4' />
                             <span>
-                              {formatDistanceToNow(new Date(post.createdAt || new Date().toISOString()), {
-                                addSuffix: true,
-                                locale: ko,
-                              })}
+                              {formatDistanceToNow(
+                                new Date(
+                                  post.createdAt || new Date().toISOString()
+                                ),
+                                {
+                                  addSuffix: true,
+                                  locale: ko,
+                                }
+                              )}
                             </span>
                           </div>
                         </div>
@@ -203,26 +231,22 @@ export const CommunityPage = ({}: CommunityPageProps) => {
                 </Card>
               ))}
 
-              {/* 더 보기 버튼 */}
-              {hasNextPage && (
-                <div className='flex justify-center mt-8'>
-                  <Button
-                    onClick={handleLoadMore}
-                    disabled={isFetchingNextPage}
-                    variant='outline'
-                    className='px-8 py-3 text-slate-600 border-slate-200 hover:bg-slate-50'
-                  >
-                    {isFetchingNextPage ? (
-                      <>
-                        <LoadingSpinner size='sm' className='mr-2' />
-                        로딩 중...
-                      </>
-                    ) : (
-                      '더 보기'
-                    )}
-                  </Button>
-                </div>
-              )}
+              {/* 무한 스크롤 센티넬 */}
+              <div
+                ref={sentinelRef}
+                className='h-12 flex items-center justify-center'
+              >
+                {isFetchingNextPage && (
+                  <div className='flex items-center text-sm text-slate-500 gap-2'>
+                    <LoadingSpinner size='sm' /> 다음 글 불러오는 중...
+                  </div>
+                )}
+                {!hasNextPage && posts.posts.length > 0 && (
+                  <span className='text-xs text-slate-400'>
+                    모든 게시글을 다 보셨습니다 🎉
+                  </span>
+                )}
+              </div>
             </>
           ) : (
             <Card className='border-0 shadow-md bg-white/80 backdrop-blur-sm'>

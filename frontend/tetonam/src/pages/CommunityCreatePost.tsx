@@ -13,7 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/forms/select';
-import { Textarea } from '@/components/ui/forms/textarea';
+// 기존 Textarea 대신 경량 마크다운 에디터 사용
+import { MarkdownEditor } from '@/components/community/MarkdownEditor';
+import { CommonHeader } from '@/components/layout/CommonHeader';
 import { Button } from '@/components/ui/interactive/button';
 import {
   Card,
@@ -22,6 +24,7 @@ import {
   CardTitle,
 } from '@/components/ui/layout/card';
 import { useCreatePost } from '@/hooks/useCommunityMutations';
+import { useAuthStore } from '@/stores/useAuthStore';
 import type { CommunityCategory, PostWriteRequest } from '@/types/community';
 import { CATEGORY_LABELS, COMMUNITY_LIMITS } from '@/types/community';
 import {
@@ -33,6 +36,7 @@ import { mapCounselingTypeToCommunityCategory } from '@/utils/communityMapping';
 export const CommunityCreatePost = () => {
   const navigate = useNavigate();
   const createPostMutation = useCreatePost();
+  const { user } = useAuthStore();
 
   // 폼 상태
   const [formData, setFormData] = useState({
@@ -107,7 +111,12 @@ export const CommunityCreatePost = () => {
 
   return (
     <div className='min-h-screen bg-warm-gradient'>
-      <div className='container mx-auto px-4 py-8 max-w-4xl'>
+      <CommonHeader
+        user={user || { roles: [] }}
+        showBackButton
+        title='새 글 작성'
+      />
+      <div className='container mx-auto px-4 py-6 max-w-4xl'>
         {/* 상단 네비게이션 */}
         <div className='mb-6'>
           <Button
@@ -206,22 +215,19 @@ export const CommunityCreatePost = () => {
               </div>
             </div>
 
-            {/* 내용 입력 */}
+            {/* 내용 입력 (MarkdownEditor) */}
             <div className='space-y-3'>
               <Label className='text-sm font-medium text-slate-700'>
                 내용 <span className='text-red-500'>*</span>
               </Label>
-              <Textarea
+              <MarkdownEditor
                 value={formData.content}
-                onChange={e =>
-                  setFormData(prev => ({ ...prev, content: e.target.value }))
+                onChange={v => setFormData(prev => ({ ...prev, content: v }))}
+                placeholder={
+                  '내용을 입력하세요\n\n• 다른 사람을 배려하는 마음으로 작성해주세요\n• 개인정보나 민감한 정보는 포함하지 마세요\n• 건전하고 건설적인 소통을 지향합니다'
                 }
-                placeholder='내용을 입력하세요&#10;&#10;• 다른 사람을 배려하는 마음으로 작성해주세요&#10;• 개인정보나 민감한 정보는 포함하지 마세요&#10;• 건전하고 건설적인 소통을 지향합니다'
                 maxLength={COMMUNITY_LIMITS.CONTENT_MAX_LENGTH}
-                rows={12}
-                className={`border-slate-200 focus:border-orange-400 focus:ring-orange-400/20 resize-none ${
-                  errors['content'] ? 'border-red-500' : ''
-                }`}
+                height={360}
               />
               <div className='flex justify-between items-center'>
                 {errors['content'] && (

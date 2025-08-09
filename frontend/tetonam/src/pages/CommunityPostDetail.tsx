@@ -1,16 +1,20 @@
 import {
   ArrowLeft,
   Calendar,
+  Check,
   Edit,
   Eye,
   MessageCircle,
   MoreVertical,
+  Send,
   Trash2,
   User,
+  X,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import { CommonHeader } from '@/components/layout/CommonHeader';
 import { Badge } from '@/components/ui/data-display/badge';
 import { Alert, AlertDescription } from '@/components/ui/feedback/alert';
 import {
@@ -24,6 +28,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/feedback/alert-dialog';
 import { LoadingSpinner } from '@/components/ui/feedback/loading-spinner';
+import { Textarea } from '@/components/ui/forms/textarea';
 import { Button } from '@/components/ui/interactive/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/layout/card';
 import {
@@ -32,6 +37,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/navigation/dropdown-menu';
+import {
+  useComments,
+  useCreateComment,
+  useDeleteComment,
+  useUpdateComment,
+} from '@/hooks/useCommunityComments';
 import { useDeletePost } from '@/hooks/useCommunityMutations';
 import { useCommunityPost } from '@/hooks/useCommunityPost';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -49,6 +60,57 @@ export const CommunityPostDetail = () => {
   const postId = id ? parseInt(id, 10) : 0;
 
   const { data: post, isLoading, isError, error } = useCommunityPost(postId);
+  const { data: comments, isLoading: commentsLoading } = useComments(
+    postId,
+    true
+  );
+  const createCommentMutation = useCreateComment(postId);
+  const updateCommentMutation = useUpdateComment(postId);
+  const deleteCommentMutation = useDeleteComment(postId);
+
+  const [commentContent, setCommentContent] = useState('');
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+  const [editingContent, setEditingContent] = useState('');
+
+  const handleSubmitComment = () => {
+    if (!commentContent.trim()) return;
+    createCommentMutation.mutate(
+      { content: commentContent.trim() },
+      {
+        onSuccess: () => {
+          setCommentContent('');
+        },
+      }
+    );
+  };
+
+  const startEditComment = (id: number, existing: string) => {
+    setEditingCommentId(id);
+    setEditingContent(existing);
+  };
+  const cancelEditComment = () => {
+    setEditingCommentId(null);
+    setEditingContent('');
+  };
+  const submitEditComment = () => {
+    if (!editingCommentId) return;
+    if (!editingContent.trim()) return;
+    updateCommentMutation.mutate(
+      { id: editingCommentId, data: { content: editingContent.trim() } },
+      {
+        onSuccess: () => {
+          cancelEditComment();
+        },
+      }
+    );
+  };
+  const handleDeleteComment = (id: number) => {
+    deleteCommentMutation.mutate(id, {
+      onSuccess: () => {
+        if (editingCommentId === id) cancelEditComment();
+      },
+    });
+  };
 
   const deletePostMutation = useDeletePost();
 
@@ -93,7 +155,8 @@ export const CommunityPostDetail = () => {
         <div className='container mx-auto px-4 py-8'>
           <Alert variant='destructive'>
             <AlertDescription>
-              게시글을 불러오는 중 오류가 발생했습니다. {(error as any)?.message}
+              게시글을 불러오는 중 오류가 발생했습니다.{' '}
+              {(error as any)?.message}
             </AlertDescription>
           </Alert>
         </div>
@@ -103,16 +166,20 @@ export const CommunityPostDetail = () => {
 
   return (
     <div className='min-h-screen bg-warm-gradient'>
-      <div className='container mx-auto px-4 py-8 max-w-4xl'>
+      <CommonHeader
+        user={user || { roles: [] }}
+        showBackButton
+        title='게시글 상세'
+      />
+      <div className='container mx-auto px-4 py-6 max-w-4xl'>
         {/* 상단 네비게이션 */}
-        <div className='mb-6'>
+        <div className='mb-2'>
           <Button
             onClick={handleGoBack}
             variant='ghost'
-            className='text-slate-600 hover:text-slate-800 p-0 h-auto mb-4'
+            className='text-slate-600 hover:text-slate-800 p-0 h-auto'
           >
-            <ArrowLeft className='w-4 h-4 mr-2' />
-            목록으로 돌아가기
+            <ArrowLeft className='w-4 h-4 mr-2' /> 목록으로
           </Button>
         </div>
 
@@ -208,14 +275,153 @@ export const CommunityPostDetail = () => {
             <div className='flex items-center gap-2'>
               <MessageCircle className='w-5 h-5 text-slate-600' />
               <h2 className='text-lg font-semibold text-slate-800'>댓글</h2>
-              <span className='text-sm text-slate-500'>0</span>
+              <span className='text-sm text-slate-500'>
+                {comments?.length || 0}
+              </span>
             </div>
           </CardHeader>
 
-          <CardContent>
-            {/* TODO: 댓글 목록 및 작성 폼 구현 */}
-            <div className='text-center py-8 text-slate-500'>
-              댓글 기능은 곧 추가될 예정입니다.
+          <CardContent className='space-y-6'>
+            {/* 작성 폼 */}
+            {user && (
+              <div className='space-y-2'>
+                <Textarea
+                  placeholder='댓글을 입력하세요'
+                  value={commentContent}
+                  onChange={e => setCommentContent(e.target.value)}
+                  maxLength={1000}
+                  rows={4}
+                  className='resize-none focus-visible:ring-orange-400/30'
+                />
+                <div className='flex justify-between items-center'>
+                  <span className='text-xs text-slate-500'>
+                    {commentContent.length}/1000
+                  </span>
+                  <Button
+                    onClick={handleSubmitComment}
+                    disabled={
+                      createCommentMutation.isPending || !commentContent.trim()
+                    }
+                    className='bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500 text-white'
+                    size='sm'
+                  >
+                    {createCommentMutation.isPending ? (
+                      '작성 중...'
+                    ) : (
+                      <>
+                        <Send className='w-4 h-4 mr-1' />
+                        작성
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* 목록 */}
+            <div className='space-y-4'>
+              {commentsLoading && (
+                <div className='flex items-center gap-2 text-slate-500 text-sm'>
+                  <LoadingSpinner size='sm' /> 불러오는 중...
+                </div>
+              )}
+              {!commentsLoading && comments && comments.length === 0 && (
+                <div className='text-center py-6 text-slate-400 text-sm'>
+                  첫 댓글을 남겨보세요.
+                </div>
+              )}
+              {comments &&
+                comments.map(c => {
+                  const isEditing = editingCommentId === c.id;
+                  const isOwner =
+                    user && user.nickname && user.nickname === c.nickname;
+                  return (
+                    <div
+                      key={c.id}
+                      className='group rounded-lg border border-slate-100 bg-white/60 hover:bg-white/80 transition p-4 shadow-sm'
+                    >
+                      <div className='flex justify-between items-start mb-2'>
+                        <div className='flex items-center gap-2 text-sm text-slate-600'>
+                          <User className='w-4 h-4' />
+                          <span className='font-medium'>{c.nickname}</span>
+                          <span className='text-slate-400'>
+                            •{' '}
+                            {formatDistanceToNow(new Date(c.createdAt), {
+                              addSuffix: true,
+                              locale: ko,
+                            })}
+                          </span>
+                        </div>
+                        {isOwner && !isEditing && (
+                          <div className='flex gap-1 opacity-0 group-hover:opacity-100 transition'>
+                            <Button
+                              variant='ghost'
+                              size='icon'
+                              className='h-7 w-7'
+                              onClick={() => startEditComment(c.id, c.content)}
+                            >
+                              <Edit className='w-3 h-3' />
+                            </Button>
+                            <Button
+                              variant='ghost'
+                              size='icon'
+                              className='h-7 w-7 text-red-500 hover:text-red-600'
+                              onClick={() => handleDeleteComment(c.id)}
+                              disabled={deleteCommentMutation.isPending}
+                            >
+                              <Trash2 className='w-3 h-3' />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                      {!isEditing && (
+                        <p className='text-sm whitespace-pre-wrap text-slate-700 leading-relaxed'>
+                          {c.content}
+                        </p>
+                      )}
+                      {isEditing && (
+                        <div className='space-y-2'>
+                          <Textarea
+                            value={editingContent}
+                            onChange={e => setEditingContent(e.target.value)}
+                            rows={4}
+                            maxLength={1000}
+                            className='resize-none focus-visible:ring-orange-400/30'
+                          />
+                          <div className='flex justify-end gap-2'>
+                            <Button
+                              variant='outline'
+                              size='sm'
+                              onClick={cancelEditComment}
+                              disabled={updateCommentMutation.isPending}
+                            >
+                              <X className='w-4 h-4 mr-1' />
+                              취소
+                            </Button>
+                            <Button
+                              size='sm'
+                              onClick={submitEditComment}
+                              disabled={
+                                updateCommentMutation.isPending ||
+                                !editingContent.trim()
+                              }
+                              className='bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500 text-white'
+                            >
+                              {updateCommentMutation.isPending ? (
+                                '저장 중...'
+                              ) : (
+                                <>
+                                  <Check className='w-4 h-4 mr-1' />
+                                  저장
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
             </div>
           </CardContent>
         </Card>
