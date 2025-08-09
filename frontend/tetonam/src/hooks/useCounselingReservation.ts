@@ -116,9 +116,9 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
       if (!selectedDate || !selectedTime) {
         return Promise.resolve([]);
       }
-      // 백엔드 FORMATTER와 일치하는 yyyyMMddHHmm 형식
+      // Spring Boot LocalDateTime 기본 파싱 형식 (ISO Local DateTime)
       const dateTime =
-        format(selectedDate, 'yyyyMMdd') + selectedTime.replace(':', '');
+        format(selectedDate, 'yyyy-MM-dd') + 'T' + selectedTime + ':00';
       return counselingService.getAvailableCounselors(dateTime);
     },
     enabled: !!(selectedDate && selectedTime),
