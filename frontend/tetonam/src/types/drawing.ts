@@ -56,3 +56,70 @@ export interface UseDrawingLocalStorageReturn {
   hasUnsavedChanges: () => boolean;
   restoreFromStorage: () => Record<DrawingCategory, string>;
 }
+
+// ========== 캔버스 그리기 관련 타입 ==========
+
+// 그리기 선 데이터 타입
+export interface DrawingLine {
+  readonly id: number;
+  points: number[];
+  stroke: string;
+  strokeWidth: number;
+  globalCompositeOperation: 'source-over' | 'destination-out';
+}
+
+// 캔버스 크기 타입
+export interface CanvasSize {
+  readonly width: number;
+  readonly height: number;
+}
+
+// 그리기 도구 타입
+export type DrawingTool = 'pen' | 'eraser';
+
+// 브러시 크기 타입
+export type BrushSize = 2 | 5;
+
+// 색상 타입 (COLOR_PALETTE에서 가져온 색상들)
+export type DrawingColor =
+  | '#000000'
+  | '#FF0000'
+  | '#00FF00'
+  | '#0000FF'
+  | '#FFFF00'
+  | '#FF00FF'
+  | '#00FFFF'
+  | '#FFA500'
+  | '#800080'
+  | '#FFC0CB'
+  | '#A52A2A'
+  | '#808080'
+  | '#000080'
+  | '#008000'
+  | '#800000';
+
+// 그리기 단계 데이터 타입
+export interface DrawingStep {
+  readonly id: DrawingCategory;
+  readonly title: string;
+  readonly description: string;
+  readonly instruction: string;
+}
+
+// 각 단계별 선 데이터 타입
+export type StepLines = Array<Array<DrawingLine>>;
+
+// Redo 스택 타입
+export type RedoStacks = Array<Array<DrawingLine>>;
+
+// 히스토리 타입 (실행취소용)
+export type History = Array<Array<DrawingLine>>;
+
+// 저장된 이미지들 타입
+export type SavedImages = Record<DrawingCategory, string>;
+
+// 마우스/터치 이벤트 포지션 타입
+export interface PointerPosition {
+  readonly x: number;
+  readonly y: number;
+}
