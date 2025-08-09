@@ -1,5 +1,5 @@
 def toString(result, category):
-    if len(result) <= 5:
+    if len(result) <= 3:
         return "그림에서 분석할 수 있는 요소가 발견되지 않았습니다. 그림을 다시 그려주세요."
     counts = {}
     for x in result:

@@ -31,10 +31,12 @@ async def predict_json_s3(url, category):
         class_names = class_names_house
 
     img_np = s3imageLoader(url)
+    orig_height, orig_width = img_np.shape[:2]
+
     _, results = run_inference(img_np, model, class_names, visualize=False)
     # 일단 필터 빼
     # filtered_result = nms_filter(results)
-    calc_result = calc(results)
+    calc_result = calc(results, orig_width, orig_height)
     stringVal = toString(calc_result, category)
     return stringVal
 
@@ -64,7 +66,7 @@ async def predict_json(file: UploadFile = File(...), category: str = Form(...)):
 
 @router.post("/image")
 async def predict_image(file: UploadFile = File(...), category: str = Form(...)):
-    if category == "PERSON1" or "PERSON2":
+    if category in ("PERSON1", "PERSON2"):
         model = personModel
         class_names = class_names_person
     elif category == "TREE":
