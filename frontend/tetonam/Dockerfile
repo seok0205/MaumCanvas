@@ -16,6 +16,9 @@ RUN pnpm run build
 
 FROM nginx:stable-alpine
 
+# Brotli 모듈 설치 (alpine 패키지 사용)
+RUN apk add --no-cache nginx-mod-http-brotli
+
 # Nginx 기본 index.html 경로로 빌드 결과 복사
 COPY --from=builder /app/dist /usr/share/nginx/html
 

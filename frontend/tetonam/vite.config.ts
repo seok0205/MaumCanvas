@@ -33,6 +33,13 @@ export default defineConfig(({ mode }) => ({
       threshold: 1024, // 1KB 이상 파일만 압축
       deleteOriginFile: false, // 원본 파일 유지
     }),
+    // Brotli 압축 추가 (gzip보다 높은 압축률)
+    compression({
+      algorithm: 'brotliCompress',
+      ext: '.br',
+      threshold: 1024,
+      deleteOriginFile: false,
+    }),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['MaumCanvasLogo.png', 'fonts/*.woff2'],
