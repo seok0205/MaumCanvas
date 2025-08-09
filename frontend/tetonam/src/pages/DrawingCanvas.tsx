@@ -72,11 +72,16 @@ const DrawingCanvas = memo(() => {
     useDrawingHandlers();
 
   // localStorage 관리 훅
-  const { getSaveStates, hasUnsavedChanges, restoreFromStorage } =
+  const { getSaveStates, hasUnsavedChanges, restoreFromStorage, saveDrawing } =
     useDrawingLocalStorage(user?.id || '');
 
   // 저장 기능
-  const { handleSave } = useDrawingSave(stageRef, reActivateButtonRef);
+  // 기존 동일 훅 인스턴스의 saveDrawing 사용 (중복 인스턴스 생성으로 인한 상태 불일치 방지)
+  const { handleSave } = useDrawingSave(
+    stageRef,
+    reActivateButtonRef,
+    saveDrawing
+  );
 
   // 제출 기능
   const { handleSubmit } = useDrawingSubmit(stageRef);

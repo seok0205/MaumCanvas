@@ -4,23 +4,22 @@ import { toast } from 'sonner';
 
 import { CANVAS_CONFIG, DRAWING_STEPS } from '@/constants/drawing';
 import { useCompressedLines } from '@/hooks/useCompressedLines';
-import { useDrawingLocalStorage } from '@/hooks/useDrawingLocalStorage';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useDrawingStore } from '@/stores/useDrawingStore';
 import { useUIStore } from '@/stores/useUIStore';
 import { AuthenticationError } from '@/types/auth';
 import type { DrawingCategory } from '@/types/drawing';
 
+// saveDrawing 함수를 외부(동일 훅 인스턴스)에서 주입하도록 변경하여
+// 중복 useDrawingLocalStorage 인스턴스로 인한 saveStates 불일치 문제 해결
 export const useDrawingSave = (
   stageRef: React.RefObject<Konva.Stage | null>,
-  reActivateButtonRef: React.RefObject<HTMLButtonElement | null>
+  reActivateButtonRef: React.RefObject<HTMLButtonElement | null>,
+  saveDrawing: (stepId: DrawingCategory, dataURL: string) => Promise<boolean>
 ) => {
   const { user } = useAuthStore();
   const { currentStep, stepsLines, updateSavedImage } = useDrawingStore();
-
   const { deactivateEditing, triggerSaveAnimation } = useUIStore();
-
-  const { saveDrawing } = useDrawingLocalStorage(user?.id || '');
   const { compress } = useCompressedLines();
 
   // 임시저장 (localStorage 사용)
