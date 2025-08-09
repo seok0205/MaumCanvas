@@ -152,6 +152,3 @@ export const DRAWING_STEPS = [
 
 // 브러시 도구 설정 (연필/볼펜 정도의 두께만 제공)
 export const BRUSH_SIZES = [2, 5] as const;
-
-// A4 비율 상수
-export const A4_RATIO = 1.4142; // 높이 / 너비 (A4 세로 비율)

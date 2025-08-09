@@ -27,6 +27,12 @@ export type CounselingRagResponse = string;
 // Drawing 카테고리 타입 (백엔드의 DrawingCategory enum에 정확히 맞춤)
 export type DrawingCategory = 'HOME' | 'TREE' | 'PERSON1' | 'PERSON2';
 
+// 캔버스 크기 타입 (StageSize와 CanvasSize 통합)
+export interface StageSize {
+  readonly width: number;
+  readonly height: number;
+}
+
 // localStorage 저장 데이터 타입
 export interface SavedDrawingData {
   readonly dataURL: string;
@@ -66,12 +72,6 @@ export interface DrawingLine {
   stroke: string;
   strokeWidth: number;
   globalCompositeOperation: 'source-over' | 'destination-out';
-}
-
-// 캔버스 크기 타입
-export interface CanvasSize {
-  readonly width: number;
-  readonly height: number;
 }
 
 // 그리기 도구 타입
