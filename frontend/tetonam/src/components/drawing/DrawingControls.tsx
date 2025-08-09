@@ -1,4 +1,5 @@
-import React from 'react';
+import { memo, useCallback } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 
 import { ApiButton } from '@/components/ui/ApiButton';
 import { Button } from '@/components/ui/interactive/button';
@@ -9,19 +10,17 @@ import {
   TooltipTrigger,
 } from '@/components/ui/overlay/tooltip';
 import { DRAWING_STEPS } from '@/constants/drawing';
-import type { DrawingLine, StepSaveStates } from '@/types/drawing';
+import { useDrawingStore } from '@/stores/useDrawingStore';
+import { useUIStore } from '@/stores/useUIStore';
+import type { StepSaveStates } from '@/types/drawing';
 import { ArrowLeft, ArrowRight, Palette } from 'lucide-react';
 
 interface DrawingControlsProps {
-  currentStep: number;
-  isEditingActive: boolean;
-  isSubmitting: boolean;
-  isBlocked: boolean;
-  stepsLines: DrawingLine[][];
   saveStates: StepSaveStates;
   onPrevStep: () => void;
   onNextStep: () => void;
   onSubmit: () => void;
+  isBlocked: boolean;
   canGoNext: (saveStates: StepSaveStates) => boolean;
 }
 
@@ -29,19 +28,36 @@ interface DrawingControlsProps {
  * 네비게이션 버튼과 제출 버튼을 담당하는 컴포넌트
  * 단일 책임: 단계 이동과 제출 컨트롤만 처리
  */
-const DrawingControls = React.memo<DrawingControlsProps>(
-  ({
-    currentStep,
-    isEditingActive,
-    isSubmitting,
-    isBlocked,
-    stepsLines,
-    saveStates,
-    onPrevStep,
-    onNextStep,
-    onSubmit,
-    canGoNext,
-  }) => {
+const DrawingControls = memo<DrawingControlsProps>(
+  ({ saveStates, onPrevStep, onNextStep, onSubmit, isBlocked, canGoNext }) => {
+    // 스토어에서 필요한 상태들을 useShallow로 최적화하여 가져오기
+    const { currentStep, stepsLines, isSubmitting } = useDrawingStore(
+      useShallow(state => ({
+        currentStep: state.currentStep,
+        stepsLines: state.stepsLines,
+        isSubmitting: state.isSubmitting,
+      }))
+    );
+
+    const { isEditingActive } = useUIStore(
+      useShallow(state => ({
+        isEditingActive: state.isEditingActive,
+      }))
+    );
+
+    // 메모이즈된 핸들러들
+    const handlePrevStep = useCallback(() => {
+      onPrevStep();
+    }, [onPrevStep]);
+
+    const handleNextStep = useCallback(() => {
+      onNextStep();
+    }, [onNextStep]);
+
+    const handleSubmit = useCallback(() => {
+      onSubmit();
+    }, [onSubmit]);
+
     // 편집 중에는 네비게이션 숨김
     if (isEditingActive) {
       return null;
@@ -51,7 +67,7 @@ const DrawingControls = React.memo<DrawingControlsProps>(
       <div className='mt-2 md:mt-4 flex justify-between'>
         <Button
           variant='outline'
-          onClick={onPrevStep}
+          onClick={handlePrevStep}
           disabled={currentStep === 0}
           className='flex items-center gap-2'
         >
@@ -61,9 +77,10 @@ const DrawingControls = React.memo<DrawingControlsProps>(
         <div className='flex gap-3'>
           {currentStep === DRAWING_STEPS.length - 1 ? (
             <ApiButton
-              onClick={onSubmit}
+              onClick={handleSubmit}
               disabled={
-                isBlocked || stepsLines.some(lines => lines.length === 0)
+                isBlocked ||
+                stepsLines.some((lines: any[]) => lines.length === 0)
               }
               isLoading={isSubmitting}
               loadingText='제출 중...'
@@ -77,7 +94,7 @@ const DrawingControls = React.memo<DrawingControlsProps>(
                 <TooltipTrigger asChild>
                   <div>
                     <Button
-                      onClick={onNextStep}
+                      onClick={handleNextStep}
                       disabled={
                         currentStep === DRAWING_STEPS.length - 1 ||
                         !canGoNext(saveStates)

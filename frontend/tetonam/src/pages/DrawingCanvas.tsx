@@ -1,12 +1,12 @@
 import type Konva from 'konva';
-import { useCallback, useEffect, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 
 import { DrawingControls } from '@/components/drawing/DrawingControls';
 import { DrawingStage } from '@/components/drawing/DrawingStage';
 import { DrawingStepHeader } from '@/components/drawing/DrawingStepHeader';
 import { DrawingThumbnails } from '@/components/drawing/DrawingThumbnails';
-import DrawingToolbar from '@/components/drawing/DrawingToolbar';
+import { DrawingToolbar } from '@/components/drawing/DrawingToolbar';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { CommonHeader } from '@/components/layout/CommonHeader';
 import {
@@ -29,9 +29,8 @@ import { useDrawingStore } from '@/stores/useDrawingStore';
 import { useUIStore } from '@/stores/useUIStore';
 import type { DrawingCategory } from '@/types/drawing';
 
-// 컴포넌트 상태
-
-const DrawingCanvas = () => {
+// 컴포넌트 정의
+const DrawingCanvas = memo(() => {
   const { user } = useAuthStore();
   const stageRef = useRef<Konva.Stage>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
@@ -43,34 +42,21 @@ const DrawingCanvas = () => {
   const {
     currentStep,
     stepsLines,
-    redoStacks,
     savedImages,
-    isSubmitting,
     setCurrentStep,
     setSavedImages,
     setStepsLines,
     goToPrevStep,
     goToNextStep,
-    undo,
-    redo,
-    clearCurrentStep,
   } = useDrawingStore();
 
   const {
     isEditingActive,
     showSizeOptions,
     showColorOptions,
-    isEraser,
-    brushSize,
-    brushColor,
     stageSize,
     saveAnimationKey,
     setIsEditingActive,
-    setShowSizeOptions,
-    setShowColorOptions,
-    setIsEraser,
-    setBrushSize,
-    setBrushColor,
     setStageSize,
     closeAllPopovers,
   } = useUIStore();
@@ -94,6 +80,11 @@ const DrawingCanvas = () => {
 
   // 제출 기능
   const { handleSubmit } = useDrawingSubmit(stageRef);
+
+  // 저장 상태 추적
+  const saveStates = getSaveStates();
+
+  const { decompress } = useCompressedLines();
 
   // 캔버스 크기 관리 훅
   useCanvasResize({
@@ -128,24 +119,6 @@ const DrawingCanvas = () => {
     hasUnsavedChanges(),
     '저장되지 않은 그림이 있습니다. 정말 페이지를 떠나시겠습니까?'
   );
-
-  // 저장 상태 추적
-  const saveStates = getSaveStates();
-
-  const { decompress } = useCompressedLines();
-
-  // Action handlers for toolbar
-  const handleUndo = useCallback(() => {
-    undo();
-  }, [undo]);
-
-  const handleRedo = useCallback(() => {
-    redo();
-  }, [redo]);
-
-  const handleClear = useCallback(() => {
-    clearCurrentStep();
-  }, [clearCurrentStep]);
 
   // 기존 이미지 + 압축 라인 복원 (초기 마운트)
   useEffect(() => {
@@ -237,25 +210,9 @@ const DrawingCanvas = () => {
               {isEditingActive && (
                 <div className='mb-4 md:mb-6 bg-white rounded-lg border border-gray-200 p-3 md:p-4 relative'>
                   <DrawingToolbar
-                    isEraser={isEraser}
-                    setIsEraser={setIsEraser}
-                    brushSize={brushSize}
-                    setBrushSize={setBrushSize}
-                    brushColor={brushColor}
-                    setBrushColor={setBrushColor}
-                    showSizeOptions={showSizeOptions}
-                    setShowSizeOptions={setShowSizeOptions}
-                    showColorOptions={showColorOptions}
-                    setShowColorOptions={setShowColorOptions}
                     sizePopoverRef={sizePopoverRef}
                     colorPopoverRef={colorPopoverRef}
-                    handleUndo={handleUndo}
-                    handleRedo={handleRedo}
-                    handleClear={handleClear}
                     handleSave={handleSave}
-                    currentLines={currentLines}
-                    redoStacks={redoStacks}
-                    currentStep={currentStep}
                   />
                 </div>
               )}
@@ -281,15 +238,11 @@ const DrawingCanvas = () => {
 
               {/* 네비게이션 버튼 */}
               <DrawingControls
-                currentStep={currentStep}
-                isEditingActive={isEditingActive}
-                isSubmitting={isSubmitting}
-                isBlocked={isBlocked}
-                stepsLines={stepsLines}
                 saveStates={saveStates}
                 onPrevStep={handlePrevStep}
                 onNextStep={handleNextStep}
                 onSubmit={preventDoubleClick(handleSubmit)}
+                isBlocked={isBlocked}
                 canGoNext={canGoNext}
               />
             </div>
@@ -301,7 +254,8 @@ const DrawingCanvas = () => {
       </div>
     </SidebarProvider>
   );
-};
+});
+
+DrawingCanvas.displayName = 'DrawingCanvas';
 
 export { DrawingCanvas };
-export default DrawingCanvas;

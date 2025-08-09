@@ -1,5 +1,5 @@
 import type Konva from 'konva';
-import React from 'react';
+import { memo, useCallback } from 'react';
 import { Layer, Line, Stage } from 'react-konva';
 
 import { Button } from '@/components/ui/interactive/button';
@@ -24,7 +24,7 @@ interface DrawingStageProps {
  * Konva Stage와 캔버스 렌더링을 담당하는 컴포넌트
  * 단일 책임: 캔버스 렌더링과 기본 상호작용만 처리
  */
-const DrawingStage = React.memo<DrawingStageProps>(
+const DrawingStage = memo<DrawingStageProps>(
   ({
     stageRef,
     stageSize,
@@ -38,6 +38,11 @@ const DrawingStage = React.memo<DrawingStageProps>(
     reActivateButtonRef,
   }) => {
     const reduceMotion = useReducedMotion();
+
+    // 메모이즈된 핸들러
+    const handleReactivate = useCallback(() => {
+      onReactivate();
+    }, [onReactivate]);
 
     return (
       <div
@@ -80,7 +85,7 @@ const DrawingStage = React.memo<DrawingStageProps>(
           <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
             <Button
               ref={reActivateButtonRef}
-              onClick={onReactivate}
+              onClick={handleReactivate}
               className={`flex items-center gap-2 pointer-events-auto bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-4 rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition ${
                 reduceMotion ? '' : 'origin-center motion-safe:animate-none'
               } ${reduceMotion ? '' : 'save-scale-in'}`}
