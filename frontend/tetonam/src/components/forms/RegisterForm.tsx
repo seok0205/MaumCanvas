@@ -3,9 +3,16 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 // 2. 외부 라이브러리
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertTriangle, CheckCircle, Loader2, Mail } from 'lucide-react';
+import {
+  AlertTriangle,
+  ArrowLeft,
+  CheckCircle,
+  Heart,
+  Loader2,
+  Mail,
+} from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
 // 3. 내부 모듈
@@ -17,7 +24,6 @@ import {
   PhoneField,
 } from '@/components/forms/RegisterFormFields';
 import { ApiButton } from '@/components/ui/ApiButton';
-import { FormLayout } from '@/components/ui/forms/FormLayout';
 import { Input } from '@/components/ui/forms/input';
 import { PasswordInput } from '@/components/ui/forms/PasswordInput';
 import { PrivacyNotice } from '@/components/ui/forms/PrivacyNotice';
@@ -451,252 +457,320 @@ export const RegisterForm = () => {
   ]);
 
   return (
-    <FormLayout title='회원가입'>
-      <PrivacyNotice className='mb-6' />
-
-      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
-        <NameField form={form} />
-
-        {/* 학교 검색 */}
-        <div className='space-y-2'>
-          <Label htmlFor='school' className='text-foreground font-medium'>
-            학교 *
-          </Label>
-          <SchoolSearchInput
-            value={schoolSearchValue}
-            onChange={setSchoolSearchValue}
-            onSelect={school => {
-              setSelectedSchool(school);
-              setSchoolSearchValue(school.name);
-            }}
-            placeholder='학교명을 입력하세요'
-            className='w-full'
-          />
-          {selectedSchool && (
-            <div className='mt-1 text-sm text-green-600'>
-              선택된 학교: {selectedSchool.name}
-            </div>
-          )}
-        </div>
-
-        <BirthDateField
-          form={form}
-          currentDate={currentDate}
-          validateBirthDate={validateBirthDate}
-        />
-
-        {/* 이메일 */}
-        <div className='space-y-2'>
-          <Label htmlFor='email' className='text-foreground font-medium'>
-            이메일
-          </Label>
-          <div className='flex space-x-2'>
-            <div className='relative flex-1'>
-              <Mail className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 pointer-events-none' />
-              <Input
-                id='email'
-                type='email'
-                placeholder='이메일을 입력하세요'
-                className='pl-10'
-                {...form.register('email')}
-              />
-            </div>
-            <Button
-              type='button'
-              onClick={() => sendEmailVerification(form.getValues('email'))}
-              disabled={
-                !form.watch('email') ||
-                emailLoading ||
-                isEmailBlocked ||
-                isEmailVerified
-              }
-              variant='outline'
-              size='sm'
-              className='whitespace-nowrap'
+    <div className='flex flex-col items-center justify-center min-h-screen p-6 bg-gradient-to-br from-mint/10 via-yellow/5 to-light-blue/10'>
+      <div className='w-full max-w-4xl mx-auto'>
+        <div className='p-8 shadow-card border border-border/30 bg-card/90 backdrop-blur-sm rounded-xl'>
+          {/* 뒤로가기 버튼과 제목 */}
+          <div className='flex items-center justify-between mb-8'>
+            <Link
+              to='/user-role-selection'
+              className='text-muted-foreground hover:text-foreground transition-colors duration-200 p-2 rounded-xl hover:bg-muted/50'
+              aria-label='이전 페이지로 돌아가기'
             >
-              {emailLoading ? (
-                <Loader2 className='w-4 h-4 animate-spin' />
-              ) : isEmailSent ? (
-                '재발송'
-              ) : (
-                '인증번호 발송'
-              )}
-            </Button>
+              <ArrowLeft className='w-6 h-6' />
+            </Link>
+            <div className='flex items-center'>
+              <Heart className='w-6 h-6 text-mint mr-3' />
+              <h1 className='text-xl font-bold text-foreground'>회원가입</h1>
+            </div>
+            <div className='w-6' />
           </div>
-          {form.formState.errors.email && (
-            <p className='text-destructive text-sm'>
-              {form.formState.errors.email.message}
-            </p>
-          )}
-          {emailError && (
-            <p className='text-destructive text-sm'>{emailError}</p>
-          )}
-          {emailSuccessMessage && (
-            <p className='text-green-600 text-sm'>{emailSuccessMessage}</p>
-          )}
-        </div>
 
-        {/* 이메일 인증 코드 */}
-        {isEmailSent && !isEmailVerified && (
-          <div className='space-y-2'>
-            <Label
-              htmlFor='emailVerificationCode'
-              className='text-foreground font-medium'
-            >
-              인증번호
-            </Label>
-            <div className='flex space-x-2'>
-              <Input
-                id='emailVerificationCode'
-                type='text'
-                placeholder='인증번호 6자리를 입력하세요'
-                maxLength={6}
-                className='flex-1'
-                {...form.register('emailVerificationCode')}
-              />
-              {form.formState.errors.emailVerificationCode && (
-                <p className='text-destructive text-sm'>
-                  {form.formState.errors.emailVerificationCode.message}
-                </p>
-              )}
-              <Button
-                type='button'
-                onClick={handleEmailVerification}
-                disabled={
-                  !form.watch('emailVerificationCode') ||
-                  emailLoading ||
-                  isEmailBlocked
-                }
-                variant='outline'
-                size='sm'
-                className='whitespace-nowrap'
-              >
-                {emailLoading ? (
-                  <Loader2 className='w-4 h-4 animate-spin' />
-                ) : (
-                  '인증 확인'
+          <PrivacyNotice className='mb-6' />
+
+          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+            {/* 2열 그리드 레이아웃 with 구분선 */}
+            <div className='grid grid-cols-1 lg:grid-cols-[1fr_1px_1fr] gap-8 lg:gap-12'>
+              {/* 왼쪽: 개인정보 섹션 */}
+              <div className='space-y-6 min-h-[500px]'>
+                <div className='border-b border-gray-200 pb-3 mb-6'>
+                  <h3 className='font-semibold text-lg text-foreground'>
+                    개인정보
+                  </h3>
+                  <p className='text-sm text-muted-foreground mt-1'>
+                    기본 개인정보를 입력해주세요
+                  </p>
+                </div>
+
+                <NameField form={form} />
+
+                <BirthDateField
+                  form={form}
+                  currentDate={currentDate}
+                  validateBirthDate={validateBirthDate}
+                />
+
+                <GenderField form={form} />
+
+                <PhoneField form={form} />
+
+                {/* 학교 검색 */}
+                <div className='space-y-2'>
+                  <Label
+                    htmlFor='school'
+                    className='text-foreground font-medium'
+                  >
+                    학교 *
+                  </Label>
+                  <SchoolSearchInput
+                    value={schoolSearchValue}
+                    onChange={setSchoolSearchValue}
+                    onSelect={school => {
+                      setSelectedSchool(school);
+                      setSchoolSearchValue(school.name);
+                    }}
+                    placeholder='학교명을 입력하세요'
+                    className='w-full'
+                  />
+                  {selectedSchool && (
+                    <div className='mt-1 text-sm text-green-600'>
+                      선택된 학교: {selectedSchool.name}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* 구분선 (데스크톱에서만 표시) */}
+              <div className='hidden lg:block bg-gray-200'></div>
+
+              {/* 오른쪽: 계정정보 섹션 */}
+              <div className='space-y-6 min-h-[500px]'>
+                <div className='border-b border-gray-200 pb-3 mb-6'>
+                  <h3 className='font-semibold text-lg text-foreground'>
+                    계정정보
+                  </h3>
+                  <p className='text-sm text-muted-foreground mt-1'>
+                    로그인을 위한 계정정보를 설정해주세요
+                  </p>
+                </div>
+
+                {/* 이메일 */}
+                <div className='space-y-2'>
+                  <Label
+                    htmlFor='email'
+                    className='text-foreground font-medium'
+                  >
+                    이메일
+                  </Label>
+                  <div className='flex space-x-2'>
+                    <div className='relative flex-1'>
+                      <Mail className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 pointer-events-none' />
+                      <Input
+                        id='email'
+                        type='email'
+                        placeholder='이메일을 입력하세요'
+                        className='pl-10'
+                        {...form.register('email')}
+                      />
+                    </div>
+                    <Button
+                      type='button'
+                      onClick={() =>
+                        sendEmailVerification(form.getValues('email'))
+                      }
+                      disabled={
+                        !form.watch('email') ||
+                        emailLoading ||
+                        isEmailBlocked ||
+                        isEmailVerified
+                      }
+                      variant='outline'
+                      size='sm'
+                      className='whitespace-nowrap'
+                    >
+                      {emailLoading ? (
+                        <Loader2 className='w-4 h-4 animate-spin' />
+                      ) : isEmailSent ? (
+                        '재발송'
+                      ) : (
+                        '인증번호 발송'
+                      )}
+                    </Button>
+                  </div>
+                  {form.formState.errors.email && (
+                    <p className='text-destructive text-sm'>
+                      {form.formState.errors.email.message}
+                    </p>
+                  )}
+                  {emailError && (
+                    <p className='text-destructive text-sm'>{emailError}</p>
+                  )}
+                  {emailSuccessMessage && (
+                    <p className='text-green-600 text-sm'>
+                      {emailSuccessMessage}
+                    </p>
+                  )}
+                </div>
+
+                {/* 이메일 인증 코드 */}
+                {isEmailSent && !isEmailVerified && (
+                  <div className='space-y-2'>
+                    <Label
+                      htmlFor='emailVerificationCode'
+                      className='text-foreground font-medium'
+                    >
+                      인증번호
+                    </Label>
+                    <div className='flex space-x-2'>
+                      <Input
+                        id='emailVerificationCode'
+                        type='text'
+                        placeholder='인증번호 6자리를 입력하세요'
+                        maxLength={6}
+                        className='flex-1'
+                        {...form.register('emailVerificationCode')}
+                      />
+                      {form.formState.errors.emailVerificationCode && (
+                        <p className='text-destructive text-sm'>
+                          {form.formState.errors.emailVerificationCode.message}
+                        </p>
+                      )}
+                      <Button
+                        type='button'
+                        onClick={handleEmailVerification}
+                        disabled={
+                          !form.watch('emailVerificationCode') ||
+                          emailLoading ||
+                          isEmailBlocked
+                        }
+                        variant='outline'
+                        size='sm'
+                        className='whitespace-nowrap'
+                      >
+                        {emailLoading ? (
+                          <Loader2 className='w-4 h-4 animate-spin' />
+                        ) : (
+                          '인증 확인'
+                        )}
+                      </Button>
+                    </div>
+                    <div
+                      id='verification-code-help'
+                      className='text-muted-foreground text-xs'
+                    >
+                      * 입력하신 이메일로 인증번호가 발송됩니다.
+                      {verificationAttempts > 0 && (
+                        <span className='text-orange-600 ml-2' role='alert'>
+                          남은 시도:{' '}
+                          {FORM_CONSTANTS.EMAIL.VERIFICATION_ATTEMPTS -
+                            verificationAttempts}
+                          회
+                        </span>
+                      )}
+                    </div>
+                    <div
+                      id='verification-status'
+                      aria-live='polite'
+                      className='sr-only'
+                    >
+                      {isEmailBlocked &&
+                        '인증이 차단되었습니다. 페이지를 새로고침 후 다시 시도해주세요.'}
+                    </div>
+                  </div>
                 )}
-              </Button>
-            </div>
-            <div
-              id='verification-code-help'
-              className='text-muted-foreground text-xs'
-            >
-              * 입력하신 이메일로 인증번호가 발송됩니다.
-              {verificationAttempts > 0 && (
-                <span className='text-orange-600 ml-2' role='alert'>
-                  남은 시도:{' '}
-                  {FORM_CONSTANTS.EMAIL.VERIFICATION_ATTEMPTS -
-                    verificationAttempts}
-                  회
-                </span>
-              )}
-            </div>
-            <div
-              id='verification-status'
-              aria-live='polite'
-              className='sr-only'
-            >
-              {isEmailBlocked &&
-                '인증이 차단되었습니다. 페이지를 새로고침 후 다시 시도해주세요.'}
-            </div>
-          </div>
-        )}
 
-        {/* 이메일 인증 성공 상태 표시 */}
-        {isEmailSent && isEmailVerified && (
-          <div className='space-y-2'>
-            <div className='flex items-center space-x-2 p-3 bg-green-50 border border-green-200 rounded-lg'>
-              <CheckCircle className='w-5 h-5 text-green-600 flex-shrink-0' />
-              <div className='flex-1'>
-                <p className='text-green-800 text-sm font-medium'>
-                  이메일 인증이 완료되었습니다
-                </p>
+                {/* 이메일 인증 성공 상태 표시 */}
+                {isEmailSent && isEmailVerified && (
+                  <div className='space-y-2'>
+                    <div className='flex items-center space-x-2 p-3 bg-green-50 border border-green-200 rounded-lg'>
+                      <CheckCircle className='w-5 h-5 text-green-600 flex-shrink-0' />
+                      <div className='flex-1'>
+                        <p className='text-green-800 text-sm font-medium'>
+                          이메일 인증이 완료되었습니다
+                        </p>
+                      </div>
+                    </div>
+                    <div
+                      id='verification-success-status'
+                      aria-live='polite'
+                      className='sr-only'
+                    >
+                      이메일 인증이 완료되었습니다. 인증된 이메일:{' '}
+                      {form.watch('email')}
+                    </div>
+                  </div>
+                )}
+
+                {/* 비밀번호 */}
+                <PasswordInput
+                  label='비밀번호'
+                  {...form.register('password')}
+                  error={form.formState.errors.password?.message || undefined}
+                />
+                <div className='text-xs text-muted-foreground space-y-1'>
+                  <p>비밀번호 조건:</p>
+                  <ul className='list-disc list-inside space-y-1'>
+                    <li>8-15자리</li>
+                    <li>영문, 숫자, 특수문자 포함</li>
+                  </ul>
+                </div>
+
+                {/* 비밀번호 확인 */}
+                <PasswordInput
+                  label='비밀번호 확인'
+                  {...form.register('confirmPassword')}
+                  error={
+                    form.formState.errors.confirmPassword?.message || undefined
+                  }
+                />
+
+                {/* 닉네임 */}
+                <div className='space-y-2'>
+                  <NicknameField
+                    form={form}
+                    onCheckNickname={handleNicknameCheck}
+                    isLoading={nicknameLoading}
+                    isVerified={
+                      nicknameVerified &&
+                      form.watch('nickname') === verifiedNickname
+                    }
+                  />
+                  {nicknameError && (
+                    <p className='text-destructive text-sm'>{nicknameError}</p>
+                  )}
+                  {nicknameSuccessMessage && (
+                    <p className='text-green-600 text-sm'>
+                      {nicknameSuccessMessage}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
-            <div
-              id='verification-success-status'
-              aria-live='polite'
-              className='sr-only'
-            >
-              이메일 인증이 완료되었습니다. 인증된 이메일: {form.watch('email')}
+
+            {/* 회원가입 버튼 - 전체 너비 */}
+            <div className='pt-4'>
+              <ApiButton
+                type='submit'
+                isLoading={isLoading}
+                loadingText='회원가입 중...'
+                disabled={isSubmitDisabled}
+                onClick={() => {}} // 폼 제출은 onSubmit에서 처리되므로 빈 함수
+                className='w-full bg-primary hover:bg-primary-dark text-primary-foreground py-3 rounded-full shadow-soft font-medium text-lg'
+              >
+                회원가입
+                {isSubmitDisabled && (
+                  <span className='ml-2 text-xs'>(양식을 완성해주세요)</span>
+                )}
+              </ApiButton>
             </div>
-          </div>
-        )}
+          </form>
 
-        <PhoneField form={form} />
-
-        {/* 비밀번호 */}
-        <PasswordInput
-          label='비밀번호'
-          {...form.register('password')}
-          error={form.formState.errors.password?.message || undefined}
-        />
-        <div className='text-xs text-muted-foreground space-y-1'>
-          <p>비밀번호 조건:</p>
-          <ul className='list-disc list-inside space-y-1'>
-            <li>8-15자리</li>
-            <li>영문, 숫자, 특수문자 포함</li>
-          </ul>
-        </div>
-
-        {/* 비밀번호 확인 */}
-        <PasswordInput
-          label='비밀번호 확인'
-          {...form.register('confirmPassword')}
-          error={form.formState.errors.confirmPassword?.message || undefined}
-        />
-
-        <GenderField form={form} />
-
-        {/* 닉네임 */}
-        <div className='space-y-2'>
-          <NicknameField
-            form={form}
-            onCheckNickname={handleNicknameCheck}
-            isLoading={nicknameLoading}
-            isVerified={
-              nicknameVerified && form.watch('nickname') === verifiedNickname
-            }
+          {/* 회원가입 결과 모달 */}
+          <RegisterResultDialog
+            isOpen={showRegisterResultModal}
+            onClose={handleRegisterResultClose}
+            isSuccess={registerResult.isSuccess}
+            onLoginClick={handleLoginClick}
           />
-          {nicknameError && (
-            <p className='text-destructive text-sm'>{nicknameError}</p>
-          )}
-          {nicknameSuccessMessage && (
-            <p className='text-green-600 text-sm'>{nicknameSuccessMessage}</p>
-          )}
+
+          {/* 인증 실패 모달 */}
+          <AuthenticationFailureDialog
+            isOpen={showAuthFailureModal}
+            onClose={handleAuthFailureClose}
+            onRetry={handleAuthFailureRetry}
+          />
         </div>
-
-        {/* 회원가입 버튼 */}
-        <ApiButton
-          type='submit'
-          isLoading={isLoading}
-          loadingText='회원가입 중...'
-          disabled={isSubmitDisabled}
-          onClick={() => {}} // 폼 제출은 onSubmit에서 처리되므로 빈 함수
-          className='w-full bg-primary hover:bg-primary-dark text-primary-foreground py-3 rounded-full shadow-soft font-medium text-lg'
-        >
-          회원가입
-          {isSubmitDisabled && (
-            <span className='ml-2 text-xs'>(양식을 완성해주세요)</span>
-          )}
-        </ApiButton>
-      </form>
-
-      {/* 회원가입 결과 모달 */}
-      <RegisterResultDialog
-        isOpen={showRegisterResultModal}
-        onClose={handleRegisterResultClose}
-        isSuccess={registerResult.isSuccess}
-        onLoginClick={handleLoginClick}
-      />
-
-      {/* 인증 실패 모달 */}
-      <AuthenticationFailureDialog
-        isOpen={showAuthFailureModal}
-        onClose={handleAuthFailureClose}
-        onRetry={handleAuthFailureRetry}
-      />
-    </FormLayout>
+      </div>
+    </div>
   );
 };
