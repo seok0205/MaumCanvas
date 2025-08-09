@@ -59,7 +59,7 @@ export const DiagnosisCard = ({
         </h3>
       </div>
 
-      <p className='text-sm text-gray-600 mb-6 flex-1 leading-relaxed'>
+  <p className='text-sm text-gray-600 mb-6 flex-1 leading-relaxed line-clamp-3'>
         {category.description}
       </p>
 

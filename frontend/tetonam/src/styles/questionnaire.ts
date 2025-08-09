@@ -33,10 +33,14 @@ export const questionnaireStyles = {
 
   // 옵션 스타일
   option: {
-    base: 'flex items-center space-x-3 p-3 rounded-lg border transition-all duration-200 cursor-pointer hover:bg-muted/50',
+    base: 'flex items-center space-x-3 p-3 rounded-lg border transition-all duration-200 cursor-pointer hover:bg-muted/50 min-h-[4rem] md:min-h-[3.5rem]',
     selected: 'border-primary bg-primary/10',
     unselected: 'border-border',
   },
+
+  // 옵션 라벨 스타일 (line-clamp 지원 + fallback)
+  optionLabel:
+    'flex-1 text-sm font-medium cursor-pointer leading-relaxed line-clamp-3 overflow-hidden',
 
   // 버튼 스타일
   submitButton: 'px-12 py-3 text-lg font-semibold',
