@@ -11,7 +11,8 @@ export const usePreventDoubleClick = (
   delay = 1000
 ): UsePreventDoubleClickReturn => {
   const isBlockedRef = useRef(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Node/브라우저 환경 모두 호환되도록 반환 타입 추론 사용
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const preventDoubleClick = useCallback(
     <T extends (...args: any[]) => any>(callback: T) => {

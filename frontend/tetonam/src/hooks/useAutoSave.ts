@@ -11,7 +11,8 @@ export const useAutoSave = (
   delay: number = 30000, // 30초
   dependencies: React.DependencyList = []
 ) => {
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Node/브라우저 환경 모두 호환되도록 반환 타입 추론 사용
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isEnabledRef = useRef(true);
 
   // 자동저장 실행

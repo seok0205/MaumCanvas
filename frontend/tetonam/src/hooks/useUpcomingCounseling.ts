@@ -3,7 +3,6 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import type { UpcomingCounseling } from '@/types/api';
 import { AuthenticationError } from '@/types/auth';
 import {
-  createErrorLogData,
   generateUserFriendlyMessage,
   isRetryableError as isErrorRetryable,
 } from '@/utils/counselingErrorHandler';
@@ -31,7 +30,8 @@ export const useUpcomingCounseling = (): UseUpcomingCounselingReturn => {
   const [retryCount, setRetryCount] = useState(0);
   const [isRetrying, setIsRetrying] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // 브라우저 환경 호환을 위해 NodeJS.Timeout 대신 반환 타입 추론 사용
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // 인증 상태 확인
   const { isAuthenticated, user } = useAuthStore();
@@ -93,16 +93,7 @@ export const useUpcomingCounseling = (): UseUpcomingCounselingReturn => {
         ) {
           setRetryCount(prev => prev + 1);
 
-          // 에러 로깅 (개발 환경에서만)
-          if (process.env['NODE_ENV'] === 'development') {
-            console.warn(
-              'Retrying upcoming counseling fetch:',
-              createErrorLogData(err, {
-                retryCount: retryCount + 1,
-                maxRetries: MAX_RETRIES,
-              })
-            );
-          }
+          // (개발 전용 로깅 제거)
 
           // 지수적 백오프로 지연 후 재시도
           const delay =

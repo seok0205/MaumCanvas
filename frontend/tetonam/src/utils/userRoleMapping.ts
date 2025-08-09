@@ -8,13 +8,8 @@ import type { UserRole } from '@/constants/userRoles';
 export const getPrimaryRole = (
   roles: string[] | undefined | null
 ): UserRole => {
-  // 더 엄격한 유효성 검사
   if (!roles || !Array.isArray(roles) || roles.length === 0) {
-    // 개발 환경에서만 경고 출력
-    if (process.env['NODE_ENV'] === 'development') {
-      console.warn('getPrimaryRole: 유효하지 않은 roles 배열:', roles);
-    }
-    return 'USER'; // 기본값
+    return 'USER';
   }
 
   // 역할 검증 함수
@@ -26,11 +21,7 @@ export const getPrimaryRole = (
   const validRoles = roles.filter(isValidRole);
 
   if (validRoles.length === 0) {
-    // 개발 환경에서만 경고 출력
-    if (process.env['NODE_ENV'] === 'development') {
-      console.warn('getPrimaryRole: 유효한 역할이 없음:', roles);
-    }
-    return 'USER'; // 기본값
+    return 'USER';
   }
 
   // 우선순위: COUNSELOR > ADMIN > USER
@@ -44,10 +35,6 @@ export const getPrimaryRole = (
     return 'USER';
   }
 
-  // 알 수 없는 role인 경우 경고 및 기본값 반환
-  if (process.env['NODE_ENV'] === 'development') {
-    console.warn('getPrimaryRole: 알 수 없는 role들:', validRoles);
-  }
   return 'USER';
 };
 

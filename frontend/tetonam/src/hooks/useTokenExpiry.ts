@@ -21,8 +21,7 @@ const decodeToken = (token: string): TokenPayload | null => {
         .join('')
     );
     return JSON.parse(jsonPayload);
-  } catch (error) {
-    console.error('토큰 디코딩 실패:', error);
+  } catch {
     return null;
   }
 };
@@ -45,12 +44,12 @@ const isTokenExpired = (): boolean => {
 
 export const useTokenExpiry = () => {
   const { logout } = useAuthStore();
-  const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  // 브라우저/Node 환경 모두 호환되도록 반환 타입 추론 사용
+  const checkIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     const checkTokenExpiry = () => {
       if (isTokenExpired()) {
-        console.warn('토큰이 만료되었습니다. 자동 로그아웃을 실행합니다.');
         logout();
         // 로그인 페이지로 리다이렉트
         window.location.href = '/login';

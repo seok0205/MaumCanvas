@@ -3,6 +3,7 @@ import {
   COMMUNITY_ERROR_MESSAGES,
 } from '@/constants/community';
 import type { CommunityCategory, PostSortType } from '@/types/community';
+import { isValidCommunityCategory } from '@/types/community';
 
 // === 유효성 검사 함수 ===
 
@@ -59,13 +60,8 @@ export const validateCategory = (category: string): string | null => {
     return COMMUNITY_ERROR_MESSAGES.CATEGORY_REQUIRED;
   }
 
-  const validCategories: CommunityCategory[] = [
-    'STUDY',
-    'HOBBY',
-    'TALK',
-    'QNA',
-  ];
-  if (!validCategories.includes(category as CommunityCategory)) {
+  // 중앙 타입 정의의 유효성 검사 함수 사용 (백엔드 enum과 동기화됨)
+  if (!isValidCommunityCategory(category)) {
     return COMMUNITY_ERROR_MESSAGES.INVALID_CATEGORY;
   }
 

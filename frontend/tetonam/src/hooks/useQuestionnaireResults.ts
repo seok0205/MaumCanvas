@@ -1,20 +1,23 @@
 import { getAllCategoriesQuestionnaireResults } from '@/services/questionnaireService';
-import type { QuestionnaireCategory, QuestionnaireResult } from '@/types/api';
+import type {
+  QuestionnaireCategory as QuestionnaireCategoryKey,
+  QuestionnaireResult,
+} from '@/types/api';
 import { useQuery } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
 
 const MAX_RETRIES = 5;
 const RETRY_DELAY = 2000; // 2초
 
-// 카테고리별 결과 타입 정의
-type CategoryResults = Record<QuestionnaireCategory, QuestionnaireResult[]>;
+// 서비스에서 반환하는 객체는 한글 카테고리명을 키로 사용하므로 string 인덱스
+type CategoryResults = Record<string, QuestionnaireResult[]>;
 
 export const useQuestionnaireResults = () => {
   const [retryCount, setRetryCount] = useState(0);
   const [selectedCategory, setSelectedCategory] =
-    useState<QuestionnaireCategory>('스트레스');
+    useState<QuestionnaireCategoryKey>('스트레스');
 
-  const categories: QuestionnaireCategory[] = [
+  const categories: QuestionnaireCategoryKey[] = [
     '스트레스',
     '우울',
     '불안',
@@ -30,9 +33,23 @@ export const useQuestionnaireResults = () => {
     queryKey: ['questionnaire-results', categories],
     queryFn: async (): Promise<CategoryResults> => {
       try {
-        const results = await getAllCategoriesQuestionnaireResults(categories);
-        setRetryCount(0); // 성공 시 재시도 카운트 리셋
-        return results;
+        const raw = await getAllCategoriesQuestionnaireResults(
+          categories as unknown as any[]
+        );
+        // 서비스 결과(CategoryQuestionnaireResult[])를 QuestionnaireResult[]로 정규화
+        const normalized: CategoryResults = {};
+        Object.entries(raw).forEach(([k, arr]) => {
+          normalized[k] = (arr as any[]).map(item => ({
+            category: k,
+            score:
+              typeof item.score === 'number'
+                ? item.score
+                : parseInt(item.score, 10) || 0,
+            createdDate: item.createdDate,
+          }));
+        });
+        setRetryCount(0);
+        return normalized;
       } catch (error) {
         setRetryCount(prev => prev + 1);
         throw error;
@@ -58,7 +75,7 @@ export const useQuestionnaireResults = () => {
   }, [refetch]);
 
   const getCategoryResults = useCallback(
-    (category: QuestionnaireCategory): QuestionnaireResult[] => {
+    (category: QuestionnaireCategoryKey): QuestionnaireResult[] => {
       return allResults?.[category] || [];
     },
     [allResults]
@@ -74,8 +91,8 @@ export const useQuestionnaireResults = () => {
   }, [allResults]);
 
   const getCategoryDisplayName = useCallback(
-    (category: QuestionnaireCategory): string => {
-      return category; // API 문서와 일치하므로 카테고리명 그대로 사용
+    (category: QuestionnaireCategoryKey): string => {
+      return category;
     },
     []
   );

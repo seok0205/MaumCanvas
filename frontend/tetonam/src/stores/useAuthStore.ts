@@ -41,8 +41,15 @@ export const useAuthStore = create<AuthState>()(
             // 토큰에서 받은 role 배열을 그대로 사용
             const tokenRoles = tokenResponse.role || [];
 
-            // JWT 토큰의 role 정보를 사용 (my-info API는 역할 판단에 불필요)
-            const finalRoles = tokenRoles.filter((role): role is UserRole =>
+            // 백엔드 enum은 ROLE_USER 형태를 반환하므로 정규화
+            const normalizeRole = (r: string): string => {
+              if (r.startsWith('ROLE_')) return r.replace('ROLE_', '');
+              return r;
+            };
+            const normalized = tokenRoles.map(normalizeRole);
+
+            // 정규화 후 프론트 UserRole로 필터
+            const finalRoles = normalized.filter((role): role is UserRole =>
               ['USER', 'COUNSELOR', 'ADMIN'].includes(role)
             );
 
@@ -126,6 +133,18 @@ export const useAuthStore = create<AuthState>()(
             const response = await authService.register(userData);
 
             // 회원가입 성공 시 안전한 사용자 정보 생성
+            // 백엔드 회원가입 DTO가 roles 배열을 제공하므로 이를 검증 후 사용
+            const rawRoles: string[] = Array.isArray(userData.roles)
+              ? userData.roles
+              : [];
+            const normalizeRole = (r: string): string =>
+              r.startsWith('ROLE_') ? r.replace('ROLE_', '') : r;
+            const roles: UserRole[] = rawRoles
+              .map(normalizeRole)
+              .filter((r): r is UserRole =>
+                ['USER', 'COUNSELOR', 'ADMIN'].includes(r)
+              );
+
             const user: User = {
               id: response.id.toString(),
               email: userData.email,
@@ -135,7 +154,7 @@ export const useAuthStore = create<AuthState>()(
               phone: userData.phone,
               school: userData.school.name, // school 객체에서 name만 추출
               birthday: userData.birthday,
-              roles: [userData.role as UserRole], // 단일 role을 배열로 변환
+              roles: roles.length > 0 ? roles : (['USER'] as UserRole[]),
               createdAt: new Date().toISOString(),
             };
 
