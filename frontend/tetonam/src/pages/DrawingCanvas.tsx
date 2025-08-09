@@ -1,26 +1,22 @@
 import type Konva from 'konva';
-import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
-import { Layer, Line, Stage } from 'react-konva';
+import { useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 
+import { DrawingControls } from '@/components/drawing/DrawingControls';
+import { DrawingStage } from '@/components/drawing/DrawingStage';
 import { DrawingStepHeader } from '@/components/drawing/DrawingStepHeader';
 import { DrawingThumbnails } from '@/components/drawing/DrawingThumbnails';
 import DrawingToolbar from '@/components/drawing/DrawingToolbar';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { CommonHeader } from '@/components/layout/CommonHeader';
-import { ApiButton } from '@/components/ui/ApiButton';
-import { Button } from '@/components/ui/interactive/button';
 import {
   MobileSidebarToggle,
   SidebarProvider,
 } from '@/components/ui/navigation/sidebar';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/overlay/tooltip';
 import { DRAWING_STEPS } from '@/constants/drawing';
+import { useCanvasResize } from '@/hooks/drawing/useCanvasResize';
+import { useDrawingNavigation } from '@/hooks/drawing/useDrawingNavigation';
+import { usePopoverManagement } from '@/hooks/drawing/usePopoverManagement';
 import { useCompressedLines } from '@/hooks/useCompressedLines';
 import { useDrawingHandlers } from '@/hooks/useDrawingHandlers';
 import { useDrawingLocalStorage } from '@/hooks/useDrawingLocalStorage';
@@ -28,15 +24,10 @@ import { useDrawingSave } from '@/hooks/useDrawingSave';
 import { useDrawingSubmit } from '@/hooks/useDrawingSubmit';
 import { usePageLeaveWarning } from '@/hooks/usePageLeaveWarning';
 import { usePreventDoubleClick } from '@/hooks/usePreventDoubleClick';
-import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useDrawingStore } from '@/stores/useDrawingStore';
 import { useUIStore } from '@/stores/useUIStore';
 import type { DrawingCategory } from '@/types/drawing';
-import { ArrowLeft, ArrowRight, Palette } from 'lucide-react';
-
-// A4 비율 상수
-const A4_RATIO = 1.4142; // 높이 / 너비 (A4 세로 비율)
 
 // 컴포넌트 상태
 
@@ -104,6 +95,34 @@ const DrawingCanvas = () => {
   // 제출 기능
   const { handleSubmit } = useDrawingSubmit(stageRef);
 
+  // 캔버스 크기 관리 훅
+  useCanvasResize({
+    containerRef: canvasContainerRef,
+    isEditingActive,
+    setStageSize,
+    currentStep,
+  });
+
+  // 네비게이션 관리 훅
+  const { handlePrevStep, handleNextStep, handleThumbnailSelect, canGoNext } =
+    useDrawingNavigation({
+      currentStep,
+      setCurrentStep,
+      setIsEditingActive,
+      closeAllPopovers,
+      goToPrevStep,
+      goToNextStep,
+    });
+
+  // 팝오버 관리 훅
+  usePopoverManagement({
+    showSizeOptions,
+    showColorOptions,
+    sizePopoverRef,
+    colorPopoverRef,
+    closeAllPopovers,
+  });
+
   // 페이지 이탈 경고 훅
   usePageLeaveWarning(
     hasUnsavedChanges(),
@@ -112,67 +131,8 @@ const DrawingCanvas = () => {
 
   // 저장 상태 추적
   const saveStates = getSaveStates();
-  const reduceMotion = useReducedMotion();
 
   const { decompress } = useCompressedLines();
-
-  // Stage 크기 계산 (A4 비율)
-  const recalcStageSize = useCallback(() => {
-    const container = canvasContainerRef.current;
-    if (!container) return;
-    const padding = 16; // 여백
-    const availWidth = container.clientWidth - padding * 2;
-    const availHeight = container.clientHeight - padding * 2;
-
-    if (isEditingActive) {
-      // A4 세로 비율 유지하면서 최대 크기
-      // 높이를 기준으로 폭 계산, 폭이 넘치면 폭 기준으로 다시 계산
-      let height = availHeight;
-      let width = height / A4_RATIO;
-      if (width > availWidth) {
-        width = availWidth;
-        height = width * A4_RATIO;
-      }
-      setStageSize({ width: Math.floor(width), height: Math.floor(height) });
-    } else {
-      // 비활성 상태에서는 가용 공간 채우기 (비율 자유)
-      setStageSize({ width: availWidth, height: availHeight });
-    }
-  }, [isEditingActive, setStageSize]);
-
-  useLayoutEffect(() => {
-    recalcStageSize();
-  }, [recalcStageSize, currentStep, isEditingActive]);
-
-  useEffect(() => {
-    let frame: number | null = null;
-    let lastRun = 0;
-    const DEBOUNCE = 120; // ms
-    const run = () => {
-      frame = null;
-      lastRun = Date.now();
-      recalcStageSize();
-    };
-    const schedule = () => {
-      const now = Date.now();
-      if (now - lastRun > DEBOUNCE) {
-        if (frame) cancelAnimationFrame(frame);
-        frame = requestAnimationFrame(run);
-      } else {
-        if (frame) cancelAnimationFrame(frame);
-        frame = requestAnimationFrame(() => {
-          setTimeout(run, DEBOUNCE - (now - lastRun));
-        });
-      }
-    };
-    window.addEventListener('resize', schedule, { passive: true });
-    window.addEventListener('orientationchange', schedule, { passive: true });
-    return () => {
-      window.removeEventListener('resize', schedule);
-      window.removeEventListener('orientationchange', schedule);
-      if (frame) cancelAnimationFrame(frame);
-    };
-  }, [recalcStageSize]);
 
   // Action handlers for toolbar
   const handleUndo = useCallback(() => {
@@ -224,38 +184,6 @@ const DrawingCanvas = () => {
     }
   }, [user?.id, restoreFromStorage, decompress, setSavedImages, setStepsLines]);
 
-  // 이전 단계로
-  const handlePrevStep = useCallback(() => {
-    goToPrevStep();
-  }, [goToPrevStep]);
-
-  // 다음 단계로
-  const handleNextStep = useCallback(() => {
-    goToNextStep();
-  }, [goToNextStep]);
-
-  // 팝오버 외부 클릭 닫기
-  useEffect(() => {
-    const handleDocClick = (e: MouseEvent) => {
-      if (
-        showSizeOptions &&
-        sizePopoverRef.current &&
-        !sizePopoverRef.current.contains(e.target as Node)
-      ) {
-        closeAllPopovers();
-      }
-      if (
-        showColorOptions &&
-        colorPopoverRef.current &&
-        !colorPopoverRef.current.contains(e.target as Node)
-      ) {
-        closeAllPopovers();
-      }
-    };
-    document.addEventListener('mousedown', handleDocClick);
-    return () => document.removeEventListener('mousedown', handleDocClick);
-  }, [showSizeOptions, showColorOptions]);
-
   if (!user) {
     return <div>로딩 중...</div>;
   }
@@ -266,27 +194,13 @@ const DrawingCanvas = () => {
     return <div>잘못된 단계입니다.</div>;
   }
 
-  // 썸네일 클릭 시 해당 단계 이동 + 편집 재활성화
-  const handleThumbnailSelect = useCallback(
-    (index: number) => {
-      if (index < 0 || index >= DRAWING_STEPS.length) return;
-      setCurrentStep(index);
-      // 단계 전환 직후 레이아웃 계산 후 편집 활성화
-      setIsEditingActive(true);
-      // 팝오버 초기화
-      closeAllPopovers();
-      // 지우개 상태 유지 (사용자 선택 존중)
-    },
-    [setCurrentStep, setIsEditingActive, closeAllPopovers]
-  );
-
   return (
     <SidebarProvider>
       <div className='flex w-full min-h-screen bg-orange-50/30'>
         <AppSidebar />
 
         <div className='flex flex-1 flex-col'>
-          <CommonHeader user={user} />
+          <CommonHeader user={user!} />
 
           {/* 메인 콘텐츠 */}
           <main className='flex-1 overflow-hidden flex flex-col'>
@@ -346,117 +260,38 @@ const DrawingCanvas = () => {
                 </div>
               )}
 
-              {/* 캔버스 영역 (실제 그릴 수 있는 영역만 표시) */}
+              {/* 캔버스 영역 */}
               <div
                 ref={canvasContainerRef}
                 className='flex-1 relative flex items-start justify-center pb-4'
               >
-                <div
-                  className='relative rounded-lg border border-gray-300 bg-white shadow-sm'
-                  style={{ width: stageSize.width, height: stageSize.height }}
-                >
-                  <Stage
-                    ref={stageRef}
-                    width={stageSize.width}
-                    height={stageSize.height}
-                    onMouseDown={handleMouseDown}
-                    onMousemove={handleMouseMove}
-                    onMouseup={handleMouseUp}
-                    onTouchStart={handleMouseDown}
-                    onTouchMove={handleMouseMove}
-                    onTouchEnd={handleMouseUp}
-                    className={`transition-all ${isEditingActive ? 'cursor-crosshair' : 'cursor-not-allowed opacity-60'} bg-white rounded-lg`}
-                  >
-                    <Layer>
-                      {currentLines.map((line: any) => (
-                        <Line
-                          key={line.id}
-                          points={line.points}
-                          stroke={line.stroke}
-                          strokeWidth={line.strokeWidth}
-                          tension={0.5}
-                          lineCap='round'
-                          lineJoin='round'
-                          globalCompositeOperation={
-                            line.globalCompositeOperation
-                          }
-                        />
-                      ))}
-                    </Layer>
-                  </Stage>
-                  {!isEditingActive && (
-                    <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
-                      <Button
-                        ref={reActivateButtonRef}
-                        onClick={() => setIsEditingActive(true)}
-                        className={`flex items-center gap-2 pointer-events-auto bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-4 rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition ${reduceMotion ? '' : 'origin-center motion-safe:animate-none'} ${reduceMotion ? '' : 'save-scale-in'}`}
-                        data-anim-key={saveAnimationKey}
-                      >
-                        <Palette className='w-5 h-5' /> 그림 그리기
-                      </Button>
-                    </div>
-                  )}
-                </div>
+                <DrawingStage
+                  stageRef={stageRef}
+                  stageSize={stageSize}
+                  currentLines={currentLines}
+                  isEditingActive={isEditingActive}
+                  onMouseDown={handleMouseDown}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                  onReactivate={() => setIsEditingActive(true)}
+                  saveAnimationKey={saveAnimationKey}
+                  reActivateButtonRef={reActivateButtonRef}
+                />
               </div>
 
-              {/* 네비게이션 버튼 (편집 중 숨김) */}
-              {!isEditingActive && (
-                <div className='mt-2 md:mt-4 flex justify-between'>
-                  <Button
-                    variant='outline'
-                    onClick={handlePrevStep}
-                    disabled={currentStep === 0}
-                    className='flex items-center gap-2'
-                  >
-                    <ArrowLeft className='w-4 h-4' /> 이전 단계
-                  </Button>
-                  <div className='flex gap-3'>
-                    {currentStep === DRAWING_STEPS.length - 1 ? (
-                      <ApiButton
-                        onClick={preventDoubleClick(handleSubmit)}
-                        disabled={
-                          isBlocked ||
-                          stepsLines.some(lines => lines.length === 0)
-                        }
-                        isLoading={isSubmitting}
-                        loadingText='제출 중...'
-                        className='flex items-center gap-2 bg-green-600 hover:bg-green-700'
-                      >
-                        <Palette className='w-4 h-4' /> 그림 제출하기
-                      </ApiButton>
-                    ) : (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div>
-                              <Button
-                                onClick={handleNextStep}
-                                disabled={
-                                  currentStep === DRAWING_STEPS.length - 1 ||
-                                  saveStates[
-                                    DRAWING_STEPS[currentStep]
-                                      ?.id as DrawingCategory
-                                  ]?.status !== 'saved'
-                                }
-                                className='flex items-center gap-2'
-                              >
-                                다음 단계 <ArrowRight className='w-4 h-4' />
-                              </Button>
-                            </div>
-                          </TooltipTrigger>
-                          {saveStates[
-                            DRAWING_STEPS[currentStep]?.id as DrawingCategory
-                          ]?.status !== 'saved' && (
-                            <TooltipContent side='top'>
-                              <p>임시저장 후 진행해주세요.</p>
-                            </TooltipContent>
-                          )}
-                        </Tooltip>
-                      </TooltipProvider>
-                    )}
-                  </div>
-                </div>
-              )}
+              {/* 네비게이션 버튼 */}
+              <DrawingControls
+                currentStep={currentStep}
+                isEditingActive={isEditingActive}
+                isSubmitting={isSubmitting}
+                isBlocked={isBlocked}
+                stepsLines={stepsLines}
+                saveStates={saveStates}
+                onPrevStep={handlePrevStep}
+                onNextStep={handleNextStep}
+                onSubmit={preventDoubleClick(handleSubmit)}
+                canGoNext={canGoNext}
+              />
             </div>
           </main>
         </div>
