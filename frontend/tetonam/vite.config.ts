@@ -2,8 +2,8 @@ import react from '@vitejs/plugin-react';
 import { FontaineTransform } from 'fontaine';
 import path from 'path';
 import { defineConfig } from 'vite';
-import { VitePWA } from 'vite-plugin-pwa';
 import compression from 'vite-plugin-compression';
+import { VitePWA } from 'vite-plugin-pwa';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -138,7 +138,6 @@ export default defineConfig(({ mode }) => ({
             '@radix-ui/react-tooltip',
             'lucide-react',
           ],
-          'vendor-canvas': ['konva', 'react-konva'],
           'vendor-charts': ['recharts'],
           'vendor-query': ['@tanstack/react-query', 'axios'],
           'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
