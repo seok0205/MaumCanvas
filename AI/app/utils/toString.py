@@ -1,4 +1,6 @@
 def toString(result, category) :
+    if(len(result) < 3) :
+        return "그림에서 분석할 수 있는 요소가 발견되지 않았습니다. 그림을 다시 그려주세요."
     stringVal = ""
     if category == "HOME" :
         stringVal = f"{len(result)}개의 그림이 탐지되었습니다. "
@@ -47,5 +49,6 @@ def toString(result, category) :
                     stringVal = stringVal + f"{key}이(가) {value}개 탐지되었습니다. "
                 if value == 1 :
                     elseLst = elseLst + f", {key}"
-        stringVal = stringVal + elseLst + "가 탐지되었습니다."
+        if(len(result) > 1) :
+            stringVal = stringVal + elseLst + "가 탐지되었습니다."
     return stringVal
