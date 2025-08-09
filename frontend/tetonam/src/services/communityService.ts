@@ -11,6 +11,7 @@ import type {
   Community,
   PostListQuery,
   PostListResponse,
+  PostPageItem,
   PostUpdateRequest,
   PostWriteRequest,
 } from '@/types/community';
@@ -34,16 +35,18 @@ export const communityService = {
   getPosts: async (
     query: PostListQuery = {},
     signal?: AbortSignal
-  ): Promise<PostListResponse[]> => {
+  ): Promise<PostPageItem[]> => {
     try {
       // 페이지 번호는 커서 기반 파라미터 대신 number를 사용 (기본 0페이지)
       const pageNumber = query.lastId ? Number(query.lastId) : 0;
-      const response = await apiClient.get<any>(
-        COMMUNITY_ENDPOINTS.GET_POSTS_PAGE(pageNumber),
-        {
-          ...(signal && { signal }),
-        }
-      );
+      const isSearch = !!query.nickname;
+      const baseUrl = isSearch
+        ? `${COMMUNITY_ENDPOINTS.GET_POSTS_PAGE(pageNumber)}/search`
+        : COMMUNITY_ENDPOINTS.GET_POSTS_PAGE(pageNumber);
+      const response = await apiClient.get<any>(baseUrl, {
+        params: isSearch ? { nickname: query.nickname } : undefined,
+        ...(signal && { signal }),
+      });
 
       // Spring의 Page 직렬화는 { content: T[], ... } 또는 바로 배열일 수 있음.
       const data = response.data;
@@ -55,16 +58,14 @@ export const communityService = {
 
       // PostPageDto는 id,title,nickname,category만 포함하므로 상세 화면 데이터가 아님.
       // 목록 컴포넌트에서는 title/category/nickname만 사용하도록 했고, createdAt/viewCount는 없을 수 있음.
-      return items.map(item => ({
-        id: item.id,
-        title: item.title,
-        content: '',
-        category: item.category,
-        nickname: item.nickname,
-        viewCount: item.viewCount ?? 0,
-        createdAt: item.createdAt ?? new Date().toISOString(),
-        updatedAt: item.updatedAt ?? new Date().toISOString(),
-      })) as PostListResponse[];
+      return items.map(
+        (item): PostPageItem => ({
+          id: item.id,
+          title: item.title,
+          category: item.category,
+          nickname: item.nickname,
+        })
+      );
     } catch (error) {
       if (error instanceof AuthenticationError) {
         throw error;
@@ -84,12 +85,17 @@ export const communityService = {
         throw handleNetworkError(axiosError);
       }
 
-      if (axiosError.response?.status) {
-        throw handleHttpError(axiosError.response.status);
+      if (axiosError.response?.data) {
+        const apiError = axiosError.response.data;
+        if (apiError.code === 'POST_LIST_EMPTY') {
+          // 빈 목록은 UI에서 빈 상태 카드로 처리 (예외 아님)
+          return [];
+        }
+        throw handleApiError(apiError);
       }
 
-      if (axiosError.response?.data) {
-        throw handleApiError(axiosError.response.data);
+      if (axiosError.response?.status) {
+        throw handleHttpError(axiosError.response.status);
       }
 
       throw new AuthenticationError(
@@ -130,7 +136,11 @@ export const communityService = {
         nickname: raw.nickname,
         viewCount: raw.viewCount ?? 0,
         createdAt: raw.createdAt || raw.createdDate || new Date().toISOString(),
-        updatedAt: raw.updatedAt || raw.modifiedDate || raw.updatedDate || new Date().toISOString(),
+        updatedAt:
+          raw.updatedAt ||
+          raw.modifiedDate ||
+          raw.updatedDate ||
+          new Date().toISOString(),
       };
 
       return normalized;
@@ -513,6 +523,11 @@ export const communityService = {
             throw new AuthenticationError(
               'POST_NOT_FOUND',
               COMMUNITY_ERROR_MESSAGES.POST_NOT_FOUND
+            );
+          case 'COMMENT_LIST_EMPTY':
+            throw new AuthenticationError(
+              'COMMENT_NOT_FOUND',
+              COMMUNITY_ERROR_MESSAGES.COMMENT_NOT_FOUND
             );
           default:
             throw handleApiError(apiError);

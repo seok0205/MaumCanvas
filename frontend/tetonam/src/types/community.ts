@@ -81,6 +81,15 @@ export interface PostListResponse {
   readonly updatedAt: string;
 }
 
+// 게시글 페이지(목록) 조회 응답 (PostPageDto - 백엔드와 일치)
+// 백엔드 PostPageDto 필드: id, title, nickname, category
+export interface PostPageItem {
+  readonly id: number;
+  title: string;
+  nickname: string;
+  category: CommunityCategory;
+}
+
 // 댓글 목록 조회 응답 (CommentListDto - 백엔드와 일치)
 export interface CommentListResponse {
   readonly id: number;
@@ -120,6 +129,7 @@ export interface PostListQuery {
   category?: CommunityCategory;
   lastId?: number;
   size?: number;
+  nickname?: string; // 닉네임 검색 (백엔드 /community/page/{page}/search?nickname=)
 }
 
 // === 유효성 검사 헬퍼 ===

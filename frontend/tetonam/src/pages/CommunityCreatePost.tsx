@@ -2,7 +2,6 @@ import { ArrowLeft, Save } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { CounselingTypeSelector } from '@/components/ui/CounselingTypeSelector';
 import { Alert, AlertDescription } from '@/components/ui/feedback/alert';
 import { Input } from '@/components/ui/forms/input';
 import { Label } from '@/components/ui/forms/label';
@@ -27,11 +26,7 @@ import { useCreatePost } from '@/hooks/useCommunityMutations';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { CommunityCategory, PostWriteRequest } from '@/types/community';
 import { CATEGORY_LABELS, COMMUNITY_LIMITS } from '@/types/community';
-import {
-  COUNSELING_TYPE_DATA,
-  type CounselingTypeId,
-} from '@/types/counselingType';
-import { mapCounselingTypeToCommunityCategory } from '@/utils/communityMapping';
+// 상담 유형 선택 기능 제거 (요청 반영)
 
 export const CommunityCreatePost = () => {
   const navigate = useNavigate();
@@ -44,8 +39,7 @@ export const CommunityCreatePost = () => {
     content: '',
     category: '' as CommunityCategory | '',
   });
-  const [selectedCounselingType, setSelectedCounselingType] =
-    useState<CounselingTypeId | null>(null);
+  // 상담 유형 제거됨
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // 뒤로 가기
@@ -53,17 +47,9 @@ export const CommunityCreatePost = () => {
     navigate('/community');
   };
 
-  // 상담 유형 선택 핸들러
-  const handleCounselingTypeSelect = (counselingTypeId: CounselingTypeId) => {
-    setSelectedCounselingType(counselingTypeId);
-    const category = mapCounselingTypeToCommunityCategory(counselingTypeId);
-    setFormData(prev => ({ ...prev, category }));
-  };
-
-  // 직접 카테고리 선택 핸들러
+  // 카테고리 선택 핸들러
   const handleCategorySelect = (category: CommunityCategory) => {
     setFormData(prev => ({ ...prev, category }));
-    setSelectedCounselingType(null); // 직접 선택 시 상담 유형 초기화
   };
 
   // 폼 검증
@@ -138,28 +124,6 @@ export const CommunityCreatePost = () => {
           </CardHeader>
 
           <CardContent className='space-y-6'>
-            {/* 상담 유형 선택 */}
-            <div className='space-y-3'>
-              <Label className='text-sm font-medium text-slate-700'>
-                고민 유형 선택 (선택사항)
-              </Label>
-              <CounselingTypeSelector
-                selectedType={
-                  selectedCounselingType
-                    ? COUNSELING_TYPE_DATA.find(
-                        c => c.id === selectedCounselingType
-                      ) || null
-                    : null
-                }
-                onTypeSelect={type => handleCounselingTypeSelect(type.id)}
-                categories={COUNSELING_TYPE_DATA}
-                className='border rounded-lg p-4'
-              />
-              <p className='text-xs text-slate-500'>
-                고민 유형을 선택하시면 적절한 카테고리가 자동으로 설정됩니다.
-              </p>
-            </div>
-
             {/* 카테고리 직접 선택 */}
             <div className='space-y-3'>
               <Label className='text-sm font-medium text-slate-700'>
