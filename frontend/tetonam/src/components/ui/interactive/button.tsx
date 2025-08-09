@@ -5,28 +5,29 @@ import * as React from 'react';
 import { cn } from '@/utils/cn';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-2xl text-sm font-medium ring-offset-background transition-all duration-300 active:scale-95 hover:scale-105 min-h-[44px] min-w-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 transform-gpu',
+  'inline-flex items-center justify-center whitespace-nowrap rounded-2xl text-sm font-medium ring-offset-background transition-all duration-150 ease-out active:scale-[0.98] active:duration-75 min-h-[44px] min-w-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 transform-gpu will-change-transform',
   {
     variants: {
       variant: {
         default:
-          'bg-primary text-primary-foreground shadow-soft hover:shadow-medium hover:bg-primary/90',
+          'bg-primary text-primary-foreground shadow-md hover:shadow-lg hover:bg-primary/95 active:shadow-[inset_0_2px_8px_rgba(0,0,0,0.3)] active:bg-primary/80',
         destructive:
-          'bg-destructive text-destructive-foreground shadow-soft hover:shadow-medium hover:bg-destructive/90',
+          'bg-destructive text-destructive-foreground shadow-md hover:shadow-lg hover:bg-destructive/95 active:shadow-[inset_0_2px_8px_rgba(0,0,0,0.3)] active:bg-destructive/80',
         outline:
-          'border border-input bg-background shadow-soft hover:shadow-medium hover:bg-accent hover:text-accent-foreground',
+          'border border-input bg-background shadow-md hover:shadow-lg hover:bg-accent hover:text-accent-foreground active:shadow-[inset_0_2px_8px_rgba(0,0,0,0.2)] active:bg-accent/70',
         secondary:
-          'bg-secondary text-secondary-foreground shadow-soft hover:shadow-medium hover:bg-secondary/80',
-        ghost: 'hover:bg-accent hover:text-accent-foreground',
-        link: 'text-primary underline-offset-4 hover:underline',
-        mint: 'bg-gradient-mint text-white shadow-soft hover:shadow-medium hover:bg-mint-dark',
+          'bg-secondary text-secondary-foreground shadow-md hover:shadow-lg hover:bg-secondary/85 active:shadow-[inset_0_2px_8px_rgba(0,0,0,0.3)] active:bg-secondary/60',
+        ghost:
+          'hover:bg-accent hover:text-accent-foreground hover:shadow-md active:shadow-[inset_0_2px_8px_rgba(0,0,0,0.2)] active:bg-accent/70',
+        link: 'text-primary underline-offset-4 hover:underline active:text-primary/70',
+        mint: 'bg-gradient-mint text-white shadow-md hover:shadow-lg hover:bg-mint-dark active:shadow-[inset_0_2px_8px_rgba(0,0,0,0.3)] active:bg-mint-dark/80',
         yellow:
-          'bg-gradient-yellow text-white shadow-soft hover:shadow-medium hover:bg-yellow-dark',
-        blue: 'bg-gradient-blue text-white shadow-soft hover:shadow-medium hover:bg-light-blue-dark',
+          'bg-gradient-yellow text-white shadow-md hover:shadow-lg hover:bg-yellow-dark active:shadow-[inset_0_2px_8px_rgba(0,0,0,0.3)] active:bg-yellow-dark/80',
+        blue: 'bg-gradient-blue text-white shadow-md hover:shadow-lg hover:bg-light-blue-dark active:shadow-[inset_0_2px_8px_rgba(0,0,0,0.3)] active:bg-light-blue-dark/80',
         lilac:
-          'bg-lilac text-white shadow-soft hover:shadow-medium hover:bg-lilac-dark',
+          'bg-lilac text-white shadow-md hover:shadow-lg hover:bg-lilac-dark active:shadow-[inset_0_2px_8px_rgba(0,0,0,0.3)] active:bg-lilac-dark/80',
         peach:
-          'bg-peach text-white shadow-soft hover:shadow-medium hover:bg-peach-dark',
+          'bg-peach text-white shadow-md hover:shadow-lg hover:bg-peach-dark active:shadow-[inset_0_2px_8px_rgba(0,0,0,0.3)] active:bg-peach-dark/80',
       },
       size: {
         default: 'h-12 px-6 py-3',
