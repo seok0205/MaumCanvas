@@ -483,3 +483,31 @@
     transform: rotate(3deg);
   }
 }
+
+/* Save scale-in animation (appears after temporary save) */
+@keyframes save-scale-in-keyframes {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.02);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.save-scale-in[data-anim-key] {
+  animation: save-scale-in-keyframes 300ms
+    var(--transition-spring, cubic-bezier(0.4, 0, 0.2, 1));
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .save-scale-in[data-anim-key] {
+    animation: none;
+  }
+}

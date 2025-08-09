@@ -1,11 +1,11 @@
-// const BASE_URL = 'https://i13e108.p.ssafy.io';
+const BASE_URL = 'https://i13e108.p.ssafy.io';
 
 // 인증 관련 상수 - 백엔드 API 문서 기반
 export const AUTH_CONSTANTS = {
   // API 엔드포인트 - 실제 백엔드 엔드포인트
   ENDPOINTS: {
-    LOGIN: '/api/user/sign-in',
-    // LOGIN: `${BASE_URL}/api/user/sign-in`,
+    // LOGIN: '/api/user/sign-in',
+    LOGIN: `${BASE_URL}/api/user/sign-in`,
     REGISTER: '/api/user/sign-up',
     // REGISTER: `${BASE_URL}/api/user/sign-up`,
     PASSWORD_RESET: '/api/user/password',
