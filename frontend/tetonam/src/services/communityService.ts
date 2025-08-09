@@ -429,7 +429,26 @@ export const communityService = {
       }
 
       // 댓글이 없는 경우 빈 배열 반환
-      return response.data.result || [];
+      const raw = response.data.result || [];
+      // 백엔드 CommentListDto가 createdAt/updatedAt을 제공하지 않을 가능성 방어
+      return raw.map((item: any) => ({
+        id: item.id,
+        content: item.content,
+        nickname: item.nickname,
+        communityId: item.communityId ?? communityId,
+        createdAt:
+          item.createdAt ||
+          item.createdDate ||
+          item.created_time ||
+          new Date().toISOString(),
+        updatedAt:
+          item.updatedAt ||
+          item.modifiedDate ||
+          item.updatedDate ||
+          item.updated_time ||
+          item.createdAt ||
+          new Date().toISOString(),
+      }));
     } catch (error) {
       if (error instanceof AuthenticationError) {
         throw error;

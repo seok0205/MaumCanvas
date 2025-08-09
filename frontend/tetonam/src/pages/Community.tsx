@@ -1,11 +1,11 @@
 import { Eye, MessageCircle, Plus, Search, User } from 'lucide-react';
 import React, {
+  useCallback,
+  useDeferredValue,
   useEffect,
+  useMemo,
   useRef,
   useState,
-  useMemo,
-  useDeferredValue,
-  useCallback,
 } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -37,15 +37,16 @@ export const CommunityPage = ({}: CommunityPageProps) => {
 
   const initialNickname = searchParams.get('nickname') ?? '';
   const [searchQuery, setSearchQuery] = useState(initialNickname);
-  const [searchType, setSearchType] = useState<'nickname' | 'title'>((
-    searchParams.get('type') as 'nickname' | 'title'
-  ) || 'nickname');
+  const [searchType, setSearchType] = useState<'nickname' | 'title'>(
+    (searchParams.get('type') as 'nickname' | 'title') || 'nickname'
+  );
   const syncingFromUrlRef = useRef(false);
   const deferredSearch = useDeferredValue(searchQuery.trim());
 
   useEffect(() => {
     const urlNickname = searchParams.get('nickname') ?? '';
-    const urlType = (searchParams.get('type') as 'nickname' | 'title') || 'nickname';
+    const urlType =
+      (searchParams.get('type') as 'nickname' | 'title') || 'nickname';
     let changed = false;
     if (urlNickname !== searchQuery) {
       syncingFromUrlRef.current = true;
@@ -79,10 +80,18 @@ export const CommunityPage = ({}: CommunityPageProps) => {
     setSearchParams(next, { replace: false });
   }, [deferredSearch, searchType, searchParams, setSearchParams]);
 
-  const effectiveNickname = searchType === 'nickname' ? (deferredSearch || undefined) : undefined;
+  const effectiveNickname =
+    searchType === 'nickname' ? deferredSearch || undefined : undefined;
 
-  const { data: posts, isLoading, isError, error, hasNextPage, fetchNextPage, isFetchingNextPage } =
-    useCommunityPosts({ nickname: effectiveNickname });
+  const {
+    data: posts,
+    isLoading,
+    isError,
+    error,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useCommunityPosts({ nickname: effectiveNickname });
 
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
@@ -116,7 +125,10 @@ export const CommunityPage = ({}: CommunityPageProps) => {
       <div className='flex min-h-screen w-full bg-gradient-to-b from-orange-50 via-white to-white'>
         <AppSidebar />
         <div className='flex-1 flex flex-col'>
-          <CommonHeader title='커뮤니티' user={(user as any) || { roles: [] }} />
+          <CommonHeader
+            title='커뮤니티'
+            user={(user as any) || { roles: [] }}
+          />
           <div className='container mx-auto px-4 py-8 flex flex-col gap-6'>
             {content}
           </div>
@@ -157,7 +169,9 @@ export const CommunityPage = ({}: CommunityPageProps) => {
               <div className='flex gap-2'>
                 <select
                   value={searchType}
-                  onChange={e => setSearchType(e.target.value as 'nickname' | 'title')}
+                  onChange={e =>
+                    setSearchType(e.target.value as 'nickname' | 'title')
+                  }
                   className='w-28 rounded-md border border-slate-200 bg-white px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400/40'
                   aria-label='검색 유형'
                 >
@@ -246,7 +260,9 @@ const PostList = React.memo(
                   <h3 className='text-lg font-medium text-slate-800 mb-2'>
                     결과가 없습니다
                   </h3>
-                  <p className='text-slate-600 mb-6'>검색 조건을 변경해 보세요.</p>
+                  <p className='text-slate-600 mb-6'>
+                    검색 조건을 변경해 보세요.
+                  </p>
                   {userLoggedIn && (
                     <Button
                       onClick={onCreatePost}
@@ -280,11 +296,16 @@ const PostList = React.memo(
                         variant='secondary'
                         className={cn(
                           'px-3 py-1 text-xs font-medium rounded-full',
-                          post.category === 'FAMILY' && 'bg-rose-100 text-rose-700',
-                          post.category === 'FRIENDSHIP' && 'bg-blue-100 text-blue-700',
-                          post.category === 'STUDY' && 'bg-green-100 text-green-700',
-                          post.category === 'SECRET' && 'bg-purple-100 text-purple-700',
-                          post.category === 'GENERAL' && 'bg-orange-100 text-orange-700'
+                          post.category === 'FAMILY' &&
+                            'bg-rose-100 text-rose-700',
+                          post.category === 'FRIENDSHIP' &&
+                            'bg-blue-100 text-blue-700',
+                          post.category === 'STUDY' &&
+                            'bg-green-100 text-green-700',
+                          post.category === 'SECRET' &&
+                            'bg-purple-100 text-purple-700',
+                          post.category === 'GENERAL' &&
+                            'bg-orange-100 text-orange-700'
                         )}
                       >
                         {post.category}
@@ -317,14 +338,19 @@ const PostList = React.memo(
             </CardContent>
           </Card>
         ))}
-        <div ref={sentinelRef} className='h-12 flex items-center justify-center'>
+        <div
+          ref={sentinelRef}
+          className='h-12 flex items-center justify-center'
+        >
           {isFetchingNextPage && (
             <div className='flex items-center text-sm text-slate-500 gap-2'>
               <LoadingSpinner size='sm' /> 다음 글 불러오는 중...
             </div>
           )}
           {!isFetchingNextPage && !hasNextPage && filtered.length > 0 && (
-            <span className='text-xs text-slate-400'>모든 게시글을 다 보셨습니다 🎉</span>
+            <span className='text-xs text-slate-400'>
+              모든 게시글을 다 보셨습니다 🎉
+            </span>
           )}
         </div>
       </div>

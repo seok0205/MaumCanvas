@@ -137,6 +137,18 @@ export const CommunityPostDetail = () => {
   // 현재 사용자가 작성자인지 확인 (nickname 기반)
   const isAuthor = user && post && user.nickname === post.nickname;
 
+  // 안전한 상대 시간 포매터 (createdAt이 없거나 잘못된 경우 빈 문자열 반환)
+  const safeRelativeTime = (value?: string) => {
+    if (!value) return '';
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return '';
+    try {
+      return formatDistanceToNow(d, { addSuffix: true, locale: ko });
+    } catch {
+      return '';
+    }
+  };
+
   if (isLoading) {
     return (
       <div className='min-h-screen bg-warm-gradient'>
@@ -217,15 +229,12 @@ export const CommunityPostDetail = () => {
                     <User className='w-4 h-4' />
                     <span>{post.nickname}</span>
                   </div>
-                  <div className='flex items-center gap-1'>
-                    <Calendar className='w-4 h-4' />
-                    <span>
-                      {formatDistanceToNow(new Date(post.createdAt), {
-                        addSuffix: true,
-                        locale: ko,
-                      })}
-                    </span>
-                  </div>
+                  {safeRelativeTime(post.createdAt) && (
+                    <div className='flex items-center gap-1'>
+                      <Calendar className='w-4 h-4' />
+                      <span>{safeRelativeTime(post.createdAt)}</span>
+                    </div>
+                  )}
                   <div className='flex items-center gap-1'>
                     <Eye className='w-4 h-4' />
                     <span>{post.viewCount}</span>
@@ -345,11 +354,7 @@ export const CommunityPostDetail = () => {
                           <User className='w-4 h-4' />
                           <span className='font-medium'>{c.nickname}</span>
                           <span className='text-slate-400'>
-                            •{' '}
-                            {formatDistanceToNow(new Date(c.createdAt), {
-                              addSuffix: true,
-                              locale: ko,
-                            })}
+                            • {safeRelativeTime(c.createdAt) || '—'}
                           </span>
                         </div>
                         {isOwner && !isEditing && (
