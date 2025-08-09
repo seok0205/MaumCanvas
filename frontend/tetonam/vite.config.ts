@@ -3,6 +3,7 @@ import { FontaineTransform } from 'fontaine';
 import path from 'path';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import compression from 'vite-plugin-compression';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -24,6 +25,13 @@ export default defineConfig(({ mode }) => ({
       ],
       // Vite public 디렉토리에서 제공되는 폰트 파일 경로 해석
       resolvePath: (id: string) => new URL(`./public${id}`, import.meta.url),
+    }),
+    // 안전한 gzip 압축 (빌드 시점)
+    compression({
+      algorithm: 'gzip',
+      ext: '.gz',
+      threshold: 1024, // 1KB 이상 파일만 압축
+      deleteOriginFile: false, // 원본 파일 유지
     }),
     VitePWA({
       registerType: 'autoUpdate',
