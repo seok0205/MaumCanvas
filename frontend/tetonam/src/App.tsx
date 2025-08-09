@@ -44,8 +44,8 @@ const DrawingDiagnosis = lazyNamedExport(
   'DrawingDiagnosis'
 );
 const DrawingCanvas = lazyNamedExport(
-  () => import('@/pages/DrawingCanvasNative'),
-  'DrawingCanvasNative'
+  () => import('@/pages/DrawingCanvas'),
+  'DrawingCanvas'
 );
 const MyPage = lazyNamedExport(() => import('@/pages/MyPage'), 'MyPage');
 const QuestionnaireForm = lazyNamedExport(
