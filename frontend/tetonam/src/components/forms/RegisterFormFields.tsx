@@ -308,9 +308,6 @@ export const NicknameField = ({
           {form.formState.errors['nickname']?.message}
         </p>
       )}
-      {isVerified && (
-        <p className='text-green-600 text-sm'>✓ 사용 가능한 닉네임입니다.</p>
-      )}
     </div>
   );
 };
