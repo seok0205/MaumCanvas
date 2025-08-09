@@ -2,9 +2,7 @@ import react from '@vitejs/plugin-react';
 import { FontaineTransform } from 'fontaine';
 import path from 'path';
 import { defineConfig } from 'vite';
-import viteCompression from 'vite-plugin-compression';
 import { VitePWA } from 'vite-plugin-pwa';
-import { constants } from 'zlib';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -80,32 +78,6 @@ export default defineConfig(({ mode }) => ({
           },
         ],
       },
-    }),
-    // Gzip 압축 플러그인
-    viteCompression({
-      verbose: true,
-      disable: false,
-      threshold: 1024,
-      algorithm: 'gzip',
-      ext: '.gz',
-      compressionOptions: {
-        level: 9,
-      },
-      filter: /\.(js|mjs|json|css|html)$/i,
-    }),
-    // Brotli 압축 플러그인
-    viteCompression({
-      verbose: true,
-      disable: false,
-      threshold: 1024,
-      algorithm: 'brotliCompress',
-      ext: '.br',
-      compressionOptions: {
-        params: {
-          [constants.BROTLI_PARAM_QUALITY]: 11,
-        },
-      },
-      filter: /\.(js|mjs|json|css|html)$/i,
     }),
   ],
   resolve: {
