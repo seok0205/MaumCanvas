@@ -251,7 +251,10 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
           selectedTime &&
           selectedCounselingType &&
           selectedCounselor && (
-            <Card className='bg-blue-50 border-blue-200'>
+            <Card 
+              className='bg-blue-50 border-blue-200 drop-shadow-2xl'
+              style={{ boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)' }}
+            >
               <CardHeader>
                 <CardTitle className='text-lg text-blue-900'>
                   예약 확인
@@ -285,7 +288,10 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
           )}
 
         {/* 예약 안내사항 */}
-        <Card className='bg-white shadow-sm'>
+        <Card 
+          className='bg-white border-0 drop-shadow-2xl'
+          style={{ boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)' }}
+        >
           <CardHeader>
             <CardTitle className='flex items-center gap-2 text-lg'>
               <Info className='h-5 w-5 text-blue-600' />

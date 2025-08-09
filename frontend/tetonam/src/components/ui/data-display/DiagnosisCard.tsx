@@ -41,7 +41,7 @@ export const DiagnosisCard = ({
   return (
     <div
       className={cn(
-        'flex flex-col p-6 bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200',
+        'flex flex-col p-6 bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 min-h-[12rem] h-full',
         category.color
       )}
       role='article'
