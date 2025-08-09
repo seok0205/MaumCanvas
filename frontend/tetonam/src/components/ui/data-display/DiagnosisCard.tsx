@@ -41,7 +41,7 @@ export const DiagnosisCard = ({
   return (
     <div
       className={cn(
-        'flex flex-col p-6 bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 min-h-[12rem] h-full',
+        'flex flex-col p-6 bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200',
         category.color
       )}
       role='article'
@@ -59,7 +59,7 @@ export const DiagnosisCard = ({
         </h3>
       </div>
 
-      <p className='text-sm text-gray-600 mb-6 flex-1 leading-relaxed line-clamp-3'>
+      <p className='text-sm text-gray-600 mb-6 flex-1 leading-relaxed'>
         {category.description}
       </p>
 

@@ -67,10 +67,7 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
         </header>
 
         {/* 날짜 선택 섹션 */}
-        <Card 
-          className='bg-white border-0 drop-shadow-2xl'
-          style={{ boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)' }}
-        >
+        <Card className='bg-white shadow-sm'>
           <CardHeader>
             <CardTitle className='flex items-center gap-2 text-lg'>
               <Calendar className='h-5 w-5 text-blue-600' />
@@ -88,7 +85,7 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
                   key={option.date.toISOString()}
                   variant={option.isSelected ? 'default' : 'outline'}
                   className={cn(
-                    'h-auto flex-col gap-1 p-3 transition-all rounded-lg',
+                    'h-auto flex-col gap-1 p-3 transition-all',
                     option.isSelected
                       ? 'bg-yellow-100 border-yellow-300 text-yellow-900 hover:bg-yellow-200'
                       : 'hover:bg-gray-50'
@@ -109,10 +106,7 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
         </Card>
 
         {/* 시간 선택 섹션 */}
-        <Card 
-          className='bg-white border-0 drop-shadow-2xl'
-          style={{ boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)' }}
-        >
+        <Card className='bg-white shadow-sm'>
           <CardHeader>
             <CardTitle className='flex items-center gap-2 text-lg'>
               <Clock className='h-5 w-5 text-blue-600' />
@@ -130,7 +124,7 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
                   key={option.time}
                   variant={option.isSelected ? 'default' : 'outline'}
                   className={cn(
-                    'h-auto flex-col gap-1 p-3 transition-all rounded-lg',
+                    'h-auto flex-col gap-1 p-3 transition-all',
                     option.isSelected
                       ? 'bg-yellow-100 border-yellow-300 text-yellow-900 hover:bg-yellow-200'
                       : 'hover:bg-gray-50'
@@ -150,10 +144,7 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
 
         {/* 상담유형 선택 섹션 */}
         {selectedDate && selectedTime && (
-          <Card 
-            className='bg-white border-0 drop-shadow-2xl'
-            style={{ boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)' }}
-          >
+          <Card className='bg-white shadow-sm'>
             <CardHeader>
               <CardTitle className='flex items-center gap-2 text-lg'>
                 <MessageCircle className='h-5 w-5 text-purple-600' />
@@ -172,10 +163,7 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
 
         {/* 상담사 선택 섹션 */}
         {selectedDate && selectedTime && selectedCounselingType && (
-          <Card 
-            className='bg-white border-0 drop-shadow-2xl'
-            style={{ boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)' }}
-          >
+          <Card className='bg-white shadow-sm'>
             <CardHeader>
               <CardTitle className='flex items-center gap-2 text-lg'>
                 <User className='h-5 w-5 text-blue-600' />
@@ -251,10 +239,7 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
           selectedTime &&
           selectedCounselingType &&
           selectedCounselor && (
-            <Card 
-              className='bg-blue-50 border-blue-200 drop-shadow-2xl'
-              style={{ boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)' }}
-            >
+            <Card className='bg-blue-50 border-blue-200'>
               <CardHeader>
                 <CardTitle className='text-lg text-blue-900'>
                   예약 확인
@@ -288,10 +273,7 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
           )}
 
         {/* 예약 안내사항 */}
-        <Card 
-          className='bg-white border-0 drop-shadow-2xl'
-          style={{ boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)' }}
-        >
+        <Card className='bg-white shadow-sm'>
           <CardHeader>
             <CardTitle className='flex items-center gap-2 text-lg'>
               <Info className='h-5 w-5 text-blue-600' />

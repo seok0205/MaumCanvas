@@ -124,7 +124,7 @@ const QuestionCard = ({
           onOptionChange(question.id, parseInt(value))
         }
         value={currentResponse?.selectedScore.toString() || ''}
-        className='grid gap-3 auto-rows-fr'
+        className='grid gap-3'
         {...accessibilityProps.radioGroup}
         aria-labelledby={`question-title-${question.id}`}
       >
@@ -144,7 +144,7 @@ const QuestionCard = ({
             />
             <Label
               htmlFor={`option-${question.id}-${optionIndex}`}
-              className={questionnaireStyles.optionLabel}
+              className='flex-1 text-sm font-medium cursor-pointer leading-relaxed'
             >
               {option.text}
             </Label>
