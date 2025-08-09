@@ -10,11 +10,11 @@
     />
     <meta name="author" content="Tetonam" />
 
-    <!-- Performance optimizations -->
+    <!-- 성능 최적화 -->
     <link rel="dns-prefetch" href="//fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
 
-    <!-- Preload critical fonts -->
+    <!-- 핵심 폰트 미리 로드 -->
     <link
       rel="preload"
       href="/fonts/Pretendard-Regular.woff2"
@@ -30,7 +30,7 @@
       crossorigin
     />
 
-    <!-- Critical font-face: define early to avoid FOUT before app CSS loads -->
+    <!-- 핵심 폰트 페이스: 앱 CSS 로드 전 FOUT 방지를 위해 조기 정의 -->
     <style id="critical-fonts">
       @font-face {
         font-family: 'Pretendard';
@@ -56,13 +56,13 @@
         font-display: swap;
         unicode-range: U+AC00-D7AF, U+0041-005A, U+0061-007A, U+0030-0039;
       }
-      /* Metric-overridden fallback to match Pretendard more closely */
+      /* Pretendard에 더 가깝게 매칭되는 메트릭 오버라이드 폴백 */
       @font-face {
         font-family: 'Pretendard Fallback';
         src:
           local('Noto Sans KR'), local('Malgun Gothic'), local('Segoe UI'),
           local('Arial');
-        /* Initial calibrated values to reduce small->large jump; refine if needed */
+        /* 작은->큰 크기 점프를 줄이기 위한 초기 보정값; 필요시 세밀 조정 */
         size-adjust: 102%;
         ascent-override: 88%;
         descent-override: 12%;
@@ -70,14 +70,14 @@
         font-weight: 400 700;
         font-style: normal;
       }
-      /* Optional: reduce synthetic font adjustments to avoid reflow differences */
+      /* 선택사항: 리플로우 차이를 피하기 위한 합성 폰트 조정 감소 */
       html {
         font-synthesis-weight: none;
         font-synthesis-style: none;
       }
     </style>
 
-    <!-- Global CSS early load to reduce FOUC -->
+    <!-- FOUC 감소를 위한 전역 CSS 조기 로드 -->
     <link rel="stylesheet" href="/src/index.css" />
 
     <!-- Favicon -->
@@ -103,7 +103,7 @@
   <body class="font-loading">
     <div id="root"></div>
     <script>
-      // When all fonts are ready, remove loading state for smoother swap.
+      // 모든 폰트가 준비되면 로딩 상태를 제거하여 더 부드러운 전환 구현
       (function () {
         try {
           if (document.fonts && document.fonts.ready) {
@@ -112,7 +112,7 @@
               document.body.classList.add('font-loaded');
             });
           } else {
-            // Fallback: ensure we drop loading state quickly even without FontFaceSet
+            // 폴백: FontFaceSet이 없어도 로딩 상태를 빠르게 제거하도록 보장
             window.addEventListener('load', function () {
               document.body.classList.remove('font-loading');
               document.body.classList.add('font-loaded');

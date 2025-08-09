@@ -23,7 +23,7 @@ export function lazyNamedExport<T extends ComponentType<any>>(
       const component = module[name];
       if (!component) {
         throw new Error(
-          `Component "${name}" not found in module. Available exports: ${Object.keys(module).join(', ')}`
+          `컴포넌트 "${name}"을(를) 모듈에서 찾을 수 없습니다. 사용 가능한 exports: ${Object.keys(module).join(', ')}`
         );
       }
       return { default: component };

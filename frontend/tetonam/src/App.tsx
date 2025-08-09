@@ -8,14 +8,14 @@ import { queryClient } from '@/config/queryClient';
 import { useFontLoading } from '@/hooks/useFontLoading';
 import { lazyNamedExport } from '@/utils/lazyNamedExport';
 
-// Loading component
+// 로딩 컴포넌트
 const LoadingSpinner = () => (
   <div className='flex items-center justify-center min-h-screen bg-warm-gradient'>
     <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-mint'></div>
   </div>
 );
 
-// Lazy load pages for code splitting using type-safe utility
+// 타입 안전 유틸리티를 사용한 페이지별 코드 분할
 const Index = lazyNamedExport(() => import('@/pages/Index'), 'Index');
 const Login = lazyNamedExport(() => import('@/pages/Login'), 'Login');
 const Register = lazyNamedExport(() => import('@/pages/Register'), 'Register');

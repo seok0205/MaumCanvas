@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     FontaineTransform.vite({
-      // Prefer local Korean sans as fallbacks, applies to all fonts
+      // 한국어 폰트를 우선으로 하는 폴백 설정, 모든 폰트에 적용
       fallbacks: [
         'Noto Sans KR',
         'Malgun Gothic',
@@ -22,7 +22,7 @@ export default defineConfig(({ mode }) => ({
         'Helvetica Neue',
         'Arial',
       ],
-      // Resolve font files served from Vite public dir
+      // Vite public 디렉토리에서 제공되는 폰트 파일 경로 해석
       resolvePath: (id: string) => new URL(`./public${id}`, import.meta.url),
     }),
     VitePWA({
@@ -61,7 +61,7 @@ export default defineConfig(({ mode }) => ({
               cacheName: 'google-fonts-cache',
               expiration: {
                 maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+                maxAgeSeconds: 60 * 60 * 24 * 365, // 1년
               },
             },
           },
@@ -72,7 +72,7 @@ export default defineConfig(({ mode }) => ({
               cacheName: 'api-cache',
               expiration: {
                 maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24, // 1 day
+                maxAgeSeconds: 60 * 60 * 24, // 1일
               },
             },
           },
@@ -99,7 +99,7 @@ export default defineConfig(({ mode }) => ({
           return 'assets/[name]-[hash][extname]';
         },
         manualChunks: {
-          // Vendor libraries
+          // 벤더 라이브러리
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
           'vendor-ui': [
             '@radix-ui/react-dialog',
