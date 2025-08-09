@@ -77,8 +77,8 @@ export interface DrawingLine {
 // 그리기 도구 타입
 export type DrawingTool = 'pen' | 'eraser';
 
-// 브러시 크기 타입
-export type BrushSize = 2 | 5;
+// 브러시 크기 타입 (요구사항: 연필 1~5, 지우개 5~30 (5단위))
+export type BrushSize = 1 | 2 | 3 | 4 | 5 | 10 | 15 | 20 | 25 | 30;
 
 // 색상 타입 (COLOR_PALETTE에서 가져온 색상들)
 export type DrawingColor =

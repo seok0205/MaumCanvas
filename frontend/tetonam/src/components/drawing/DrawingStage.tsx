@@ -1,6 +1,6 @@
 import type Konva from 'konva';
 import { memo, useCallback } from 'react';
-import { Layer, Line, Stage } from 'react-konva';
+import { Layer, Line, Rect, Stage } from 'react-konva';
 
 import { Button } from '@/components/ui/interactive/button';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
@@ -65,6 +65,16 @@ const DrawingStage = memo<DrawingStageProps>(
               : 'cursor-not-allowed opacity-60'
           } bg-white rounded-lg`}
         >
+          {/* 배경 레이어 (내보내기 시 흰색 배경 포함) */}
+          <Layer listening={false}>
+            <Rect
+              x={0}
+              y={0}
+              width={stageSize.width}
+              height={stageSize.height}
+              fill='#ffffff'
+            />
+          </Layer>
           <Layer>
             {currentLines.map(line => (
               <Line

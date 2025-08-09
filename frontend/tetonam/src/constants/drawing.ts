@@ -92,7 +92,8 @@ export type SaveStatus = (typeof SAVE_STATUS)[keyof typeof SAVE_STATUS];
 export const CANVAS_CONFIG = {
   WIDTH: 800,
   HEIGHT: 600,
-  DEFAULT_BRUSH_SIZE: 5,
+  // 기본 도구는 연필이므로 2px로 지정 (요구사항)
+  DEFAULT_BRUSH_SIZE: 2,
   MIN_BRUSH_SIZE: 1,
   MAX_BRUSH_SIZE: 20,
   IMAGE_QUALITY: 1.0,
@@ -150,5 +151,10 @@ export const DRAWING_STEPS = [
   },
 ] as const;
 
-// 브러시 도구 설정 (연필/볼펜 정도의 두께만 제공)
-export const BRUSH_SIZES = [2, 5] as const;
+// 도구별 브러시 프리셋 (요구사항 반영)
+export const PENCIL_BRUSH_SIZES = [1, 2, 3, 4, 5] as const;
+export const ERASER_BRUSH_SIZES = [5, 10, 15, 20, 25, 30] as const;
+export const BRUSH_SIZE_PRESETS = {
+  PENCIL: PENCIL_BRUSH_SIZES,
+  ERASER: ERASER_BRUSH_SIZES,
+} as const;

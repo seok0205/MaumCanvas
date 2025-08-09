@@ -30,24 +30,17 @@ export const useCanvasResize = ({
     const availWidth = container.clientWidth - CANVAS_PADDING * 2;
     const availHeight = container.clientHeight - CANVAS_PADDING * 2;
 
-    if (isEditingActive) {
-      // A4 세로 비율 유지하면서 최대 크기
-      let height = availHeight;
-      let width = height / A4_RATIO;
-
-      if (width > availWidth) {
-        width = availWidth;
-        height = width * A4_RATIO;
-      }
-
-      setStageSize({
-        width: Math.floor(width),
-        height: Math.floor(height),
-      });
-    } else {
-      // 비활성 상태에서는 가용 공간 채우기
-      setStageSize({ width: availWidth, height: availHeight });
+    // 편집 여부와 무관하게 실제 그릴 A4 비율 영역을 항상 동일하게 유지 (요구사항)
+    let height = availHeight;
+    let width = height / A4_RATIO;
+    if (width > availWidth) {
+      width = availWidth;
+      height = width * A4_RATIO;
     }
+    setStageSize({
+      width: Math.floor(width),
+      height: Math.floor(height),
+    });
   }, [containerRef, isEditingActive, setStageSize]);
 
   // 초기 크기 설정

@@ -2,7 +2,11 @@ import { memo, useCallback } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { Button } from '@/components/ui/interactive/button';
-import { BRUSH_SIZES, COLOR_PALETTE } from '@/constants/drawing';
+import {
+  COLOR_PALETTE,
+  ERASER_BRUSH_SIZES,
+  PENCIL_BRUSH_SIZES,
+} from '@/constants/drawing';
 import { useDrawingStore } from '@/stores/useDrawingStore';
 import { useUIStore } from '@/stores/useUIStore';
 import { Eraser, Pencil, Redo, Save, Trash2, Undo } from 'lucide-react';
@@ -79,8 +83,10 @@ const DrawingToolbar = memo(
     const handleToolToggle = useCallback(
       (isEraserMode: boolean) => {
         setIsEraser(isEraserMode);
+        // 도구 변경 시 프리셋 기본값 적용: 연필 2px, 지우개 5px
+        setBrushSize(isEraserMode ? 5 : 2);
       },
-      [setIsEraser]
+      [setIsEraser, setBrushSize]
     );
 
     const handleSizeSelect = useCallback(
@@ -137,15 +143,17 @@ const DrawingToolbar = memo(
           </Button>
           {showSizeOptions && (
             <div className='absolute z-20 mt-2 bg-white border border-gray-200 rounded-md shadow-lg p-2 flex gap-2'>
-              {BRUSH_SIZES.map(size => (
-                <button
-                  key={size}
-                  onClick={() => handleSizeSelect(size)}
-                  className={`w-8 h-8 rounded-full border flex items-center justify-center text-xs ${brushSize === size ? 'bg-yellow-100 border-yellow-500 font-semibold' : 'border-gray-300 hover:border-gray-400'}`}
-                >
-                  {size}
-                </button>
-              ))}
+              {(isEraser ? ERASER_BRUSH_SIZES : PENCIL_BRUSH_SIZES).map(
+                size => (
+                  <button
+                    key={size}
+                    onClick={() => handleSizeSelect(size)}
+                    className={`w-8 h-8 rounded-full border flex items-center justify-center text-xs ${brushSize === size ? 'bg-yellow-100 border-yellow-500 font-semibold' : 'border-gray-300 hover:border-gray-400'}`}
+                  >
+                    {size}
+                  </button>
+                )
+              )}
             </div>
           )}
         </div>
