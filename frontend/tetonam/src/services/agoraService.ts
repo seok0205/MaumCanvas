@@ -21,15 +21,13 @@ export const agoraService = {
 
     const {
       token,
-      counselingId: rawChannel,
+      counselingId: channel,
       userId: uidNum,
     } = response.data.result;
-    const channel =
-      typeof rawChannel === 'string' ? rawChannel.trim() : rawChannel;
     const mapped: TokenResponse = {
       token,
       channel,
-      uid: uidNum,
+      uid: String(uidNum),
       expiresIn: 3600, // 서버에서 미제공: 사용처에서 필요 없음
     };
     return mapped;

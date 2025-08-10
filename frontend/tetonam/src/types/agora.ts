@@ -1,6 +1,6 @@
 import type {
-  IAgoraRTCRemoteUser,
   ILocalAudioTrack,
+  IAgoraRTCRemoteUser,
   ILocalVideoTrack,
 } from 'agora-rtc-sdk-ng';
 
@@ -23,7 +23,7 @@ export interface VideoCallState {
 export interface TokenResponse {
   token: string;
   channel: string;
-  uid: string | number;
+  uid: string;
   expiresIn: number;
 }
 
