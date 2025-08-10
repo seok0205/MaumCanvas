@@ -30,6 +30,7 @@ public class CommunityService {
 
     private final CommunityRepository communityRepository;
     private final UserRepository userRepository;
+    //코멘트 레포짓
     private final CommentRepository commentRepository;
     /**
      * 게시글 목록 조회
@@ -65,6 +66,7 @@ public class CommunityService {
         Community community = communityRepository.findById(id)
                 .orElseThrow(() -> new BoardHandler(ErrorStatus.POST_LIST_EMPTY));
         community.increaseViewCount();
+        //댓글 개수
         community.setCommentCount(commentRepository.countByCommunity_Id(id));
         communityRepository.save(community);
         return PostListDto.from(community);

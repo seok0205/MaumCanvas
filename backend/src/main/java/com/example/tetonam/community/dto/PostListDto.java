@@ -18,6 +18,7 @@ public class PostListDto extends BaseTime {
     private Category category;
     private String nickname;
     private int viewCount;
+    //댓글 개수
     private long commentCount;
 
     /**
@@ -31,6 +32,7 @@ public class PostListDto extends BaseTime {
                 .category(community.getCategory())
                 .nickname(community.getAuthor().getNickname())
                 .viewCount(community.getViewCount())
+                //댓글 개수
                 .commentCount(community.getCommentCount())
                 .build();
     }

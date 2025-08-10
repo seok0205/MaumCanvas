@@ -32,7 +32,7 @@ public class Community extends BaseTime {
     private int viewCount;
 
     private String nickname;
-
+    //코멘트 개수
     private long commentCount;
     public void setTitle(String title){ this.title = title;}
     public void setContent(String content){ this.content = content;}

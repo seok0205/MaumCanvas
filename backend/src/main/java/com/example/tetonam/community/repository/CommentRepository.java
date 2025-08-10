@@ -15,5 +15,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
      * - 사용 예: /community/posts?category=STUDY 요청 시
      */
     List<Comment> findByCommunity_id(Long id);
+    //댓글 개수 가져오기
     long countByCommunity_Id(Long communityId);
 }
