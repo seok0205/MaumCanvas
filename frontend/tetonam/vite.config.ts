@@ -2,8 +2,8 @@ import react from '@vitejs/plugin-react';
 import { FontaineTransform } from 'fontaine';
 import path from 'path';
 import { defineConfig } from 'vite';
-import { VitePWA } from 'vite-plugin-pwa';
 import compression from 'vite-plugin-compression';
+import { VitePWA } from 'vite-plugin-pwa';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -158,6 +158,12 @@ export default defineConfig(({ mode }) => ({
     sourcemap: false,
     reportCompressedSize: false,
     chunkSizeWarningLimit: 1000,
+  },
+  define: {
+    // 환경변수에 VITE_ 접두사가 없을 경우(예: AGORA_APP_ID), 런타임 상수로 주입
+    'import.meta.env.VITE_AGORA_APP_ID': JSON.stringify(
+      process.env.AGORA_APP_ID ?? ''
+    ),
   },
   test: {
     globals: true,
