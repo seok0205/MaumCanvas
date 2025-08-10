@@ -72,6 +72,10 @@ const CommunityPostDetail = lazyNamedExport(
   () => import('@/pages/CommunityPostDetail'),
   'CommunityPostDetail'
 );
+const CommunityEditPost = lazyNamedExport(
+  () => import('@/pages/CommunityEditPost'),
+  'CommunityEditPost'
+);
 const Unauthorized = lazyNamedExport(
   () => import('@/pages/Unauthorized'),
   'Unauthorized'
@@ -188,6 +192,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <CommunityPostDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path='/community/:id/edit'
+                element={
+                  <ProtectedRoute>
+                    <CommunityEditPost />
                   </ProtectedRoute>
                 }
               />
