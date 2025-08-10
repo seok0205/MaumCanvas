@@ -1,7 +1,9 @@
 package com.example.tetonam.user.service;
 
 import com.example.tetonam.exception.handler.MailHandler;
+import com.example.tetonam.exception.handler.UserHandler;
 import com.example.tetonam.response.code.status.ErrorStatus;
+import com.example.tetonam.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -22,6 +24,7 @@ public class MailSendService {
     private final JavaMailSender mailSender;
     private String authNumber;
     private final RedisTemplate redisTemplate;
+    private final UserRepository userRepository;
 
     /**
      * 인증번호 만들기
@@ -111,4 +114,10 @@ public class MailSendService {
         }
     }
 
+    public String mailSendForPassword(String email) {
+        userRepository.findByEmail(email)
+                .orElseThrow(()->new UserHandler(ErrorStatus.USER_NOT_FOUND));
+        joinEmail(email);
+        return "메일이 전송되었습니다";
+    }
 }

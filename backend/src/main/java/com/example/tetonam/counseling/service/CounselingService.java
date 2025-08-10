@@ -54,7 +54,7 @@ public class CounselingService {
                 .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
         User counselor = userRepository.findById(dto.getCounselorId())
                 .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
-        DrawingList drawingList=drawingListRepository.findLatestByUser(student)
+        DrawingList drawingList=drawingListRepository.findFirstByUserOrderByCreatedDateDesc(student)
                 .orElseThrow(()-> new CounselingHandler(ErrorStatus.STUDENT_HAVE_NOT_IMAGE));
         // 락 키를 상담사ID + 예약시간(분단위로 포맷팅)으로 생성
 

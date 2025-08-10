@@ -30,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -91,7 +90,7 @@ public class DrawingService {
     public List<RecentDrawingResponseDto> showRecentImages(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
-        DrawingList drawingList=drawingListRepository.findLatestByUser(user)
+        DrawingList drawingList=drawingListRepository.findFirstByUserOrderByCreatedDateDesc(user)
                 .orElseThrow(()-> new CounselingHandler(ErrorStatus.STUDENT_HAVE_NOT_IMAGE));
         return drawingList.getDrawings().stream().map(RecentDrawingResponseDto::toDto).toList();
     }
