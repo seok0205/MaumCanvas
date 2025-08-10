@@ -188,6 +188,12 @@ export const isValidUpcomingCounseling = (
 
 // LocalDateTime 배열을 ISO 8601 문자열로 변환하는 함수 (개선된 버전)
 export const convertLocalDateTimeArrayToISO = (timeArray: number[]): string => {
+  // NOTE: 기존 구현은 UTC(Date.UTC) 기준으로 ISO 문자열을 생성한 뒤
+  // 프론트에서 다시 Date 로 파싱하면서 현지 시간대(+09:00) 보정이 적용되어
+  // 실제 예약 시간이 9시간 뒤(예: 09:00 -> 18:00)로 표시되는 문제가 있었습니다.
+  // 해결: 서버(LocalDateTime)가 의미하는 “현지 시간” 그대로를 표현하기 위해
+  // Z(UTC) 접미사를 붙이지 않은 로컬 형식의 ISO 유사 문자열(YYYY-MM-DDTHH:mm:ss)을 반환합니다.
+  // 이렇게 하면 new Date(string) 파싱 시 로컬 타임존으로 해석되어 시간 왜곡이 사라집니다.
   try {
     if (!Array.isArray(timeArray) || timeArray.length < 5) {
       throw new Error(
@@ -195,29 +201,25 @@ export const convertLocalDateTimeArrayToISO = (timeArray: number[]): string => {
       );
     }
 
-    // 배열에서 안전하게 값 추출 (Jackson 형식: [year, month, day, hour, minute, second?, nanosecond?])
-    const year = timeArray[0];
-    const month = timeArray[1];
-    const day = timeArray[2];
-    const hour = timeArray[3];
-    const minute = timeArray[4];
-    const second = timeArray[5] || 0; // 선택적 요소
-    const nanosecond = timeArray[6] || 0; // 선택적 요소
+    // 기본값을 주어 타입 단언 (이미 length >=5 검증됨)
+    const [yearRaw, monthRaw, dayRaw, hourRaw, minuteRaw] = timeArray;
+    const secondRaw = timeArray[5] ?? 0;
+    const nanosecondRaw = timeArray[6] ?? 0; // 보존 용도
 
-    // 값들이 유효한 숫자인지 확인
-    if (
-      typeof year !== 'number' ||
-      typeof month !== 'number' ||
-      typeof day !== 'number' ||
-      typeof hour !== 'number' ||
-      typeof minute !== 'number' ||
-      typeof second !== 'number' ||
-      typeof nanosecond !== 'number'
-    ) {
+    const year = yearRaw as number;
+    const month = monthRaw as number;
+    const day = dayRaw as number;
+    const hour = hourRaw as number;
+    const minute = minuteRaw as number;
+    const second = secondRaw as number;
+    const nanosecond = nanosecondRaw as number;
+
+    // 값 타입 및 범위 검증
+    const isNumber = (v: unknown): v is number =>
+      typeof v === 'number' && !isNaN(v);
+    if (![year, month, day, hour, minute, second, nanosecond].every(isNumber)) {
       throw new Error('Invalid number values in time array');
     }
-
-    // 값 범위 검증
     if (
       year < 1900 ||
       year > 3000 ||
@@ -235,22 +237,15 @@ export const convertLocalDateTimeArrayToISO = (timeArray: number[]): string => {
       throw new Error('Date values out of valid range');
     }
 
-    // UTC 기준으로 Date 생성 (타임존 문제 해결)
-    // 백엔드에서 오는 월은 1부터 시작하므로 -1 해야 함
-    const millisecond = Math.floor(nanosecond / 1000000); // 나노초를 밀리초로 변환
-    const date = new Date(
-      Date.UTC(year, month - 1, day, hour, minute, second, millisecond)
-    );
-
-    if (isNaN(date.getTime())) {
-      throw new Error('Invalid date created from time array');
-    }
-
-    return date.toISOString();
-  } catch (error) {
-    // 실패 시 더 안전한 fallback: 현재 UTC 시간
-    const fallbackDate = new Date();
-    return fallbackDate.toISOString();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    // 로컬(타임존 미지정) ISO 유사 포맷. 초 이하 정밀도는 현재 사용하지 않아 생략.
+    // 예: 2025-08-12T09:00:00
+    return `${year}-${pad(month)}-${pad(day)}T${pad(hour)}:${pad(minute)}:${pad(second)}`;
+  } catch {
+    // 실패 시에도 기존 로직과 유사하게 안전한 fallback
+    const now = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
   }
 };
 
