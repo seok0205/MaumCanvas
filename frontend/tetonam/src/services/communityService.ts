@@ -3,6 +3,7 @@ import {
   COMMUNITY_ERROR_MESSAGES,
 } from '@/constants/community';
 import type { ApiResponse } from '@/types/api';
+import { convertLocalDateTimeArrayToISO } from '@/types/api';
 import { AuthenticationError } from '@/types/auth';
 import type {
   Comment,
@@ -129,6 +130,25 @@ export const communityService = {
       }
 
       const raw = response.data.result as any;
+      
+      // LocalDateTime 배열을 문자열로 변환하는 함수
+      const convertDateTime = (dateField: any): string => {
+        if (Array.isArray(dateField)) {
+          // LocalDateTime 배열인 경우 ISO 문자열로 변환
+          try {
+            return convertLocalDateTimeArrayToISO(dateField);
+          } catch (error) {
+            console.warn('날짜 배열 변환 실패:', error);
+            return new Date().toISOString();
+          }
+        }
+        if (typeof dateField === 'string') {
+          return dateField;
+        }
+        // fallback: 현재 시간
+        return new Date().toISOString();
+      };
+
       const normalized: PostListResponse = {
         id: raw.id,
         title: raw.title,
@@ -136,12 +156,8 @@ export const communityService = {
         category: raw.category,
         nickname: raw.nickname,
         viewCount: raw.viewCount ?? 0,
-        createdAt: raw.createdAt || raw.createdDate || new Date().toISOString(),
-        updatedAt:
-          raw.updatedAt ||
-          raw.modifiedDate ||
-          raw.updatedDate ||
-          new Date().toISOString(),
+        createdAt: convertDateTime(raw.createdAt || raw.createdDate),
+        updatedAt: convertDateTime(raw.updatedAt || raw.modifiedDate),
       };
 
       return normalized;
@@ -431,25 +447,35 @@ export const communityService = {
 
       // 댓글이 없는 경우 빈 배열 반환
       const raw = response.data.result || [];
-      // 백엔드 CommentListDto가 createdAt/updatedAt을 제공하지 않을 가능성 방어
-      return raw.map((item: any) => ({
-        id: item.id,
-        content: item.content,
-        nickname: item.nickname,
-        communityId: item.communityId ?? communityId,
-        createdAt:
-          item.createdAt ||
-          item.createdDate ||
-          item.created_time ||
-          new Date().toISOString(),
-        updatedAt:
-          item.updatedAt ||
-          item.modifiedDate ||
-          item.updatedDate ||
-          item.updated_time ||
-          item.createdAt ||
-          new Date().toISOString(),
-      }));
+      
+      return raw.map((item: any) => {
+        // LocalDateTime 배열을 문자열로 변환하는 함수
+        const convertDateTime = (dateField: any): string => {
+          if (Array.isArray(dateField)) {
+            // LocalDateTime 배열인 경우 ISO 문자열로 변환
+            try {
+              return convertLocalDateTimeArrayToISO(dateField);
+            } catch (error) {
+              console.warn('날짜 배열 변환 실패:', error);
+              return new Date().toISOString();
+            }
+          }
+          if (typeof dateField === 'string') {
+            return dateField;
+          }
+          // fallback: 현재 시간
+          return new Date().toISOString();
+        };
+
+        return {
+          id: item.id,
+          content: item.content,
+          nickname: item.nickname,
+          communityId: item.communityId ?? communityId,
+          createdAt: convertDateTime(item.createdAt),
+          updatedAt: convertDateTime(item.updatedAt),
+        };
+      });
     } catch (error) {
       if (error instanceof AuthenticationError) {
         throw error;
