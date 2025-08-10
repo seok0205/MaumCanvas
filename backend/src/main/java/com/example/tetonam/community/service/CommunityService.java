@@ -5,6 +5,7 @@ import com.example.tetonam.community.domain.Community;
 import com.example.tetonam.community.dto.PostPageDto;
 import com.example.tetonam.community.dto.PostUpdateDto;
 import com.example.tetonam.community.dto.PostWriteDto;
+import com.example.tetonam.community.repository.CommentRepository;
 import com.example.tetonam.community.repository.CommunityRepository;
 import com.example.tetonam.exception.handler.BoardHandler;
 import com.example.tetonam.response.code.status.ErrorStatus;
@@ -29,7 +30,7 @@ public class CommunityService {
 
     private final CommunityRepository communityRepository;
     private final UserRepository userRepository;
-
+    private final CommentRepository commentRepository;
     /**
      * 게시글 목록 조회
      * - 정렬 조건: latest, popular
@@ -64,6 +65,7 @@ public class CommunityService {
         Community community = communityRepository.findById(id)
                 .orElseThrow(() -> new BoardHandler(ErrorStatus.POST_LIST_EMPTY));
         community.increaseViewCount();
+        community.setCommentCount(commentRepository.countByCommunity_Id(id));
         communityRepository.save(community);
         return PostListDto.from(community);
     }

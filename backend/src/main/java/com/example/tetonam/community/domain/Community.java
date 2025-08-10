@@ -33,8 +33,12 @@ public class Community extends BaseTime {
 
     private String nickname;
 
+    private long commentCount;
     public void setTitle(String title){ this.title = title;}
     public void setContent(String content){ this.content = content;}
     public void increaseViewCount(){this.viewCount++;}
+    public void increaseCommentCount(){this.commentCount++;}
+    public void decreaseCommentCount(){this.commentCount--;}
+    public void setCommentCount(long commentCount){this.commentCount = commentCount;}
 }
 
