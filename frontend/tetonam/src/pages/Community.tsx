@@ -125,58 +125,57 @@ export const CommunityPage = ({}: CommunityPageProps) => {
       <Card className='mb-4 border-0 shadow-lg bg-white/85 backdrop-blur-sm'>
         <CardHeader className='pb-4'>
           <div className='flex flex-col gap-4'>
-            <div className='flex items-start gap-4'>
-              <div className='flex-1'>
-                <div className='flex items-center gap-2 mb-2'>
-                  <Search className='w-4 h-4 text-slate-600' />
-                  <span className='text-sm font-medium text-slate-700'>
-                    검색
-                  </span>
-                </div>
-                <div className='flex gap-2'>
-                  <select
-                    value={searchType}
-                    onChange={e =>
-                      setSearchType(e.target.value as 'nickname' | 'title')
-                    }
-                    className='w-28 rounded-md border border-slate-200 bg-white px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400/40'
-                    aria-label='검색 유형'
-                  >
-                    <option value='nickname'>닉네임</option>
-                    <option value='title'>제목</option>
-                  </select>
-                  <Input
-                    placeholder={
-                      searchType === 'nickname'
-                        ? '닉네임으로 검색'
-                        : '제목으로 검색'
-                    }
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    className='border-slate-200 focus:border-orange-400 focus:ring-orange-400/20 flex-1'
-                    aria-label='검색어'
-                  />
-                </div>
-                {searchType === 'title' && (
-                  <p className='mt-1 text-[11px] text-slate-500'>
-                    제목 검색은 클라이언트 필터링입니다.
-                  </p>
-                )}
+            <div className='flex-1'>
+              <div className='flex items-center gap-2 mb-2'>
+                <Search className='w-4 h-4 text-slate-600' />
+                <span className='text-sm font-medium text-slate-700'>검색</span>
               </div>
-              {user && (
-                <div className='flex justify-end'>
-                  <Button
-                    onClick={handleCreatePost}
-                    className='bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500 text-white font-medium px-5 py-2 rounded-lg'
-                  >
-                    <PlusCircle className='w-4 h-4 mr-2' /> 글 작성
-                  </Button>
-                </div>
+              <div className='flex gap-2'>
+                <select
+                  value={searchType}
+                  onChange={e =>
+                    setSearchType(e.target.value as 'nickname' | 'title')
+                  }
+                  className='w-28 rounded-md border border-slate-200 bg-white px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400/40'
+                  aria-label='검색 유형'
+                >
+                  <option value='nickname'>닉네임</option>
+                  <option value='title'>제목</option>
+                </select>
+                <Input
+                  placeholder={
+                    searchType === 'nickname'
+                      ? '닉네임으로 검색'
+                      : '제목으로 검색'
+                  }
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className='border-slate-200 focus:border-orange-400 focus:ring-orange-400/20 flex-1'
+                  aria-label='검색어'
+                />
+              </div>
+              {searchType === 'title' && (
+                <p className='mt-1 text-[11px] text-slate-500'>
+                  제목 검색은 클라이언트 필터링입니다.
+                </p>
               )}
             </div>
           </div>
         </CardHeader>
       </Card>
+      
+      {/* 검색창과 게시글 목록 사이 영역 - 글 작성 버튼 */}
+      {user && (
+        <div className='mb-4 flex justify-end'>
+          <Button
+            onClick={handleCreatePost}
+            className='bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500 text-white font-medium px-6 py-2.5 rounded-lg shadow-md transition-all hover:shadow-lg'
+          >
+            <PlusCircle className='w-4 h-4 mr-2' />
+            글 작성
+          </Button>
+        </div>
+      )}
       <PostList
         rawPosts={posts?.posts || []}
         searchType={searchType}
