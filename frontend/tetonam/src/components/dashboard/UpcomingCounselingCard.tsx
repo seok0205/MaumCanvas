@@ -6,8 +6,16 @@ import { isValidUpcomingCounseling } from '@/types/api';
 import { isValidDateString } from '@/utils/counselingValidation';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { AlertCircle, Calendar, Clock, RefreshCw, User } from 'lucide-react';
+import {
+  AlertCircle,
+  Calendar,
+  Clock,
+  RefreshCw,
+  User,
+  Video,
+} from 'lucide-react';
 import { memo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // 상수 함수들을 컴포넌트 외부로 이동하여 불필요한 재생성 방지
 const getStatusText = (status: CounselingStatus): string => {
@@ -63,6 +71,7 @@ const formatDateTime = (dateTimeString: string) => {
 };
 
 export const UpcomingCounselingCard = memo(() => {
+  const navigate = useNavigate();
   const {
     upcomingCounseling,
     isLoading,
@@ -275,6 +284,23 @@ export const UpcomingCounselingCard = memo(() => {
   // 정상적인 상담 정보 표시 - 개선된 유효성 검사 적용
   const { date, time } = formatDateTime(validatedCounseling.time);
 
+  const canStart = (() => {
+    // 테스트: 항상 활성화하되, 상담 시간 30분 경과 후에는 비활성화
+    try {
+      const now = new Date();
+      const appointmentTime = new Date(validatedCounseling.time);
+      const diffMs = appointmentTime.getTime() - now.getTime();
+      const minutesDiff = diffMs / (1000 * 60);
+      return minutesDiff >= -30;
+    } catch {
+      return true;
+    }
+  })();
+
+  const handleJoin = useCallback(() => {
+    navigate(`/video-call/${validatedCounseling.id}`);
+  }, [navigate, validatedCounseling.id]);
+
   return (
     <Card className='p-6'>
       <div className='flex items-center justify-between mb-4'>
@@ -312,6 +338,17 @@ export const UpcomingCounselingCard = memo(() => {
             >
               {getStatusText(validatedCounseling.status)}
             </span>
+            <div className='mt-2'>
+              <Button
+                variant={canStart ? 'default' : 'outline'}
+                size='sm'
+                disabled={!canStart}
+                onClick={handleJoin}
+                className='text-xs'
+              >
+                <Video className='w-3 h-3 mr-1' /> 입장하기
+              </Button>
+            </div>
           </div>
         </div>
       </div>
