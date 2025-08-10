@@ -76,6 +76,10 @@ const Unauthorized = lazyNamedExport(
   () => import('@/pages/Unauthorized'),
   'Unauthorized'
 );
+const VideoCallPage = lazyNamedExport(
+  () => import('@/pages/VideoCallPage'),
+  'VideoCallPage'
+);
 
 function App() {
   const { isLoaded, isError } = useFontLoading('Pretendard');
@@ -188,6 +192,14 @@ function App() {
                 }
               />
               <Route path='/unauthorized' element={<Unauthorized />} />
+              <Route
+                path='/video-call/:appointmentId'
+                element={
+                  <ProtectedRoute>
+                    <VideoCallPage />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           </Suspense>
         </BrowserRouter>

@@ -1,7 +1,9 @@
 import { Button } from '@/components/ui/interactive/button';
 import { Card } from '@/components/ui/layout/card';
 import type { Appointment } from '@/types/dashboard';
-import { Calendar } from 'lucide-react';
+import { Calendar, Video } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface AppointmentCardProps {
   appointments: readonly Appointment[];
@@ -12,8 +14,27 @@ export const AppointmentCard = ({
   appointments,
   userRole,
 }: AppointmentCardProps) => {
-  const handleAppointmentAction = (appointment: Appointment) => {
-    // TODO: 실제 상담 액션 구현
+  const navigate = useNavigate();
+  const [loadingAppointmentId, setLoadingAppointmentId] = useState<
+    string | null
+  >(null);
+
+  const canStartAppointment = (appointment: Appointment): boolean => {
+    // 테스트 기간: 언제든지 활성화하되, 상담 시간 30분 경과 후에는 비활성화
+    const now = new Date();
+    const appointmentTime = new Date(`${appointment.date} ${appointment.time}`);
+    const timeDiff = appointmentTime.getTime() - now.getTime();
+    const minutesDiff = timeDiff / (1000 * 60);
+    return minutesDiff >= -30;
+  };
+
+  const handleAppointmentAction = async (appointment: Appointment) => {
+    setLoadingAppointmentId(appointment.id);
+    try {
+      navigate(`/video-call/${appointment.id}`);
+    } finally {
+      setLoadingAppointmentId(null);
+    }
   };
 
   const getTitle = () => {
@@ -57,13 +78,6 @@ export const AppointmentCard = ({
     <Card className='p-6'>
       <div className='flex items-center justify-between mb-4'>
         <h3 className='text-lg font-semibold text-foreground'>{getTitle()}</h3>
-        <Button
-          variant={userRole === 'COUNSELOR' ? 'default' : 'outline'}
-          size='sm'
-          className='text-xs'
-        >
-          {userRole === 'COUNSELOR' ? '상담하기' : '상세보기'}
-        </Button>
       </div>
 
       {appointments.length === 0 ? (
@@ -88,6 +102,36 @@ export const AppointmentCard = ({
                   </p>
                 </div>
                 {getAppointmentInfo(appointment)}
+              </div>
+              <div>
+                {(() => {
+                  const isLoading = loadingAppointmentId === appointment.id;
+                  const canStart = canStartAppointment(appointment);
+                  const label =
+                    userRole === 'COUNSELOR' ? '상담 시작' : '입장하기';
+                  return (
+                    <Button
+                      variant={canStart ? 'default' : 'outline'}
+                      size='sm'
+                      disabled={!canStart || isLoading}
+                      onClick={() => handleAppointmentAction(appointment)}
+                      className='text-xs'
+                    >
+                      {isLoading ? (
+                        '연결 중...'
+                      ) : canStart ? (
+                        <>
+                          <Video className='w-3 h-3 mr-1' />
+                          {label}
+                        </>
+                      ) : userRole === 'COUNSELOR' ? (
+                        '대기 중'
+                      ) : (
+                        '예약됨'
+                      )}
+                    </Button>
+                  );
+                })()}
               </div>
             </div>
           ))}
