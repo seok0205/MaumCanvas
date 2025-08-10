@@ -1,11 +1,4 @@
-import {
-  BarChart3,
-  Calendar,
-  Home,
-  MessageCircle,
-  Stethoscope,
-  User,
-} from 'lucide-react';
+import { Calendar, Home, MessageCircle, Stethoscope, User } from 'lucide-react';
 
 export interface MenuItem {
   title: string;
@@ -41,8 +34,7 @@ export const USER_MENU_ITEMS: MenuItem[] = [
 
 export const COUNSELOR_MENU_ITEMS: MenuItem[] = [
   { title: '홈', url: '/dashboard', icon: Home },
-  { title: '내 활동', url: '/my-activities', icon: BarChart3 },
-  { title: '상담 관리', url: '/counseling-management', icon: MessageCircle },
+  { title: '상담 관리', url: '/counseling-management', icon: Calendar },
   { title: '커뮤니티', url: '/community', icon: MessageCircle },
   { title: '마이페이지', url: '/mypage', icon: User },
 ];
