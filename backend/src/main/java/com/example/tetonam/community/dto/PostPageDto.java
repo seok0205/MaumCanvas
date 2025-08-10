@@ -14,6 +14,7 @@ public class PostPageDto {
     private String title;
     private String nickname;
     private Category category;
+    private int viewCount;
 
     public static PostPageDto toDto(Community community){
         return PostPageDto.builder()
@@ -21,6 +22,7 @@ public class PostPageDto {
                 .title(community.getTitle())
                 .nickname(community.getNickname())
                 .category(community.getCategory())
+                .viewCount(community.getViewCount())
                 .build();
     }
 }

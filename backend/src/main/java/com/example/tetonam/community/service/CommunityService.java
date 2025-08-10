@@ -63,6 +63,8 @@ public class CommunityService {
     public PostListDto getPostById(Long id) {
         Community community = communityRepository.findById(id)
                 .orElseThrow(() -> new BoardHandler(ErrorStatus.POST_LIST_EMPTY));
+        community.increaseViewCount();
+        communityRepository.save(community);
         return PostListDto.from(community);
     }
 
