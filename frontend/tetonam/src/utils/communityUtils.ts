@@ -71,36 +71,65 @@ export const validateCategory = (category: string): string | null => {
 // === 포맷팅 함수 ===
 
 /**
- * 날짜를 상대적 시간으로 포맷팅 (예: "3분 전", "2시간 전", "3주 전", "5개월 전", "1년 전")
- * 요구 단위: 분 전, 시간 전, 일 전, 주 전, 개월 전, 년 전
- * 1분 미만 차이는 '1분 전'으로 표기 (사용자 요구: 1분전, 2분전 ... 형식)
+ * 날짜를 상대적 시간으로 포맷팅 (예: "방금 전", "3분 전", "2시간 전", "3주 전", "5개월 전", "1년 전")
+ * 요구 단위: 방금 전, 분 전, 시간 전, 일 전, 주 전, 개월 전, 년 전
+ * 개선: 1분 미만은 '방금 전', 30일 이상은 즉시 '개월 전' 전환으로 사용자 직관성 향상
  */
 export const formatRelativeTime = (dateString: string): string => {
   try {
-    const date = new Date(dateString);
-    if (Number.isNaN(date.getTime())) return '';
+    const target = new Date(dateString);
+    if (Number.isNaN(target.getTime())) return '';
     const now = new Date();
-    let diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-    if (diffInSeconds < 0) diffInSeconds = 0; // 미래 시간 보호
 
-    const minute = 60;
-    const hour = 60 * minute;
-    const day = 24 * hour;
-    const week = 7 * day;
-    const month = 30 * day; // 평균 월 길이 (단순화)
-    const year = 365 * day; // 윤년 무시 단순화
+    // 미래 시간 보정 (미세한 클럭 차이 허용)
+    if (target.getTime() > now.getTime()) {
+      // 1분 이내 미래는 '방금 전'으로 처리
+      if (target.getTime() - now.getTime() < 60_000) return '방금 전';
+      // 그 외 미래는 빈 문자열 (비정상 상황)
+      return '';
+    }
 
-    if (diffInSeconds < minute) return '1분 전';
-    if (diffInSeconds < hour)
-      return `${Math.floor(diffInSeconds / minute)}분 전`;
-    if (diffInSeconds < day)
-      return `${Math.floor(diffInSeconds / hour)}시간 전`;
-    if (diffInSeconds < week) return `${Math.floor(diffInSeconds / day)}일 전`;
-    if (diffInSeconds < month)
-      return `${Math.floor(diffInSeconds / week)}주 전`;
-    if (diffInSeconds < year)
-      return `${Math.floor(diffInSeconds / month)}개월 전`;
-    return `${Math.floor(diffInSeconds / year)}년 전`;
+    const diffMs = now.getTime() - target.getTime();
+    const sec = Math.floor(diffMs / 1000);
+
+    // 1분 미만: 방금 전
+    if (sec < 60) return '방금 전';
+
+    const min = Math.floor(sec / 60);
+    if (min < 60) return `${min}분 전`;
+
+    const hours = Math.floor(min / 60);
+    if (hours < 24) return `${hours}시간 전`;
+
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days}일 전`;
+
+    // 30일 미만: 주 단위
+    if (days < 30) {
+      const weeks = Math.floor(days / 7);
+      return `${weeks}주 전`;
+    }
+
+    // 30일 이상: 달력 기준 월/년 계산
+    let yearDiff = now.getFullYear() - target.getFullYear();
+    let monthDiff = now.getMonth() - target.getMonth(); // 0-11
+    let totalMonths = yearDiff * 12 + monthDiff;
+
+    // 날짜가 아직 해당 월 '기념일' 이전이면 한 달 차감
+    if (now.getDate() < target.getDate()) {
+      totalMonths -= 1;
+    }
+
+    // 30일 이상이면서 달력상 1개월 미만인 경우: 강제로 1개월 전 표시 (UX 개선)
+    if (totalMonths < 1 && days >= 30) {
+      return '1개월 전';
+    }
+
+    // 일반적인 월/년 처리
+    if (totalMonths < 12) return `${Math.max(1, totalMonths)}개월 전`;
+
+    const years = Math.floor(totalMonths / 12);
+    return `${years}년 전`;
   } catch {
     return '';
   }
