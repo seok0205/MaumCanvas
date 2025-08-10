@@ -27,7 +27,7 @@ export const StatisticsCard = ({ stats }: StatisticsCardProps) => {
         '
         >
           <BarChart3 className='w-5 h-5 text-primary mr-2' />
-          자기 진단 결과
+          상담 통계
         </h3>
       </div>
       <div className='space-y-4'>
