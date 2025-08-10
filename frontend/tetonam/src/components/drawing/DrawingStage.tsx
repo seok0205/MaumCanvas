@@ -1,5 +1,5 @@
 import type Konva from 'konva';
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { Layer, Line, Rect, Stage } from 'react-konva';
 
 import { Button } from '@/components/ui/interactive/button';
@@ -44,21 +44,80 @@ const DrawingStage = memo<DrawingStageProps>(
       onReactivate();
     }, [onReactivate]);
 
+    const supportsPointer = useMemo(
+      () => typeof window !== 'undefined' && 'PointerEvent' in window,
+      []
+    );
+
+    const pointerHandlers = useMemo(
+      () => ({
+        onPointerDown: (e: any) => {
+          if (e?.evt && typeof e.evt.preventDefault === 'function') {
+            e.evt.preventDefault();
+          }
+          onMouseDown(e);
+        },
+        onPointerMove: (e: any) => {
+          if (e?.evt && typeof e.evt.preventDefault === 'function') {
+            e.evt.preventDefault();
+          }
+          onMouseMove(e);
+        },
+        onPointerUp: (e: any) => {
+          if (e?.evt && typeof e.evt.preventDefault === 'function') {
+            e.evt.preventDefault();
+          }
+          onMouseUp(e);
+        },
+      }),
+      [onMouseDown, onMouseMove, onMouseUp]
+    );
+
+    const mouseTouchHandlers = useMemo(
+      () => ({
+        onMouseDown,
+        onMouseMove,
+        onMouseUp,
+        onTouchStart: (e: any) => {
+          if (e?.evt && typeof e.evt.preventDefault === 'function') {
+            e.evt.preventDefault();
+          }
+          onMouseDown(e);
+        },
+        onTouchMove: (e: any) => {
+          if (e?.evt && typeof e.evt.preventDefault === 'function') {
+            e.evt.preventDefault();
+          }
+          onMouseMove(e);
+        },
+        onTouchEnd: (e: any) => {
+          if (e?.evt && typeof e.evt.preventDefault === 'function') {
+            e.evt.preventDefault();
+          }
+          onMouseUp(e);
+        },
+      }),
+      [onMouseDown, onMouseMove, onMouseUp]
+    );
+
     return (
       <div
-        className='relative rounded-lg border border-gray-300 bg-white shadow-sm'
+        className={`relative rounded-lg border border-gray-300 bg-white shadow-sm overscroll-contain ${
+          isEditingActive ? 'touch-none select-none' : ''
+        }`}
         style={{ width: stageSize.width, height: stageSize.height }}
       >
         <Stage
           ref={stageRef}
           width={stageSize.width}
           height={stageSize.height}
-          onMouseDown={onMouseDown}
-          onMousemove={onMouseMove}
-          onMouseup={onMouseUp}
-          onTouchStart={onMouseDown}
-          onTouchMove={onMouseMove}
-          onTouchEnd={onMouseUp}
+          {...(supportsPointer ? pointerHandlers : mouseTouchHandlers)}
+          onContextMenu={(e: any) => {
+            // 롱프레스 컨텍스트 메뉴 방지 (iPad 등)
+            if (e?.evt && typeof e.evt.preventDefault === 'function') {
+              e.evt.preventDefault();
+            }
+          }}
           className={`transition-all ${
             isEditingActive
               ? 'cursor-crosshair'

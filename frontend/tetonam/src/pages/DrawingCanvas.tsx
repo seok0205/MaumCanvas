@@ -225,7 +225,9 @@ const DrawingCanvas = memo(() => {
               {/* 캔버스 영역 */}
               <div
                 ref={canvasContainerRef}
-                className='flex-1 relative flex items-start justify-center pb-4'
+                className={`flex-1 relative flex items-start justify-center pb-4 overscroll-contain ${
+                  isEditingActive ? 'touch-none select-none' : ''
+                }`}
               >
                 <DrawingStage
                   stageRef={stageRef}
