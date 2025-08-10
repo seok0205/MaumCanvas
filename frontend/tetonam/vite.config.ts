@@ -159,12 +159,6 @@ export default defineConfig(({ mode }) => ({
     reportCompressedSize: false,
     chunkSizeWarningLimit: 1000,
   },
-  define: {
-    // 환경변수에 VITE_ 접두사가 없을 경우(예: AGORA_APP_ID), 런타임 상수로 주입
-    'import.meta.env.VITE_AGORA_APP_ID': JSON.stringify(
-      process.env.AGORA_APP_ID ?? ''
-    ),
-  },
   test: {
     globals: true,
     environment: 'jsdom',
