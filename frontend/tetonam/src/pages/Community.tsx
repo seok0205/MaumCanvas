@@ -86,7 +86,7 @@ export const CommunityPage = ({}: CommunityPageProps) => {
 
   const layoutShell = (content: React.ReactNode) => (
     <SidebarProvider>
-      <div className='flex min-h-screen w-full bg-gradient-to-b from-orange-50 via-white to-white'>
+      <div className='flex min-h-screen w-full bg-gradient-to-b from-orange-50 via-orange-25 to-slate-50'>
         <AppSidebar />
         <div className='flex-1 flex flex-col'>
           <CommonHeader
@@ -122,7 +122,7 @@ export const CommunityPage = ({}: CommunityPageProps) => {
 
   return layoutShell(
     <>
-      <Card className='mb-4 border-0 shadow-lg bg-white/85 backdrop-blur-sm'>
+      <Card className='mb-4 border border-orange-100/50 shadow-xl bg-orange-50/90 backdrop-blur-sm'>
         <CardHeader className='pb-4'>
           <div className='flex flex-col gap-4'>
             <div className='flex-1'>
@@ -136,7 +136,7 @@ export const CommunityPage = ({}: CommunityPageProps) => {
                   onChange={e =>
                     setSearchType(e.target.value as 'nickname' | 'title')
                   }
-                  className='w-28 rounded-md border border-slate-200 bg-white px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400/40'
+                  className='w-28 rounded-md border border-slate-200 bg-white px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400/40 shadow-sm'
                   aria-label='검색 유형'
                 >
                   <option value='nickname'>닉네임</option>
@@ -150,7 +150,7 @@ export const CommunityPage = ({}: CommunityPageProps) => {
                   }
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className='border-slate-200 focus:border-orange-400 focus:ring-orange-400/20 flex-1'
+                  className='border-slate-200 focus:border-orange-400 focus:ring-orange-400/20 flex-1 shadow-sm bg-white'
                   aria-label='검색어'
                 />
               </div>
@@ -166,10 +166,10 @@ export const CommunityPage = ({}: CommunityPageProps) => {
       
       {/* 검색창과 게시글 목록 사이 영역 - 글 작성 버튼 */}
       {user && (
-        <div className='mb-4 flex justify-end'>
+        <div className='mb-4 flex justify-end py-3 px-4 bg-white/40 backdrop-blur-sm border-l-4 border-orange-300 rounded-r-lg'>
           <Button
             onClick={handleCreatePost}
-            className='bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500 text-white font-medium px-6 py-2.5 rounded-lg shadow-md transition-all hover:shadow-lg'
+            className='bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500 text-white font-medium px-6 py-2.5 rounded-lg shadow-lg transition-all hover:shadow-xl hover:scale-105'
           >
             <PlusCircle className='w-4 h-4 mr-2' />
             글 작성
@@ -228,11 +228,11 @@ const PostList = React.memo(
     if (filtered.length === 0) {
       return (
         <div className='flex-1'>
-          <Card className='border-0 shadow-md bg-white/80 backdrop-blur-sm'>
+          <Card className='border border-slate-200 shadow-lg bg-slate-50/80 backdrop-blur-sm'>
             <CardContent className='p-12 text-center'>
               <div className='space-y-4'>
-                <div className='w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto'>
-                  <MessageCircle className='w-8 h-8 text-slate-400' />
+                <div className='w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto shadow-inner'>
+                  <MessageCircle className='w-8 h-8 text-orange-400' />
                 </div>
                 <div>
                   <h3 className='text-lg font-medium text-slate-800 mb-2'>
@@ -244,7 +244,7 @@ const PostList = React.memo(
                   {userLoggedIn && (
                     <Button
                       onClick={onCreatePost}
-                      className='bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500 text-white font-medium px-6 py-3 rounded-xl'
+                      className='bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500 text-white font-medium px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105'
                     >
                       <PlusCircle className='w-4 h-4 mr-2' />새 글 작성
                     </Button>
@@ -262,7 +262,7 @@ const PostList = React.memo(
         {filtered.map(post => (
           <Card
             key={post.id}
-            className='border-0 shadow-md hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm cursor-pointer hover:scale-[1.02]'
+            className='border border-slate-100 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/95 backdrop-blur-sm cursor-pointer hover:scale-[1.02] hover:border-orange-200'
             onClick={() => onClickPost(post.id)}
           >
             <CardContent className='p-6'>

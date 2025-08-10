@@ -141,7 +141,7 @@ export const CommunityPostDetail = () => {
 
   if (isLoading) {
     return (
-      <div className='min-h-screen bg-warm-gradient'>
+      <div className='min-h-screen bg-gradient-to-b from-orange-50 via-orange-25 to-slate-50'>
         <div className='container mx-auto px-4 py-8'>
           <div className='flex items-center justify-center h-64'>
             <LoadingSpinner size='lg' />
@@ -153,7 +153,7 @@ export const CommunityPostDetail = () => {
 
   if (isError || !post) {
     return (
-      <div className='min-h-screen bg-warm-gradient'>
+      <div className='min-h-screen bg-gradient-to-b from-orange-50 via-orange-25 to-slate-50'>
         <div className='container mx-auto px-4 py-8'>
           <Alert variant='destructive'>
             <AlertDescription>
@@ -167,7 +167,7 @@ export const CommunityPostDetail = () => {
   }
 
   return (
-    <div className='min-h-screen bg-warm-gradient'>
+    <div className='min-h-screen bg-gradient-to-b from-orange-50 via-orange-25 to-slate-50'>
       <CommonHeader user={user || { roles: [] }} title='게시글 상세' />
       <div className='container mx-auto px-4 py-6 max-w-4xl'>
         {/* 상단 네비게이션 */}
@@ -182,7 +182,7 @@ export const CommunityPostDetail = () => {
         </div>
 
         {/* 게시글 카드 */}
-        <Card className='border-0 shadow-lg bg-white/95 backdrop-blur-sm mb-8'>
+        <Card className='border border-slate-100 shadow-xl bg-white/98 backdrop-blur-sm mb-8'>
           <CardHeader className='pb-6 border-b border-slate-100'>
             <div className='flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4'>
               <div className='flex-1'>
@@ -266,7 +266,7 @@ export const CommunityPostDetail = () => {
         </Card>
 
         {/* 댓글 섹션 */}
-        <Card className='border-0 shadow-lg bg-white/90 backdrop-blur-sm'>
+        <Card className='border border-slate-100 shadow-xl bg-white/95 backdrop-blur-sm'>
           <CardHeader>
             <div className='flex items-center gap-2'>
               <MessageCircle className='w-5 h-5 text-slate-600' />
@@ -334,7 +334,7 @@ export const CommunityPostDetail = () => {
                   return (
                     <div
                       key={c.id}
-                      className='group rounded-lg border border-slate-100 bg-white/60 hover:bg-white/80 transition p-4 shadow-sm'
+                      className='group rounded-lg border border-slate-200 bg-slate-50/80 hover:bg-white/90 transition p-4 shadow-md hover:shadow-lg'
                     >
                       <div className='flex justify-between items-start mb-2'>
                         <div className='flex items-center gap-2 text-sm text-slate-600'>
