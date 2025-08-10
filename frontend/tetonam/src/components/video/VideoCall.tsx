@@ -41,11 +41,17 @@ export const VideoCall = ({ appointmentId, onEnd }: VideoCallProps) => {
           uidCandidate
         );
         if (cancelled) return;
+        const appId = (
+          import.meta.env['VITE_AGORA_APP_ID'] as string | undefined
+        )?.trim();
+        if (!appId) {
+          throw new Error('VITE_AGORA_APP_ID 환경변수가 설정되지 않았습니다.');
+        }
         await join({
-          appId: import.meta.env['VITE_AGORA_APP_ID'] as string,
+          appId,
           channel: tokenData.channel,
           token: tokenData.token,
-          uid: Number(tokenData.uid),
+          uid: tokenData.uid ?? uidCandidate,
         });
       } catch (e) {
         console.error('화상 통화 초기화 실패:', e);
