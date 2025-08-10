@@ -18,6 +18,7 @@ public class PostListDto extends BaseTime {
     private Category category;
     private String nickname;
     private int viewCount;
+    private long commentCount;
 
     /**
      * Community 엔티티를 PostListDto DTO로 변환
@@ -30,6 +31,7 @@ public class PostListDto extends BaseTime {
                 .category(community.getCategory())
                 .nickname(community.getAuthor().getNickname())
                 .viewCount(community.getViewCount())
+                .commentCount(community.getCommentCount())
                 .build();
     }
 }
