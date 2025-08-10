@@ -174,7 +174,12 @@ const DrawingCanvas = memo(() => {
 
   return (
     <SidebarProvider>
-      <div className='flex w-full min-h-screen bg-orange-50/30'>
+      {/* 편집(그리기) 중 텍스트 드래그/선택 방지: 페이지 루트에 select-none 적용 */}
+      <div
+        className={`flex w-full min-h-screen bg-orange-50/30 ${
+          isEditingActive ? 'select-none' : ''
+        }`}
+      >
         <AppSidebar />
 
         <div className='flex flex-1 flex-col'>
