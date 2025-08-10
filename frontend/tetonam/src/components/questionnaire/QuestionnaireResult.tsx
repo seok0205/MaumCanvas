@@ -179,7 +179,7 @@ export const QuestionnaireResult = () => {
               {category?.questions.map((question, index) => {
                 const response = result!.responses[index];
                 if (!response) return null;
-                const isAnswerYes = response.selectedScore === 1;
+
                 return (
                   <div
                     key={question.id}
@@ -193,41 +193,33 @@ export const QuestionnaireResult = () => {
                         <p className='text-gray-800 leading-relaxed mb-3'>
                           {question.text}
                         </p>
-                        <div className='flex gap-4'>
-                          <label className='flex items-center gap-2'>
-                            <input
-                              type='radio'
-                              checked={isAnswerYes}
-                              readOnly
-                              className='w-4 h-4 text-blue-600'
-                            />
-                            <span
-                              className={
-                                isAnswerYes
-                                  ? 'font-semibold text-blue-700'
-                                  : 'text-gray-600'
-                              }
-                            >
-                              있다
-                            </span>
-                          </label>
-                          <label className='flex items-center gap-2'>
-                            <input
-                              type='radio'
-                              checked={!isAnswerYes}
-                              readOnly
-                              className='w-4 h-4 text-blue-600'
-                            />
-                            <span
-                              className={
-                                !isAnswerYes
-                                  ? 'font-semibold text-blue-700'
-                                  : 'text-gray-600'
-                              }
-                            >
-                              없다
-                            </span>
-                          </label>
+                        <div className='flex gap-4 flex-wrap'>
+                          {question.options.map((opt, optIdx) => {
+                            const checked =
+                              response.selectedScore === opt.score;
+                            return (
+                              <label
+                                key={optIdx}
+                                className='flex items-center gap-2'
+                              >
+                                <input
+                                  type='radio'
+                                  checked={checked}
+                                  readOnly
+                                  className='w-4 h-4 text-blue-600'
+                                />
+                                <span
+                                  className={
+                                    checked
+                                      ? 'font-semibold text-blue-700'
+                                      : 'text-gray-600'
+                                  }
+                                >
+                                  {opt.text}
+                                </span>
+                              </label>
+                            );
+                          })}
                         </div>
                       </div>
                     </div>
@@ -612,13 +604,17 @@ export const QuestionnaireResult = () => {
   const getLevelIcon = (level: string) => {
     switch (level) {
       case '정상':
-      case '낮음':
+      case '거의 없음':
+      case '자살위험성 거의 없음':
         return <CheckCircle className='h-8 w-8 text-green-500' />;
       case '경미':
       case '보통':
+      case '낮음':
+      case '자살위험성 낮음':
         return <Info className='h-8 w-8 text-blue-500' />;
       case '중간':
       case '높음':
+      case '자살위험성 높음':
         return <AlertTriangle className='h-8 w-8 text-orange-500' />;
       case '심각':
       case '매우 높음':
