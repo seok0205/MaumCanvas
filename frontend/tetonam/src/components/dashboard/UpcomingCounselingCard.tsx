@@ -15,6 +15,7 @@ import {
   Video,
 } from 'lucide-react';
 import { memo, useCallback } from 'react';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { useNavigate } from 'react-router-dom';
 
 // 상수 함수들을 컴포넌트 외부로 이동하여 불필요한 재생성 방지
@@ -72,6 +73,8 @@ const formatDateTime = (dateTimeString: string) => {
 
 export const UpcomingCounselingCard = memo(() => {
   const navigate = useNavigate();
+  const { user } = useAuthStore();
+  const isCounselor = user?.roles?.some(r => r === 'COUNSELOR');
   const {
     upcomingCounseling,
     isLoading,
@@ -323,12 +326,20 @@ export const UpcomingCounselingCard = memo(() => {
               </p>
             </div>
             <div className='space-y-1'>
-              <div className='flex items-center space-x-2'>
-                <User className='w-4 h-4 text-muted-foreground' />
-                <p className='font-medium text-foreground'>
-                  {validatedCounseling.counselor}
-                </p>
-              </div>
+              {isCounselor ? (
+                // 상담사 화면: 현재 API에서 학생 이름 미제공 → '이름누락' placeholder
+                <div className='flex items-center space-x-2'>
+                  <User className='w-4 h-4 text-muted-foreground' />
+                  <p className='font-medium text-foreground'>이름누락</p>
+                </div>
+              ) : (
+                <div className='flex items-center space-x-2'>
+                  <User className='w-4 h-4 text-muted-foreground' />
+                  <p className='font-medium text-foreground'>
+                    {validatedCounseling.counselor}
+                  </p>
+                </div>
+              )}
               <p className='text-sm text-muted-foreground'>
                 {validatedCounseling.type}
               </p>

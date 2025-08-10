@@ -34,6 +34,11 @@ const COUNSELING_ENDPOINTS = {
   // GET_RECENT_COUNSELING: `${BASE_URL}/api/counseling/my-counseling-recent`,
   GET_UPCOMING_COUNSELING: '/api/counseling/my-counseling-recent',
   // GET_UPCOMING_COUNSELING: `${BASE_URL}/api/counseling/my-counseling-recent`,
+  // === 예상되는 "상담사 전용" API (백엔드 구현 예정) ===
+  // 상담사가 가장 가까운 상담 1건 (학생 이름 포함 예상)
+  GET_COUNSELOR_UPCOMING: '/api/counseling/counselor-recent',
+  // 상담사 자신의 상담 목록 (학생 정보 목록 예상)
+  GET_COUNSELOR_HISTORY: '/api/counseling/counselor',
 } as const;
 
 // 상담 관련 API 서비스
@@ -454,5 +459,23 @@ export const counselingService = {
         '다가오는 상담 조회에 실패했습니다. 다시 시도해주세요.'
       );
     }
+  },
+
+  // === 상담사 전용: 다가오는 상담 1건 (미구현 백엔드 대비) ===
+  // 현재는 학생용 API를 재사용하고, 백엔드 준비되면 GET_COUNSELOR_UPCOMING으로 전환
+  getCounselorUpcomingCounseling: async (
+    signal?: AbortSignal
+  ): Promise<UpcomingCounseling | null> => {
+    // TODO: 백엔드 구현 후 endpoint를 COUNSELING_ENDPOINTS.GET_COUNSELOR_UPCOMING 로 교체하고
+    // 반환 스키마(studentName 등)를 반영한 별도 transform 추가 예정.
+    return counselingService.getUpcomingCounseling(signal);
+  },
+
+  // === 상담사 전용: 상담 내역 목록 (미구현 백엔드 대비) ===
+  // 임시로 학생 내역 API 재사용. 추후 학생/상담사 구분되는 DTO 수신 시 분리.
+  getCounselorCounselingHistory: async (
+    signal?: AbortSignal
+  ): Promise<CounselingHistory[]> => {
+    return counselingService.getMyCounselingHistory(signal);
   },
 };

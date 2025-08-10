@@ -5,13 +5,15 @@ import { useSidebar } from '@/components/ui/navigation/sidebar';
 import {
   DAILY_TIPS,
   DASHBOARD_CONSTANTS,
-  MOCK_APPOINTMENTS,
   MOCK_STATS,
 } from '@/constants/dashboard';
 import type { CommunityActivity as CommunityActivityType } from '@/types/dashboard';
 import type { User } from '@/types/user';
 import { getPrimaryRole } from '@/utils/userRoleMapping';
-import { AppointmentCard } from './AppointmentCard';
+// 학생 대시보드와 동일한 API 기반 구성 재사용
+import { UpcomingCounselingCard } from './UpcomingCounselingCard';
+// NOTE: 상담사 전용 개별 Hook (백엔드 전용 엔드포인트 완성 후 교체 예정)
+// import { useCounselorUpcomingCounseling } from '@/hooks/useCounselorUpcomingCounseling';
 import { CommunityActivity } from './CommunityActivity';
 import { DailyTips } from './DailyTips';
 import { QuickStartSection } from './QuickStartSection';
@@ -25,6 +27,7 @@ interface CounselorDashboardProps {
 export const CounselorDashboard = ({ user }: CounselorDashboardProps) => {
   const { state } = useSidebar();
   const primaryRole = getPrimaryRole(user.roles);
+  // const { upcoming, isLoading } = useCounselorUpcomingCounseling(); // 추후 UpcomingCounselingCard 대체 가능
 
   // 사이드바가 expanded 상태일 때 더 많은 패딩 적용
   const paddingClass = state === 'expanded' ? 'p-8' : 'p-6';
@@ -57,12 +60,9 @@ export const CounselorDashboard = ({ user }: CounselorDashboardProps) => {
 
       {/* 내 활동 섹션 */}
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
-        {/* 다가오는 상담 */}
+        {/* 다가오는 상담: 학생과 동일한 Hook/UI 재사용 (상담사 권한으로도 최근 1건 제공) */}
         <div>
-          <AppointmentCard
-            appointments={MOCK_APPOINTMENTS.COUNSELOR}
-            userRole={primaryRole === 'COUNSELOR' ? 'COUNSELOR' : 'USER'}
-          />
+          <UpcomingCounselingCard />
         </div>
 
         {/* 자기 진단 결과 */}
