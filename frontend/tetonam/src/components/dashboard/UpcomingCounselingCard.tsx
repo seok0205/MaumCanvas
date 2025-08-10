@@ -86,6 +86,14 @@ export const UpcomingCounselingCard = memo(() => {
     await refetch();
   }, [refetch]);
 
+  // Join 핸들러는 항상 동일한 순서로 Hook이 호출되도록 최상단에서 선언
+  const handleJoin = useCallback(
+    (id: number | string) => {
+      navigate(`/video-call/${id}`);
+    },
+    [navigate]
+  );
+
   // 데이터 유효성 검사 함수 개선 - 더 구체적인 검증과 로깅
   const validateCounselingData = useCallback((data: unknown) => {
     if (!data) {
@@ -297,10 +305,6 @@ export const UpcomingCounselingCard = memo(() => {
     }
   })();
 
-  const handleJoin = useCallback(() => {
-    navigate(`/video-call/${validatedCounseling.id}`);
-  }, [navigate, validatedCounseling.id]);
-
   return (
     <Card className='p-6'>
       <div className='flex items-center justify-between mb-4'>
@@ -343,7 +347,7 @@ export const UpcomingCounselingCard = memo(() => {
                 variant={canStart ? 'default' : 'outline'}
                 size='sm'
                 disabled={!canStart}
-                onClick={handleJoin}
+                onClick={() => handleJoin(validatedCounseling.id)}
                 className='text-xs'
               >
                 <Video className='w-3 h-3 mr-1' /> 입장하기

@@ -8,7 +8,6 @@ import {
 } from '@/components/ui/navigation/sidebar';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { getPrimaryRole } from '@/utils/userRoleMapping';
-import { useCallback } from 'react';
 
 // 로딩 컴포넌트
 const LoadingSpinner = () => (
@@ -42,14 +41,21 @@ const UnknownRoleDashboard = () => (
 export const Dashboard = () => {
   const { user, isAuthenticated, isLoading } = useAuthStore();
 
-  // roles 배열에서 주요 역할 결정 (user가 없을 때의 안전한 기본값 처리)
-  const primaryRole = user ? getPrimaryRole(user.roles) : 'USER';
+  // 로딩 상태 처리
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
 
-  // 대시보드 콘텐츠 렌더링 (Hook은 최상단에서 호출해서 규칙 준수)
-  const renderDashboardContent = useCallback(() => {
-    if (!isAuthenticated || !user) {
-      return <LoadingSpinner />;
-    }
+  // 인증되지 않은 상태 처리
+  if (!isAuthenticated || !user) {
+    return <LoadingSpinner />;
+  }
+
+  // roles 배열에서 주요 역할 결정 (원래 방식)
+  const primaryRole = getPrimaryRole(user.roles);
+
+  // 대시보드 콘텐츠 렌더링 (Hook 미사용 함수로 구성)
+  const renderDashboardContent = () => {
     switch (primaryRole) {
       case 'USER':
         return <UserDashboard user={user} />;
@@ -60,17 +66,7 @@ export const Dashboard = () => {
       default:
         return <UnknownRoleDashboard />;
     }
-  }, [isAuthenticated, primaryRole, user]);
-
-  // 로딩 상태 처리
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
-
-  // 인증되지 않은 상태 처리
-  if (!isAuthenticated || !user) {
-    return <LoadingSpinner />;
-  }
+  };
 
   return (
     <SidebarProvider>
