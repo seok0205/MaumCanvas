@@ -1,13 +1,12 @@
-import { Eye, MessageCircle, Plus, Search, User } from 'lucide-react';
+import { Clock, MessageCircle, PlusCircle, Search, User } from 'lucide-react';
 import React, {
   useCallback,
-  useDeferredValue,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { CommonHeader } from '@/components/layout/CommonHeader';
@@ -22,9 +21,12 @@ import {
   SidebarProvider,
 } from '@/components/ui/navigation/sidebar';
 import { useCommunityPosts } from '@/hooks/useCommunityPosts';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { PostPageItem } from '@/types/community';
+import { CATEGORY_LABELS } from '@/types/community';
 import { cn } from '@/utils/cn';
+import { formatRelativeTime } from '@/utils/communityUtils';
 
 interface CommunityPageProps {
   // 향후 확장을 위한 props
@@ -32,56 +34,18 @@ interface CommunityPageProps {
 
 export const CommunityPage = ({}: CommunityPageProps) => {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuthStore();
-
-  const initialNickname = searchParams.get('nickname') ?? '';
-  const [searchQuery, setSearchQuery] = useState(initialNickname);
+  const [searchQuery, setSearchQuery] = useState('');
   const [searchType, setSearchType] = useState<'nickname' | 'title'>(
-    (searchParams.get('type') as 'nickname' | 'title') || 'nickname'
+    'nickname'
   );
-  const syncingFromUrlRef = useRef(false);
-  const deferredSearch = useDeferredValue(searchQuery.trim());
+  const debouncedSearch = useDebouncedValue(searchQuery.trim(), { delay: 300 });
 
-  useEffect(() => {
-    const urlNickname = searchParams.get('nickname') ?? '';
-    const urlType =
-      (searchParams.get('type') as 'nickname' | 'title') || 'nickname';
-    let changed = false;
-    if (urlNickname !== searchQuery) {
-      syncingFromUrlRef.current = true;
-      setSearchQuery(urlNickname);
-      changed = true;
-    }
-    if (urlType !== searchType) {
-      syncingFromUrlRef.current = true;
-      setSearchType(urlType);
-      changed = true;
-    }
-    if (changed) {
-      setTimeout(() => {
-        syncingFromUrlRef.current = false;
-      }, 0);
-    }
-  }, [searchParams, searchQuery, searchType]);
-
-  useEffect(() => {
-    if (syncingFromUrlRef.current) return;
-    const currentNickname = searchParams.get('nickname') ?? '';
-    const currentType = searchParams.get('type') ?? 'nickname';
-    const nextNickname = deferredSearch;
-    const needNicknameUpdate = currentNickname !== nextNickname;
-    const needTypeUpdate = currentType !== searchType;
-    if (!needNicknameUpdate && !needTypeUpdate) return;
-    const next = new URLSearchParams(searchParams);
-    if (nextNickname) next.set('nickname', nextNickname);
-    else next.delete('nickname');
-    next.set('type', searchType);
-    setSearchParams(next, { replace: false });
-  }, [deferredSearch, searchType, searchParams, setSearchParams]);
-
+  // 서버 검색(닉네임) 파라미터 구성
   const effectiveNickname =
-    searchType === 'nickname' ? deferredSearch || undefined : undefined;
+    searchType === 'nickname' && debouncedSearch.length > 0
+      ? debouncedSearch
+      : undefined;
 
   const {
     data: posts,
@@ -158,41 +122,56 @@ export const CommunityPage = ({}: CommunityPageProps) => {
 
   return layoutShell(
     <>
-      <Card className='mb-4 border-0 shadow-lg bg-white/80 backdrop-blur-sm'>
+      <Card className='mb-4 border-0 shadow-lg bg-white/85 backdrop-blur-sm'>
         <CardHeader className='pb-4'>
           <div className='flex flex-col gap-4'>
-            <div className='flex-1'>
-              <div className='flex items-center gap-2 mb-2'>
-                <Search className='w-4 h-4 text-slate-600' />
-                <span className='text-sm font-medium text-slate-700'>검색</span>
+            <div className='flex items-start gap-4'>
+              <div className='flex-1'>
+                <div className='flex items-center gap-2 mb-2'>
+                  <Search className='w-4 h-4 text-slate-600' />
+                  <span className='text-sm font-medium text-slate-700'>
+                    검색
+                  </span>
+                </div>
+                <div className='flex gap-2'>
+                  <select
+                    value={searchType}
+                    onChange={e =>
+                      setSearchType(e.target.value as 'nickname' | 'title')
+                    }
+                    className='w-28 rounded-md border border-slate-200 bg-white px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400/40'
+                    aria-label='검색 유형'
+                  >
+                    <option value='nickname'>닉네임</option>
+                    <option value='title'>제목</option>
+                  </select>
+                  <Input
+                    placeholder={
+                      searchType === 'nickname'
+                        ? '닉네임으로 검색'
+                        : '제목으로 검색'
+                    }
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    className='border-slate-200 focus:border-orange-400 focus:ring-orange-400/20 flex-1'
+                    aria-label='검색어'
+                  />
+                </div>
+                {searchType === 'title' && (
+                  <p className='mt-1 text-[11px] text-slate-500'>
+                    제목 검색은 클라이언트 필터링입니다.
+                  </p>
+                )}
               </div>
-              <div className='flex gap-2'>
-                <select
-                  value={searchType}
-                  onChange={e =>
-                    setSearchType(e.target.value as 'nickname' | 'title')
-                  }
-                  className='w-28 rounded-md border border-slate-200 bg-white px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400/40'
-                  aria-label='검색 유형'
-                >
-                  <option value='nickname'>닉네임</option>
-                  <option value='title'>제목</option>
-                </select>
-                <Input
-                  placeholder={
-                    searchType === 'nickname'
-                      ? '닉네임 검색 (뒤로가기 지원)'
-                      : '제목 검색 (클라이언트 필터)'
-                  }
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  className='border-slate-200 focus:border-orange-400 focus:ring-orange-400/20 flex-1'
-                />
-              </div>
-              {searchType === 'title' && (
-                <p className='mt-1 text-[11px] text-slate-500'>
-                  제목 검색은 서버 미지원으로 클라이언트 필터링 중입니다.
-                </p>
+              {user && (
+                <div className='flex justify-end'>
+                  <Button
+                    onClick={handleCreatePost}
+                    className='bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500 text-white font-medium px-5 py-2 rounded-lg'
+                  >
+                    <PlusCircle className='w-4 h-4 mr-2' /> 글 작성
+                  </Button>
+                </div>
               )}
             </div>
           </div>
@@ -201,7 +180,7 @@ export const CommunityPage = ({}: CommunityPageProps) => {
       <PostList
         rawPosts={posts?.posts || []}
         searchType={searchType}
-        searchValue={deferredSearch}
+        searchValue={debouncedSearch}
         isFetchingNextPage={isFetchingNextPage}
         hasNextPage={hasNextPage}
         sentinelRef={sentinelRef}
@@ -268,7 +247,7 @@ const PostList = React.memo(
                       onClick={onCreatePost}
                       className='bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500 text-white font-medium px-6 py-3 rounded-xl'
                     >
-                      <Plus className='w-4 h-4 mr-2' />새 글 작성
+                      <PlusCircle className='w-4 h-4 mr-2' />새 글 작성
                     </Button>
                   )}
                 </div>
@@ -308,7 +287,7 @@ const PostList = React.memo(
                             'bg-orange-100 text-orange-700'
                         )}
                       >
-                        {post.category}
+                        {CATEGORY_LABELS[post.category]}
                       </Badge>
                     </div>
                     <h3 className='text-lg font-semibold text-slate-800 mb-2 line-clamp-1'>
@@ -316,23 +295,19 @@ const PostList = React.memo(
                     </h3>
                   </div>
                 </div>
-                <div className='flex items-center justify-between pt-3 border-t border-slate-100'>
-                  <div className='flex items-center gap-4 text-sm text-slate-500'>
-                    <div className='flex items-center gap-1'>
-                      <User className='w-4 h-4' />
-                      <span>{post.nickname}</span>
-                    </div>
+                <div className='flex items-center justify-between pt-3 border-t border-slate-100 text-xs text-slate-500'>
+                  <div className='flex items-center'>
+                    <User className='w-4 h-4 mr-1' />
+                    <span>{post.nickname}</span>
                   </div>
-                  <div className='flex items-center gap-4 text-sm text-slate-500'>
+                  {post.createdAt && (
                     <div className='flex items-center gap-1'>
-                      <Eye className='w-4 h-4 opacity-40' />
-                      <span className='text-slate-400'>-</span>
+                      <Clock className='w-3 h-3' />
+                      <span className='tabular-nums'>
+                        {formatRelativeTime(post.createdAt)}
+                      </span>
                     </div>
-                    <div className='flex items-center gap-1'>
-                      <MessageCircle className='w-4 h-4' />
-                      <span>0</span>
-                    </div>
-                  </div>
+                  )}
                 </div>
               </div>
             </CardContent>

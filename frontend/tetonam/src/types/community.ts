@@ -88,6 +88,7 @@ export interface PostPageItem {
   title: string;
   nickname: string;
   category: CommunityCategory;
+  createdAt?: string; // 목록 API가 제공할 경우 상대 시간 표시용 (옵션)
 }
 
 // 댓글 목록 조회 응답 (CommentListDto - 백엔드와 일치)

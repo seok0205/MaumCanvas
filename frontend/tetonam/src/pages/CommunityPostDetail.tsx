@@ -48,8 +48,7 @@ import { useCommunityPost } from '@/hooks/useCommunityPost';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { CATEGORY_LABELS } from '@/types/community';
 import { cn } from '@/utils/cn';
-import { formatDistanceToNow } from 'date-fns';
-import { ko } from 'date-fns/locale';
+import { formatRelativeTime } from '@/utils/communityUtils';
 
 export const CommunityPostDetail = () => {
   const navigate = useNavigate();
@@ -137,17 +136,8 @@ export const CommunityPostDetail = () => {
   // 현재 사용자가 작성자인지 확인 (nickname 기반)
   const isAuthor = user && post && user.nickname === post.nickname;
 
-  // 안전한 상대 시간 포매터 (createdAt이 없거나 잘못된 경우 빈 문자열 반환)
-  const safeRelativeTime = (value?: string) => {
-    if (!value) return '';
-    const d = new Date(value);
-    if (Number.isNaN(d.getTime())) return '';
-    try {
-      return formatDistanceToNow(d, { addSuffix: true, locale: ko });
-    } catch {
-      return '';
-    }
-  };
+  const safeRelativeTime = (value?: string) =>
+    value ? formatRelativeTime(value) : '';
 
   if (isLoading) {
     return (
@@ -178,11 +168,7 @@ export const CommunityPostDetail = () => {
 
   return (
     <div className='min-h-screen bg-warm-gradient'>
-      <CommonHeader
-        user={user || { roles: [] }}
-        showBackButton
-        title='게시글 상세'
-      />
+      <CommonHeader user={user || { roles: [] }} title='게시글 상세' />
       <div className='container mx-auto px-4 py-6 max-w-4xl'>
         {/* 상단 네비게이션 */}
         <div className='mb-2'>
@@ -196,8 +182,8 @@ export const CommunityPostDetail = () => {
         </div>
 
         {/* 게시글 카드 */}
-        <Card className='border-0 shadow-lg bg-white/90 backdrop-blur-sm mb-8'>
-          <CardHeader className='pb-4'>
+        <Card className='border-0 shadow-lg bg-white/95 backdrop-blur-sm mb-8'>
+          <CardHeader className='pb-6 border-b border-slate-100'>
             <div className='flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4'>
               <div className='flex-1'>
                 {/* 카테고리 배지 */}
@@ -219,25 +205,26 @@ export const CommunityPostDetail = () => {
                 </Badge>
 
                 {/* 제목 */}
-                <h1 className='text-2xl sm:text-3xl font-bold text-slate-800 mb-4'>
+                <h1 className='text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-4'>
                   {post.title}
                 </h1>
-
                 {/* 메타 정보 */}
-                <div className='flex flex-wrap items-center gap-4 text-sm text-slate-600'>
+                <div className='flex flex-wrap items-center gap-4 text-sm text-slate-600 divide-x divide-slate-200'>
                   <div className='flex items-center gap-1'>
                     <User className='w-4 h-4' />
                     <span>{post.nickname}</span>
                   </div>
                   {safeRelativeTime(post.createdAt) && (
-                    <div className='flex items-center gap-1'>
+                    <div className='flex items-center gap-1 pl-4'>
                       <Calendar className='w-4 h-4' />
-                      <span>{safeRelativeTime(post.createdAt)}</span>
+                      <span className='tabular-nums'>
+                        {safeRelativeTime(post.createdAt)}
+                      </span>
                     </div>
                   )}
-                  <div className='flex items-center gap-1'>
+                  <div className='flex items-center gap-1 pl-4'>
                     <Eye className='w-4 h-4' />
-                    <span>{post.viewCount}</span>
+                    <span className='tabular-nums'>{post.viewCount}</span>
                   </div>
                 </div>
               </div>
@@ -268,13 +255,13 @@ export const CommunityPostDetail = () => {
             </div>
           </CardHeader>
 
-          <CardContent>
-            {/* 게시글 내용 */}
-            <div className='prose prose-slate max-w-none'>
-              <div className='whitespace-pre-wrap text-slate-700 leading-relaxed'>
+          <CardContent className='pt-6 space-y-8'>
+            <section aria-label='게시글 본문' className='space-y-4'>
+              <h2 className='sr-only'>본문</h2>
+              <div className='whitespace-pre-wrap text-slate-800 leading-relaxed text-[15px]'>
                 {post.content}
               </div>
-            </div>
+            </section>
           </CardContent>
         </Card>
 
@@ -354,7 +341,7 @@ export const CommunityPostDetail = () => {
                           <User className='w-4 h-4' />
                           <span className='font-medium'>{c.nickname}</span>
                           <span className='text-slate-400'>
-                            • {safeRelativeTime(c.createdAt) || '—'}
+                            • {safeRelativeTime(c.createdAt) || ''}
                           </span>
                         </div>
                         {isOwner && !isEditing && (

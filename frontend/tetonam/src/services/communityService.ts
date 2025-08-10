@@ -64,6 +64,7 @@ export const communityService = {
           title: item.title,
           category: item.category,
           nickname: item.nickname,
+          createdAt: item.createdAt || item.createdDate || undefined,
         })
       );
     } catch (error) {

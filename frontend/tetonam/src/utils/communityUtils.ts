@@ -71,41 +71,38 @@ export const validateCategory = (category: string): string | null => {
 // === 포맷팅 함수 ===
 
 /**
- * 날짜를 상대적 시간으로 포맷팅 (예: "3분 전", "2시간 전")
+ * 날짜를 상대적 시간으로 포맷팅 (예: "3분 전", "2시간 전", "3주 전", "5개월 전", "1년 전")
+ * 요구 단위: 분 전, 시간 전, 일 전, 주 전, 개월 전, 년 전
+ * 1분 미만 차이는 '1분 전'으로 표기 (사용자 요구: 1분전, 2분전 ... 형식)
  */
 export const formatRelativeTime = (dateString: string): string => {
   try {
     const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return '';
     const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    let diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    if (diffInSeconds < 0) diffInSeconds = 0; // 미래 시간 보호
 
-    if (diffInSeconds < 60) {
-      return '방금 전';
-    }
+    const minute = 60;
+    const hour = 60 * minute;
+    const day = 24 * hour;
+    const week = 7 * day;
+    const month = 30 * day; // 평균 월 길이 (단순화)
+    const year = 365 * day; // 윤년 무시 단순화
 
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) {
-      return `${diffInMinutes}분 전`;
-    }
-
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) {
-      return `${diffInHours}시간 전`;
-    }
-
-    const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 7) {
-      return `${diffInDays}일 전`;
-    }
-
-    // 7일 이상은 날짜 표시
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  } catch (error) {
-    return '날짜 오류';
+    if (diffInSeconds < minute) return '1분 전';
+    if (diffInSeconds < hour)
+      return `${Math.floor(diffInSeconds / minute)}분 전`;
+    if (diffInSeconds < day)
+      return `${Math.floor(diffInSeconds / hour)}시간 전`;
+    if (diffInSeconds < week) return `${Math.floor(diffInSeconds / day)}일 전`;
+    if (diffInSeconds < month)
+      return `${Math.floor(diffInSeconds / week)}주 전`;
+    if (diffInSeconds < year)
+      return `${Math.floor(diffInSeconds / month)}개월 전`;
+    return `${Math.floor(diffInSeconds / year)}년 전`;
+  } catch {
+    return '';
   }
 };
 
