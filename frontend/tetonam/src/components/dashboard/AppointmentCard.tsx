@@ -19,6 +19,23 @@ export const AppointmentCard = ({
     string | null
   >(null);
 
+  // 날짜 + 요일 포맷 (예약된 데이터가 변하지 않도록 표시만 가공)
+  const formatDateWithWeekday = (dateStr: string, timeStr: string) => {
+    try {
+      // timeStr이 HH:mm 형태라고 가정 (초 없음) / 파싱 실패 시 원본 반환
+      const isoCandidate = /T/.test(dateStr)
+        ? dateStr
+        : `${dateStr} ${timeStr}`;
+      const d = new Date(isoCandidate);
+      if (isNaN(d.getTime())) return dateStr; // 파싱 실패 시 fallback
+      const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+      const w = weekdays[d.getDay()];
+      return `${dateStr} (${w})`;
+    } catch {
+      return dateStr;
+    }
+  };
+
   const canStartAppointment = (appointment: Appointment): boolean => {
     // 테스트 기간: 언제든지 활성화하되, 상담 시간 30분 경과 후에는 비활성화
     const now = new Date();
@@ -38,9 +55,7 @@ export const AppointmentCard = ({
   };
 
   const getTitle = () => {
-    if (userRole === 'COUNSELOR') {
-      return '오늘의 상담 일정';
-    }
+    // 학생/상담사 동일 타이틀
     return '다가오는 상담';
   };
 
@@ -53,14 +68,13 @@ export const AppointmentCard = ({
 
   const getAppointmentInfo = (appointment: Appointment) => {
     if (userRole === 'COUNSELOR') {
+      // 학생 대시보드 구성과 동일: 이름 + 라벨
       return (
         <div className='space-y-1'>
           <p className='font-medium text-foreground'>
-            {appointment.studentName}
+            {appointment.studentName || '-'}
           </p>
-          <p className='text-sm text-muted-foreground'>
-            {appointment.grade} • {appointment.topic}
-          </p>
+          <p className='text-sm text-muted-foreground'>학생</p>
         </div>
       );
     }
@@ -95,7 +109,7 @@ export const AppointmentCard = ({
               <div className='flex items-center space-x-3'>
                 <div className='text-center'>
                   <p className='text-sm font-medium text-foreground'>
-                    {appointment.date}
+                    {formatDateWithWeekday(appointment.date, appointment.time)}
                   </p>
                   <p className='text-xs text-muted-foreground'>
                     {appointment.time}

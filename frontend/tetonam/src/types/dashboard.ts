@@ -9,7 +9,6 @@ export interface Appointment {
   date: string;
   time: string;
   studentName?: string;
-  grade?: string;
   topic?: string;
   counselorName?: string;
 }
