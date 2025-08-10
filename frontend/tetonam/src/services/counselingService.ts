@@ -143,20 +143,40 @@ export const counselingService = {
         throw handleHttpError(axiosError.response.status);
       }
 
-      // 🚨 상담 예약 특화 에러 처리
+      // 상담 예약 특화 에러 처리
       if (axiosError.response?.data) {
         const apiError = axiosError.response.data;
 
-        // 그림 그리기 미완료 에러 특별 처리
-        if (apiError.code === 'STUDENT_HAVE_NOT_IMAGE') {
+        // === 백엔드 실제 에러 코드 매핑 (ErrorStatus 참고) ===
+        // COMMON500 이지만 result 메시지에 "Query did not return a unique result" 가 포함되면
+        // DrawingList 중복(그림 여러 번 저장)으로 인해 findLatestByUser 쿼리가 단일 결과를
+        // 기대하다가 2개 이상을 반환한 경우다. (백엔드 DrawingListRepository.findLatestByUser)
+        const apiErrorResultStr =
+          typeof apiError.result === 'string'
+            ? apiError.result
+            : Array.isArray(apiError.result) || apiError.result == null
+              ? ''
+              : String(apiError.result);
+        if (
+          apiError.code === 'COMMON500' &&
+          apiErrorResultStr.includes('Query did not return a unique result')
+        ) {
+          throw new AuthenticationError(
+            'DUPLICATE_DRAWING_DATA',
+            '그림 데이터가 중복되어 상담 예약을 진행할 수 없습니다. 관리자에게 문의하거나, 중복 그림 데이터를 정리한 후 다시 시도해주세요.'
+          );
+        }
+
+        // COUNSELING4003: 학생이 그림을 그리지 않음
+        if (apiError.code === 'COUNSELING4003') {
           throw new AuthenticationError(
             'DRAWING_REQUIRED',
             '상담 예약을 위해 그림 그리기를 먼저 완료해주세요.'
           );
         }
 
-        // 기타 상담 관련 에러 처리
-        if (apiError.code === 'ALREADY_RESERVED') {
+        // COUNSELING4000: 이미 예약된 시간
+        if (apiError.code === 'COUNSELING4000') {
           throw new AuthenticationError(
             'TIME_ALREADY_RESERVED',
             '선택한 시간에 이미 예약이 있습니다. 다른 시간을 선택해주세요.'
