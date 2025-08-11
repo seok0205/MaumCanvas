@@ -15,19 +15,28 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class StudentCounselingListResponseDto {
     private long id;
-    private String counselor;
+    private String name;
     private LocalDateTime time;
     private String type;
     private Status status;
 
-    public static StudentCounselingListResponseDto toDto(Counseling counseling){
+    public static StudentCounselingListResponseDto toStudentDto(Counseling counseling){
         return StudentCounselingListResponseDto.builder()
                 .id(counseling.getId())
-                .counselor(counseling.getCounselor().getName())
+                .name(counseling.getCounselor().getName())
                 .time(counseling.getReservationTime())
                 .type(counseling.getTypes())
                 .status(counseling.getStatus())
                 .build();
     }
 
+    public static StudentCounselingListResponseDto toCounselorDto(Counseling counseling) {
+        return StudentCounselingListResponseDto.builder()
+                .id(counseling.getId())
+                .name(counseling.getStudent().getName())
+                .time(counseling.getReservationTime())
+                .type(counseling.getTypes())
+                .status(counseling.getStatus())
+                .build();
+    }
 }
