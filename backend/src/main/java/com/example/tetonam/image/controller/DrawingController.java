@@ -1,25 +1,20 @@
 package com.example.tetonam.image.controller;
 
 
-import com.example.tetonam.counseling.dto.MyCounselingDetailResponseDto;
 import com.example.tetonam.image.dto.CounselingRagRequestDto;
 import com.example.tetonam.image.dto.RecentDrawingResponseDto;
-import com.example.tetonam.image.dto.testDto;
 import com.example.tetonam.image.service.DrawingService;
 import com.example.tetonam.response.ApiResponse;
 import com.example.tetonam.user.token.JwtTokenProvider;
-import com.example.tetonam.util.WebClientUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor

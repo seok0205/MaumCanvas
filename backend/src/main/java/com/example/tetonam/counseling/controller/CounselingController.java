@@ -65,7 +65,7 @@ public class CounselingController {
     @Operation(summary = "내 상담내역 상세 조회 API", description = "나의 상담내역을 상세 조회합니다")
     public ResponseEntity<?> showMyCounselingDetail(@RequestHeader("Authorization") String token,@PathVariable Long id) {
         String email = jwtTokenProvider.getEmail(token.substring(7));
-         MyCounselingDetailResponseDto result=counselingService.showMyCounselingDetail(email,id);
+         CounselingDetailResponseDto result=counselingService.showMyCounselingDetail(email,id);
         return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
     }
 
