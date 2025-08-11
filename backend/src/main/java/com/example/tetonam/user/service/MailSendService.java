@@ -48,22 +48,52 @@ public class MailSendService {
     @Async
     public void joinEmail(String email) {
         makeRandomNumber();
-        String setFrom = "jj99526@naver.com"; // email-config에 설정한 자신의 이메일 주소를 입력
+        String setFrom = "jj99526@naver.com";
         String toMail = email;
-        String title = "회원 가입 인증 이메일 입니다."; // 이메일 제목
+        String title = "🌼 회원가입 인증 메일 – 마음 캔버스";
+
         String content =
-                "나의 APP을 방문해주셔서 감사합니다." +    //html 형식으로 작성 !
-                        "<br><br>" +
-                        "인증 번호는 " + authNumber + "입니다." +
-                        "<br>" +
-                        "인증번호를 제대로 입력해주세요"; //이메일 내용 삽입
+                "<!DOCTYPE html>" +
+                        "<html lang='ko'><head><meta charset='UTF-8'>" +
+                        "<meta name='viewport' content='width=device-width, initial-scale=1.0'></head>" +
+                        "<body style='margin:0;padding:0;background:#fff8e6;'>"+
+                        "<table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' style='background:#fff8e6;'>"+
+                        "<tr><td align='center' style='padding:24px;'>"+
+                        "<table role='presentation' width='560' cellspacing='0' cellpadding='0' border='0' style='max-width:560px;background:#ffffff;border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,0.08);overflow:hidden;font-family:Segoe UI,Apple SD Gothic Neo,Apple Color Emoji,Arial,sans-serif;'>"+
+                        // 헤더
+                        "<tr><td style='padding:28px 24px;background:linear-gradient(135deg,#FFE082,#FFCC80,#FFAB91);color:#4a2b00;text-align:center;'>"+
+                        "<div style='font-size:20px;font-weight:700;letter-spacing:.3px'>마음 캔버스 방문을 환영합니다 ✨</div>"+
+                        "<div style='font-size:13px;opacity:.9;margin-top:6px'>아래 인증번호를 3분 이내에 입력해 주세요</div>"+
+                        "</td></tr>"+
+                        // 본문
+                        "<tr><td style='padding:28px 28px 10px 28px;color:#333333;'>"+
+                        "<div style='font-size:15px;line-height:1.6;'>안녕하세요!<br>회원가입을 계속하려면 아래의 인증번호를 입력해 주세요.</div>"+
+                        "</td></tr>"+
+                        // 코드 카드
+                        "<tr><td align='center' style='padding:6px 28px 22px 28px;'>"+
+                        "<div style='display:inline-block;background:#fff3cd;border:2px dashed #ffb300;color:#7a4b00;font-weight:800;font-size:28px;letter-spacing:4px;padding:14px 22px;border-radius:12px;'>"
+                        + authNumber +
+                        "</div>"+
+                        "<div style='font-size:12px;color:#a06b00;margin-top:10px'>유효시간: 3분</div>"+
+                        "</td></tr>"+
+                        // 안내
+                        "<tr><td style='padding:0 28px 22px 28px;color:#555555;'>"+
+                        "<div style='font-size:13px;line-height:1.6;'>본 메일을 요청하지 않으셨다면 안전하게 무시하셔도 됩니다.<br>더 나은 보안을 위해 인증번호는 타인과 공유하지 마세요.</div>"+
+                        "</td></tr>"+
+                        // 푸터
+                        "<tr><td style='padding:14px 18px 24px 18px;text-align:center;background:#fffaf0;color:#8a6d3b;font-size:11px;'>"+
+                        "© "+ java.time.LocalDate.now() +" 마음 캔버스 · 본 메일은 발신전용입니다"+
+                        "</td></tr>"+
+                        "</table>"+
+                        "</td></tr>"+
+                        "</table>"+
+                        "</body></html>";
 
-        // 이메일보내기
         mailSend(setFrom, toMail, title, content);
-        // 레디스 저장
-        redisTemplate.opsForValue().set("MAIL:" + authNumber, toMail, 3, TimeUnit.MINUTES);
-
+        redisTemplate.opsForValue().set("MAIL:" + authNumber, toMail, 3, java.util.concurrent.TimeUnit.MINUTES);
     }
+
+
 
 
     /**
