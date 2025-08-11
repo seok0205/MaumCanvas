@@ -80,7 +80,7 @@ public class CounselingService {
     public List<StudentCounselingListResponseDto> showStudentCounselingList(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
-      return counselingRepository.findByCounselorOrderByReservationTimeAsc(user).stream().map(StudentCounselingListResponseDto::toDto).toList();
+      return counselingRepository.findByCounselorOrderByReservationTimeAsc(user).stream().map(StudentCounselingListResponseDto::toStudentDto).toList();
     }
 
     public List<CounselorCounselingListResponseDto> showCounselorCounselingList(String email) {
@@ -97,11 +97,15 @@ public class CounselingService {
         if(User.hasRole(user,Role.COUNSELOR)){
             counseling = counselingRepository.findFirstByCounselorAndStatusOrderByReservationTimeAsc(user, Status.OPEN)
                     .orElseThrow(() -> new CounselingHandler(ErrorStatus.NOTING_COUNSELING));
+            return StudentCounselingListResponseDto.toCounselorDto(counseling);
         }else if(User.hasRole(user,Role.USER)) {
             counseling = counselingRepository.findFirstByStudentAndStatusOrderByReservationTimeAsc(user, Status.OPEN)
                     .orElseThrow(() -> new CounselingHandler(ErrorStatus.NOTING_COUNSELING));
+            return StudentCounselingListResponseDto.toStudentDto(counseling);
+        }else {
+            throw new CounselingHandler(ErrorStatus.NOTING_COUNSELING);
         }
-        return StudentCounselingListResponseDto.toDto(counseling);
+
 
     }
 
