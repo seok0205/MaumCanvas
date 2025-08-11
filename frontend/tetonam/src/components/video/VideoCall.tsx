@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/interactive/button';
 import { useAgoraClient } from '@/hooks/useAgoraClient';
 import { agoraService } from '@/services/agoraService';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { Loader2, Mic, MicOff, PhoneOff, Video, VideoOff } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -12,6 +13,7 @@ interface VideoCallProps {
 export const VideoCall = ({ appointmentId, onEnd }: VideoCallProps) => {
   const localVideoRef = useRef<HTMLDivElement>(null);
   const remoteVideoRef = useRef<HTMLDivElement>(null);
+  const uidRef = useRef<number | null>(null);
 
   const [isAudioOn, setIsAudioOn] = useState(true);
   const [isVideoOn, setIsVideoOn] = useState(true);
@@ -27,18 +29,26 @@ export const VideoCall = ({ appointmentId, onEnd }: VideoCallProps) => {
     toggleAudio,
     toggleVideo,
   } = useAgoraClient();
+  const { user } = useAuthStore();
 
   useEffect(() => {
     let cancelled = false;
     const initialize = async () => {
       try {
-        // NOTE: 백엔드 스펙에 맞춰 counselingId=appointmentId, userId는 로그인 사용자 기준 필요
-        // 현재 store의 사용자 id가 문자열이므로 숫자 기반 uid 필요 시 파싱 또는 서버에서 수신 가능 형태 유지
-        const uidCandidate =
-          Number((window as any).__CURRENT_USER_ID__ ?? '0') || 0;
+        // uid 결정: 존재하면 사용, 없으면 양수 랜덤 생성(1..2^31-1)
+        if (uidRef.current == null) {
+          const fromStore = Number(user?.id ?? '0');
+          uidRef.current =
+            Number.isFinite(fromStore) && fromStore > 0
+              ? Math.floor(fromStore)
+              : null;
+          if (uidRef.current == null) {
+            throw new Error('로그인 사용자 numeric userId를 찾을 수 없습니다.');
+          }
+        }
         const tokenData = await agoraService.getToken(
           appointmentId,
-          uidCandidate
+          uidRef.current
         );
         if (cancelled) return;
         const appId = (
@@ -51,7 +61,7 @@ export const VideoCall = ({ appointmentId, onEnd }: VideoCallProps) => {
           appId,
           channel: tokenData.channel,
           token: tokenData.token,
-          uid: tokenData.uid ?? uidCandidate,
+          uid: tokenData.uid ?? uidRef.current!,
         });
       } catch (e) {
         console.error('화상 통화 초기화 실패:', e);

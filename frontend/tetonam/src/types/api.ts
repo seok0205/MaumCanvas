@@ -77,6 +77,8 @@ export interface UserInfoResponse {
 export interface MainMyInfoResponse {
   readonly name: string;
   readonly nickname: string;
+  readonly id?: number; // 백엔드가 id로 줄 수도 있음
+  readonly userId?: number; // 또는 userId로 줄 수도 있음
 }
 
 // 회원가입 응답 타입

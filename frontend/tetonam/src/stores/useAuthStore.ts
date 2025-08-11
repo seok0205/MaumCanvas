@@ -1,5 +1,6 @@
 import type { UserRole } from '@/constants/userRoles';
 import { authService } from '@/services/authService';
+import { userService } from '@/services/userService';
 import type { AuthError } from '@/types/auth';
 import type { AuthState } from '@/types/store';
 import type { User } from '@/types/user';
@@ -58,16 +59,29 @@ export const useAuthStore = create<AuthState>()(
               finalRoles.length > 0 ? finalRoles : (['USER'] as UserRole[]);
 
             // 로그인 시에는 role 정보만 설정하고, 나머지 정보는 필요시 별도 API로 가져옴
+            // 로그인 직후 서버에서 numeric userId를 조회
+            let numericUserId = '';
+            try {
+              const myInfo = await userService.getHomeMyInfo();
+              const idCandidate =
+                (myInfo as any)?.userId ?? (myInfo as any)?.id;
+              if (typeof idCandidate === 'number' && idCandidate > 0) {
+                numericUserId = String(idCandidate);
+              }
+            } catch {
+              // 조회 실패 시 임시 문자열 유지
+            }
+
             const user: User = {
-              id: `user-${Date.now()}`, // 임시 ID
-              email: email, // 로그인 파라미터에서 가져옴
-              name: '', // 필요시 my-info API로 별도 조회
+              id: numericUserId,
+              email: email,
+              name: '',
               nickname: '',
               gender: '',
               phone: '',
               school: '',
               birthday: '',
-              roles: validatedRoles, // 토큰 기반 검증된 roles 배열 사용
+              roles: validatedRoles,
               createdAt: new Date().toISOString(),
             };
 
