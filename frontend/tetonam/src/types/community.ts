@@ -77,18 +77,18 @@ export interface PostListResponse {
   category: CommunityCategory;
   nickname: string; // 백엔드 PostListDto와 일치 (nickname만 포함)
   viewCount: number;
-  readonly createdAt: string;
-  readonly updatedAt: string;
+  commentCount: number; // 백엔드 PostListDto의 commentCount 포함
+  readonly createdDate: string; // 백엔드 필드명에 맞춤 (createdDate)
 }
 
 // 게시글 페이지(목록) 조회 응답 (PostPageDto - 백엔드와 일치)
-// 백엔드 PostPageDto 필드: id, title, nickname, category
+// 백엔드 PostPageDto 필드: id, title, nickname, category, createdDate
 export interface PostPageItem {
   readonly id: number;
   title: string;
   nickname: string;
   category: CommunityCategory;
-  createdAt?: string; // 목록 API가 제공할 경우 상대 시간 표시용 (옵션)
+  createdDate?: string; // 백엔드 PostPageDto의 createdDate에 맞춤
 }
 
 // 댓글 목록 조회 응답 (CommentListDto - 백엔드와 일치)
@@ -96,9 +96,7 @@ export interface CommentListResponse {
   readonly id: number;
   content: string;
   nickname: string; // 백엔드 CommentListDto와 일치 (nickname만 포함)
-  readonly communityId: number;
-  readonly createdAt: string;
-  readonly updatedAt: string;
+  readonly createdDate: string; // 백엔드 필드명에 맞춤 (createdDate)
 }
 
 // === 페이지네이션 관련 타입 ===
@@ -149,8 +147,8 @@ export const isValidPostSortType = (sort: any): sort is PostSortType => {
   return ['latest', 'popular'].includes(sort);
 };
 
-// 게시글 데이터 유효성 검사
-export const isValidPostData = (post: any): post is Community => {
+// 게시글 데이터 유효성 검사 (PostListResponse 기준)
+export const isValidPostData = (post: any): post is PostListResponse => {
   return (
     post &&
     typeof post === 'object' &&
@@ -160,18 +158,18 @@ export const isValidPostData = (post: any): post is Community => {
     post.title.trim().length > 0 &&
     typeof post.content === 'string' &&
     post.content.trim().length > 0 &&
-    post.author &&
-    typeof post.author.id === 'number' &&
-    typeof post.author.nickname === 'string' &&
+    typeof post.nickname === 'string' &&
     isValidCommunityCategory(post.category) &&
     typeof post.viewCount === 'number' &&
-    typeof post.createdAt === 'string' &&
-    typeof post.updatedAt === 'string'
+    typeof post.commentCount === 'number' &&
+    typeof post.createdDate === 'string'
   );
 };
 
-// 댓글 데이터 유효성 검사
-export const isValidCommentData = (comment: any): comment is Comment => {
+// 댓글 데이터 유효성 검사 (CommentListResponse 기준)
+export const isValidCommentData = (
+  comment: any
+): comment is CommentListResponse => {
   return (
     comment &&
     typeof comment === 'object' &&
@@ -179,12 +177,8 @@ export const isValidCommentData = (comment: any): comment is Comment => {
     comment.id > 0 &&
     typeof comment.content === 'string' &&
     comment.content.trim().length > 0 &&
-    comment.author &&
-    typeof comment.author.id === 'number' &&
-    typeof comment.author.nickname === 'string' &&
-    typeof comment.communityId === 'number' &&
-    typeof comment.createdAt === 'string' &&
-    typeof comment.updatedAt === 'string'
+    typeof comment.nickname === 'string' &&
+    typeof comment.createdDate === 'string'
   );
 };
 

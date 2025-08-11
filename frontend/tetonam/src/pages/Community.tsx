@@ -163,7 +163,7 @@ export const CommunityPage = ({}: CommunityPageProps) => {
           </div>
         </CardHeader>
       </Card>
-      
+
       {/* 검색창과 게시글 목록 사이 영역 - 글 작성 버튼 */}
       {user && (
         <div className='mb-4 flex justify-end py-3 px-4 bg-white/40 backdrop-blur-sm border-l-4 border-orange-300 rounded-r-lg'>
@@ -171,8 +171,7 @@ export const CommunityPage = ({}: CommunityPageProps) => {
             onClick={handleCreatePost}
             className='bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500 text-white font-medium px-6 py-2.5 rounded-lg shadow-lg transition-all hover:shadow-xl hover:scale-105'
           >
-            <PlusCircle className='w-4 h-4 mr-2' />
-            글 작성
+            <PlusCircle className='w-4 h-4 mr-2' />글 작성
           </Button>
         </div>
       )}
@@ -299,11 +298,11 @@ const PostList = React.memo(
                     <User className='w-4 h-4 mr-1' />
                     <span>{post.nickname}</span>
                   </div>
-                  {post.createdAt && (
+                  {post.createdDate && (
                     <div className='flex items-center gap-1'>
                       <Clock className='w-3 h-3' />
                       <span className='tabular-nums'>
-                        {formatRelativeTime(post.createdAt)}
+                        {formatRelativeTime(post.createdDate)}
                       </span>
                     </div>
                   )}

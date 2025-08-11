@@ -3,7 +3,6 @@ import {
   COMMUNITY_ERROR_MESSAGES,
 } from '@/constants/community';
 import type { ApiResponse } from '@/types/api';
-import { convertLocalDateTimeArrayToISO } from '@/types/api';
 import { AuthenticationError } from '@/types/auth';
 import type {
   Comment,
@@ -57,15 +56,14 @@ export const communityService = {
           ? data.content
           : [];
 
-      // PostPageDto는 id,title,nickname,category만 포함하므로 상세 화면 데이터가 아님.
-      // 목록 컴포넌트에서는 title/category/nickname만 사용하도록 했고, createdAt/viewCount는 없을 수 있음.
+      // PostPageDto는 id,title,nickname,category,createdDate 포함
       return items.map(
         (item): PostPageItem => ({
           id: item.id,
           title: item.title,
           category: item.category,
           nickname: item.nickname,
-          createdAt: item.createdAt || item.createdDate || undefined,
+          createdDate: item.createdDate || item.createdAt || undefined,
         })
       );
     } catch (error) {
@@ -130,20 +128,23 @@ export const communityService = {
       }
 
       const raw = response.data.result as any;
-      
-      // LocalDateTime 배열을 문자열로 변환하는 함수
-      const convertDateTime = (dateField: any): string => {
-        if (Array.isArray(dateField)) {
-          // LocalDateTime 배열인 경우 ISO 문자열로 변환
-          try {
-            return convertLocalDateTimeArrayToISO(dateField);
-          } catch (error) {
-            console.warn('날짜 배열 변환 실패:', error);
-            return new Date().toISOString();
-          }
+
+      // LocalDateTime을 ISO 문자열로 변환하는 헬퍼 함수
+      const convertDateTime = (dateTime: any): string => {
+        if (typeof dateTime === 'string') {
+          return dateTime;
         }
-        if (typeof dateField === 'string') {
-          return dateField;
+        if (Array.isArray(dateTime) && dateTime.length >= 3) {
+          // LocalDateTime 배열 [year, month, day, hour?, minute?, second?, nano?]
+          const [year, month, day, hour = 0, minute = 0, second = 0] = dateTime;
+          return new Date(
+            year,
+            month - 1,
+            day,
+            hour,
+            minute,
+            second
+          ).toISOString();
         }
         // fallback: 현재 시간
         return new Date().toISOString();
@@ -156,8 +157,8 @@ export const communityService = {
         category: raw.category,
         nickname: raw.nickname,
         viewCount: raw.viewCount ?? 0,
-        createdAt: convertDateTime(raw.createdAt || raw.createdDate),
-        updatedAt: convertDateTime(raw.updatedAt || raw.modifiedDate),
+        commentCount: raw.commentCount ?? 0,
+        createdDate: convertDateTime(raw.createdDate), // 백엔드 필드명 사용
       };
 
       return normalized;
@@ -447,35 +448,36 @@ export const communityService = {
 
       // 댓글이 없는 경우 빈 배열 반환
       const raw = response.data.result || [];
-      
-      return raw.map((item: any) => {
-        // LocalDateTime 배열을 문자열로 변환하는 함수
-        const convertDateTime = (dateField: any): string => {
-          if (Array.isArray(dateField)) {
-            // LocalDateTime 배열인 경우 ISO 문자열로 변환
-            try {
-              return convertLocalDateTimeArrayToISO(dateField);
-            } catch (error) {
-              console.warn('날짜 배열 변환 실패:', error);
-              return new Date().toISOString();
-            }
-          }
-          if (typeof dateField === 'string') {
-            return dateField;
-          }
-          // fallback: 현재 시간
-          return new Date().toISOString();
-        };
 
-        return {
+      // LocalDateTime을 ISO 문자열로 변환하는 헬퍼 함수
+      const convertDateTime = (dateTime: any): string => {
+        if (typeof dateTime === 'string') {
+          return dateTime;
+        }
+        if (Array.isArray(dateTime) && dateTime.length >= 3) {
+          // LocalDateTime 배열 [year, month, day, hour?, minute?, second?, nano?]
+          const [year, month, day, hour = 0, minute = 0, second = 0] = dateTime;
+          return new Date(
+            year,
+            month - 1,
+            day,
+            hour,
+            minute,
+            second
+          ).toISOString();
+        }
+        // fallback: 현재 시간
+        return new Date().toISOString();
+      };
+
+      return raw.map(
+        (item: any): CommentListResponse => ({
           id: item.id,
           content: item.content,
           nickname: item.nickname,
-          communityId: item.communityId ?? communityId,
-          createdAt: convertDateTime(item.createdAt),
-          updatedAt: convertDateTime(item.updatedAt),
-        };
-      });
+          createdDate: convertDateTime(item.createdDate), // 백엔드 필드명 사용
+        })
+      );
     } catch (error) {
       if (error instanceof AuthenticationError) {
         throw error;
@@ -597,12 +599,13 @@ export const communityService = {
     signal?: AbortSignal
   ): Promise<Comment> => {
     try {
+      // 백엔드가 @RequestBody CommentWriteDto를 기대하므로 DTO 객체로 전송
       const response = await apiClient.put<ApiResponse<Comment>>(
         COMMUNITY_ENDPOINTS.UPDATE_COMMENT(communityId, commentId),
-        data.content,
+        data, // CommentWriteRequest 객체 전체를 전송
         {
           headers: {
-            'Content-Type': 'text/plain; charset=utf-8',
+            'Content-Type': 'application/json',
           },
           ...(signal && { signal }),
         }

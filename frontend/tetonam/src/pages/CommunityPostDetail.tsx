@@ -11,7 +11,7 @@ import {
   User,
   X,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { CommonHeader } from '@/components/layout/CommonHeader';
@@ -71,7 +71,7 @@ export const CommunityPostDetail = () => {
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
   const [editingContent, setEditingContent] = useState('');
 
-  const handleSubmitComment = () => {
+  const handleSubmitComment = useCallback(() => {
     if (!commentContent.trim()) return;
     createCommentMutation.mutate(
       { content: commentContent.trim() },
@@ -81,17 +81,19 @@ export const CommunityPostDetail = () => {
         },
       }
     );
-  };
+  }, [commentContent, createCommentMutation]);
 
-  const startEditComment = (id: number, existing: string) => {
+  const startEditComment = useCallback((id: number, existing: string) => {
     setEditingCommentId(id);
     setEditingContent(existing);
-  };
-  const cancelEditComment = () => {
+  }, []);
+
+  const cancelEditComment = useCallback(() => {
     setEditingCommentId(null);
     setEditingContent('');
-  };
-  const submitEditComment = () => {
+  }, []);
+
+  const submitEditComment = useCallback(() => {
     if (!editingCommentId) return;
     if (!editingContent.trim()) return;
     updateCommentMutation.mutate(
@@ -102,14 +104,23 @@ export const CommunityPostDetail = () => {
         },
       }
     );
-  };
-  const handleDeleteComment = (id: number) => {
-    deleteCommentMutation.mutate(id, {
-      onSuccess: () => {
-        if (editingCommentId === id) cancelEditComment();
-      },
-    });
-  };
+  }, [
+    editingCommentId,
+    editingContent,
+    updateCommentMutation,
+    cancelEditComment,
+  ]);
+
+  const handleDeleteComment = useCallback(
+    (id: number) => {
+      deleteCommentMutation.mutate(id, {
+        onSuccess: () => {
+          if (editingCommentId === id) cancelEditComment();
+        },
+      });
+    },
+    [deleteCommentMutation, editingCommentId, cancelEditComment]
+  );
 
   const deletePostMutation = useDeletePost();
 
@@ -214,11 +225,11 @@ export const CommunityPostDetail = () => {
                     <User className='w-4 h-4' />
                     <span>{post.nickname}</span>
                   </div>
-                  {safeRelativeTime(post.createdAt) && (
+                  {safeRelativeTime(post.createdDate) && (
                     <div className='flex items-center gap-1 pl-4'>
                       <Calendar className='w-4 h-4' />
                       <span className='tabular-nums'>
-                        {safeRelativeTime(post.createdAt)}
+                        {safeRelativeTime(post.createdDate)}
                       </span>
                     </div>
                   )}
@@ -341,7 +352,7 @@ export const CommunityPostDetail = () => {
                           <User className='w-4 h-4' />
                           <span className='font-medium'>{c.nickname}</span>
                           <span className='text-slate-400'>
-                            • {safeRelativeTime(c.createdAt) || ''}
+                            • {safeRelativeTime(c.createdDate) || ''}
                           </span>
                         </div>
                         {isOwner && !isEditing && (
