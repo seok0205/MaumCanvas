@@ -1,12 +1,13 @@
 import type Konva from 'konva';
-import { memo, useEffect, useRef } from 'react';
+import type { ErrorInfo, ReactNode } from 'react';
+import { Component, memo, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 
 import { DrawingControls } from '@/components/drawing/DrawingControls';
-import { LazyDrawingStage } from '@/components/drawing/LazyDrawingStage';
 import { DrawingStepHeader } from '@/components/drawing/DrawingStepHeader';
 import { DrawingThumbnails } from '@/components/drawing/DrawingThumbnails';
 import { DrawingToolbar } from '@/components/drawing/DrawingToolbar';
+import { LazyDrawingStage } from '@/components/drawing/LazyDrawingStage';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { CommonHeader } from '@/components/layout/CommonHeader';
 import {
@@ -28,6 +29,65 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useDrawingStore } from '@/stores/useDrawingStore';
 import { useUIStore } from '@/stores/useUIStore';
 import type { DrawingCategory } from '@/types/drawing';
+
+// Error Boundary for Canvas Loading Safety
+interface DrawingErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+interface DrawingErrorBoundaryProps {
+  children: ReactNode;
+  onRetry?: () => void;
+}
+
+class DrawingErrorBoundary extends Component<
+  DrawingErrorBoundaryProps,
+  DrawingErrorBoundaryState
+> {
+  constructor(props: DrawingErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error): DrawingErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('Drawing Canvas Error:', error, errorInfo);
+  }
+
+  handleRetry = () => {
+    this.setState({ hasError: false, error: null });
+    this.props.onRetry?.();
+  };
+
+  override render() {
+    if (this.state.hasError) {
+      return (
+        <div className='flex flex-col items-center justify-center h-96 p-4 border-2 border-dashed border-gray-300 rounded-lg'>
+          <div className='text-center'>
+            <h3 className='text-lg font-semibold text-gray-900 mb-2'>
+              Drawing Canvas Error
+            </h3>
+            <p className='text-sm text-gray-600 mb-4'>
+              Something went wrong loading the drawing canvas. Please try again.
+            </p>
+            <button
+              onClick={this.handleRetry}
+              className='px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+            >
+              Retry Loading Canvas
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 // 컴포넌트 정의
 const DrawingCanvas = memo(() => {
@@ -234,18 +294,26 @@ const DrawingCanvas = memo(() => {
                   isEditingActive ? 'touch-none select-none' : ''
                 }`}
               >
-                <LazyDrawingStage
-                  stageRef={stageRef}
-                  stageSize={stageSize}
-                  currentLines={currentLines}
-                  isEditingActive={isEditingActive}
-                  onMouseDown={handleMouseDown}
-                  onMouseMove={handleMouseMove}
-                  onMouseUp={handleMouseUp}
-                  onReactivate={() => setIsEditingActive(true)}
-                  saveAnimationKey={saveAnimationKey}
-                  reActivateButtonRef={reActivateButtonRef}
-                />
+                <DrawingErrorBoundary
+                  onRetry={() => {
+                    // Reset any drawing state if needed
+                    console.log('Retrying canvas load...');
+                  }}
+                >
+                  <LazyDrawingStage
+                    stageRef={stageRef}
+                    stageSize={stageSize}
+                    currentLines={currentLines}
+                    isEditingActive={isEditingActive}
+                    onMouseDown={handleMouseDown}
+                    onMouseMove={handleMouseMove}
+                    onMouseUp={handleMouseUp}
+                    onReactivate={() => setIsEditingActive(true)}
+                    saveAnimationKey={saveAnimationKey}
+                    reActivateButtonRef={reActivateButtonRef}
+                    enablePreload={true} // 항상 preload 활성화로 최적화
+                  />
+                </DrawingErrorBoundary>
               </div>
 
               {/* 네비게이션 버튼 */}

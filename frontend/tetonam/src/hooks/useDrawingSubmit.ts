@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -20,6 +20,29 @@ export const useDrawingSubmit = (stageRef: React.RefObject<any>) => {
   } = useDrawingStore();
 
   const { clearAllDrawings } = useDrawingLocalStorage('');
+
+  // 미저장 변경사항 확인 함수
+  const hasUnsavedChanges = useCallback(() => {
+    // stepsLines에 그림 데이터가 있는지 확인
+    const hasDrawingData = stepsLines.some((lines: any) => lines.length > 0);
+
+    // savedImages에 임시 이미지가 있는지 확인
+    const hasSavedImages = Object.keys(savedImages).some(
+      key => savedImages[key as DrawingCategory]
+    );
+
+    return hasDrawingData || hasSavedImages;
+  }, [stepsLines, savedImages]);
+
+  // 컴포넌트 언마운트 시 localStorage 정리 (Effect cleanup)
+  useEffect(() => {
+    return () => {
+      // 컴포넌트 언마운트 시 미저장 변경사항이 있으면 정리
+      if (hasUnsavedChanges()) {
+        clearAllDrawings();
+      }
+    };
+  }, [clearAllDrawings, hasUnsavedChanges]);
 
   // 캔버스를 이미지로 변환
   const canvasToFile = useCallback(

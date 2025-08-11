@@ -1,5 +1,5 @@
 import type Konva from 'konva';
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useLayoutEffect, useMemo, useRef } from 'react';
 import { Layer, Line, Rect, Stage } from 'react-konva';
 
 import { Button } from '@/components/ui/interactive/button';
@@ -23,6 +23,7 @@ interface DrawingStageProps {
 /**
  * Konva Stage와 캔버스 렌더링을 담당하는 컴포넌트
  * 단일 책임: 캔버스 렌더링과 기본 상호작용만 처리
+ * ref 안정화로 Suspense boundary에서의 문제 해결
  */
 const DrawingStage = memo<DrawingStageProps>(
   ({
@@ -38,6 +39,14 @@ const DrawingStage = memo<DrawingStageProps>(
     reActivateButtonRef,
   }) => {
     const reduceMotion = useReducedMotion();
+    const localRef = useRef<Konva.Stage>(null);
+
+    // DOM 업데이트와 동기화하여 ref 안정성 보장
+    useLayoutEffect(() => {
+      if (localRef.current && stageRef) {
+        stageRef.current = localRef.current;
+      }
+    }, [stageRef]);
 
     // 메모이즈된 핸들러
     const handleReactivate = useCallback(() => {
@@ -108,7 +117,7 @@ const DrawingStage = memo<DrawingStageProps>(
         style={{ width: stageSize.width, height: stageSize.height }}
       >
         <Stage
-          ref={stageRef}
+          ref={localRef}
           width={stageSize.width}
           height={stageSize.height}
           {...(supportsPointer ? pointerHandlers : mouseTouchHandlers)}
