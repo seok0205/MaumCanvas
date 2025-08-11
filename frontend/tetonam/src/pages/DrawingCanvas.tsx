@@ -3,7 +3,7 @@ import { memo, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 
 import { DrawingControls } from '@/components/drawing/DrawingControls';
-import { LazyDrawingStage } from '@/components/drawing/LazyDrawingStage';
+import { DrawingStage } from '@/components/drawing/DrawingStage';
 import { DrawingStepHeader } from '@/components/drawing/DrawingStepHeader';
 import { DrawingThumbnails } from '@/components/drawing/DrawingThumbnails';
 import { DrawingToolbar } from '@/components/drawing/DrawingToolbar';
@@ -234,7 +234,7 @@ const DrawingCanvas = memo(() => {
                   isEditingActive ? 'touch-none select-none' : ''
                 }`}
               >
-                <LazyDrawingStage
+                <DrawingStage
                   stageRef={stageRef}
                   stageSize={stageSize}
                   currentLines={currentLines}

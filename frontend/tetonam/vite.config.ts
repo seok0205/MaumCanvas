@@ -96,11 +96,6 @@ export default defineConfig(({ mode }) => ({
   assetsInclude: ['**/*.woff2', '**/*.woff'],
   build: {
     rollupOptions: {
-      treeshake: {
-        moduleSideEffects: false,
-        propertyReadSideEffects: false,
-        unknownGlobalSideEffects: false,
-      },
       output: {
         assetFileNames: assetInfo => {
           if (
@@ -143,9 +138,7 @@ export default defineConfig(({ mode }) => ({
             '@radix-ui/react-tooltip',
             'lucide-react',
           ],
-          // 캔버스 관련 라이브러리들을 분리하여 동적 로딩 최적화
-          'vendor-canvas-core': ['konva'],
-          'vendor-canvas-react': ['react-konva'],
+          'vendor-canvas': ['konva', 'react-konva'],
           'vendor-charts': ['recharts'],
           'vendor-query': ['@tanstack/react-query', 'axios'],
           'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
