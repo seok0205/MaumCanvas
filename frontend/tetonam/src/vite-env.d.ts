@@ -5,6 +5,7 @@ interface ImportMetaEnv {
   readonly VITE_API_TIMEOUT?: string;
   readonly VITE_APP_NAME: string;
   readonly VITE_ENVIRONMENT: 'development' | 'production' | 'test';
+  readonly VITE_AGORA_APP_ID: string;
 }
 
 interface ImportMeta {
