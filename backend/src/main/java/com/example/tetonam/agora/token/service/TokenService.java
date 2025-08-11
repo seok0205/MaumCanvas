@@ -16,9 +16,9 @@ import org.springframework.stereotype.Service;
 public class TokenService {
     static int tokenExpirationInSeconds = 3600;
     static int privilegeExpirationInSeconds = 3600;
-    @Value("${AGORA_APP_ID}")
+    @Value("${agora.app.id}")
     private String appId;
-    @Value("${AGORA_APP_CERTIFICATE}")
+    @Value("${agora.app.certificate}")
     private String appCertificate;
     public tokenDto getToken(String counseling_id, int user_id){
         if (appId == null || appId.isEmpty() || appCertificate == null || appCertificate.isEmpty()) {

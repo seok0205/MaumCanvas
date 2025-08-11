@@ -50,3 +50,8 @@ ai:
 kakao:
   client_id: ${KAKAO_CLIENT_ID}
   redirect_uri: ${KAKAO_REDIRECT_URL}
+
+agora:
+  app:
+    id: ${AGORA_APP_ID}
+    certificate: ${AGORA_APP_CERTIFICATE} 
