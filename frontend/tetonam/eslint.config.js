@@ -26,6 +26,7 @@ export default tseslint.config(
       ],
       '@typescript-eslint/no-unused-vars': 'warn',
       '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-unused-imports': 'warn',
       'prefer-const': 'error',
       '@typescript-eslint/no-var-requires': 'error',
     },
