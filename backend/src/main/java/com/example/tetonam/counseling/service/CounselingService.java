@@ -105,17 +105,24 @@ public class CounselingService {
 
     }
 
-    public MyCounselingDetailResponseDto showMyCounselingDetail(String email, Long id) {
+    public CounselingDetailResponseDto showMyCounselingDetail(String email, Long id) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
         Counseling counseling=counselingRepository.findById(id)
                 .orElseThrow(()-> new CounselingHandler(ErrorStatus.NOTING_COUNSELING));
 
         // 해당 유저의 예약이 아닐때 비정상적 접속
-        if (!counseling.getStudent().equals(user)){
+        if (!counseling.getStudent().equals(user)&&!counseling.getCounselor().equals(user)){
             throw new CounselingHandler(ErrorStatus.COUNSELING_IS_NOT_AUTHORITY);
         }
-        return MyCounselingDetailResponseDto.toDto(counseling);
+
+        if(User.hasRole(user,Role.COUNSELOR)) {
+            return CounselingDetailResponseDto.toCounselorDto(counseling);
+        } else if (User.hasRole(user,Role.USER)) {
+            return CounselingDetailResponseDto.toStudentDto(counseling);
+        }else {
+            throw new CounselingHandler(ErrorStatus._INTERNAL_SERVER_ERROR);
+        }
     }
 
 
