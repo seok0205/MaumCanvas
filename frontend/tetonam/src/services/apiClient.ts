@@ -50,8 +50,16 @@ const refreshToken = async (): Promise<string | null> => {
       throw new Error('토큰이 없습니다.');
     }
 
+    const base = (import.meta.env.VITE_API_URL || '').toString();
+    const reissuePath = API_CONSTANTS.TOKEN_REISSUE_ENDPOINT;
+    // '/api' 중복 방지: base가 /api로 끝나고 path가 /api로 시작하면 path의 '/api'를 제거
+    const needsTrim = base.endsWith('/api') && reissuePath.startsWith('/api/');
+    const url = needsTrim
+      ? `${base}${reissuePath.substring(4)}`
+      : `${base}${reissuePath}`;
+
     const response = await axios.post<ApiResponse<JwtTokenResponse>>(
-      `${import.meta.env.VITE_API_URL}${API_CONSTANTS.TOKEN_REISSUE_ENDPOINT}`,
+      url,
       {
         accessToken,
         refreshToken,
