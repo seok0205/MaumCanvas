@@ -248,11 +248,13 @@ export const NicknameField = ({
   onCheckNickname,
   isLoading,
   isVerified,
+  hasBackendResponse,
 }: {
   form: UseFormReturn<RegisterFormData>;
   onCheckNickname?: () => void;
   isLoading?: boolean;
   isVerified?: boolean;
+  hasBackendResponse?: boolean;
 }) => {
   const nickname = form.watch('nickname');
   const nicknameError = form.formState.errors.nickname;
@@ -260,6 +262,9 @@ export const NicknameField = ({
     nickname &&
     !nicknameError &&
     nickname.length >= FORM_CONSTANTS.VALIDATION.NICKNAME_MIN_LENGTH;
+
+  // 백엔드 응답이 있을 때는 클라이언트 사이드 검증 에러를 숨김
+  const shouldShowClientError = !hasBackendResponse && nicknameError;
 
   return (
     <div className='space-y-2'>
@@ -278,7 +283,7 @@ export const NicknameField = ({
             pattern='[가-힣a-zA-Z0-9]+'
             maxLength={FORM_CONSTANTS.VALIDATION.NICKNAME_MAX_LENGTH}
             aria-describedby={
-              form.formState.errors['nickname'] ? 'nickname-error' : undefined
+              shouldShowClientError ? 'nickname-error' : undefined
             }
           />
         </div>
@@ -303,13 +308,10 @@ export const NicknameField = ({
           </Button>
         )}
       </div>
-      {form.formState.errors['nickname'] && (
+      {shouldShowClientError && (
         <p id='nickname-error' className='text-destructive text-sm'>
-          {form.formState.errors['nickname']?.message}
+          {nicknameError?.message}
         </p>
-      )}
-      {isVerified && (
-        <p className='text-green-600 text-sm'>✓ 사용 가능한 닉네임입니다.</p>
       )}
     </div>
   );
