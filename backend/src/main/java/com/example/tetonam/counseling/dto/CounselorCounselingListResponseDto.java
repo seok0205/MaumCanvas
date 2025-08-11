@@ -13,17 +13,17 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class MyCounselingListResponseDto {
+public class CounselorCounselingListResponseDto {
     private long id;
-    private String counselor;
+    private String student;
     private LocalDateTime time;
     private String type;
     private Status status;
 
-    public static MyCounselingListResponseDto toDto(Counseling counseling){
-        return MyCounselingListResponseDto.builder()
+    public static CounselorCounselingListResponseDto toDto(Counseling counseling){
+        return CounselorCounselingListResponseDto.builder()
                 .id(counseling.getId())
-                .counselor(counseling.getCounselor().getName())
+                .student(counseling.getStudent().getName())
                 .time(counseling.getReservationTime())
                 .type(counseling.getTypes())
                 .status(counseling.getStatus())

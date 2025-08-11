@@ -4,10 +4,7 @@ package com.example.tetonam.counseling.service;
 import com.example.tetonam.counseling.domain.Counseling;
 import com.example.tetonam.counseling.domain.CounselingImage;
 import com.example.tetonam.counseling.domain.enums.Status;
-import com.example.tetonam.counseling.dto.CounselingPossibleCounselorResponseDto;
-import com.example.tetonam.counseling.dto.CounselingReserveRequestDto;
-import com.example.tetonam.counseling.dto.MyCounselingDetailResponseDto;
-import com.example.tetonam.counseling.dto.MyCounselingListResponseDto;
+import com.example.tetonam.counseling.dto.*;
 import com.example.tetonam.counseling.repository.CounselingImageRepository;
 import com.example.tetonam.counseling.repository.CounselingRepository;
 import com.example.tetonam.exception.handler.CounselingHandler;
@@ -80,15 +77,20 @@ public class CounselingService {
         return "상담이 예약 되었습니다";
     }
 
-    public List<MyCounselingListResponseDto> showMyCounselingList(String email) {
+    public List<StudentCounselingListResponseDto> showStudentCounselingList(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
-      return counselingRepository.findByStudentOrderByReservationTimeAsc(user).stream().map(MyCounselingListResponseDto::toDto).toList();
+      return counselingRepository.findByCounselorOrderByReservationTimeAsc(user).stream().map(StudentCounselingListResponseDto::toDto).toList();
+    }
 
+    public List<CounselorCounselingListResponseDto> showCounselorCounselingList(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+        return counselingRepository.findByStudentOrderByReservationTimeAsc(user).stream().map(CounselorCounselingListResponseDto::toDto).toList();
 
     }
 
-    public MyCounselingListResponseDto showMyRecentCounseling(String email) {
+    public StudentCounselingListResponseDto showMyRecentCounseling(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
         Counseling counseling=null;
@@ -99,7 +101,7 @@ public class CounselingService {
             counseling = counselingRepository.findFirstByStudentAndStatusOrderByReservationTimeAsc(user, Status.OPEN)
                     .orElseThrow(() -> new CounselingHandler(ErrorStatus.NOTING_COUNSELING));
         }
-        return MyCounselingListResponseDto.toDto(counseling);
+        return StudentCounselingListResponseDto.toDto(counseling);
 
     }
 
@@ -115,6 +117,8 @@ public class CounselingService {
         }
         return MyCounselingDetailResponseDto.toDto(counseling);
     }
+
+
 
 
 //    public String createCounseling(String email, CounselingReserveRequestDto counselingReserveRequestDto) {

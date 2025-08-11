@@ -1,15 +1,13 @@
 package com.example.tetonam.counseling.controller;
 
-import com.example.tetonam.counseling.dto.CounselingPossibleCounselorResponseDto;
-import com.example.tetonam.counseling.dto.CounselingReserveRequestDto;
-import com.example.tetonam.counseling.dto.MyCounselingDetailResponseDto;
-import com.example.tetonam.counseling.dto.MyCounselingListResponseDto;
+import com.example.tetonam.counseling.dto.*;
 import com.example.tetonam.counseling.service.CounselingService;
 import com.example.tetonam.response.ApiResponse;
 import com.example.tetonam.user.token.JwtTokenProvider;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -44,11 +42,22 @@ public class CounselingController {
         return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
     }
 
-    @GetMapping("/my-counseling")
-    @Operation(summary = "내 상담내역 전체 조회 API", description = "나의 전체 상담내역을 반환합니다")
-    public ResponseEntity<?> showMyCounselingList(@RequestHeader("Authorization") String token) {
+    @GetMapping("/my-counseling-counselor")
+    @PreAuthorize("hasRole('COUNSELOR')")
+    @Operation(summary = "내(상담사) 상담내역 전체 조회 API", description = "나의 전체 상담내역을 반환합니다")
+    public ResponseEntity<?> showCounselorCounselingList(@RequestHeader("Authorization") String token) {
         String email = jwtTokenProvider.getEmail(token.substring(7));
-        List<MyCounselingListResponseDto> result=counselingService.showMyCounselingList(email);
+        List<CounselorCounselingListResponseDto> result=counselingService.showCounselorCounselingList(email);
+        return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
+    }
+
+
+    @GetMapping("/my-counseling-student")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(summary = "내(학생) 상담내역 전체 조회 API", description = "나의 전체 상담내역을 반환합니다")
+    public ResponseEntity<?> showStudentCounselingList(@RequestHeader("Authorization") String token) {
+        String email = jwtTokenProvider.getEmail(token.substring(7));
+        List<StudentCounselingListResponseDto> result=counselingService.showStudentCounselingList(email);
         return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
     }
 
@@ -64,7 +73,7 @@ public class CounselingController {
     @Operation(summary = "학생 메인 다가오는상담 조회 API", description = "나의 제일 가까운 상담내역을 반환합니다")
     public ResponseEntity<?> showMyRecentCounseling(@RequestHeader("Authorization") String token) {
         String email = jwtTokenProvider.getEmail(token.substring(7));
-        MyCounselingListResponseDto result=counselingService.showMyRecentCounseling(email);
+        StudentCounselingListResponseDto result=counselingService.showMyRecentCounseling(email);
         return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
     }
 
