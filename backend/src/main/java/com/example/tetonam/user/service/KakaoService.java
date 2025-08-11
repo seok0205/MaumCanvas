@@ -29,7 +29,7 @@ public class KakaoService {
         KAUTH_USER_URL_HOST = "https://kapi.kakao.com";
     }
 
-    public String getAccessTokenFromKakao(String code) {
+    public KakaoTokenResponseDto getAccessTokenFromKakao(String code) {
         
         KakaoTokenResponseDto kakaoTokenResponseDto = WebClient.create(KAUTH_TOKEN_URL_HOST).post()
                 .uri(uriBuilder -> uriBuilder
@@ -54,7 +54,7 @@ public class KakaoService {
         log.info(" [Kakao Service] Id Token ------> {}", kakaoTokenResponseDto.getIdToken());
         log.info(" [Kakao Service] Scope ------> {}", kakaoTokenResponseDto.getScope());
 
-        return kakaoTokenResponseDto.getAccessToken();
+        return kakaoTokenResponseDto;
     }
 
     public KakaoUserInfoResponseDto getUserInfo(String accessToken) {
