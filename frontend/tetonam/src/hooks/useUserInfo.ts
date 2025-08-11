@@ -3,12 +3,18 @@ import { useQuery } from '@tanstack/react-query';
 import { authService } from '@/services/authService';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { UserInfoResponse } from '@/types/api';
+import { useProgressiveLoading } from './useDelayedLoading';
 
 interface UseUserInfoReturn {
   userInfo: UserInfoResponse | null;
   isLoading: boolean;
   error: Error | null;
   refetch: () => void;
+  // Progressive Loading 상태들
+  showSkeleton: boolean;
+  isBackgroundFetching: boolean;
+  hasData: boolean;
+  hasError: boolean;
 }
 
 export const useUserInfo = (): UseUserInfoReturn => {
@@ -19,6 +25,7 @@ export const useUserInfo = (): UseUserInfoReturn => {
     isLoading,
     error,
     refetch,
+    isFetching,
   } = useQuery({
     queryKey: ['userInfo'],
     queryFn: () => authService.getMyInfo(),
@@ -31,10 +38,20 @@ export const useUserInfo = (): UseUserInfoReturn => {
     select: (data: UserInfoResponse) => data,
   });
 
+  // Progressive Loading 상태 관리
+  const progressiveLoadingState = useProgressiveLoading({
+    isLoading,
+    isFetching,
+    data: userInfo,
+    error,
+  });
+
   return {
     userInfo: userInfo ?? null,
     isLoading,
     error: error as Error | null,
     refetch,
+    // Progressive Loading 상태들 추가
+    ...progressiveLoadingState,
   };
 };

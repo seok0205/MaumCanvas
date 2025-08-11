@@ -10,7 +10,6 @@ export const SelfDiagnosisCard = memo(() => {
     selectedCategory,
     setSelectedCategory,
     categories,
-    isLoading,
     error,
     retryCount,
     maxRetries,
@@ -18,6 +17,9 @@ export const SelfDiagnosisCard = memo(() => {
     getSelectedCategoryResults,
     hasAnyResults,
     getCategoryDisplayName,
+    // Progressive Loading 상태들
+    showSkeleton,
+    isBackgroundFetching,
   } = useQuestionnaireResults();
 
   const handleRefresh = useCallback(async () => {
@@ -31,8 +33,8 @@ export const SelfDiagnosisCard = memo(() => {
     [setSelectedCategory]
   );
 
-  // 로딩 상태
-  if (isLoading && !hasAnyResults()) {
+  // Progressive Loading: 초기 로딩 시 스켈레톤 표시
+  if (showSkeleton) {
     return (
       <Card className='p-6'>
         <div className='flex items-center justify-between mb-4'>
@@ -40,9 +42,18 @@ export const SelfDiagnosisCard = memo(() => {
             자가 진단 결과
           </h3>
         </div>
-        <div className='text-center py-8'>
-          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-3'></div>
-          <p className='text-muted-foreground'>진단 결과를 불러오는 중...</p>
+        <div className='space-y-4'>
+          {/* 카테고리 선택 스켈레톤 */}
+          <div className='flex space-x-2'>
+            {[1, 2, 3, 4].map(i => (
+              <div
+                key={i}
+                className='h-8 bg-gray-200 rounded animate-pulse flex-1'
+              />
+            ))}
+          </div>
+          {/* 차트 영역 스켈레톤 */}
+          <div className='h-64 bg-gray-200 rounded animate-pulse' />
         </div>
       </Card>
     );
@@ -168,10 +179,13 @@ export const SelfDiagnosisCard = memo(() => {
           <h4 className='text-md font-medium text-foreground'>
             {getCategoryDisplayName(selectedCategory)} 진단 추이
           </h4>
-          {isLoading && (
+          {/* Context7 모범 사례: 백그라운드 갱신 상태 표시 */}
+          {isBackgroundFetching && (
             <div className='flex items-center space-x-2'>
               <RefreshCw className='w-3 h-3 animate-spin text-muted-foreground' />
-              <span className='text-xs text-muted-foreground'>업데이트 중</span>
+              <span className='text-xs text-muted-foreground'>
+                Background Updating...
+              </span>
             </div>
           )}
         </div>

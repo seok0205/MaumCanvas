@@ -289,7 +289,8 @@ interface MyPageProps {}
 export const MyPage = ({}: MyPageProps) => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { userInfo, isLoading, error, refetch } = useUserInfo();
+  const { userInfo, error, refetch, showSkeleton, isBackgroundFetching } =
+    useUserInfo();
 
   // 재시도 핸들러
   const handleRetry = useCallback(() => {
@@ -311,15 +312,31 @@ export const MyPage = ({}: MyPageProps) => {
 
           {/* 페이지 제목 */}
           <div className='px-6 py-4'>
-            <h1 className='text-3xl font-bold text-foreground'>마이페이지</h1>
-            <p className='text-muted-foreground mt-2'>
-              내 정보를 확인하고 관리할 수 있습니다.
-            </p>
+            <div className='flex items-center justify-between'>
+              <div>
+                <h1 className='text-3xl font-bold text-foreground'>
+                  마이페이지
+                </h1>
+                <p className='text-muted-foreground mt-2'>
+                  내 정보를 확인하고 관리할 수 있습니다.
+                </p>
+              </div>
+              {/* Context7 모범 사례: 백그라운드 갱신 상태 표시 */}
+              {isBackgroundFetching && (
+                <div className='flex items-center space-x-2'>
+                  <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-primary' />
+                  <span className='text-sm text-muted-foreground'>
+                    업데이트 중...
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* 메인 콘텐츠 */}
           <main className='flex-1 overflow-auto'>
-            {isLoading && !userInfo && <MyPageLoading />}
+            {/* Progressive Loading: 초기 로딩 시 스켈레톤 표시 */}
+            {showSkeleton && <MyPageLoading />}
             {error && !userInfo && (
               <MyPageError
                 error={error}

@@ -5,6 +5,7 @@ import type {
 } from '@/types/api';
 import { useQuery } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
+import { useProgressiveLoading } from './useDelayedLoading';
 
 const MAX_RETRIES = 5;
 const RETRY_DELAY = 2000; // 2초
@@ -29,6 +30,7 @@ export const useQuestionnaireResults = () => {
     isLoading,
     error,
     refetch,
+    isFetching,
   } = useQuery({
     queryKey: ['questionnaire-results', categories],
     queryFn: async (): Promise<CategoryResults> => {
@@ -69,6 +71,14 @@ export const useQuestionnaireResults = () => {
     gcTime: 10 * 60 * 1000, // 10분
   });
 
+  // Progressive Loading 상태 관리
+  const progressiveLoadingState = useProgressiveLoading({
+    isLoading,
+    isFetching,
+    data: allResults,
+    error,
+  });
+
   const handleRefresh = useCallback(async () => {
     setRetryCount(0);
     await refetch();
@@ -98,6 +108,7 @@ export const useQuestionnaireResults = () => {
   );
 
   return {
+    // 기존 반환값들
     allResults,
     selectedCategory,
     setSelectedCategory,
@@ -111,5 +122,8 @@ export const useQuestionnaireResults = () => {
     getSelectedCategoryResults,
     hasAnyResults,
     getCategoryDisplayName,
+
+    // Progressive Loading 상태들 추가
+    ...progressiveLoadingState,
   };
 };
