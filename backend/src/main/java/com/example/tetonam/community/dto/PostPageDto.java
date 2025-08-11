@@ -15,7 +15,7 @@ public class PostPageDto {
     private String nickname;
     private Category category;
     private int viewCount;
-
+    private LocalDateTime createdDate;
     public static PostPageDto toDto(Community community){
         return PostPageDto.builder()
                 .id(community.getId())
@@ -23,6 +23,7 @@ public class PostPageDto {
                 .nickname(community.getNickname())
                 .category(community.getCategory())
                 .viewCount(community.getViewCount())
+                .createdDate(community.getCreatedDate())
                 .build();
     }
 }

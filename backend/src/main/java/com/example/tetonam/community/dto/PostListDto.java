@@ -20,6 +20,7 @@ public class PostListDto extends BaseTime {
     private int viewCount;
     //댓글 개수
     private long commentCount;
+    private LocalDateTime createdDate;
 
     /**
      * Community 엔티티를 PostListDto DTO로 변환
@@ -34,6 +35,7 @@ public class PostListDto extends BaseTime {
                 .viewCount(community.getViewCount())
                 //댓글 개수
                 .commentCount(community.getCommentCount())
+                .createdDate(community.getCreatedDate())
                 .build();
     }
 }
