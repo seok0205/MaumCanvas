@@ -49,7 +49,7 @@ export const QuickStartSection = ({
         navigate('/community');
         break;
       case '내 일정 관리하기':
-        // TODO: 일정 관리 페이지로 이동
+        navigate('/counseling-management');
         break;
       case '학생 상담 시작하기':
         // TODO: 상담 시작 페이지로 이동
