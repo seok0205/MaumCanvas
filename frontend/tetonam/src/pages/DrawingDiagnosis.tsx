@@ -28,11 +28,10 @@ export const DrawingDiagnosis = () => {
     setIsUploadModalOpen(true);
   }, []);
 
-  const handleUploadSuccess = useCallback((result: string) => {
+  const handleUploadSuccess = useCallback(() => {
     toast.success('그림이 성공적으로 업로드되었습니다!', {
       description: 'AI 분석이 시작됩니다. 잠시만 기다려주세요.',
     });
-    console.log('Upload result:', result);
     // TODO: 결과 페이지로 이동하거나 추가 작업 수행
     // navigate('/diagnosis/results');
   }, []);

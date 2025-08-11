@@ -114,13 +114,11 @@ export const useDrawingSubmit = (stageRef: React.RefObject<any>) => {
       }
 
       // API 호출
-      const result = await drawingService.createDrawing(files as HTPImageFiles);
+      await drawingService.createDrawing(files as HTPImageFiles);
 
       toast.success('그림이 성공적으로 제출되었습니다!', {
         description: 'AI 분석이 시작됩니다. 잠시만 기다려주세요.',
       });
-
-      console.log('Drawing submission result:', result);
 
       // 제출 성공 후 localStorage에서 모든 임시저장 데이터 삭제
       clearAllDrawings();

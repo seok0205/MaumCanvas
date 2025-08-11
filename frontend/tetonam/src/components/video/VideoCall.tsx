@@ -36,25 +36,8 @@ export const VideoCall = ({ appointmentId, onEnd }: VideoCallProps) => {
     let cancelled = false;
     const initialize = async () => {
       try {
-        console.log('🔍 [VideoCall] 환경변수 디버깅 시작');
-        console.log('🔍 [VideoCall] import.meta.env:', import.meta.env);
-        console.log(
-          '🔍 [VideoCall] VITE_API_URL:',
-          import.meta.env.VITE_API_URL
-        );
-        console.log(
-          '🔍 [VideoCall] VITE_AGORA_APP_ID (dot notation):',
-          import.meta.env.VITE_AGORA_APP_ID
-        );
-        console.log(
-          '🔍 [VideoCall] VITE_AGORA_APP_ID (bracket notation):',
-          import.meta.env['VITE_AGORA_APP_ID']
-        );
-
         // 브라우저 호환성 체크 (Agora Best Practice)
-        console.log('🔍 [VideoCall] 브라우저 호환성 체크 시작');
         const isSupported = AgoraRTC.checkSystemRequirements();
-        console.log('🔍 [VideoCall] 브라우저 지원 여부:', isSupported);
 
         if (!isSupported) {
           throw new Error(
@@ -74,23 +57,15 @@ export const VideoCall = ({ appointmentId, onEnd }: VideoCallProps) => {
           }
         }
 
-        console.log(
-          '🔍 [VideoCall] 토큰 요청 시작 - appointmentId:',
-          appointmentId,
-          'uid:',
-          uidRef.current
-        );
         const tokenData = await agoraService.getToken(
           appointmentId,
           uidRef.current
         );
-        console.log('🔍 [VideoCall] 토큰 응답:', tokenData);
 
         if (cancelled) return;
 
         // 환경변수 접근 방식 통일 (dot notation 사용)
         const appId = import.meta.env.VITE_AGORA_APP_ID?.trim();
-        console.log('🔍 [VideoCall] appId 추출 결과:', appId);
 
         if (!appId) {
           console.error(
@@ -103,23 +78,12 @@ export const VideoCall = ({ appointmentId, onEnd }: VideoCallProps) => {
           throw new Error('VITE_AGORA_APP_ID 환경변수가 설정되지 않았습니다.');
         }
 
-        console.log('🔍 [VideoCall] Agora join 시작:', {
-          appId: appId.substring(0, 8) + '...',
-          channel: tokenData.channel,
-          token: tokenData.token
-            ? tokenData.token.substring(0, 20) + '...'
-            : null,
-          uid: tokenData.uid ?? uidRef.current!,
-        });
-
         await join({
           appId,
           channel: tokenData.channel,
           token: tokenData.token,
           uid: tokenData.uid ?? uidRef.current!,
         });
-
-        console.log('✅ [VideoCall] 화상 통화 초기화 성공');
       } catch (e) {
         console.error('❌ [VideoCall] 화상 통화 초기화 실패:', e);
       }
