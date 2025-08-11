@@ -6,6 +6,7 @@ import com.example.tetonam.exception.handler.BoardHandler;
 import com.example.tetonam.response.code.status.ErrorStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 
@@ -15,9 +16,11 @@ import org.springframework.stereotype.Service;
 public class TokenService {
     static int tokenExpirationInSeconds = 3600;
     static int privilegeExpirationInSeconds = 3600;
+    @Value("${AGORA_APP_ID}")
+    private String appId;
+    @Value("${AGORA_APP_CERTIFICATE}")
+    private String appCertificate;
     public tokenDto getToken(String counseling_id, int user_id){
-        String appId = System.getenv("AGORA_APP_ID");
-        String appCertificate = System.getenv("AGORA_APP_CERTIFICATE");
         if (appId == null || appId.isEmpty() || appCertificate == null || appCertificate.isEmpty()) {
             throw new BoardHandler(ErrorStatus.CERTIFICATE_EMPTY);
         }
