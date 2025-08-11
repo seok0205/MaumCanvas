@@ -11,10 +11,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MainMyInfoResponseDto {
+    private long userId;
     private String name;
     private String nickname;
     public static MainMyInfoResponseDto toDto(User user){
         return MainMyInfoResponseDto.builder()
+                .userId(user.getId())
                 .name(user.getName())
                 .nickname(user.getNickname())
                 .build();
