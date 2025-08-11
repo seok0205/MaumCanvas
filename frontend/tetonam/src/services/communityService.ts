@@ -2,7 +2,7 @@ import {
   COMMUNITY_ENDPOINTS,
   COMMUNITY_ERROR_MESSAGES,
 } from '@/constants/community';
-import type { ApiResponse } from '@/types/api';
+import { convertLocalDateTimeArrayToISO, type ApiResponse } from '@/types/api';
 import { AuthenticationError } from '@/types/auth';
 import type {
   Comment,
@@ -129,25 +129,19 @@ export const communityService = {
 
       const raw = response.data.result as any;
 
-      // LocalDateTime을 ISO 문자열로 변환하는 헬퍼 함수
+      // LocalDateTime 배열을 안전한 ISO 문자열로 변환하는 헬퍼 함수
       const convertDateTime = (dateTime: any): string => {
         if (typeof dateTime === 'string') {
           return dateTime;
         }
         if (Array.isArray(dateTime) && dateTime.length >= 3) {
-          // LocalDateTime 배열 [year, month, day, hour?, minute?, second?, nano?]
-          const [year, month, day, hour = 0, minute = 0, second = 0] = dateTime;
-          return new Date(
-            year,
-            month - 1,
-            day,
-            hour,
-            minute,
-            second
-          ).toISOString();
+          // 올바른 LocalDateTime 변환 - 타임존 왜곡 방지
+          return convertLocalDateTimeArrayToISO(dateTime);
         }
         // fallback: 현재 시간
-        return new Date().toISOString();
+        const now = new Date();
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       };
 
       const normalized: PostListResponse = {
@@ -455,19 +449,13 @@ export const communityService = {
           return dateTime;
         }
         if (Array.isArray(dateTime) && dateTime.length >= 3) {
-          // LocalDateTime 배열 [year, month, day, hour?, minute?, second?, nano?]
-          const [year, month, day, hour = 0, minute = 0, second = 0] = dateTime;
-          return new Date(
-            year,
-            month - 1,
-            day,
-            hour,
-            minute,
-            second
-          ).toISOString();
+          // 올바른 LocalDateTime 변환 - 타임존 왜곡 방지
+          return convertLocalDateTimeArrayToISO(dateTime);
         }
         // fallback: 현재 시간
-        return new Date().toISOString();
+        const now = new Date();
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       };
 
       return raw.map(
