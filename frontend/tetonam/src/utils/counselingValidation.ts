@@ -11,7 +11,7 @@ export const isValidCounseling: CounselingValidator = counseling => {
 
   if (
     typeof counseling.id !== 'number' ||
-    typeof counseling.counselor !== 'string' ||
+    typeof counseling.name !== 'string' ||
     typeof counseling.time !== 'string' ||
     typeof counseling.type !== 'string' ||
     typeof counseling.status !== 'string'
@@ -24,8 +24,8 @@ export const isValidCounseling: CounselingValidator = counseling => {
     return false;
   }
 
-  // 상담사 이름이 비어있지 않은지 확인
-  if (counseling.counselor.trim().length === 0) {
+  // 상대방 이름이 비어있지 않은지 확인 (역할에 따라 학생/상담사)
+  if (counseling.name.trim().length === 0) {
     return false;
   }
 

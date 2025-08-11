@@ -130,7 +130,7 @@ export type CounselingStatus = 'OPEN' | 'CLOSE' | 'CANCEL';
 // 백엔드에서 받는 원시 상담 데이터 (LocalDateTime이 배열로 직렬화됨)
 export interface RawUpcomingCounseling {
   readonly id: number;
-  readonly counselor: string;
+  readonly name: string; // 역할에 따라 상대방 이름(학생/상담사)
   readonly time: number[]; // LocalDateTime이 [년, 월, 일, 시, 분] 배열로 직렬화됨
   readonly type: string;
   readonly status: CounselingStatus;
@@ -139,7 +139,7 @@ export interface RawUpcomingCounseling {
 // 다가오는 상담 타입 (프론트엔드에서 사용하는 변환된 형태)
 export interface UpcomingCounseling {
   readonly id: number;
-  readonly counselor: string;
+  readonly name: string; // 역할에 따라 상대방 이름(학생/상담사)
   readonly time: string; // ISO 8601 형식의 날짜 문자열
   readonly type: string;
   readonly status: CounselingStatus;
@@ -161,7 +161,7 @@ export const isValidRawUpcomingCounseling = (
   const obj = data as Record<string, unknown>;
   return (
     typeof obj['id'] === 'number' &&
-    typeof obj['counselor'] === 'string' &&
+    typeof obj['name'] === 'string' &&
     Array.isArray(obj['time']) &&
     obj['time'].length >= 5 &&
     obj['time'].every((item: unknown) => typeof item === 'number') &&
@@ -180,7 +180,7 @@ export const isValidUpcomingCounseling = (
   const obj = data as Record<string, unknown>;
   return (
     typeof obj['id'] === 'number' &&
-    typeof obj['counselor'] === 'string' &&
+    typeof obj['name'] === 'string' &&
     typeof obj['time'] === 'string' &&
     typeof obj['type'] === 'string' &&
     typeof obj['status'] === 'string' &&
@@ -257,7 +257,7 @@ export const transformRawToCounseling = (
 ): UpcomingCounseling => {
   return {
     id: raw.id,
-    counselor: raw.counselor,
+    name: raw.name,
     time: convertLocalDateTimeArrayToISO(raw.time),
     type: raw.type,
     status: raw.status,
