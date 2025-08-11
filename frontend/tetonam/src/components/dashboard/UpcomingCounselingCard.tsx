@@ -19,6 +19,13 @@ import {
 import { memo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+// Props 인터페이스 정의 - TanStack Query Best Practice
+interface UpcomingCounselingCardProps {
+  counselingData?: UpcomingCounseling | null;
+  isLoading?: boolean;
+  isFetching?: boolean;
+}
+
 // 상수 함수들을 컴포넌트 외부로 이동하여 불필요한 재생성 방지
 const getStatusText = (status: CounselingStatus): string => {
   switch (status) {
@@ -72,14 +79,24 @@ const formatDateTime = (dateTimeString: string) => {
   }
 };
 
-export const UpcomingCounselingCard = memo(() => {
+export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(({ 
+  counselingData = null,
+  isLoading: propsIsLoading = false,
+  isFetching: propsIsFetching = false 
+}) => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const isCounselor = user?.roles?.some(r => r === 'COUNSELOR');
 
-  // React Query 상태
-  const { upcomingCounseling, isLoading, isFetching, error, refetch } =
-    useUpcomingCounselingQuery();
+  // TanStack Query Best Practice: Props 우선, 개별 쿼리는 fallback
+  const queryResult = useUpcomingCounselingQuery();
+  
+  // Props에서 데이터가 제공되면 사용, 없으면 개별 쿼리 결과 사용
+  const upcomingCounseling = counselingData !== undefined ? counselingData : queryResult.upcomingCounseling;
+  const isLoading = counselingData !== undefined ? propsIsLoading : queryResult.isLoading;
+  const isFetching = counselingData !== undefined ? propsIsFetching : queryResult.isFetching;
+  const error = counselingData !== undefined ? null : queryResult.error;
+  const refetch = counselingData !== undefined ? () => {} : queryResult.refetch;
 
   // Progressive Loading 상태 - 300ms 지연 + 800ms 최소 표시 시간 적용
   const { showSkeleton, isBackgroundFetching: showBackgroundIndicator } =

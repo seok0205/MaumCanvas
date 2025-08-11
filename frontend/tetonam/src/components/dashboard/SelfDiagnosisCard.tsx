@@ -1,11 +1,29 @@
 import { Button } from '@/components/ui/interactive/button';
 import { Card } from '@/components/ui/layout/card';
 import { useQuestionnaireResults } from '@/hooks/useQuestionnaireResults';
+import type { QuestionnaireCategory } from '@/types/api';
 import { AlertCircle, RefreshCw, TrendingUp } from 'lucide-react';
 import { memo, useCallback } from 'react';
 import { QuestionnaireChart } from './QuestionnaireChart';
 
-export const SelfDiagnosisCard = memo(() => {
+// Props 인터페이스 정의 - TanStack Query Best Practice
+interface SelfDiagnosisCardProps {
+  questionnaireData?: Record<string, any> | null;
+  isLoading?: boolean;
+  isFetching?: boolean;
+}
+
+export const SelfDiagnosisCard = memo<SelfDiagnosisCardProps>(({ 
+  questionnaireData = null,
+  isLoading: propsIsLoading = false,
+  isFetching: propsIsFetching = false 
+}) => {
+  // TanStack Query Best Practice: Props 우선, 개별 쿼리는 fallback
+  const queryResult = useQuestionnaireResults();
+  
+  // Props에서 데이터가 제공되면 사용, 없으면 개별 쿼리 결과 사용
+  const shouldUseProps = questionnaireData !== undefined;
+  
   const {
     selectedCategory,
     setSelectedCategory,
@@ -20,7 +38,24 @@ export const SelfDiagnosisCard = memo(() => {
     // Progressive Loading 상태들
     showSkeleton,
     isBackgroundFetching,
-  } = useQuestionnaireResults();
+  } = shouldUseProps ? {
+    // Props 기반 데이터 사용 시 간소화된 인터페이스
+    selectedCategory: Object.keys(questionnaireData || {})[0] || '스트레스',
+    setSelectedCategory: () => {},
+    categories: Object.keys(questionnaireData || {}),
+    error: null,
+    retryCount: 0,
+    maxRetries: 3,
+    refetch: async () => {},
+    getSelectedCategoryResults: () => {
+      const key = Object.keys(questionnaireData || {})[0];
+      return key && questionnaireData ? questionnaireData[key] || [] : [];
+    },
+    hasAnyResults: () => Object.keys(questionnaireData || {}).length > 0,
+    getCategoryDisplayName: (cat: any) => String(cat),
+    showSkeleton: propsIsLoading,
+    isBackgroundFetching: propsIsFetching,
+  } : queryResult;
 
   const handleRefresh = useCallback(async () => {
     await refetch();
@@ -168,7 +203,7 @@ export const SelfDiagnosisCard = memo(() => {
             onClick={() => handleCategoryChange(category)}
             className='text-xs'
           >
-            {getCategoryDisplayName(category)}
+            {getCategoryDisplayName(category as QuestionnaireCategory)}
           </Button>
         ))}
       </div>
@@ -177,7 +212,7 @@ export const SelfDiagnosisCard = memo(() => {
       <div className='space-y-4'>
         <div className='flex items-center justify-between'>
           <h4 className='text-md font-medium text-foreground'>
-            {getCategoryDisplayName(selectedCategory)} 진단 추이
+            {getCategoryDisplayName(selectedCategory as QuestionnaireCategory)} 진단 추이
           </h4>
           {/* Context7 모범 사례: 백그라운드 갱신 상태 표시 */}
           {isBackgroundFetching && (
@@ -192,7 +227,7 @@ export const SelfDiagnosisCard = memo(() => {
 
         <QuestionnaireChart
           results={selectedResults}
-          categoryName={getCategoryDisplayName(selectedCategory)}
+          categoryName={getCategoryDisplayName(selectedCategory as QuestionnaireCategory)}
         />
       </div>
     </Card>
