@@ -31,8 +31,10 @@ public class CommunityController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "게시글 단건 조회", description = "정해진 한건의 게시글을 가져옵니다")
-    public ResponseEntity<?> getPost(@PathVariable Long id) {
-        PostListDto post = communityService.getPostById(id);
+    public ResponseEntity<?> getPost(@PathVariable Long id, @RequestHeader("Authorization") String token) {
+        String jwt = token.substring(7);
+        String email = jwtTokenProvider.getEmail(jwt);
+        PostListDto post = communityService.getPostById(id, email);
         return ResponseEntity.ok().body(ApiResponse.onSuccess(post));
     }
 

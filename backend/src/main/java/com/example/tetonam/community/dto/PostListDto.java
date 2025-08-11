@@ -21,11 +21,12 @@ public class PostListDto extends BaseTime {
     //댓글 개수
     private long commentCount;
     private LocalDateTime createdDate;
+    private boolean isAuthor;
 
     /**
      * Community 엔티티를 PostListDto DTO로 변환
      */
-    public static PostListDto from(Community community) {
+    public static PostListDto from(Community community, boolean isAuthor) {
         return PostListDto.builder()
                 .id(community.getId())
                 .title(community.getTitle())
@@ -36,6 +37,7 @@ public class PostListDto extends BaseTime {
                 //댓글 개수
                 .commentCount(community.getCommentCount())
                 .createdDate(community.getCreatedDate())
+                .isAuthor(isAuthor)
                 .build();
     }
 }

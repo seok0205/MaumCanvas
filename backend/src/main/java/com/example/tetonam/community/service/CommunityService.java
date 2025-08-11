@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -62,14 +63,16 @@ public class CommunityService {
 //                .collect(Collectors.toList());
 //    }
     // PostId로 게시글 정보 다 가져오기(게시글 상세 조회)
-    public PostListDto getPostById(Long id) {
+    public PostListDto getPostById(Long id, String email) {
         Community community = communityRepository.findById(id)
                 .orElseThrow(() -> new BoardHandler(ErrorStatus.POST_LIST_EMPTY));
         community.increaseViewCount();
         //댓글 개수
         community.setCommentCount(commentRepository.countByCommunity_Id(id));
+        User author = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BoardHandler(ErrorStatus.USER_NOT_FOUND));
         communityRepository.save(community);
-        return PostListDto.from(community);
+        return PostListDto.from(community, author.getNickname().equals(community.getAuthor().getNickname()));
     }
 
 
