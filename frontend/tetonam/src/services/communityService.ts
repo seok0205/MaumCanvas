@@ -2,8 +2,17 @@ import {
   COMMUNITY_ENDPOINTS,
   COMMUNITY_ERROR_MESSAGES,
 } from '@/constants/community';
-import { convertLocalDateTimeArrayToISO, type ApiResponse } from '@/types/api';
+import { type ApiResponse } from '@/types/api';
 import { AuthenticationError } from '@/types/auth';
+import {
+  type CommentDto,
+  type CommentListDto,
+  type CommunityDto,
+  type PageResponse,
+  type PostListDto,
+  type PostPageDto,
+  safeConvertDateTime,
+} from '@/types/communityBackend';
 import type {
   Comment,
   CommentListResponse,
@@ -43,16 +52,18 @@ export const communityService = {
       const baseUrl = isSearch
         ? `${COMMUNITY_ENDPOINTS.GET_POSTS_PAGE(pageNumber)}/search`
         : COMMUNITY_ENDPOINTS.GET_POSTS_PAGE(pageNumber);
-      const response = await apiClient.get<any>(baseUrl, {
+      const response = await apiClient.get<
+        PageResponse<PostPageDto> | PostPageDto[]
+      >(baseUrl, {
         params: isSearch ? { nickname: query.nickname } : undefined,
         ...(signal && { signal }),
       });
 
       // Spring의 Page 직렬화는 { content: T[], ... } 또는 바로 배열일 수 있음.
       const data = response.data;
-      const items: any[] = Array.isArray(data)
+      const items: PostPageDto[] = Array.isArray(data)
         ? data
-        : Array.isArray(data?.content)
+        : 'content' in data && Array.isArray(data.content)
           ? data.content
           : [];
 
@@ -63,7 +74,7 @@ export const communityService = {
           title: item.title,
           category: item.category,
           nickname: item.nickname,
-          createdDate: item.createdDate || item.createdAt || undefined,
+          createdDate: safeConvertDateTime(item.createdDate),
         })
       );
     } catch (error) {
@@ -113,7 +124,7 @@ export const communityService = {
     signal?: AbortSignal
   ): Promise<PostListResponse> => {
     try {
-      const response = await apiClient.get<ApiResponse<any>>(
+      const response = await apiClient.get<ApiResponse<PostListDto>>(
         COMMUNITY_ENDPOINTS.GET_POST_BY_ID(id),
         {
           ...(signal && { signal }),
@@ -127,22 +138,7 @@ export const communityService = {
         );
       }
 
-      const raw = response.data.result as any;
-
-      // LocalDateTime 배열을 안전한 ISO 문자열로 변환하는 헬퍼 함수
-      const convertDateTime = (dateTime: any): string => {
-        if (typeof dateTime === 'string') {
-          return dateTime;
-        }
-        if (Array.isArray(dateTime) && dateTime.length >= 3) {
-          // 올바른 LocalDateTime 변환 - 타임존 왜곡 방지
-          return convertLocalDateTimeArrayToISO(dateTime);
-        }
-        // fallback: 현재 시간
-        const now = new Date();
-        const pad = (n: number) => n.toString().padStart(2, '0');
-        return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-      };
+      const raw = response.data.result;
 
       const normalized: PostListResponse = {
         id: raw.id,
@@ -152,7 +148,7 @@ export const communityService = {
         nickname: raw.nickname,
         viewCount: raw.viewCount ?? 0,
         commentCount: raw.commentCount ?? 0,
-        createdDate: convertDateTime(raw.createdDate), // 백엔드 필드명 사용
+        createdDate: safeConvertDateTime(raw.createdDate), // 백엔드 필드명 사용
       };
 
       return normalized;
@@ -205,7 +201,7 @@ export const communityService = {
     signal?: AbortSignal
   ): Promise<Community> => {
     try {
-      const response = await apiClient.post<ApiResponse<Community>>(
+      const response = await apiClient.post<ApiResponse<CommunityDto>>(
         COMMUNITY_ENDPOINTS.CREATE_POST,
         data,
         {
@@ -223,7 +219,21 @@ export const communityService = {
         );
       }
 
-      return response.data.result;
+      const raw = response.data.result;
+
+      // CommunityDto를 Community 타입으로 변환
+      const normalized: Community = {
+        id: raw.id,
+        title: raw.title,
+        content: raw.content,
+        author: raw.author,
+        category: raw.category,
+        viewCount: raw.viewCount,
+        createdAt: safeConvertDateTime(raw.createdAt),
+        updatedAt: safeConvertDateTime(raw.updatedAt),
+      };
+
+      return normalized;
     } catch (error) {
       if (error instanceof AuthenticationError) {
         throw error;
@@ -282,7 +292,7 @@ export const communityService = {
     signal?: AbortSignal
   ): Promise<Community> => {
     try {
-      const response = await apiClient.put<ApiResponse<Community>>(
+      const response = await apiClient.put<ApiResponse<CommunityDto>>(
         COMMUNITY_ENDPOINTS.UPDATE_POST(id),
         data,
         {
@@ -300,7 +310,21 @@ export const communityService = {
         );
       }
 
-      return response.data.result;
+      const raw = response.data.result;
+
+      // CommunityDto를 Community 타입으로 변환
+      const normalized: Community = {
+        id: raw.id,
+        title: raw.title,
+        content: raw.content,
+        author: raw.author,
+        category: raw.category,
+        viewCount: raw.viewCount,
+        createdAt: safeConvertDateTime(raw.createdAt),
+        updatedAt: safeConvertDateTime(raw.updatedAt),
+      };
+
+      return normalized;
     } catch (error) {
       if (error instanceof AuthenticationError) {
         throw error;
@@ -426,7 +450,7 @@ export const communityService = {
     signal?: AbortSignal
   ): Promise<CommentListResponse[]> => {
     try {
-      const response = await apiClient.get<ApiResponse<CommentListResponse[]>>(
+      const response = await apiClient.get<ApiResponse<CommentListDto[]>>(
         COMMUNITY_ENDPOINTS.GET_COMMENTS(communityId),
         {
           ...(signal && { signal }),
@@ -443,27 +467,12 @@ export const communityService = {
       // 댓글이 없는 경우 빈 배열 반환
       const raw = response.data.result || [];
 
-      // LocalDateTime을 ISO 문자열로 변환하는 헬퍼 함수
-      const convertDateTime = (dateTime: any): string => {
-        if (typeof dateTime === 'string') {
-          return dateTime;
-        }
-        if (Array.isArray(dateTime) && dateTime.length >= 3) {
-          // 올바른 LocalDateTime 변환 - 타임존 왜곡 방지
-          return convertLocalDateTimeArrayToISO(dateTime);
-        }
-        // fallback: 현재 시간
-        const now = new Date();
-        const pad = (n: number) => n.toString().padStart(2, '0');
-        return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-      };
-
       return raw.map(
-        (item: any): CommentListResponse => ({
+        (item): CommentListResponse => ({
           id: item.id,
           content: item.content,
           nickname: item.nickname,
-          createdDate: convertDateTime(item.createdDate), // 백엔드 필드명 사용
+          createdDate: safeConvertDateTime(item.createdDate), // 백엔드 필드명 사용
         })
       );
     } catch (error) {
@@ -510,7 +519,7 @@ export const communityService = {
   ): Promise<Comment> => {
     try {
       // 백엔드가 @RequestBody String commentBody를 기대하므로 순수 텍스트로 전송
-      const response = await apiClient.post<ApiResponse<Comment>>(
+      const response = await apiClient.post<ApiResponse<CommentDto>>(
         COMMUNITY_ENDPOINTS.CREATE_COMMENT(communityId),
         data.content,
         {
@@ -528,7 +537,19 @@ export const communityService = {
         );
       }
 
-      return response.data.result;
+      const raw = response.data.result;
+
+      // CommentDto를 Comment 타입으로 변환
+      const normalized: Comment = {
+        id: raw.id,
+        content: raw.content,
+        author: raw.author,
+        communityId: raw.communityId,
+        createdAt: safeConvertDateTime(raw.createdAt),
+        updatedAt: safeConvertDateTime(raw.updatedAt),
+      };
+
+      return normalized;
     } catch (error) {
       if (error instanceof AuthenticationError) {
         throw error;
@@ -588,7 +609,7 @@ export const communityService = {
   ): Promise<Comment> => {
     try {
       // 백엔드가 @RequestBody CommentWriteDto를 기대하므로 DTO 객체로 전송
-      const response = await apiClient.put<ApiResponse<Comment>>(
+      const response = await apiClient.put<ApiResponse<CommentDto>>(
         COMMUNITY_ENDPOINTS.UPDATE_COMMENT(communityId, commentId),
         data, // CommentWriteRequest 객체 전체를 전송
         {
@@ -606,7 +627,19 @@ export const communityService = {
         );
       }
 
-      return response.data.result;
+      const raw = response.data.result;
+
+      // CommentDto를 Comment 타입으로 변환
+      const normalized: Comment = {
+        id: raw.id,
+        content: raw.content,
+        author: raw.author,
+        communityId: raw.communityId,
+        createdAt: safeConvertDateTime(raw.createdAt),
+        updatedAt: safeConvertDateTime(raw.updatedAt),
+      };
+
+      return normalized;
     } catch (error) {
       if (error instanceof AuthenticationError) {
         throw error;
