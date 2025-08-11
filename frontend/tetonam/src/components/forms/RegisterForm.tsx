@@ -172,9 +172,6 @@ const RegisterResultDialog = ({
               <p className='text-sm text-muted-foreground mb-2'>
                 자동으로 로그인 페이지로 이동합니다...
               </p>
-              <Button onClick={onLoginClick} className='w-full sm:w-auto'>
-                바로 로그인하기
-              </Button>
             </div>
           ) : (
             <Button
@@ -723,6 +720,9 @@ export const RegisterForm = () => {
                     isVerified={
                       nicknameVerified &&
                       form.watch('nickname') === verifiedNickname
+                    }
+                    hasBackendResponse={
+                      !!(nicknameError || nicknameSuccessMessage)
                     }
                   />
                   {nicknameError && (
