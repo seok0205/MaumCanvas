@@ -49,12 +49,12 @@ export const useUpcomingCounselingQuery = () => {
     // 데이터
     upcomingCounseling: query.data ?? null,
 
-    // 상태
-    isLoading: query.isPending, // React Query v5에서는 isPending 사용
+    // 상태 - Progressive Loading을 위한 구분
+    isLoading: query.isPending && !query.data, // 초기 로딩만 (캐시된 데이터가 없을 때)
+    isFetching: query.isFetching, // 모든 페칭 상태 (백그라운드 포함)
     error: query.error?.message ?? null,
 
     // React Query 고유 상태
-    isFetching: query.isFetching,
     isError: query.isError,
     isSuccess: query.isSuccess,
 
@@ -64,6 +64,10 @@ export const useUpcomingCounselingQuery = () => {
     // 추가 유용한 상태들
     dataUpdatedAt: query.dataUpdatedAt,
     errorUpdatedAt: query.errorUpdatedAt,
+
+    // Progressive Loading을 위한 헬퍼 상태
+    hasData: !!query.data,
+    isBackgroundFetching: !!query.data && query.isFetching,
 
     // 디버깅용 (개발 환경에서만 사용)
     ...(import.meta.env.DEV && {

@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/interactive/button';
 import { Card } from '@/components/ui/layout/card';
+import { useProgressiveLoading } from '@/hooks/useDelayedLoading';
 import { useUpcomingCounselingQuery } from '@/hooks/useUpcomingCounselingQuery';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { CounselingStatus, UpcomingCounseling } from '@/types/api';
@@ -75,8 +76,22 @@ export const UpcomingCounselingCard = memo(() => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const isCounselor = user?.roles?.some(r => r === 'COUNSELOR');
-  const { upcomingCounseling, isLoading, error, refetch } =
+
+  // React Query 상태
+  const { upcomingCounseling, isLoading, isFetching, error, refetch } =
     useUpcomingCounselingQuery();
+
+  // Progressive Loading 상태 - 300ms 지연 + 800ms 최소 표시 시간 적용
+  const { showSkeleton, isBackgroundFetching: showBackgroundIndicator } =
+    useProgressiveLoading({
+      isLoading,
+      isFetching,
+      data: upcomingCounseling,
+      error,
+      delay: 300, // RAIL 모델 기반 최적 지연 시간
+      minDisplayTime: 800, // 스켈레톤 최소 표시 시간으로 깜빡임 방지
+    });
+
   const handleRefresh = useCallback(async () => {
     await refetch();
   }, [refetch]);
@@ -127,8 +142,8 @@ export const UpcomingCounselingCard = memo(() => {
     return counselingData;
   }, []);
 
-  // 로딩 상태 개선 - React Query 간소화 + 스켈레톤 UI로 부드러운 경험
-  if (isLoading) {
+  // Progressive Loading 로직 - Best Practice 적용
+  if (showSkeleton) {
     return (
       <Card className='p-6'>
         <div className='flex items-center justify-between mb-4'>
@@ -154,7 +169,7 @@ export const UpcomingCounselingCard = memo(() => {
             </div>
           </div>
         </div>
-        <div className='text-center mt-4'>
+        <div className='text-center mt-4' aria-live='polite' role='status'>
           <p className='text-sm text-muted-foreground'>
             상담 정보를 불러오는 중...
           </p>
@@ -271,7 +286,13 @@ export const UpcomingCounselingCard = memo(() => {
     <Card className='p-6'>
       <div className='flex items-center justify-between mb-4'>
         <h3 className='text-lg font-semibold text-foreground'>다가오는 상담</h3>
-        {/* 상담 정보가 있을 때는 새로고침 버튼 제거 */}
+        {/* 백그라운드 업데이트 시 작은 로딩 인디케이터 */}
+        {showBackgroundIndicator && (
+          <div className='flex items-center text-xs text-muted-foreground'>
+            <RefreshCw className='w-3 h-3 animate-spin mr-1' />
+            업데이트 중
+          </div>
+        )}
       </div>
 
       <div className='space-y-4'>
