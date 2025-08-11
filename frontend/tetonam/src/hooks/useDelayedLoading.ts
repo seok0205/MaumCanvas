@@ -13,7 +13,7 @@ import { useEffect, useState } from 'react';
  */
 export const useDelayedLoading = (
   isLoading: boolean,
-  delay: number = 500
+  delay: number = 800
 ): boolean => {
   const [delayedLoading, setDelayedLoading] = useState(false);
 
@@ -66,8 +66,8 @@ export const useProgressiveLoading = ({
   isFetching,
   data,
   error,
-  delay = 500,
-  minDisplayTime = 800,
+  delay = 800,
+  minDisplayTime = 1000,
 }: {
   isLoading: boolean;
   isFetching: boolean;
