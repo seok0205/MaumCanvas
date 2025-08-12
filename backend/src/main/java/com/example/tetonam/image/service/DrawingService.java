@@ -114,6 +114,7 @@ public class DrawingService {
         LLMRequestDto llmRequestDto=LLMRequestDto.toDto(question,category);
         webClientUtil.post(url, llmRequestDto, String.class)
                 .subscribe(result -> {
+                    System.out.println(result);
                     drawingRagResultRepository.save(DrawingRagResult.builder()
                                     .drawing(drawing)
                                     .drawingRagResult(result)
@@ -125,13 +126,10 @@ public class DrawingService {
 
 
     public String counselingRagSave(String email, Long id, CounselingRagRequestDto counselingRagRequestDto) {
-        User user = userRepository.findByEmail(email)
+        userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
         Drawing drawing=drawingRepository.findById(id)
                 .orElseThrow(()-> new DrawingHandler(ErrorStatus.DRAWING_NOT_FOUND));
-        if(!drawing.getDrawingList().getUser().equals(user)){
-            throw new DrawingHandler(ErrorStatus.ALREADY_RAG);
-        }
 
         // 이미 생성되어있을 때
         if(drawing.getDrawingRagResult()!=null){
