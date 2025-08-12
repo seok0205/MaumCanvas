@@ -18,7 +18,7 @@ spring:
       ddl-auto: update
     properties:
       hibernate:
-        globally_quoted_identifiers: true
+
 mail:
   username: ${MAIL_USERNAME}
   password: ${MAIL_PASSWORD}
