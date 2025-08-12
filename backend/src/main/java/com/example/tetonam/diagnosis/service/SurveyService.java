@@ -36,7 +36,7 @@ public class SurveyService {
 
         List<ShowAllQuestionnaireDto> showAllQuestionnaireDtoList=new ArrayList<>();
         for(Category c:Category.values()){
-            Survey survey=surveyRepository.findTopByUserIdAndCategoryOrderByCreatedAtDesc(user,c);
+            Survey survey=surveyRepository.findTopByUserAndCategoryOrderByCreatedDateDesc(user,c);
             if(survey==null) {
                 showAllQuestionnaireDtoList.add(new ShowAllQuestionnaireDto(c, ""));
                 continue;
