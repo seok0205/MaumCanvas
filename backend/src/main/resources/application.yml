@@ -50,6 +50,8 @@ ai:
 kakao:
   client_id: ${KAKAO_CLIENT_ID}
   redirect_uri: ${KAKAO_REDIRECT_URL}
+  receiver_uuids: ${KAKAO_RECEIVER_UUID}
+  template_id: ${KAKAO_TEMPLATE_ID}
 
 agora:
   app:
