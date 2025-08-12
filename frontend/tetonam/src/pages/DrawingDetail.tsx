@@ -33,29 +33,42 @@ export const DrawingDetail = () => {
   const [submitting, setSubmitting] = useState(false);
   const pollTimer = useRef<number | null>(null);
 
-  const fetchParallel = useCallback(async (id: string) => {
-    const ac = new AbortController();
-    try {
-      setLoadingAI(true);
-      setLoadingRAG(true);
-      setRagError(null);
+  const fetchParallel = useCallback(
+    async (id: string) => {
+      const ac = new AbortController();
+      const isCounselor = user?.roles?.includes('COUNSELOR');
 
-      const [ai, ragResult] = await Promise.all([
-        imageService.getAiDetectionText(id, ac.signal),
-        imageService.getRagResult(id, ac.signal),
-      ]);
+      try {
+        setLoadingRAG(true);
+        setRagError(null);
 
-      setAiText(ai);
-      setRagText(ragResult.data);
-
-      if (ragResult.error) {
-        setRagError(ragResult.error);
+        if (isCounselor) {
+          // 상담사: AI 결과와 RAG 결과 모두 요청
+          setLoadingAI(true);
+          const [ai, ragResult] = await Promise.all([
+            imageService.getAiDetectionText(id, ac.signal),
+            imageService.getRagResult(id, ac.signal),
+          ]);
+          setAiText(ai);
+          setRagText(ragResult.data);
+          if (ragResult.error) {
+            setRagError(ragResult.error);
+          }
+          setLoadingAI(false);
+        } else {
+          // 학생: RAG 결과만 요청
+          const ragResult = await imageService.getRagResult(id, ac.signal);
+          setRagText(ragResult.data);
+          if (ragResult.error) {
+            setRagError(ragResult.error);
+          }
+        }
+      } finally {
+        setLoadingRAG(false);
       }
-    } finally {
-      setLoadingAI(false);
-      setLoadingRAG(false);
-    }
-  }, []);
+    },
+    [user?.roles]
+  );
 
   useEffect(() => {
     if (!drawingId) return;
@@ -173,7 +186,14 @@ export const DrawingDetail = () => {
                   </div>
                 ) : ragText ? (
                   <div
-                    className='prose prose-slate max-w-none text-sm font-sans'
+                    className='prose prose-slate max-w-none font-sans leading-relaxed'
+                    style={{
+                      fontFamily:
+                        "'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif",
+                      fontSize: '14px',
+                      lineHeight: '1.7',
+                      color: 'hsl(var(--foreground))',
+                    }}
                     dangerouslySetInnerHTML={{ __html: ragHtml }}
                   />
                 ) : (
