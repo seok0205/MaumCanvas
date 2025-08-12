@@ -16,6 +16,14 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
   };
 }
 
+// API 에러 타입 정의
+export type ApiErrorType = 'UNAUTHORIZED' | 'NOT_FOUND' | 'NETWORK' | 'UNKNOWN';
+
+export interface ApiResult<T> {
+  data: T | null;
+  error?: ApiErrorType;
+}
+
 // Auth 관련 타입
 export interface LoginCredentials {
   email: string;

@@ -1,4 +1,4 @@
-import type { ApiResponse } from '@/types/api';
+import type { ApiResponse, ApiResult } from '@/types/api';
 import { AuthenticationError } from '@/types/auth';
 import type { AxiosError } from 'axios';
 import { apiClient } from './apiClient';
@@ -154,7 +154,7 @@ export const imageService = {
   getRagResult: async (
     drawingId: number | string,
     signal?: AbortSignal
-  ): Promise<string | null> => {
+  ): Promise<ApiResult<string>> => {
     try {
       const response = await apiClient.get<ApiResponse<string>>(
         IMAGE_ENDPOINTS.GET_RAG_RESULT(drawingId),
@@ -162,10 +162,32 @@ export const imageService = {
           ...(signal && { signal }),
         }
       );
-      if (!response.data.isSuccess) return null;
-      return response.data.result;
+      if (!response.data.isSuccess) {
+        return { data: null, error: 'NOT_FOUND' };
+      }
+      return { data: response.data.result || null };
     } catch (error) {
-      return null;
+      // 개발 환경에서 에러 로깅
+      if (import.meta.env.DEV) {
+        console.error('RAG 결과 조회 중 에러 발생:', error);
+      }
+
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as AxiosError;
+        if (
+          axiosError.response?.status === 401 ||
+          axiosError.response?.status === 403
+        ) {
+          return { data: null, error: 'UNAUTHORIZED' };
+        }
+        if (axiosError.response?.status === 404) {
+          return { data: null, error: 'NOT_FOUND' };
+        }
+      }
+      if (signal?.aborted) {
+        throw new AuthenticationError('ABORTED', '요청이 취소되었습니다.');
+      }
+      return { data: null, error: 'NETWORK' };
     }
   },
 

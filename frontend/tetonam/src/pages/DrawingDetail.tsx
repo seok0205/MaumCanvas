@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/navigation/sidebar';
 import { imageService } from '@/services/imageService';
 import { useAuthStore } from '@/stores/useAuthStore';
+import type { ApiErrorType } from '@/types/api';
 
 export const DrawingDetail = () => {
   const { drawingId } = useParams();
@@ -24,6 +25,8 @@ export const DrawingDetail = () => {
 
   const [aiText, setAiText] = useState<string>('');
   const [ragText, setRagText] = useState<string | null>(null);
+  const [ragError, setRagError] = useState<ApiErrorType | null>(null);
+  const [ragHtml, setRagHtml] = useState<string>('');
   const [prompt, setPrompt] = useState('');
   const [loadingAI, setLoadingAI] = useState(true);
   const [loadingRAG, setLoadingRAG] = useState(true);
@@ -35,12 +38,19 @@ export const DrawingDetail = () => {
     try {
       setLoadingAI(true);
       setLoadingRAG(true);
-      const [ai, rag] = await Promise.all([
+      setRagError(null);
+
+      const [ai, ragResult] = await Promise.all([
         imageService.getAiDetectionText(id, ac.signal),
         imageService.getRagResult(id, ac.signal),
       ]);
+
       setAiText(ai);
-      setRagText(rag);
+      setRagText(ragResult.data);
+
+      if (ragResult.error) {
+        setRagError(ragResult.error);
+      }
     } finally {
       setLoadingAI(false);
       setLoadingRAG(false);
@@ -55,27 +65,54 @@ export const DrawingDetail = () => {
     };
   }, [drawingId, fetchParallel]);
 
+  // RAG 마크다운을 HTML로 변환하여 안전하게 렌더링
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (!ragText) {
+        setRagHtml('');
+        return;
+      }
+      const [m, d] = await Promise.all([import('marked'), import('dompurify')]);
+      const raw = m.marked.parse(ragText, { async: false });
+      const safe = d.default.sanitize(raw);
+      if (!cancelled) setRagHtml(safe);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [ragText]);
+
   const handleSubmit = useCallback(async () => {
     if (!drawingId || !prompt.trim()) return;
     setSubmitting(true);
     setRagText(null);
+    setRagError(null);
     setLoadingRAG(true);
     try {
       await imageService.submitRagPrompt(drawingId, prompt.trim());
       // 15초 후 첫 확인
       window.setTimeout(async () => {
-        const first = await imageService.getRagResult(drawingId);
-        if (first) {
-          setRagText(first);
+        const firstResult = await imageService.getRagResult(drawingId);
+        if (firstResult.data) {
+          setRagText(firstResult.data);
           setLoadingRAG(false);
           setSubmitting(false);
           return;
         }
+        if (firstResult.error) {
+          setRagError(firstResult.error);
+        }
         // 3초마다 폴링
         pollTimer.current = window.setInterval(async () => {
-          const res = await imageService.getRagResult(drawingId);
-          if (res) {
-            setRagText(res);
+          const result = await imageService.getRagResult(drawingId);
+          if (result.data) {
+            setRagText(result.data);
+            setLoadingRAG(false);
+            setSubmitting(false);
+            if (pollTimer.current) window.clearInterval(pollTimer.current);
+          } else if (result.error) {
+            setRagError(result.error);
             setLoadingRAG(false);
             setSubmitting(false);
             if (pollTimer.current) window.clearInterval(pollTimer.current);
@@ -96,22 +133,24 @@ export const DrawingDetail = () => {
       <div className='flex w-full min-h-screen bg-gradient-warm'>
         <AppSidebar />
         <div className='flex-1 flex flex-col'>
-          <CommonHeader user={user} title='그림 상세' showBackButton />
+          <CommonHeader user={user} title='그림 분석 결과' showBackButton />
           <main className='p-6 space-y-6'>
-            <Card>
-              <CardHeader>
-                <CardTitle>객체 탐지 결과</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {loadingAI ? (
-                  <Skeleton className='h-24 w-full' />
-                ) : (
-                  <pre className='whitespace-pre-wrap text-sm'>
-                    {aiText || '내용이 없습니다'}
-                  </pre>
-                )}
-              </CardContent>
-            </Card>
+            {isCounselor && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>객체 탐지 결과</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loadingAI ? (
+                    <Skeleton className='h-24 w-full' />
+                  ) : (
+                    <div className='whitespace-pre-wrap text-sm font-sans'>
+                      {aiText || '내용이 없습니다'}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             <Card>
               <CardHeader>
@@ -122,8 +161,21 @@ export const DrawingDetail = () => {
                   <div className='text-sm text-muted-foreground'>
                     분석 중...
                   </div>
+                ) : ragError ? (
+                  <div className='text-sm text-red-600'>
+                    {ragError === 'UNAUTHORIZED'
+                      ? '분석 결과를 확인할 권한이 없습니다.'
+                      : ragError === 'NOT_FOUND'
+                        ? '아직 분석 결과가 없습니다.'
+                        : ragError === 'NETWORK'
+                          ? '네트워크 오류로 결과를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.'
+                          : '알 수 없는 오류가 발생했습니다.'}
+                  </div>
                 ) : ragText ? (
-                  <pre className='whitespace-pre-wrap text-sm'>{ragText}</pre>
+                  <div
+                    className='prose prose-slate max-w-none text-sm font-sans'
+                    dangerouslySetInnerHTML={{ __html: ragHtml }}
+                  />
                 ) : (
                   <div className='text-sm text-muted-foreground'>
                     {isCounselor
