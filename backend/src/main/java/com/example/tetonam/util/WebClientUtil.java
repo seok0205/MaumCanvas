@@ -5,7 +5,6 @@ import com.example.tetonam.exception.handler.UserHandler;
 import com.example.tetonam.response.code.status.ErrorStatus;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 
 import org.springframework.http.HttpStatusCode;
@@ -22,12 +21,28 @@ public class WebClientUtil {
 
     private final WebClientConfig webClientConfig;
 
-    public <T> Mono<T> postForm(String url, MultiValueMap<String, String> formData, Class<T> responseDtoClass) {
+    public <T> Mono<T> postReIssue(String url, MultiValueMap<String, String> formData, Class<T> responseDtoClass) {
         return webClientConfig.webClient()
                 .post()
                 .uri(url)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)  // Content-Type 지정
-                .headers(headers -> headers.setBearerAuth("PNw5I3yWn-n_kgqfeKbCiW2QKKJbKQfvAAAAAQoNFdgAAAGYnDeVsRKZRqbpl2cW"))
+                .body(BodyInserters.fromFormData(formData))
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        clientResponse -> Mono.error(new UserHandler(ErrorStatus.AI_CLIENT_ERROR)))
+                .onStatus(HttpStatusCode::is5xxServerError,
+                        clientResponse -> Mono.error(new UserHandler(ErrorStatus.AI_SERVER_ERROR)))
+                .bodyToMono(responseDtoClass);
+    }
+
+
+
+    public <T> Mono<T> messageSandPost(String url, MultiValueMap<String, String> formData, Class<T> responseDtoClass,String accessToken) {
+        return webClientConfig.webClient()
+                .post()
+                .uri(url)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)  // Content-Type 지정
+                .headers(headers -> headers.setBearerAuth(accessToken))
                 .body(BodyInserters.fromFormData(formData))
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError,

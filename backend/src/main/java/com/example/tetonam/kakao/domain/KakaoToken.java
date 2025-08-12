@@ -2,16 +2,14 @@ package com.example.tetonam.kakao.domain;
 
 import com.example.tetonam.util.BaseTime;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Setter
 public class KakaoToken extends BaseTime {
 
     @Column(name = "Kakao_Token_id", updatable = false, unique = true, nullable = false)
