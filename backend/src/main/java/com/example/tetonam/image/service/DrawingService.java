@@ -121,7 +121,7 @@ public class DrawingService {
                                     .drawingRagResult(result)
                             .build());
 
-                    kakaoService.sendMessage("AI 결과가 도착했습니다",category+"그림의 결과가 저장되었습니다. 확인해주세요","https://i13e108.p.ssafy.io/counseling/image/"+drawing.getId(),drawing.getImageUrl());
+//                    kakaoService.sendMessage("AI 결과가 도착했습니다",category+"그림의 결과가 저장되었습니다. 확인해주세요","https://i13e108.p.ssafy.io/counseling/image/"+drawing.getId(),drawing.getImageUrl());
                 }, error -> {
                     log.error("RAG 저장 중 에러 발생", error);
                 });
