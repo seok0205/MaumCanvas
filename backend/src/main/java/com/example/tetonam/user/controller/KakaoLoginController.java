@@ -39,7 +39,7 @@ public class KakaoLoginController {
 
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("template_id", "123284");
-        formData.add("receiver_uuids", "[\"-s38z_zP-87i0-fS597t3OvH9sT9zvbB-H8\"]");
+        formData.add("receiver_uuids", "[\"-sv9zfvD-sL22uje59Lq2OnR48_-zPXG_snwew\"]");
         formData.add("template_args", "{\"TITLE\":\"타이틀입니다.\", \"DETAIL\":\"상세 내용입니다.\", \"REGI_WEB_DOMAIN\":\"https://nexon.com\"}");
 
         webClientUtil.postForm("https://kapi.kakao.com/v1/api/talk/friends/message/send", formData, String.class)

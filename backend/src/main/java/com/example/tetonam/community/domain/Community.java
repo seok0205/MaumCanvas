@@ -19,7 +19,7 @@ public class Community extends BaseTime {
 
     private String title;
 
-    @Lob      // content 컬럼을 긴 글로 저장
+    @Column(columnDefinition = "TEXT",nullable = false)
     private String content;
 
     @Enumerated(EnumType.STRING)
