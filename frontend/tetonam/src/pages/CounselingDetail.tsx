@@ -198,5 +198,3 @@ export const CounselingDetail = () => {
     </SidebarProvider>
   );
 };
-
-export default CounselingDetail;

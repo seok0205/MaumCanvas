@@ -129,5 +129,3 @@ export const CounselingManagement = () => {
     </SidebarProvider>
   );
 };
-
-export default CounselingManagement;

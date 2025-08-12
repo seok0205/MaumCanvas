@@ -209,5 +209,3 @@ export const DrawingDetail = () => {
     </SidebarProvider>
   );
 };
-
-export default DrawingDetail;
