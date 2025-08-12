@@ -43,4 +43,8 @@ public interface CounselingRepository extends JpaRepository<Counseling,Long> {
             "CASE WHEN c.status = 'OPEN' THEN 0 ELSE 1 END, " +
             "c.reservationTime ASC")
     List<Counseling> findByCounselorOrderByReservationTimeAsc(User student);
+
+    //시간 지난 예약 close처리
+    @Query("SELECT c FROM Counseling c WHERE c.status = :status AND c.reservationTime < :now")
+    List<Counseling> findCounselingsToClose(Status status, LocalDateTime now);
 }

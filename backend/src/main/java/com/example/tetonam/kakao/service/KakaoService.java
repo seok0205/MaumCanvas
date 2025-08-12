@@ -1,6 +1,9 @@
 package com.example.tetonam.kakao.service;
 
-import com.example.tetonam.user.domain.User;
+import com.example.tetonam.exception.handler.TokenHandler;
+import com.example.tetonam.kakao.domain.KakaoToken;
+import com.example.tetonam.kakao.repository.KakaoTokenRepository;
+import com.example.tetonam.response.code.status.ErrorStatus;
 import com.example.tetonam.user.dto.KakaoTokenResponseDto;
 import com.example.tetonam.user.dto.KakaoUserInfoResponseDto;
 import com.example.tetonam.util.WebClientUtil;
@@ -8,7 +11,6 @@ import io.netty.handler.codec.http.HttpHeaderValues;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHeaders;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,7 @@ public class KakaoService {
     private final String KAUTH_TOKEN_URL_HOST = "https://kauth.kakao.com";
     private final String KAUTH_USER_URL_HOST = "https://kapi.kakao.com";
     private final WebClientUtil webClientUtil;
+    private final KakaoTokenRepository kakaoTokenRepository;
 
 
     public String sendMessage(String title,String detail,String url,String img) {
@@ -38,10 +41,10 @@ public class KakaoService {
         formData.add("template_id", templateId);
         formData.add("receiver_uuids", uuid);
         formData.add("template_args", "{\"TITLE\":\"" + title + "\", \"DETAIL\":\"" + detail + "\", \"REGI_WEB_DOMAIN\":\"" + url + "\", \"THU\":\"" + img + "\"}");
+        KakaoToken kakaoToken=kakaoTokenRepository.findById(1L)
+                        .orElseThrow(()->new TokenHandler(ErrorStatus.TOKEN_IS_NOT_AUTHORITY));
 
-
-        webClientUtil.postForm("https://kapi.kakao.com/v1/api/talk/friends/message/send", formData, String.class).subscribe(result -> {
-            System.out.println(result);
+        webClientUtil.messageSandPost("https://kapi.kakao.com/v1/api/talk/friends/message/send", formData, String.class, kakaoToken.getAccessToken()).subscribe(result -> {
         }, error -> {
             error.printStackTrace();
         });
