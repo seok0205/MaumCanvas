@@ -19,7 +19,7 @@ public class DrawingResult {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String drawingResult;
 
     @JoinColumn(name="drawing_id")
