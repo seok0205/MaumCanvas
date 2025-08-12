@@ -24,7 +24,7 @@ import { apiClient } from './apiClient';
 interface CounselorCounselingListItem {
   id: number;
   student: string;
-  time: number[]; // LocalDateTime 배열
+  time: number[] | string; // LocalDateTime 배열 또는 ISO 문자열
   type: string;
   status: string;
 }
@@ -32,7 +32,7 @@ interface CounselorCounselingListItem {
 interface StudentCounselingListItem {
   id: number;
   name: string; // 상담사 이름
-  time: number[]; // LocalDateTime 배열
+  time: number[] | string; // LocalDateTime 배열 또는 ISO 문자열
   type: string;
   status: string;
 }
@@ -528,7 +528,9 @@ export const counselingService = {
       return response.data.result.map(item => ({
         id: item.id,
         counselor: item.student,
-        time: convertLocalDateTimeArrayToISO(item.time),
+        time: Array.isArray(item.time)
+          ? convertLocalDateTimeArrayToISO(item.time)
+          : (item.time as string),
         type: item.type,
         status: String(item.status),
       }));
@@ -559,7 +561,9 @@ export const counselingService = {
       return response.data.result.map(item => ({
         id: item.id,
         counselor: item.name,
-        time: convertLocalDateTimeArrayToISO(item.time),
+        time: Array.isArray(item.time)
+          ? convertLocalDateTimeArrayToISO(item.time)
+          : (item.time as string),
         type: item.type,
         status: String(item.status),
       }));
