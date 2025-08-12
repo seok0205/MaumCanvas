@@ -78,6 +78,21 @@ export const DrawingDetail = () => {
     };
   }, [drawingId, fetchParallel]);
 
+  // 텍스트 전처리 함수: 쌍따옴표 제거 및 제로폭 문자 제거 (Best Practice 적용)
+  const preprocessText = useCallback((text: string): string => {
+    if (!text) return '';
+
+    return text
+      .trim() // 앞뒤 공백 제거
+      .replace(/^"(.*)"$/s, '$1') // 전체를 감싸는 쌍따옴표 제거 (개선된 정규식)
+      .replace(/\\n/g, '\n') // 이스케이프된 줄바꿈을 실제 줄바꿈으로 변환
+      .replace(/\\"/g, '"') // 이스케이프된 쌍따옴표 복원
+      .replace(/[\u200B\u200C\u200D\u200E\u200F\uFEFF]/g, '') // Zero-width space 및 관련 문자 제거 (marked.js 권장사항)
+      .replace(/\u00A0/g, ' ') // Non-breaking space를 일반 공백으로 변환
+      .replace(/\r\n/g, '\n') // Windows CRLF를 LF로 통일
+      .replace(/\r/g, '\n'); // 남은 CR을 LF로 변환
+  }, []);
+
   // RAG 마크다운을 HTML로 변환하여 안전하게 렌더링
   useEffect(() => {
     let cancelled = false;
@@ -86,15 +101,105 @@ export const DrawingDetail = () => {
         setRagHtml('');
         return;
       }
-      const [m, d] = await Promise.all([import('marked'), import('dompurify')]);
-      const raw = m.marked.parse(ragText, { async: false });
-      const safe = d.default.sanitize(raw);
-      if (!cancelled) setRagHtml(safe);
+
+      try {
+        const [m, d] = await Promise.all([
+          import('marked'),
+          import('dompurify'),
+        ]);
+
+        // 텍스트 전처리
+        const preprocessedText = preprocessText(ragText);
+
+        // marked.js 설정 (Best Practices 적용)
+        const markedOptions = {
+          gfm: true, // GitHub Flavored Markdown 활성화
+          breaks: true, // 줄바꿈을 <br>로 변환
+          silent: false, // 오류 시 콘솔에 출력 (디버깅용)
+          sanitize: false, // DOMPurify를 별도로 사용하므로 비활성화
+          smartypants: true, // 스마트 인용부호 변환
+          smartLists: true, // 스마트 리스트 처리
+          pedantic: false, // 원본 markdown.pl과의 호환성 비활성화 (현대적 사용)
+        };
+
+        // 마크다운을 HTML로 변환 (동기적 처리)
+        const raw = m.marked.parse(preprocessedText, markedOptions) as string;
+
+        // DOMPurify 설정 (보안 강화 및 Best Practices)
+        const purifyOptions = {
+          ALLOWED_TAGS: [
+            'h1',
+            'h2',
+            'h3',
+            'h4',
+            'h5',
+            'h6',
+            'p',
+            'br',
+            'strong',
+            'em',
+            'u',
+            's',
+            'del',
+            'mark',
+            'ul',
+            'ol',
+            'li',
+            'blockquote',
+            'pre',
+            'code',
+            'a',
+            'img',
+            'table',
+            'thead',
+            'tbody',
+            'tr',
+            'td',
+            'th',
+            'hr',
+            'div',
+            'span', // 추가적인 스타일링 요소
+          ],
+          ALLOWED_ATTR: [
+            'href',
+            'src',
+            'alt',
+            'title',
+            'class',
+            'id',
+            'target',
+            'rel',
+            'style',
+            'width',
+            'height',
+            'colspan',
+            'rowspan', // 테이블 관련 속성 추가
+          ],
+          ALLOW_DATA_ATTR: false,
+          ALLOW_ARIA_ATTR: false,
+          ALLOW_UNKNOWN_PROTOCOLS: false, // 보안 강화
+          SANITIZE_DOM: true, // DOM 트리 정리
+          WHOLE_DOCUMENT: false, // 문서 전체가 아닌 부분만 처리
+          RETURN_DOM: false, // HTML 문자열로 반환
+          RETURN_DOM_FRAGMENT: false,
+          RETURN_TRUSTED_TYPE: false,
+        };
+
+        const safe = d.default.sanitize(raw, purifyOptions);
+        if (!cancelled) setRagHtml(safe);
+      } catch (error) {
+        console.error('마크다운 처리 중 오류:', error);
+        if (!cancelled) {
+          // 마크다운 처리 실패 시 전처리된 텍스트를 그대로 표시
+          const preprocessedText = preprocessText(ragText);
+          setRagHtml(`<p>${preprocessedText.replace(/\n/g, '<br>')}</p>`);
+        }
+      }
     })();
     return () => {
       cancelled = true;
     };
-  }, [ragText]);
+  }, [ragText, preprocessText]);
 
   const handleSubmit = useCallback(async () => {
     if (!drawingId || !prompt.trim()) return;
