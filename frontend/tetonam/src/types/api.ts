@@ -131,7 +131,8 @@ export type CounselingStatus = 'OPEN' | 'CLOSE' | 'CANCEL';
 export interface RawUpcomingCounseling {
   readonly id: number;
   readonly name: string; // 역할에 따라 상대방 이름(학생/상담사)
-  readonly time: number[]; // LocalDateTime이 [년, 월, 일, 시, 분] 배열로 직렬화됨
+  // 백엔드(LocalDateTime) 직렬화가 ISO 문자열 또는 숫자 배열(년,월,일,시,분,...)일 수 있으므로 유니온 허용
+  readonly time: number[] | string;
   readonly type: string;
   readonly status: CounselingStatus;
 }
@@ -159,15 +160,20 @@ export const isValidRawUpcomingCounseling = (
   if (!data || typeof data !== 'object') return false;
 
   const obj = data as Record<string, unknown>;
+  const time = obj['time'];
+  const isArrayTime =
+    Array.isArray(time) &&
+    (time as unknown[]).length >= 5 &&
+    (time as unknown[]).every((item: unknown) => typeof item === 'number');
+  const isStringTime = typeof time === 'string' && (time as string).length > 0;
+
   return (
     typeof obj['id'] === 'number' &&
     typeof obj['name'] === 'string' &&
-    Array.isArray(obj['time']) &&
-    obj['time'].length >= 5 &&
-    obj['time'].every((item: unknown) => typeof item === 'number') &&
+    (isArrayTime || isStringTime) &&
     typeof obj['type'] === 'string' &&
     typeof obj['status'] === 'string' &&
-    isValidCounselingStatus(obj['status'])
+    isValidCounselingStatus(obj['status'] as string)
   );
 };
 
@@ -255,10 +261,20 @@ export const convertLocalDateTimeArrayToISO = (timeArray: number[]): string => {
 export const transformRawToCounseling = (
   raw: RawUpcomingCounseling
 ): UpcomingCounseling => {
+  const timeISO = Array.isArray(raw.time)
+    ? convertLocalDateTimeArrayToISO(raw.time)
+    : ((): string => {
+        // 문자열이면 ISO 8601로 가정하고 그대로 사용. 필요 시 간단 검증/정규화
+        const s = raw.time as string;
+        return s && s.trim().length > 0
+          ? s
+          : convertLocalDateTimeArrayToISO([] as unknown as number[]);
+      })();
+
   return {
     id: raw.id,
     name: raw.name,
-    time: convertLocalDateTimeArrayToISO(raw.time),
+    time: timeISO,
     type: raw.type,
     status: raw.status,
   };
