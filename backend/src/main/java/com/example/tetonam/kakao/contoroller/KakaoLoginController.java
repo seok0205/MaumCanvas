@@ -1,14 +1,12 @@
-package com.example.tetonam.user.controller;
+package com.example.tetonam.kakao.contoroller;
 
 
-import com.example.tetonam.image.domain.DrawingResult;
 import com.example.tetonam.response.ApiResponse;
+import com.example.tetonam.user.domain.User;
 import com.example.tetonam.user.dto.KakaoTokenResponseDto;
-import com.example.tetonam.user.dto.KakaoUserInfoResponseDto;
-import com.example.tetonam.user.service.KakaoService;
+import com.example.tetonam.kakao.service.KakaoService;
 import com.example.tetonam.util.WebClientUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -16,7 +14,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Mono;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,23 +32,9 @@ public class KakaoLoginController {
     }
 
     @GetMapping("/send-mail")
-    public ResponseEntity<?> findFriends() {
+    public ResponseEntity<?> sendMessage() {
 
-        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add("template_id", "123284");
-        formData.add("receiver_uuids", "[\"-sv9zfvD-sL22uje59Lq2OnR48_-zPXG_snwew\"]");
-        formData.add("template_args", "{\"TITLE\":\"타이틀입니다.\", \"DETAIL\":\"상세 내용입니다.\", \"REGI_WEB_DOMAIN\":\"https://nexon.com\"}");
-
-        webClientUtil.postForm("https://kapi.kakao.com/v1/api/talk/friends/message/send", formData, String.class)
-                .subscribe(result -> {
-                    System.out.println(result);
-                }, error -> {
-                    error.printStackTrace();
-                });
-
-
-
-
+//        kakaoService.sendMessage("타이틀 테스트","상세보기 테스트","https://www.naver.com/");
         return ResponseEntity.ok().body(ApiResponse.onSuccess("fuck"));
     }
 }

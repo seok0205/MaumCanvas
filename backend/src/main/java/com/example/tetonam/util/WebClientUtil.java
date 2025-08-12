@@ -27,7 +27,7 @@ public class WebClientUtil {
                 .post()
                 .uri(url)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)  // Content-Type 지정
-                .headers(headers -> headers.setBearerAuth("Qv3ITniP5A70N1O0i3l2jbXbh-Mnx2hlAAAAAQoNFZsAAAGYmBrdrhKZRqbpl2cW"))
+                .headers(headers -> headers.setBearerAuth("PNw5I3yWn-n_kgqfeKbCiW2QKKJbKQfvAAAAAQoNFdgAAAGYnDeVsRKZRqbpl2cW"))
                 .body(BodyInserters.fromFormData(formData))
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError,

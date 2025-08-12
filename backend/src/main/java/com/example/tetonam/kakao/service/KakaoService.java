@@ -1,7 +1,9 @@
-package com.example.tetonam.user.service;
+package com.example.tetonam.kakao.service;
 
+import com.example.tetonam.user.domain.User;
 import com.example.tetonam.user.dto.KakaoTokenResponseDto;
 import com.example.tetonam.user.dto.KakaoUserInfoResponseDto;
+import com.example.tetonam.util.WebClientUtil;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -18,19 +22,35 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class KakaoService {
 
+    @Value("${kakao.client_id}")
     private String clientId;
-    private final String KAUTH_TOKEN_URL_HOST;
-    private final String KAUTH_USER_URL_HOST;
+    @Value("${kakao.receiver_uuids}")
+    private String uuid;
+    @Value("${kakao.template_id}")
+    private String templateId;
+    private final String KAUTH_TOKEN_URL_HOST = "https://kauth.kakao.com";
+    private final String KAUTH_USER_URL_HOST = "https://kapi.kakao.com";
+    private final WebClientUtil webClientUtil;
 
-    @Autowired
-    public KakaoService(@Value("${kakao.client_id}") String clientId) {
-        this.clientId = clientId;
-        KAUTH_TOKEN_URL_HOST ="https://kauth.kakao.com";
-        KAUTH_USER_URL_HOST = "https://kapi.kakao.com";
+
+    public String sendMessage(String title,String detail,String url,String img) {
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("template_id", templateId);
+        formData.add("receiver_uuids", uuid);
+        formData.add("template_args", "{\"TITLE\":\"" + title + "\", \"DETAIL\":\"" + detail + "\", \"REGI_WEB_DOMAIN\":\"" + url + "\", \"THU\":\"" + img + "\"}");
+
+
+        webClientUtil.postForm("https://kapi.kakao.com/v1/api/talk/friends/message/send", formData, String.class).subscribe(result -> {
+            System.out.println(result);
+        }, error -> {
+            error.printStackTrace();
+        });
+        return "보냈습니다";
     }
 
+
     public KakaoTokenResponseDto getAccessTokenFromKakao(String code) {
-        
+
         KakaoTokenResponseDto kakaoTokenResponseDto = WebClient.create(KAUTH_TOKEN_URL_HOST).post()
                 .uri(uriBuilder -> uriBuilder
                         .scheme("https")
