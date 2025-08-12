@@ -1,4 +1,4 @@
-package com.example.tetonam.user.controller;
+package com.example.tetonam.kakao.contoroller;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;

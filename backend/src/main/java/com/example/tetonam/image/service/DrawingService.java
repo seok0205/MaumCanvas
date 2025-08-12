@@ -17,6 +17,7 @@ import com.example.tetonam.image.repository.DrawingRagResultRepository;
 import com.example.tetonam.image.repository.DrawingRepository;
 import com.example.tetonam.image.repository.DrawingResultRepository;
 import com.example.tetonam.image.service.enums.DrawingCategory;
+import com.example.tetonam.kakao.service.KakaoService;
 import com.example.tetonam.response.code.status.ErrorStatus;
 import com.example.tetonam.user.domain.User;
 import com.example.tetonam.user.domain.enums.Role;
@@ -44,6 +45,7 @@ public class DrawingService {
     private final DrawingRagResultRepository drawingRagResultRepository;
     @Value("${ai.server.url}")
     private String AI_SERVER_URL;
+    private final KakaoService kakaoService;
 
     private final CounselingImageRepository counselingImageRepository;
     @Transactional
@@ -114,11 +116,12 @@ public class DrawingService {
         LLMRequestDto llmRequestDto=LLMRequestDto.toDto(question,category);
         webClientUtil.post(url, llmRequestDto, String.class)
                 .subscribe(result -> {
-                    System.out.println(result);
                     drawingRagResultRepository.save(DrawingRagResult.builder()
                                     .drawing(drawing)
                                     .drawingRagResult(result)
                             .build());
+
+                    kakaoService.sendMessage("AI 결과가 도착했습니다",category+"그림의 결과가 저장되었습니다. 확인해주세요","https://i13e108.p.ssafy.io/counseling/image/"+drawing.getId(),drawing.getImageUrl());
                 }, error -> {
                     log.error("RAG 저장 중 에러 발생", error);
                 });
