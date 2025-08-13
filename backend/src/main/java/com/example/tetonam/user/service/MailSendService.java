@@ -46,11 +46,11 @@ public class MailSendService {
      */
     //mail을 어디서 보내는지, 어디로 보내는지 , 인증 번호를 html 형식으로 어떻게 보내는지 작성합니다.
     @Async
-    public void joinEmail(String email) {
+    public void joinEmail(String email,String text) {
         makeRandomNumber();
         String setFrom = "jj99526@naver.com";
         String toMail = email;
-        String title = "🌼 회원가입 인증 메일 – 마음 캔버스";
+        String title = "🌼 "+text+" – 마음 캔버스";
 
         String content =
                 "<!DOCTYPE html>" +
@@ -67,7 +67,7 @@ public class MailSendService {
                         "</td></tr>"+
                         // 본문
                         "<tr><td style='padding:28px 28px 10px 28px;color:#333333;'>"+
-                        "<div style='font-size:15px;line-height:1.6;'>안녕하세요!<br>회원가입을 계속하려면 아래의 인증번호를 입력해 주세요.</div>"+
+                        "<div style='font-size:15px;line-height:1.6;'>안녕하세요!<br>"+text+"을 계속하려면 아래의 인증번호를 입력해 주세요.</div>"+
                         "</td></tr>"+
                         // 코드 카드
                         "<tr><td align='center' style='padding:6px 28px 22px 28px;'>"+
@@ -90,7 +90,8 @@ public class MailSendService {
                         "</body></html>";
 
         mailSend(setFrom, toMail, title, content);
-        redisTemplate.opsForValue().set("MAIL:" + authNumber, toMail, 3, java.util.concurrent.TimeUnit.MINUTES);
+        redisTemplate.delete("MAIL:" + toMail);
+        redisTemplate.opsForValue().set("MAIL:" + toMail, authNumber, 3, java.util.concurrent.TimeUnit.MINUTES);
     }
 
 
@@ -104,14 +105,14 @@ public class MailSendService {
      * @return
      */
     public String CheckAuthNum(String email, String authNum) {
-        String code = (String) redisTemplate.opsForValue().get("MAIL:" + authNum);
+        String code = (String) redisTemplate.opsForValue().get("MAIL:" + email);
         if (code == null) {
             throw new MailHandler(ErrorStatus.MAIL_NUMBER_IS_NOT_MATCH);
-        } else if (code.equals(email)) {
+        } else if (code.equals(authNum)) {
             String uuid=UUID.randomUUID().toString();
             // 5분안에 안할시 세션종료
-            redisTemplate.opsForValue().set("UUID:" + uuid, email, 5, TimeUnit.MINUTES);
-            redisTemplate.delete("MAIL:" + authNum);
+            redisTemplate.opsForValue().set("UUID:" + email, uuid, 5, TimeUnit.MINUTES);
+            redisTemplate.delete("MAIL:" + email);
 
             return uuid;
 
@@ -147,7 +148,7 @@ public class MailSendService {
     public String mailSendForPassword(String email) {
         userRepository.findByEmail(email)
                 .orElseThrow(()->new UserHandler(ErrorStatus.USER_NOT_FOUND));
-        joinEmail(email);
+        joinEmail(email,"비밀번호 찾기");
         return "메일이 전송되었습니다";
     }
 }

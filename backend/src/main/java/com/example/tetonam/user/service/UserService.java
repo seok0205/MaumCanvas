@@ -147,8 +147,8 @@ public class UserService {
     public String resetPassword(ResetPasswordDto resetPasswordDto) {
         User user = userRepository.findByEmail(resetPasswordDto.getEmail())
                 .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
-        String uuid = (String) redisTemplate.opsForValue().get("UUID:" + resetPasswordDto.getUuid());
-        if (uuid == null || !uuid.equals(resetPasswordDto.getEmail())) {
+        String uuid = (String) redisTemplate.opsForValue().get("UUID:" + resetPasswordDto.getEmail());
+        if (uuid == null || !uuid.equals(resetPasswordDto.getUuid())) {
             throw new UserHandler(ErrorStatus.USER_NOT_AUTHORITY);
         }
         String encodedPassword = passwordEncoder.encode(resetPasswordDto.getPassword());
