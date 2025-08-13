@@ -130,13 +130,6 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
   const reservationMutation = useMutation({
     mutationKey: ['counseling', 'reserve'],
     mutationFn: async (data: CounselingReservationRequest) => {
-      // API 호출 직전 데이터 로깅
-      console.log('🚀 상담예약 API 호출 직전:', {
-        호출시간: new Date().toISOString(),
-        요청데이터: data,
-        타임존: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      });
-
       // 추가 검증 로직
       if (
         !data.counselorId ||
@@ -150,12 +143,6 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
       }
 
       const result = await counselingService.reserveCounseling(data);
-
-      // API 응답 로깅
-      console.log('✅ 상담예약 API 응답:', {
-        응답시간: new Date().toISOString(),
-        응답데이터: result,
-      });
 
       return result;
     },
@@ -253,17 +240,6 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
       types: selectedCounselingType.title,
       counselorId: selectedCounselor.id, // 백엔드 DTO와 일치하도록 수정
     };
-
-    // 상담예약 확정 시 API 요청 데이터 로깅
-    console.log('상담예약 확정 - API 요청 데이터:', {
-      현재시간: new Date().toISOString(),
-      로컬현재시간: new Date().toLocaleString('ko-KR'),
-      선택된날짜: selectedDate,
-      선택된시간: selectedTime,
-      생성된DateTime: dateTime,
-      전송데이터: reservationData,
-      타임존오프셋: new Date().getTimezoneOffset(),
-    });
 
     reservationMutation.mutate(reservationData);
   }, [
