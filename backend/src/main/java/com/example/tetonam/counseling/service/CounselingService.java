@@ -69,10 +69,12 @@ public class CounselingService {
         }
 
         Counseling counseling = CounselingReserveRequestDto.toEntity(student, counselor, dto);
-        counselingRepository.save(counseling);
+        Counseling counselingSaved =counselingRepository.save(counseling);
         counselingImageRepository.save(CounselingImage.builder()
                 .counseling(counseling)
                 .drawingList(drawingList).build());
+        System.out.println(counseling.getReservationTime()+"디비 저장전 시간확인");
+        System.out.println(counselingSaved.getReservationTime()+"디비 저장후 시간확인");
 
         return "상담이 예약 되었습니다";
     }
