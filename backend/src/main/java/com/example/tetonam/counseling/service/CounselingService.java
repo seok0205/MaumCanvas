@@ -129,7 +129,18 @@ public class CounselingService {
         }
     }
 
+    public String checkValid(String email, Long id) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+        Counseling counseling =counselingRepository.findById(id)
+                .orElseThrow(()-> new CounselingHandler(ErrorStatus.NOTING_COUNSELING));
+        // 권한이 없을때 (예약의 학생도 상담사도 아닐때)
+        if(!counseling.getCounselor().equals(user)&&!counseling.getStudent().equals(user)){
+            throw new CounselingHandler(ErrorStatus.COUNSELING_IS_NOT_AUTHORITY);
+        }
 
+        return "입장 되었습니다.";
+    }
 
 
 //    public String createCounseling(String email, CounselingReserveRequestDto counselingReserveRequestDto) {
