@@ -1,4 +1,4 @@
-import type { ApiResponse } from '@/types/api';
+import type { ApiResponse, ApiResult } from '@/types/api';
 import { AuthenticationError } from '@/types/auth';
 import type { AxiosError } from 'axios';
 import { apiClient } from './apiClient';
@@ -16,6 +16,17 @@ export interface HTPImageFiles {
 // 이미지 관련 API 엔드포인트
 const IMAGE_ENDPOINTS = {
   UPLOAD_HTP_IMAGES: '/api/image',
+  // 상담 상세에서 그림 목록
+  GET_COUNSELING_IMAGES: (counselingId: number | string) =>
+    `/api/image/counseling/${counselingId}`,
+  // 그림 상세: AI 객체탐지 결과
+  GET_AI_RESULT: (drawingId: number | string) =>
+    `/api/image/counseling/ai/${drawingId}`,
+  // 그림 상세: RAG 결과 조회/제출
+  GET_RAG_RESULT: (drawingId: number | string) =>
+    `/api/image/counseling/rag/${drawingId}`,
+  POST_RAG_PROMPT: (drawingId: number | string) =>
+    `/api/image/counseling/rag/${drawingId}`,
   // UPLOAD_HTP_IMAGES: `${BASE_URL}/api/image`,
 } as const;
 
@@ -95,6 +106,104 @@ export const imageService = {
         '이미지 업로드에 실패했습니다. 다시 시도해주세요.'
       );
     }
+  },
+
+  // 상담의 그림 목록 조회
+  getCounselingImages: async (
+    counselingId: number | string,
+    signal?: AbortSignal
+  ): Promise<Array<{ id: number; category: string; imageUrl: string }>> => {
+    try {
+      const response = await apiClient.get<
+        ApiResponse<Array<{ id: number; category: string; imageUrl: string }>>
+      >(IMAGE_ENDPOINTS.GET_COUNSELING_IMAGES(counselingId), {
+        ...(signal && { signal }),
+      });
+      if (!response.data.isSuccess || !response.data.result) return [];
+      return response.data.result;
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiResponse<null>>;
+      if (axiosError.response?.status === 401) {
+        throw new AuthenticationError('UNAUTHORIZED', '로그인이 필요합니다.');
+      }
+      return [];
+    }
+  },
+
+  // 객체탐지 결과 조회
+  getAiDetectionText: async (
+    drawingId: number | string,
+    signal?: AbortSignal
+  ): Promise<string> => {
+    const response = await apiClient.get<ApiResponse<string>>(
+      IMAGE_ENDPOINTS.GET_AI_RESULT(drawingId),
+      {
+        ...(signal && { signal }),
+      }
+    );
+    if (!response.data.isSuccess) {
+      throw new AuthenticationError(
+        'AI_RESULT_FETCH_FAILED',
+        'AI 결과 조회 실패'
+      );
+    }
+    return response.data.result ?? '';
+  },
+
+  // RAG 결과 조회
+  getRagResult: async (
+    drawingId: number | string,
+    signal?: AbortSignal
+  ): Promise<ApiResult<string>> => {
+    try {
+      const response = await apiClient.get<ApiResponse<string>>(
+        IMAGE_ENDPOINTS.GET_RAG_RESULT(drawingId),
+        {
+          ...(signal && { signal }),
+        }
+      );
+      if (!response.data.isSuccess) {
+        return { data: null, error: 'NOT_FOUND' };
+      }
+      return { data: response.data.result || null };
+    } catch (error) {
+      // 개발 환경에서 에러 로깅
+      if (import.meta.env.DEV) {
+        console.error('RAG 결과 조회 중 에러 발생:', error);
+      }
+
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as AxiosError;
+        if (
+          axiosError.response?.status === 401 ||
+          axiosError.response?.status === 403
+        ) {
+          return { data: null, error: 'UNAUTHORIZED' };
+        }
+        if (axiosError.response?.status === 404) {
+          return { data: null, error: 'NOT_FOUND' };
+        }
+      }
+      if (signal?.aborted) {
+        throw new AuthenticationError('ABORTED', '요청이 취소되었습니다.');
+      }
+      return { data: null, error: 'NETWORK' };
+    }
+  },
+
+  // RAG 프롬프트 제출
+  submitRagPrompt: async (
+    drawingId: number | string,
+    prompt: string
+  ): Promise<string> => {
+    const response = await apiClient.post<ApiResponse<string>>(
+      IMAGE_ENDPOINTS.POST_RAG_PROMPT(drawingId),
+      { comment: prompt }
+    );
+    if (!response.data.isSuccess) {
+      throw new AuthenticationError('RAG_SUBMIT_FAILED', '프롬프트 제출 실패');
+    }
+    return response.data.result ?? '저장되었습니다.';
   },
 
   // 파일 유효성 검사

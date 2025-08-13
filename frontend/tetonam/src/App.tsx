@@ -84,6 +84,18 @@ const VideoCallPage = lazyNamedExport(
   () => import('@/pages/VideoCallPage'),
   'VideoCallPage'
 );
+const CounselingManagement = lazyNamedExport(
+  () => import('@/pages/CounselingManagement'),
+  'CounselingManagement'
+);
+const CounselingDetail = lazyNamedExport(
+  () => import('@/pages/CounselingDetail'),
+  'CounselingDetail'
+);
+const DrawingDetail = lazyNamedExport(
+  () => import('@/pages/DrawingDetail'),
+  'DrawingDetail'
+);
 
 function App() {
   const { isLoaded, isError } = useFontLoading('Pretendard');
@@ -209,6 +221,30 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <VideoCallPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path='/counseling-management'
+                element={
+                  <ProtectedRoute>
+                    <CounselingManagement />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path='/counseling/:id'
+                element={
+                  <ProtectedRoute>
+                    <CounselingDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path='/counseling/image/:drawingId'
+                element={
+                  <ProtectedRoute>
+                    <DrawingDetail />
                   </ProtectedRoute>
                 }
               />

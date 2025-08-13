@@ -12,8 +12,8 @@ import type { User } from '@/types/user';
 import { getPrimaryRole } from '@/utils/userRoleMapping';
 // 학생 대시보드와 동일한 API 기반 구성 재사용
 import { UpcomingCounselingCard } from './UpcomingCounselingCard';
-// NOTE: 상담사 전용 개별 Hook (백엔드 전용 엔드포인트 완성 후 교체 예정)
-// import { useCounselorUpcomingCounseling } from '@/hooks/useCounselorUpcomingCounseling';
+// NOTE: 상담사 전용 개별 Hook 활성화
+import { useCounselorUpcomingCounseling } from '@/hooks/useCounselorUpcomingCounseling';
 import { CommunityActivity } from './CommunityActivity';
 import { DailyTips } from './DailyTips';
 import { QuickStartSection } from './QuickStartSection';
@@ -27,7 +27,14 @@ interface CounselorDashboardProps {
 export const CounselorDashboard = ({ user }: CounselorDashboardProps) => {
   const { state } = useSidebar();
   const primaryRole = getPrimaryRole(user.roles);
-  // const { upcoming, isLoading } = useCounselorUpcomingCounseling(); // 추후 UpcomingCounselingCard 대체 가능
+
+  // 상담사 전용 다가오는 상담 데이터 조회 - TanStack Query Best Practice 적용
+  const {
+    upcoming: counselorUpcoming,
+    isLoading: isCounselorUpcomingLoading,
+    error: counselorUpcomingError,
+    refetch: refetchCounselorUpcoming,
+  } = useCounselorUpcomingCounseling();
 
   // 사이드바가 expanded 상태일 때 더 많은 패딩 적용
   const paddingClass = state === 'expanded' ? 'p-8' : 'p-6';
@@ -60,9 +67,15 @@ export const CounselorDashboard = ({ user }: CounselorDashboardProps) => {
 
       {/* 내 활동 섹션 */}
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
-        {/* 다가오는 상담: 학생과 동일한 Hook/UI 재사용 (상담사 권한으로도 최근 1건 제공) */}
+        {/* 다가오는 상담: 상담사 전용 Hook으로 교체하여 올바른 데이터 표시 */}
         <div>
-          <UpcomingCounselingCard />
+          <UpcomingCounselingCard
+            counselingData={counselorUpcoming}
+            isLoading={isCounselorUpcomingLoading}
+            isFetching={false} // 현재 Hook에서 별도 isFetching 제공하지 않음
+            error={counselorUpcomingError}
+            onRefresh={refetchCounselorUpcoming}
+          />
         </div>
 
         {/* 자기 진단 결과 */}

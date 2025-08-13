@@ -15,6 +15,7 @@ import type {
   PostUpdateRequest,
   PostWriteRequest,
 } from '@/types/community';
+import { useProgressiveLoading } from './useDelayedLoading';
 
 // === 게시글 관련 훅 ===
 
@@ -30,7 +31,7 @@ export const usePosts = (
     [query]
   );
 
-  return useQuery({
+  const { data, isLoading, error, refetch, isFetching, ...rest } = useQuery({
     queryKey,
     queryFn: ({ signal }) => communityService.getPosts(query, signal),
     enabled,
@@ -45,6 +46,25 @@ export const usePosts = (
     },
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
+
+  // Progressive Loading 상태 관리
+  const progressiveLoadingState = useProgressiveLoading({
+    isLoading,
+    isFetching,
+    data,
+    error,
+  });
+
+  return {
+    data,
+    isLoading,
+    error,
+    refetch,
+    isFetching,
+    ...rest,
+    // Progressive Loading 상태들 추가
+    ...progressiveLoadingState,
+  };
 };
 
 /**

@@ -7,6 +7,7 @@ import type {
   UpcomingCounseling,
 } from '@/types/api';
 import {
+  convertLocalDateTimeArrayToISO,
   isValidRawUpcomingCounseling,
   isValidUpcomingCounseling,
   transformRawToCounseling,
@@ -19,6 +20,32 @@ import {
 } from '@/utils/errorHandler';
 import type { AxiosError } from 'axios';
 import { apiClient } from './apiClient';
+// 상담 상세/목록(상담사/학생) DTO 타입 정의
+interface CounselorCounselingListItem {
+  id: number;
+  student: string;
+  time: number[] | string; // LocalDateTime 배열 또는 ISO 문자열
+  type: string;
+  status: string;
+}
+
+interface StudentCounselingListItem {
+  id: number;
+  name: string; // 상담사 이름
+  time: number[] | string; // LocalDateTime 배열 또는 ISO 문자열
+  type: string;
+  status: string;
+}
+
+interface CounselingDetailDto {
+  name: string;
+  school: string;
+  email: string;
+  phone: string;
+  time: number[] | string; // LocalDateTime 배열 또는 ISO 문자열
+  type: string;
+  status: string;
+}
 
 // const BASE_URL = 'https://i13e108.p.ssafy.io'; // 현재 사용하지 않음
 
@@ -38,7 +65,11 @@ const COUNSELING_ENDPOINTS = {
   // 상담사가 가장 가까운 상담 1건 (학생 이름 포함 예상)
   GET_COUNSELOR_UPCOMING: '/api/counseling/counselor-recent',
   // 상담사 자신의 상담 목록 (학생 정보 목록 예상)
-  GET_COUNSELOR_HISTORY: '/api/counseling/counselor',
+  GET_COUNSELOR_HISTORY: '/api/counseling/my-counseling-counselor',
+  // 학생 자신의 상담 목록
+  GET_STUDENT_HISTORY: '/api/counseling/my-counseling-student',
+  // 공통 상세 조회
+  GET_DETAIL: (id: number | string) => `/api/counseling/my-counseling/${id}`,
 } as const;
 
 // 상담 관련 API 서비스
@@ -477,5 +508,91 @@ export const counselingService = {
     signal?: AbortSignal
   ): Promise<CounselingHistory[]> => {
     return counselingService.getMyCounselingHistory(signal);
+  },
+
+  // 상담사: 내 상담 목록
+  getMyCounselingListForCounselor: async (
+    signal?: AbortSignal
+  ): Promise<CounselingHistory[]> => {
+    try {
+      const response = await apiClient.get<
+        ApiResponse<CounselorCounselingListItem[]>
+      >(COUNSELING_ENDPOINTS.GET_COUNSELOR_HISTORY, {
+        ...(signal && { signal }),
+      });
+
+      if (!response.data.isSuccess || !response.data.result) {
+        return [];
+      }
+
+      return response.data.result.map(item => ({
+        id: item.id,
+        counselor: item.student,
+        time: Array.isArray(item.time)
+          ? convertLocalDateTimeArrayToISO(item.time)
+          : (item.time as string),
+        type: item.type,
+        status: String(item.status),
+      }));
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiResponse<null>>;
+      if (axiosError.response?.status === 401) {
+        throw new AuthenticationError('UNAUTHORIZED', '로그인이 필요합니다.');
+      }
+      return [];
+    }
+  },
+
+  // 학생: 내 상담 목록
+  getMyCounselingListForStudent: async (
+    signal?: AbortSignal
+  ): Promise<CounselingHistory[]> => {
+    try {
+      const response = await apiClient.get<
+        ApiResponse<StudentCounselingListItem[]>
+      >(COUNSELING_ENDPOINTS.GET_STUDENT_HISTORY, {
+        ...(signal && { signal }),
+      });
+
+      if (!response.data.isSuccess || !response.data.result) {
+        return [];
+      }
+
+      return response.data.result.map(item => ({
+        id: item.id,
+        counselor: item.name,
+        time: Array.isArray(item.time)
+          ? convertLocalDateTimeArrayToISO(item.time)
+          : (item.time as string),
+        type: item.type,
+        status: String(item.status),
+      }));
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiResponse<null>>;
+      if (axiosError.response?.status === 401) {
+        throw new AuthenticationError('UNAUTHORIZED', '로그인이 필요합니다.');
+      }
+      return [];
+    }
+  },
+
+  // 상담 상세조회 (공통)
+  getCounselingDetail: async (
+    id: number | string,
+    signal?: AbortSignal
+  ): Promise<CounselingDetailDto> => {
+    const response = await apiClient.get<ApiResponse<CounselingDetailDto>>(
+      COUNSELING_ENDPOINTS.GET_DETAIL(id),
+      {
+        ...(signal && { signal }),
+      }
+    );
+    if (!response.data.isSuccess || !response.data.result) {
+      throw new AuthenticationError(
+        response.data.code || 'COUNSELING_DETAIL_FETCH_FAILED',
+        response.data.message || '상담 상세 조회에 실패했습니다.'
+      );
+    }
+    return response.data.result;
   },
 };

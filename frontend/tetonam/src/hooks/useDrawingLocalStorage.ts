@@ -65,6 +65,25 @@ export const useDrawingLocalStorage = (
             keysToRemove.push(key);
           }
         }
+        // 압축된 라인 데이터도 정리 (만료 시간은 기본 데이터와 동일하게 적용)
+        if (key?.startsWith('DRAWING_COMPRESSED_')) {
+          try {
+            // 압축된 데이터는 타임스탬프가 없으므로 관련된 기본 데이터가 없으면 제거
+            const parts = key.split('_');
+            if (parts.length >= 4) {
+              const userId = parts[2];
+              const stepId = parts[3];
+              if (userId && stepId) {
+                const relatedKey = DRAWING_STORAGE.KEY_PATTERN(userId, stepId as DrawingCategory);
+                if (!localStorage.getItem(relatedKey)) {
+                  keysToRemove.push(key);
+                }
+              }
+            }
+          } catch {
+            keysToRemove.push(key);
+          }
+        }
       }
 
       keysToRemove.forEach(key => localStorage.removeItem(key));
@@ -214,8 +233,14 @@ export const useDrawingLocalStorage = (
       if (!isLocalStorageAvailable()) return;
 
       try {
+        // 기본 그림 데이터 삭제
         const key = DRAWING_STORAGE.KEY_PATTERN(userId, stepId);
         localStorage.removeItem(key);
+        
+        // 압축된 라인 데이터도 삭제
+        const compressedKey = `DRAWING_COMPRESSED_${userId}_${stepId}`;
+        localStorage.removeItem(compressedKey);
+        
         updateSaveState(stepId, { status: 'unsaved' });
       } catch (error) {
         console.warn(`Failed to clear drawing for ${stepId}:`, error);
@@ -231,8 +256,14 @@ export const useDrawingLocalStorage = (
     try {
       (['HOME', 'TREE', 'PERSON1', 'PERSON2'] as DrawingCategory[]).forEach(
         stepId => {
+          // 기본 그림 데이터 삭제
           const key = DRAWING_STORAGE.KEY_PATTERN(userId, stepId);
           localStorage.removeItem(key);
+          
+          // 압축된 라인 데이터도 삭제
+          const compressedKey = `DRAWING_COMPRESSED_${userId}_${stepId}`;
+          localStorage.removeItem(compressedKey);
+          
           updateSaveState(stepId, { status: 'unsaved' });
         }
       );

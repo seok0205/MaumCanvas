@@ -1,16 +1,33 @@
 import { Button } from '@/components/ui/interactive/button';
 import { Card } from '@/components/ui/layout/card';
 import { useQuestionnaireResults } from '@/hooks/useQuestionnaireResults';
+import type { QuestionnaireCategory } from '@/types/api';
 import { AlertCircle, RefreshCw, TrendingUp } from 'lucide-react';
 import { memo, useCallback } from 'react';
 import { QuestionnaireChart } from './QuestionnaireChart';
 
-export const SelfDiagnosisCard = memo(() => {
+// Props 인터페이스 정의 - TanStack Query Best Practice
+interface SelfDiagnosisCardProps {
+  questionnaireData?: Record<string, any> | null;
+  isLoading?: boolean;
+  isFetching?: boolean;
+}
+
+export const SelfDiagnosisCard = memo<SelfDiagnosisCardProps>(({ 
+  questionnaireData = null,
+  isLoading: propsIsLoading = false,
+  isFetching: propsIsFetching = false 
+}) => {
+  // TanStack Query Best Practice: Props 우선, 개별 쿼리는 fallback
+  const queryResult = useQuestionnaireResults();
+  
+  // Props에서 데이터가 제공되면 사용, 없으면 개별 쿼리 결과 사용
+  const shouldUseProps = questionnaireData !== undefined;
+  
   const {
     selectedCategory,
     setSelectedCategory,
     categories,
-    isLoading,
     error,
     retryCount,
     maxRetries,
@@ -18,7 +35,27 @@ export const SelfDiagnosisCard = memo(() => {
     getSelectedCategoryResults,
     hasAnyResults,
     getCategoryDisplayName,
-  } = useQuestionnaireResults();
+    // Progressive Loading 상태들
+    showSkeleton,
+    isBackgroundFetching,
+  } = shouldUseProps ? {
+    // Props 기반 데이터 사용 시 간소화된 인터페이스
+    selectedCategory: Object.keys(questionnaireData || {})[0] || '스트레스',
+    setSelectedCategory: () => {},
+    categories: Object.keys(questionnaireData || {}),
+    error: null,
+    retryCount: 0,
+    maxRetries: 3,
+    refetch: async () => {},
+    getSelectedCategoryResults: () => {
+      const key = Object.keys(questionnaireData || {})[0];
+      return key && questionnaireData ? questionnaireData[key] || [] : [];
+    },
+    hasAnyResults: () => Object.keys(questionnaireData || {}).length > 0,
+    getCategoryDisplayName: (cat: any) => String(cat),
+    showSkeleton: propsIsLoading,
+    isBackgroundFetching: propsIsFetching,
+  } : queryResult;
 
   const handleRefresh = useCallback(async () => {
     await refetch();
@@ -31,8 +68,8 @@ export const SelfDiagnosisCard = memo(() => {
     [setSelectedCategory]
   );
 
-  // 로딩 상태
-  if (isLoading && !hasAnyResults()) {
+  // Progressive Loading: 초기 로딩 시 스켈레톤 표시
+  if (showSkeleton) {
     return (
       <Card className='p-6'>
         <div className='flex items-center justify-between mb-4'>
@@ -40,9 +77,18 @@ export const SelfDiagnosisCard = memo(() => {
             자가 진단 결과
           </h3>
         </div>
-        <div className='text-center py-8'>
-          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-3'></div>
-          <p className='text-muted-foreground'>진단 결과를 불러오는 중...</p>
+        <div className='space-y-4'>
+          {/* 카테고리 선택 스켈레톤 */}
+          <div className='flex space-x-2'>
+            {[1, 2, 3, 4].map(i => (
+              <div
+                key={i}
+                className='h-8 bg-gray-200 rounded animate-pulse flex-1'
+              />
+            ))}
+          </div>
+          {/* 차트 영역 스켈레톤 */}
+          <div className='h-64 bg-gray-200 rounded animate-pulse' />
         </div>
       </Card>
     );
@@ -157,7 +203,7 @@ export const SelfDiagnosisCard = memo(() => {
             onClick={() => handleCategoryChange(category)}
             className='text-xs'
           >
-            {getCategoryDisplayName(category)}
+            {getCategoryDisplayName(category as QuestionnaireCategory)}
           </Button>
         ))}
       </div>
@@ -166,19 +212,22 @@ export const SelfDiagnosisCard = memo(() => {
       <div className='space-y-4'>
         <div className='flex items-center justify-between'>
           <h4 className='text-md font-medium text-foreground'>
-            {getCategoryDisplayName(selectedCategory)} 진단 추이
+            {getCategoryDisplayName(selectedCategory as QuestionnaireCategory)} 진단 추이
           </h4>
-          {isLoading && (
+          {/* Context7 모범 사례: 백그라운드 갱신 상태 표시 */}
+          {isBackgroundFetching && (
             <div className='flex items-center space-x-2'>
               <RefreshCw className='w-3 h-3 animate-spin text-muted-foreground' />
-              <span className='text-xs text-muted-foreground'>업데이트 중</span>
+              <span className='text-xs text-muted-foreground'>
+                Background Updating...
+              </span>
             </div>
           )}
         </div>
 
         <QuestionnaireChart
           results={selectedResults}
-          categoryName={getCategoryDisplayName(selectedCategory)}
+          categoryName={getCategoryDisplayName(selectedCategory as QuestionnaireCategory)}
         />
       </div>
     </Card>

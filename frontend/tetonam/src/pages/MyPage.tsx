@@ -1,3 +1,17 @@
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/data-display/tabs';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/layout/card';
+import { useStudentCounselingList } from '@/hooks/useCounselingList';
+import type { CounselingHistory } from '@/types/api';
 import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -6,12 +20,6 @@ import { AppSidebar } from '@/components/layout/AppSidebar';
 import { CommonHeader } from '@/components/layout/CommonHeader';
 import { Input } from '@/components/ui/forms/input';
 import { Button } from '@/components/ui/interactive/button';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/layout/card';
 import {
   MobileSidebarToggle,
   SidebarProvider,
@@ -289,7 +297,8 @@ interface MyPageProps {}
 export const MyPage = ({}: MyPageProps) => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { userInfo, isLoading, error, refetch } = useUserInfo();
+  const { userInfo, error, refetch, showSkeleton, isBackgroundFetching } =
+    useUserInfo();
 
   // 재시도 핸들러
   const handleRetry = useCallback(() => {
@@ -311,23 +320,52 @@ export const MyPage = ({}: MyPageProps) => {
 
           {/* 페이지 제목 */}
           <div className='px-6 py-4'>
-            <h1 className='text-3xl font-bold text-foreground'>마이페이지</h1>
-            <p className='text-muted-foreground mt-2'>
-              내 정보를 확인하고 관리할 수 있습니다.
-            </p>
+            <div className='flex items-center justify-between'>
+              <div>
+                <h1 className='text-3xl font-bold text-foreground'>
+                  마이페이지
+                </h1>
+                <p className='text-muted-foreground mt-2'>
+                  내 정보를 확인하고 관리할 수 있습니다.
+                </p>
+              </div>
+              {/* Context7 모범 사례: 백그라운드 갱신 상태 표시 */}
+              {isBackgroundFetching && (
+                <div className='flex items-center space-x-2'>
+                  <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-primary' />
+                  <span className='text-sm text-muted-foreground'>
+                    업데이트 중...
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* 메인 콘텐츠 */}
           <main className='flex-1 overflow-auto'>
-            {isLoading && !userInfo && <MyPageLoading />}
-            {error && !userInfo && (
-              <MyPageError
-                error={error}
-                onRetry={handleRetry}
-                onBack={() => navigate('/dashboard')}
-              />
-            )}
-            {userInfo && <MyPageForm userInfo={userInfo} />}
+            <Tabs defaultValue='info' className='px-6 py-4'>
+              <TabsList>
+                <TabsTrigger value='info'>내 정보</TabsTrigger>
+                <TabsTrigger value='counseling'>상담 내역</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value='info'>
+                {/* Progressive Loading: 초기 로딩 시 스켈레톤 표시 */}
+                {showSkeleton && <MyPageLoading />}
+                {error && !userInfo && (
+                  <MyPageError
+                    error={error}
+                    onRetry={handleRetry}
+                    onBack={() => navigate('/dashboard')}
+                  />
+                )}
+                {userInfo && <MyPageForm userInfo={userInfo} />}
+              </TabsContent>
+
+              <TabsContent value='counseling'>
+                <StudentCounselingTab />
+              </TabsContent>
+            </Tabs>
           </main>
         </div>
 
@@ -335,5 +373,75 @@ export const MyPage = ({}: MyPageProps) => {
         <MobileSidebarToggle />
       </div>
     </SidebarProvider>
+  );
+};
+
+// 학생 상담 내역 탭 컴포넌트
+const StudentCounselingTab = () => {
+  const navigate = useNavigate();
+
+  const { items, isLoading: loading, error } = useStudentCounselingList();
+
+  return (
+    <Card className='mt-4'>
+      <CardHeader>
+        <CardTitle>내 상담 내역</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className='grid grid-cols-5 gap-4 text-xs font-medium text-muted-foreground pb-2'>
+          <div>상담사</div>
+          <div>시간</div>
+          <div>유형</div>
+          <div>상태</div>
+          <div className='text-right'>액션</div>
+        </div>
+        {loading ? (
+          <div className='space-y-2'>
+            {Array.from({ length: 6 }).map((_, idx) => (
+              <div
+                key={idx}
+                className='grid grid-cols-5 gap-4 items-center py-3'
+              >
+                <div className='h-4 w-24 bg-muted animate-pulse rounded' />
+                <div className='h-4 w-32 bg-muted animate-pulse rounded' />
+                <div className='h-4 w-24 bg-muted animate-pulse rounded' />
+                <div className='h-4 w-20 bg-muted animate-pulse rounded' />
+                <div className='h-8 w-20 bg-muted animate-pulse rounded' />
+              </div>
+            ))}
+          </div>
+        ) : error ? (
+          <div className='text-center py-10 text-muted-foreground'>{error}</div>
+        ) : !items || items.length === 0 ? (
+          <div className='text-center py-10 text-muted-foreground'>
+            상담 내역이 없습니다
+          </div>
+        ) : (
+          <div className='divide-y divide-border/60'>
+            {items.map(item => (
+              <div
+                key={item.id}
+                className='grid grid-cols-5 gap-4 items-center py-3'
+              >
+                <div className='text-sm text-foreground'>{item.counselor}</div>
+                <div className='text-sm text-muted-foreground'>{item.time}</div>
+                <div className='text-sm'>{item.type}</div>
+                <div className='text-xs px-2 py-1 rounded-full bg-accent/50 text-foreground/80'>
+                  {item.status}
+                </div>
+                <div className='text-right'>
+                  <Button
+                    size='sm'
+                    onClick={() => navigate(`/counseling/${item.id}`)}
+                  >
+                    상세 보기
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
