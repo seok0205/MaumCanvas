@@ -53,19 +53,6 @@ interface UseCounselingReservationReturn {
   refetchCounselors: () => void;
 }
 
-// 타임존 정보를 포함한 DateTime 문자열 생성 함수
-const createDateTimeWithTimezone = (date: Date, time: string): string => {
-  const getTimezoneOffset = (): string => {
-    const offset = new Date().getTimezoneOffset();
-    const hours = Math.floor(Math.abs(offset) / 60);
-    const minutes = Math.abs(offset) % 60;
-    const sign = offset <= 0 ? '+' : '-';
-    return `${sign}${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-  };
-
-  return format(date, 'yyyy-MM-dd') + 'T' + time + ':00' + getTimezoneOffset();
-};
-
 export const useCounselingReservation = (): UseCounselingReservationReturn => {
   const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -129,14 +116,17 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
       if (!selectedDate || !selectedTime) {
         return Promise.resolve([]);
       }
-      // 타임존 정보를 포함한 DateTime 문자열 생성
-      const dateTime = createDateTimeWithTimezone(selectedDate, selectedTime);
+      // Spring Boot LocalDateTime 기본 파싱 형식 (ISO Local DateTime)
+      const dateTime =
+        format(selectedDate, 'yyyy-MM-dd') + 'T' + selectedTime + ':00';
       return counselingService.getAvailableCounselors(dateTime);
     },
     enabled: !!(selectedDate && selectedTime),
     staleTime: COUNSELING_CONSTANTS.STALE_TIME,
     gcTime: COUNSELING_CONSTANTS.GC_TIME,
-  }); // 상담 예약 뮤테이션 - TanStack Query Best Practices 적용
+  });
+
+  // 상담 예약 뮤테이션 - TanStack Query Best Practices 적용
   const reservationMutation = useMutation({
     mutationKey: ['counseling', 'reserve'],
     mutationFn: async (data: CounselingReservationRequest) => {
@@ -255,8 +245,9 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
       return;
     }
 
-    // 타임존 정보를 포함한 DateTime 문자열 생성
-    const dateTime = createDateTimeWithTimezone(selectedDate, selectedTime);
+    // Spring Boot JSON 역직렬화가 기대하는 ISO 8601 형식
+    const dateTime =
+      format(selectedDate, 'yyyy-MM-dd') + 'T' + selectedTime + ':00';
     const reservationData: CounselingReservationRequest = {
       time: dateTime,
       types: selectedCounselingType.title,
@@ -272,7 +263,6 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
       생성된DateTime: dateTime,
       전송데이터: reservationData,
       타임존오프셋: new Date().getTimezoneOffset(),
-      감지된타임존: dateTime.slice(-6), // 마지막 6자리 타임존 정보
     });
 
     reservationMutation.mutate(reservationData);
