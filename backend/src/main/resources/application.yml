@@ -56,4 +56,4 @@ kakao:
 agora:
   app:
     id: ${AGORA_APP_ID}
-    certificate: ${AGORA_APP_CERTIFICATE} 
+    certificate: ${AGORA_APP_CERTIFICATE}
