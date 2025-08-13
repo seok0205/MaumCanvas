@@ -48,6 +48,8 @@ public class CounselingController {
 //        String result=counselingService.createCounseling(email,counselingReserveRequestDto);
         String lockKey="counselor:" + counselingReserveRequestDto.getCounselorId() + ":time:" + counselingReserveRequestDto.getTime().format(FORMATTER);
         String result=counselingService.createCounselingWithLock(email,counselingReserveRequestDto,lockKey);
+        System.out.println("현재 시간은??" + LocalDateTime.now());
+
         return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
     }
 
