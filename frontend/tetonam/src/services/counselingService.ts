@@ -138,6 +138,14 @@ export const counselingService = {
     signal?: AbortSignal
   ): Promise<string> => {
     try {
+      // 실제 API 호출 직전 로깅
+      console.log('📡 counselingService.reserveCounseling 호출:', {
+        API엔드포인트: COUNSELING_ENDPOINTS.RESERVE_COUNSELING,
+        요청데이터: data,
+        헤더정보: { 'Content-Type': 'application/json' },
+        호출시간: new Date().toISOString(),
+      });
+
       const response = await apiClient.post<ApiResponse<string>>(
         COUNSELING_ENDPOINTS.RESERVE_COUNSELING,
         data,
@@ -148,6 +156,13 @@ export const counselingService = {
           ...(signal && { signal }),
         }
       );
+
+      // API 응답 로깅
+      console.log('📩 counselingService.reserveCounseling 응답:', {
+        응답상태: response.status,
+        응답데이터: response.data,
+        수신시간: new Date().toISOString(),
+      });
 
       if (!response.data.isSuccess || !response.data.result) {
         throw new AuthenticationError(

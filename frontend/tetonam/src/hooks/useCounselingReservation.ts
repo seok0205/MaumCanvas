@@ -130,6 +130,13 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
   const reservationMutation = useMutation({
     mutationKey: ['counseling', 'reserve'],
     mutationFn: async (data: CounselingReservationRequest) => {
+      // API 호출 직전 데이터 로깅
+      console.log('🚀 상담예약 API 호출 직전:', {
+        호출시간: new Date().toISOString(),
+        요청데이터: data,
+        타임존: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      });
+
       // 추가 검증 로직
       if (
         !data.counselorId ||
@@ -142,7 +149,15 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
         throw new Error('필수 정보가 누락되었습니다.');
       }
 
-      return counselingService.reserveCounseling(data);
+      const result = await counselingService.reserveCounseling(data);
+
+      // API 응답 로깅
+      console.log('✅ 상담예약 API 응답:', {
+        응답시간: new Date().toISOString(),
+        응답데이터: result,
+      });
+
+      return result;
     },
     onMutate: async variables => {
       // 낙관적 업데이트를 위한 이전 상태 저장
@@ -216,7 +231,7 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
       return;
     }
 
-    // 🚨 중요: 그림 그리기 완료 여부 확인 안내
+    // 중요: 그림 그리기 완료 여부 확인 안내
     const hasDrawing = confirm(
       '상담 예약을 위해서는 그림 그리기를 먼저 완료해야 합니다.\n' +
         '그림 그리기를 완료하셨나요?\n\n' +
@@ -238,6 +253,17 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
       types: selectedCounselingType.title,
       counselorId: selectedCounselor.id, // 백엔드 DTO와 일치하도록 수정
     };
+
+    // 상담예약 확정 시 API 요청 데이터 로깅
+    console.log('상담예약 확정 - API 요청 데이터:', {
+      현재시간: new Date().toISOString(),
+      로컬현재시간: new Date().toLocaleString('ko-KR'),
+      선택된날짜: selectedDate,
+      선택된시간: selectedTime,
+      생성된DateTime: dateTime,
+      전송데이터: reservationData,
+      타임존오프셋: new Date().getTimezoneOffset(),
+    });
 
     reservationMutation.mutate(reservationData);
   }, [
