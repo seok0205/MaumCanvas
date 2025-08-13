@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from 'react';
 
 import { PASSWORD_RESET_ERROR_MESSAGES } from '@/constants/passwordReset';
 import { authService } from '@/services/authService';
+import { AuthenticationError } from '@/types/auth';
 import type { AsyncState } from '@/types/common';
 
 export interface PasswordResetState {
@@ -65,17 +66,31 @@ export const usePasswordReset = () => {
       }
     } catch (error) {
       if (!ignore) {
+        // AuthenticationError의 코드에 따른 구체적인 에러 메시지 처리
+        let errorMessage: string =
+          PASSWORD_RESET_ERROR_MESSAGES.EMAIL_SEND_FAILED;
+
+        if (error instanceof AuthenticationError) {
+          if (error.code === 'USER4002') {
+            errorMessage = PASSWORD_RESET_ERROR_MESSAGES.USER_NOT_FOUND;
+          } else {
+            errorMessage = error.message;
+          }
+        } else if (error instanceof Error) {
+          errorMessage = error.message;
+        }
+
         setState(prev => ({
           ...prev,
           emailStep: {
             data: null,
             isLoading: false,
-            error:
-              error instanceof Error
-                ? error.message
-                : PASSWORD_RESET_ERROR_MESSAGES.EMAIL_SEND_FAILED,
+            error: errorMessage,
           },
         }));
+
+        // 에러를 다시 throw해서 호출하는 쪽에서 catch할 수 있도록 함
+        throw error;
       }
     }
 
