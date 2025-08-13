@@ -202,7 +202,7 @@ export const authService = {
   ): Promise<void> => {
     try {
       const response = await apiClient.post<ApiResponse<string>>(
-        AUTH_CONSTANTS.ENDPOINTS.EMAIL_SEND,
+        AUTH_CONSTANTS.ENDPOINTS.EMAIL_SEND_PASSWORD,
         { email },
         {
           headers: {
@@ -215,7 +215,8 @@ export const authService = {
       if (!response.data.isSuccess) {
         throw new AuthenticationError(
           response.data.code || 'EMAIL_SEND_FAILED',
-          '이메일 발송에 실패했습니다. 다시 시도해주세요.'
+          response.data.message ||
+            '이메일 발송에 실패했습니다. 다시 시도해주세요.'
         );
       }
     } catch (error) {
@@ -246,21 +247,30 @@ export const authService = {
           case 'MAIL5000': // 이메일 전송에 에러가 발생했습니다
             throw new AuthenticationError(
               apiError.code,
-              '이메일 전송 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+              apiError.message ||
+                '이메일 전송 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
             );
           case 'COMMON400': // 잘못된 요청입니다
             throw new AuthenticationError(
               apiError.code,
-              '잘못된 요청입니다. 이메일 주소를 확인해주세요.'
+              apiError.message ||
+                '잘못된 요청입니다. 이메일 주소를 확인해주세요.'
             );
           case 'COMMON401': // 인증이 필요합니다
-            throw new AuthenticationError(apiError.code, '인증이 필요합니다.');
+            throw new AuthenticationError(
+              apiError.code,
+              apiError.message || '인증이 필요합니다.'
+            );
           case 'COMMON403': // 금지된 요청입니다
-            throw new AuthenticationError(apiError.code, '금지된 요청입니다.');
+            throw new AuthenticationError(
+              apiError.code,
+              apiError.message || '금지된 요청입니다.'
+            );
           case 'COMMON500': // 서버 에러
             throw new AuthenticationError(
               apiError.code,
-              '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+              apiError.message ||
+                '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
             );
           default:
             throw new AuthenticationError(
