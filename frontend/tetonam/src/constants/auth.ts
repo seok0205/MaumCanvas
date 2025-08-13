@@ -18,6 +18,8 @@ export const AUTH_CONSTANTS = {
     // NICKNAME_DUPLICATE_CHECK: `${BASE_URL}/api/user/nickname-duplicate-check`,
     EMAIL_SEND: '/api/mail/send',
     // EMAIL_SEND: `${BASE_URL}/api/mail/send`,
+    EMAIL_SEND_PASSWORD: '/api/mail/send-password',
+    // EMAIL_SEND_PASSWORD: `${BASE_URL}/api/mail/send-password`,
     EMAIL_AUTH_CHECK: '/api/mail/auth-check',
     // EMAIL_AUTH_CHECK: `${BASE_URL}/api/mail/auth-check`,
     MY_INFO: '/api/user/my-info',
