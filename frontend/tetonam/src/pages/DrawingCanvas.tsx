@@ -341,17 +341,16 @@ const DrawingCanvas = memo(() => {
                   </div>
                 )}
 
-                {/* 도구모음 (편집 중이고 확대 모드가 아닐 때만 표시, 확대 모드에서는 팔레트 토글로 제어) */}
-                {isEditingActive &&
-                  (!isExpandedMode || (isExpandedMode && isToolbarVisible)) && (
-                    <div className='mb-4 md:mb-6 bg-white rounded-lg border border-gray-200 p-3 md:p-4 relative'>
-                      <DrawingToolbar
-                        sizePopoverRef={sizePopoverRef}
-                        colorPopoverRef={colorPopoverRef}
-                        handleSave={handleSave}
-                      />
-                    </div>
-                  )}
+                {/* 도구모음 (편집 중이고 일반 모드일 때만 표시) */}
+                {isEditingActive && !isExpandedMode && (
+                  <div className='mb-4 md:mb-6 bg-white rounded-lg border border-gray-200 p-3 md:p-4 relative'>
+                    <DrawingToolbar
+                      sizePopoverRef={sizePopoverRef}
+                      colorPopoverRef={colorPopoverRef}
+                      handleSave={handleSave}
+                    />
+                  </div>
+                )}
 
                 {/* 캔버스 영역 */}
                 <div
