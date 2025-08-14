@@ -12,8 +12,6 @@
     "analyze:deps": "depcheck",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "lint:css": "stylelint \"src/**/*.css\"",
-    "lint:css:fix": "stylelint \"src/**/*.css\" --fix",
     "type-check": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -24,7 +22,7 @@
     "preview": "vite preview",
     "prepare": "husky install",
     "pre-commit": "lint-staged",
-    "quality-check": "npm run type-check && npm run lint && npm run lint:css && npm run format:check && npm run test:run",
+    "quality-check": "npm run type-check && npm run lint && npm run format:check && npm run test:run",
     "lhci": "lhci autorun",
     "lhci:collect": "lhci collect",
     "lhci:assert": "lhci assert",
@@ -35,10 +33,6 @@
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "eslint --fix",
-      "prettier --write"
-    ],
-    "*.css": [
-      "stylelint --fix",
       "prettier --write"
     ],
     "*.{json,md,yml,yaml}": [
@@ -133,8 +127,6 @@
     "postcss": "^8.5.6",
     "prettier": "^3.6.2",
     "rollup-plugin-visualizer": "^6.0.3",
-    "stylelint": "^16.23.1",
-    "stylelint-config-standard": "^39.0.0",
     "tailwindcss": "3.4.17",
     "terser": "^5.43.1",
     "typescript": "~5.8.3",

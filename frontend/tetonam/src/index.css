@@ -12,17 +12,15 @@
   unicode-range: U+AC00-D7AF, U+0041-005A, U+0061-007A, U+0030-0039;
 }
 
-.animate-pulse-gentle {
-  animation: pulse-gentle 2s ease-in-out infinite;
-}
-
-/* 현재 미사용 애니메이션 */
-/* .animate-wiggle {
-  animation: wiggle 1s ease-in-out infinite;
-} */
-
 @font-face {
-  font-family: 'Pretendard';
+  font-family: 'Pret  .animate-pulse-gentle {
+    animation: pulse-gentle 2s ease-in-out infinite;
+  }
+
+  /* 현재 미사용 애니메이션 */
+  /* .animate-wiggle {
+    animation: wiggle 1s ease-in-out infinite;
+  } */;
   src: url('/fonts/Pretendard-Medium.woff2') format('woff2');
   font-weight: 500;
   font-style: normal;
@@ -50,13 +48,13 @@
     BlinkMacSystemFont,
     'Apple SD Gothic Neo',
     'Segoe UI',
-    "Roboto",
+    Roboto,
     'Helvetica Neue',
-    "Arial",
+    Arial,
     sans-serif;
   /* Scale fallback fonts to better match Pretendard's perceived size */
   font-size-adjust: 0.52;
-  opacity: 80%;
+  opacity: 0.8;
   transition: opacity 0.3s ease;
 }
 
@@ -69,11 +67,11 @@
     'Noto Sans KR',
     'Malgun Gothic',
     'Segoe UI',
-    "Roboto",
+    Roboto,
     'Helvetica Neue',
-    "Arial",
+    Arial,
     sans-serif;
-  opacity: 100%;
+  opacity: 1;
 }
 
 /* 폰트 로딩 실패 시 대체 폰트 */
@@ -86,9 +84,9 @@
     BlinkMacSystemFont,
     'Apple SD Gothic Neo',
     'Segoe UI',
-    "Roboto",
+    Roboto,
     'Helvetica Neue',
-    "Arial",
+    Arial,
     sans-serif;
 }
 
@@ -141,40 +139,40 @@
     /* 그라디언트 정의 */
     --gradient-warm: linear-gradient(
       135deg,
-      /* hsl(160 84% 39% / 0.1), */ hsl(45deg 93% 47% / 10%),
-      hsl(25deg 95% 53% / 10%)
+      /* hsl(160 84% 39% / 0.1), */ hsl(45 93% 47% / 0.1),
+      hsl(25 95% 53% / 0.1)
     );
     --gradient-primary: linear-gradient(
       135deg,
-      hsl(160deg 84% 39% / 20%),
-      hsl(199deg 89% 48% / 20%)
+      hsl(160 84% 39% / 0.2),
+      hsl(199 89% 48% / 0.2)
     );
     --gradient-subtle: linear-gradient(
       135deg,
-      hsl(220deg 14% 96%),
-      hsl(0deg 0% 100%)
+      hsl(220 14% 96%),
+      hsl(0 0% 100%)
     );
     --gradient-mint: linear-gradient(
       135deg,
-      hsl(160deg 84% 39%),
-      hsl(160deg 84% 45%)
+      hsl(160 84% 39%),
+      hsl(160 84% 45%)
     );
     --gradient-yellow: linear-gradient(
       135deg,
-      hsl(45deg 93% 47%),
-      hsl(45deg 93% 55%)
+      hsl(45 93% 47%),
+      hsl(45 93% 55%)
     );
     --gradient-blue: linear-gradient(
       135deg,
-      hsl(199deg 89% 48%),
-      hsl(199deg 89% 55%)
+      hsl(199 89% 48%),
+      hsl(199 89% 55%)
     );
 
     /* 그림자 시스템 */
-    --shadow-soft: 0 2px 8px hsl(220deg 10% 15% / 8%);
-    --shadow-medium: 0 4px 16px hsl(220deg 10% 15% / 12%);
-    --shadow-card: 0 2px 12px hsl(220deg 10% 15% / 6%);
-    --shadow-hover: 0 8px 24px hsl(220deg 10% 15% / 15%);
+    --shadow-soft: 0 2px 8px hsl(220 10% 15% / 0.08);
+    --shadow-medium: 0 4px 16px hsl(220 10% 15% / 0.12);
+    --shadow-card: 0 2px 12px hsl(220 10% 15% / 0.06);
+    --shadow-hover: 0 8px 24px hsl(220 10% 15% / 0.15);
 
     /* 전환 효과 */
     --transition-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -197,10 +195,10 @@
     /* 다크모드 따뜻한 배경 그라디언트 */
     --warm-background-gradient: linear-gradient(
       135deg,
-      hsl(45deg 25% 9%) 0%,
-      hsl(40deg 20% 8%) 30%,
-      hsl(35deg 30% 10%) 60%,
-      hsl(30deg 25% 8%) 100%
+      hsl(45, 25%, 9%) 0%,
+      hsl(40, 20%, 8%) 30%,
+      hsl(35, 30%, 10%) 60%,
+      hsl(30, 25%, 8%) 100%
     );
     --card: 220 10% 12%; /* 어두운 카드 */
     --card-foreground: 0 0% 98%;
@@ -242,41 +240,41 @@
     /* 다크 모드 그라디언트 */
     --gradient-warm: linear-gradient(
       135deg,
-      hsl(160deg 84% 45% / 15%),
-      hsl(45deg 93% 55% / 15%),
-      hsl(25deg 95% 60% / 15%)
+      hsl(160 84% 45% / 0.15),
+      hsl(45 93% 55% / 0.15),
+      hsl(25 95% 60% / 0.15)
     );
     --gradient-primary: linear-gradient(
       135deg,
-      hsl(160deg 84% 45% / 25%),
-      hsl(199deg 89% 55% / 25%)
+      hsl(160 84% 45% / 0.25),
+      hsl(199 89% 55% / 0.25)
     );
     --gradient-subtle: linear-gradient(
       135deg,
-      hsl(220deg 10% 15%),
-      hsl(220deg 10% 12%)
+      hsl(220 10% 15%),
+      hsl(220 10% 12%)
     );
     --gradient-mint: linear-gradient(
       135deg,
-      hsl(160deg 84% 45%),
-      hsl(160deg 84% 50%)
+      hsl(160 84% 45%),
+      hsl(160 84% 50%)
     );
     --gradient-yellow: linear-gradient(
       135deg,
-      hsl(45deg 93% 55%),
-      hsl(45deg 93% 62%)
+      hsl(45 93% 55%),
+      hsl(45 93% 62%)
     );
     --gradient-blue: linear-gradient(
       135deg,
-      hsl(199deg 89% 55%),
-      hsl(199deg 89% 62%)
+      hsl(199 89% 55%),
+      hsl(199 89% 62%)
     );
 
     /* 다크 모드 그림자 */
-    --shadow-soft: 0 2px 8px hsl(0deg 0% 0% / 30%);
-    --shadow-medium: 0 4px 16px hsl(0deg 0% 0% / 40%);
-    --shadow-card: 0 2px 12px hsl(0deg 0% 0% / 25%);
-    --shadow-hover: 0 8px 24px hsl(0deg 0% 0% / 50%);
+    --shadow-soft: 0 2px 8px hsl(0 0% 0% / 0.3);
+    --shadow-medium: 0 4px 16px hsl(0 0% 0% / 0.4);
+    --shadow-card: 0 2px 12px hsl(0 0% 0% / 0.25);
+    --shadow-hover: 0 8px 24px hsl(0 0% 0% / 0.5);
 
     /* 다크 모드 사이드바 */
     --sidebar-background: 220 10% 12%;
@@ -309,9 +307,9 @@
       'Noto Sans KR',
       'Malgun Gothic',
       'Segoe UI',
-      "Roboto",
+      Roboto,
       'Helvetica Neue',
-      "Arial",
+      Arial,
       sans-serif;
   }
 
@@ -402,7 +400,7 @@
     animation: pulse-gentle 2s ease-in-out infinite;
   }
 
-  /* .animate-wiggle {
+  .animate-wiggle {
     animation: wiggle 1s ease-in-out infinite;
   } */
 }
@@ -483,21 +481,21 @@
 @keyframes scale-gentle {
   0% {
     transform: scale(0.95);
-    opacity: 0%;
+    opacity: 0;
   }
   100% {
     transform: scale(1);
-    opacity: 100%;
+    opacity: 1;
   }
 }
 
 @keyframes pulse-gentle {
   0%,
   100% {
-    opacity: 100%;
+    opacity: 1;
   }
   50% {
-    opacity: 80%;
+    opacity: 0.8;
   }
 }
 
@@ -515,15 +513,15 @@
 @keyframes save-scale-in-keyframes {
   0% {
     transform: scale(0.9);
-    opacity: 0%;
+    opacity: 0;
   }
   60% {
     transform: scale(1.02);
-    opacity: 100%;
+    opacity: 1;
   }
   100% {
     transform: scale(1);
-    opacity: 100%;
+    opacity: 1;
   }
 }
 
@@ -547,17 +545,17 @@
 }
 
 .image-preloader--loading {
-  opacity: 0%;
+  opacity: 0;
   filter: blur(8px);
 }
 
 .image-preloader--loaded {
-  opacity: 100%;
+  opacity: 1;
   filter: blur(0);
 }
 
 .image-preloader--error {
-  opacity: 50%;
+  opacity: 0.5;
   filter: grayscale(1);
 }
 
