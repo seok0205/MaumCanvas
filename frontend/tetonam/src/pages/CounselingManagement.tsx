@@ -21,12 +21,23 @@ import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 
 const RowSkeleton = () => (
-  <div className='grid grid-cols-5 gap-4 items-center py-3'>
-    <Skeleton className='h-4 w-24' />
-    <Skeleton className='h-4 w-32' />
-    <Skeleton className='h-4 w-24' />
-    <Skeleton className='h-4 w-20' />
-    <Skeleton className='h-8 w-20' />
+  <div className='p-4 bg-card border rounded-lg md:grid md:grid-cols-4 md:gap-4 md:items-center md:p-3 md:bg-transparent md:border-0 md:rounded-none space-y-2 md:space-y-0'>
+    <div className='flex items-center gap-2 md:block'>
+      <span className='text-xs text-muted-foreground md:hidden'>학생:</span>
+      <Skeleton className='h-4 w-24' />
+    </div>
+    <div className='flex items-center gap-2 md:block'>
+      <span className='text-xs text-muted-foreground md:hidden'>시간:</span>
+      <Skeleton className='h-4 w-32' />
+    </div>
+    <div className='flex items-center gap-2 md:block'>
+      <span className='text-xs text-muted-foreground md:hidden'>유형:</span>
+      <Skeleton className='h-4 w-24' />
+    </div>
+    <div className='flex items-center gap-2 md:block'>
+      <span className='text-xs text-muted-foreground md:hidden'>상태:</span>
+      <Skeleton className='h-4 w-20' />
+    </div>
   </div>
 );
 
@@ -47,7 +58,7 @@ export const CounselingManagement = () => {
   const content = useMemo(() => {
     if (loading) {
       return (
-        <div className='space-y-2'>
+        <div className='space-y-3'>
           {Array.from({ length: 6 }).map((_, idx) => (
             <RowSkeleton key={idx} />
           ))}
@@ -67,24 +78,47 @@ export const CounselingManagement = () => {
       );
     }
     return (
-      <div className='divide-y divide-border/60'>
+      <div className='space-y-3 md:space-y-0 md:divide-y md:divide-border/60'>
         {items.map(item => (
           <div
             key={item.id}
-            className='grid grid-cols-5 gap-4 items-center py-3'
+            className='p-4 bg-card border rounded-lg md:grid md:grid-cols-4 md:gap-4 md:items-center md:p-3 md:bg-transparent md:border-0 md:rounded-none space-y-3 md:space-y-0'
           >
-            <div className='text-sm text-foreground'>{item.counselor}</div>
-            <div className='text-sm text-muted-foreground'>
-              {formatDateTime(item.time)}
+            <div className='flex items-center gap-2 md:block'>
+              <span className='text-xs text-muted-foreground md:hidden font-medium'>
+                학생:
+              </span>
+              <div className='text-sm text-foreground font-medium md:font-normal'>
+                {item.counselor}
+              </div>
             </div>
-            <div className='text-sm'>{item.type}</div>
-            <div className='text-xs px-2 py-1 rounded-full bg-accent/50 text-foreground/80'>
-              {item.status}
+            <div className='flex items-center gap-2 md:block'>
+                <span className='text-xs text-muted-foreground md:hidden font-medium'>
+                일시:
+                </span>
+              <div className='text-sm text-muted-foreground'>
+                {formatDateTime(item.time)}
+              </div>
             </div>
-            <div className='text-right'>
+            <div className='flex items-center gap-2 md:block'>
+              <span className='text-xs text-muted-foreground md:hidden font-medium'>
+                유형:
+              </span>
+              <div className='text-sm'>{item.type}</div>
+            </div>
+            <div className='flex items-center justify-between md:block'>
+              <div className='flex items-center gap-2'>
+                <span className='text-xs text-muted-foreground md:hidden font-medium'>
+                  상태:
+                </span>
+                <div className='text-xs px-3 py-1 rounded-full bg-accent/50 text-foreground/80 inline-block'>
+                  {item.status}
+                </div>
+              </div>
               <Button
                 size='sm'
                 onClick={() => navigate(`/counseling/${item.id}`)}
+                className='ml-auto md:ml-0 md:mt-2'
               >
                 상세 보기
               </Button>
@@ -111,12 +145,12 @@ export const CounselingManagement = () => {
                 <CardTitle>전체 상담 내역</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className='grid grid-cols-5 gap-4 text-xs font-medium text-muted-foreground pb-2'>
+                {/* Desktop Header - Hidden on mobile */}
+                <div className='hidden md:grid md:grid-cols-4 gap-4 text-xs font-medium text-muted-foreground pb-2'>
                   <div>학생</div>
                   <div>시간</div>
                   <div>유형</div>
                   <div>상태</div>
-                  <div className='text-right'>액션</div>
                 </div>
                 {content}
               </CardContent>
