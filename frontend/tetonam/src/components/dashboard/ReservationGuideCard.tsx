@@ -85,7 +85,7 @@ export const ReservationGuideCard = ({
           <li className='flex items-start gap-2'>
             <span className='text-blue-600 mt-0.5 flex-shrink-0'>•</span>
             <span>
-              예약시간 이후에는 입장이 불가하오니 원활한 상담 진행을 위해 예약
+              원활한 상담 진행을 위해 예약
               시간 5분 전까지 입장 부탁드립니다.
             </span>
           </li>
