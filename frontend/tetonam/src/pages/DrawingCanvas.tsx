@@ -42,6 +42,7 @@ const DrawingCanvas = memo(() => {
   const reActivateButtonRef = useRef<HTMLButtonElement>(null);
   const sizePopoverRef = useRef<HTMLDivElement>(null);
   const colorPopoverRef = useRef<HTMLDivElement>(null);
+  const paletteOverlayRef = useRef<HTMLDivElement>(null);
 
   // 스토어에서 상태 가져오기
   const {
@@ -196,6 +197,38 @@ const DrawingCanvas = memo(() => {
     hasUnsavedChanges(),
     '저장되지 않은 그림이 있습니다. 정말 페이지를 떠나시겠습니까?'
   );
+
+  // 팔레트 오버레이 외부 클릭 및 ESC 키로 닫기
+  useEffect(() => {
+    if (!isExpandedMode || !isEditingActive || !isToolbarVisible) return;
+
+    const handleOutsideClick = (event: MouseEvent | TouchEvent) => {
+      if (
+        paletteOverlayRef.current &&
+        !paletteOverlayRef.current.contains(event.target as Node)
+      ) {
+        toggleToolbar();
+      }
+    };
+
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        toggleToolbar();
+      }
+    };
+
+    // 이벤트 리스너 추가
+    document.addEventListener('mousedown', handleOutsideClick);
+    document.addEventListener('touchstart', handleOutsideClick);
+    document.addEventListener('keydown', handleEscapeKey);
+
+    // 정리 함수
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('touchstart', handleOutsideClick);
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [isExpandedMode, isEditingActive, isToolbarVisible, toggleToolbar]);
 
   // 기존 이미지 + 압축 라인 복원 (초기 마운트)
   useEffect(() => {
@@ -361,13 +394,30 @@ const DrawingCanvas = memo(() => {
                 >
                   {/* 확대 모드 전용 팔레트 UI (토글로 제어) */}
                   {isExpandedMode && isEditingActive && isToolbarVisible && (
-                    <div className='absolute top-4 left-4 z-20'>
+                    <div 
+                      ref={paletteOverlayRef}
+                      className='absolute top-4 left-4 z-20'
+                    >
                       <div className='bg-white/90 backdrop-blur-sm rounded-lg border border-gray-200 p-3 shadow-lg'>
+                        <div className='flex items-center justify-between mb-2'>
+                          <span className='text-sm font-medium text-gray-700'>그리기 도구</span>
+                          <button
+                            onClick={toggleToolbar}
+                            className='p-1 hover:bg-gray-100 rounded text-gray-500 hover:text-gray-700 transition-colors'
+                            title='팔레트 닫기 (ESC)'
+                            aria-label='팔레트 닫기'
+                          >
+                            ✕
+                          </button>
+                        </div>
                         <DrawingToolbar
                           sizePopoverRef={sizePopoverRef}
                           colorPopoverRef={colorPopoverRef}
                           handleSave={handleSave}
                         />
+                        <div className='mt-2 text-xs text-gray-500 text-center'>
+                          ESC 키 또는 외부 클릭으로 닫기
+                        </div>
                       </div>
                     </div>
                   )}
