@@ -1,4 +1,6 @@
 import { Button } from '@/components/ui/interactive/button';
+import { RemoteUserStatusOverlay } from '@/components/video/RemoteUserStatusOverlay';
+import { WaitingForConnection } from '@/components/video/WaitingForConnection';
 import { useAgoraClient } from '@/hooks/useAgoraClient';
 import { agoraService } from '@/services/agoraService';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -25,12 +27,18 @@ export const VideoCall = ({ appointmentId, onEnd }: VideoCallProps) => {
     localVideoTrack,
     remoteUsers,
     error,
+    waitingForUsers,
+    networkQuality,
     join,
     leave,
     toggleAudio,
     toggleVideo,
   } = useAgoraClient();
   const { user } = useAuthStore();
+
+  // 상대방 정보 상태 관리
+  const remoteUser = Array.from(remoteUsers.values())[0];
+  const hasRemoteUsers = remoteUsers.size > 0;
 
   useEffect(() => {
     let cancelled = false;
@@ -103,11 +111,10 @@ export const VideoCall = ({ appointmentId, onEnd }: VideoCallProps) => {
   }, [localVideoTrack]);
 
   useEffect(() => {
-    const remoteUser = Array.from(remoteUsers.values())[0];
     if (remoteUser?.videoTrack && remoteVideoRef.current) {
       remoteUser.videoTrack.play(remoteVideoRef.current);
     }
-  }, [remoteUsers]);
+  }, [remoteUser]);
 
   const handleEndCall = async () => {
     try {
@@ -139,12 +146,77 @@ export const VideoCall = ({ appointmentId, onEnd }: VideoCallProps) => {
 
   return (
     <div className='relative h-screen bg-black'>
-      <div ref={remoteVideoRef} className='w-full h-full' />
-      <div
-        ref={localVideoRef}
-        className='absolute top-4 right-4 w-48 h-36 bg-gray-800 rounded-lg shadow-lg overflow-hidden'
-      />
+      {/* 원격 비디오 영역 */}
+      <div className='relative w-full h-full'>
+        <div ref={remoteVideoRef} className='w-full h-full' />
 
+        {/* 상대방 상태 오버레이 */}
+        {hasRemoteUsers && remoteUser && remoteUser.userName ? (
+          <RemoteUserStatusOverlay
+            hasVideo={remoteUser.hasVideo ?? false}
+            hasAudio={remoteUser.hasAudio ?? false}
+            userName={remoteUser.userName}
+            isVisible={hasRemoteUsers}
+          />
+        ) : null}
+
+        {/* 상대방 음소거 상태 표시 (우상단) */}
+        {hasRemoteUsers && !remoteUser?.hasAudio && (
+          <div className='absolute top-4 left-4 flex items-center space-x-2 px-3 py-2 bg-red-600/90 rounded-full backdrop-blur-sm'>
+            <MicOff className='w-4 h-4 text-white' />
+            <span className='text-white text-sm font-medium'>
+              상대방 음소거
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* 로컬 비디오 (내 화면) - 우상단 */}
+      <div className='absolute top-4 right-4 w-48 h-36 bg-gray-800 rounded-lg shadow-xl overflow-hidden border-2 border-white/20'>
+        <div ref={localVideoRef} className='w-full h-full' />
+
+        {/* 내 비디오가 꺼져있을 때 */}
+        {!isVideoOn && (
+          <div className='absolute inset-0 flex flex-col items-center justify-center bg-gray-800'>
+            <VideoOff className='w-8 h-8 text-gray-400 mb-2' />
+            <span className='text-gray-400 text-xs'>내 카메라 꺼짐</span>
+          </div>
+        )}
+
+        {/* 내 음소거 상태 표시 */}
+        {!isAudioOn && (
+          <div className='absolute bottom-2 left-2 w-6 h-6 bg-red-600 rounded-full flex items-center justify-center'>
+            <MicOff className='w-3 h-3 text-white' />
+          </div>
+        )}
+      </div>
+
+      {/* 연결 대기 상태 오버레이 */}
+      {typeof networkQuality === 'number' ? (
+        <WaitingForConnection
+          isConnecting={isConnecting}
+          isConnected={isConnected}
+          hasRemoteUsers={hasRemoteUsers}
+          networkQuality={networkQuality}
+        />
+      ) : (
+        <WaitingForConnection
+          isConnecting={isConnecting}
+          isConnected={isConnected}
+          hasRemoteUsers={hasRemoteUsers}
+        />
+      )}
+
+      {/* 상대방 대기 중일 때 추가 안내 */}
+      {isConnected && waitingForUsers && !hasRemoteUsers && (
+        <div className='absolute bottom-32 left-1/2 -translate-x-1/2 px-4 py-2 bg-blue-600/80 rounded-full backdrop-blur-sm'>
+          <span className='text-white text-sm font-medium'>
+            💬 상대방을 기다리는 중...
+          </span>
+        </div>
+      )}
+
+      {/* 연결 중 로딩 (기존 로직 유지) */}
       {isConnecting && (
         <div className='absolute inset-0 flex items-center justify-center bg-black/50'>
           <Loader2 className='w-8 h-8 text-white animate-spin' />
@@ -152,34 +224,43 @@ export const VideoCall = ({ appointmentId, onEnd }: VideoCallProps) => {
         </div>
       )}
 
+      {/* 컨트롤 버튼들 */}
       {isConnected && (
-        <div className='absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 p-4 bg-black/50 rounded-full'>
+        <div className='absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 p-4 bg-black/70 rounded-full backdrop-blur-sm'>
           <Button
             size='icon'
             variant={isAudioOn ? 'secondary' : 'destructive'}
             onClick={handleToggleAudio}
-            className='rounded-full'
+            className='rounded-full w-12 h-12'
             aria-label={isAudioOn ? '마이크 끄기' : '마이크 켜기'}
           >
-            {isAudioOn ? <Mic /> : <MicOff />}
+            {isAudioOn ? (
+              <Mic className='w-5 h-5' />
+            ) : (
+              <MicOff className='w-5 h-5' />
+            )}
           </Button>
           <Button
             size='icon'
             variant={isVideoOn ? 'secondary' : 'destructive'}
             onClick={handleToggleVideo}
-            className='rounded-full'
+            className='rounded-full w-12 h-12'
             aria-label={isVideoOn ? '카메라 끄기' : '카메라 켜기'}
           >
-            {isVideoOn ? <Video /> : <VideoOff />}
+            {isVideoOn ? (
+              <Video className='w-5 h-5' />
+            ) : (
+              <VideoOff className='w-5 h-5' />
+            )}
           </Button>
           <Button
             size='icon'
             variant='destructive'
             onClick={handleEndCall}
-            className='rounded-full'
+            className='rounded-full w-12 h-12 bg-red-600 hover:bg-red-700'
             aria-label='통화 종료'
           >
-            <PhoneOff />
+            <PhoneOff className='w-5 h-5' />
           </Button>
         </div>
       )}

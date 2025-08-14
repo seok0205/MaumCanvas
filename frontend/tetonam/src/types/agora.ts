@@ -11,13 +11,24 @@ export interface AgoraConfig {
   uid: string | number | null;
 }
 
+export interface RemoteUserState {
+  uid: string | number;
+  hasAudio: boolean;
+  hasVideo: boolean;
+  userName?: string;
+  joinedAt?: Date;
+  connectionQuality?: number;
+}
+
 export interface VideoCallState {
   isConnecting: boolean;
   isConnected: boolean;
   localAudioTrack: ILocalAudioTrack | null;
   localVideoTrack: ILocalVideoTrack | null;
-  remoteUsers: Map<string, IAgoraRTCRemoteUser>;
+  remoteUsers: Map<string, IAgoraRTCRemoteUser & RemoteUserState>;
   error: string | null;
+  networkQuality?: number;
+  waitingForUsers: boolean;
 }
 
 export interface TokenResponse {
