@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.security.SecureRandom;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -31,11 +32,13 @@ public class MailSendService {
      */
     //임의의 6자리 양수를 반환합니다.
     public void makeRandomNumber() {
-        Random r = new Random();
-        String randomNumber = "";
-        for (int i = 0; i < 6; i++) {
-            randomNumber += Integer.toString(r.nextInt(10));
-        }
+//        Random r = new Random();
+        SecureRandom secureRandom = new SecureRandom();
+//        int verificationCode =
+        String randomNumber = (secureRandom.nextInt(900000) + 100000)+"";
+//        for (int i = 0; i < 6; i++) {
+//            randomNumber += Integer.toString(r.nextInt(10));
+//        }
         authNumber = randomNumber;
     }
 

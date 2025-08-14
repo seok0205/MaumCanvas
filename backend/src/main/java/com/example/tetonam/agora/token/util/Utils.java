@@ -14,8 +14,10 @@ import java.util.zip.Inflater;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 
+@Slf4j
 public class Utils {
     public static final long HMAC_SHA256_LENGTH = 32;
     public static final int VERSION_LENGTH = 3;
@@ -94,7 +96,7 @@ public class Utils {
             output = bos.toByteArray();
         } catch (Exception e) {
             output = data;
-            e.printStackTrace();
+            log.error("아고라 토큰발급 에러");
         } finally {
             deflater.end();
         }
@@ -115,7 +117,7 @@ public class Utils {
                 bos.write(buf, 0, len);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("아고라 토큰발급 에러");
         } finally {
             inflater.end();
         }

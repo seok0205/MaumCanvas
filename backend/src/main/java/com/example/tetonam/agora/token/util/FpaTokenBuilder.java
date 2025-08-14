@@ -1,5 +1,8 @@
 package com.example.tetonam.agora.token.util;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class FpaTokenBuilder {
     /**
      * Build the FPA token.
@@ -20,7 +23,7 @@ public class FpaTokenBuilder {
         try {
             return accessToken.build();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("아고라 토큰발급 에러");
             return "";
         }
     }

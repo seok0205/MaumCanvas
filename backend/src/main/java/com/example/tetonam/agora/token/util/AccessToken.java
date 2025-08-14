@@ -1,5 +1,7 @@
 package com.example.tetonam.agora.token.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.TreeMap;
@@ -7,6 +9,7 @@ import java.util.TreeMap;
 import static com.example.tetonam.agora.token.util.Utils.crc32;
 
 
+@Slf4j
 public class AccessToken {
     public enum Privileges {
         kJoinChannel(1),
@@ -85,7 +88,7 @@ public class AccessToken {
             baos.write(uid.getBytes());
             baos.write(message);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("아고라 토큰 발급 에러");
         }
         return Utils.hmacSign(appCertificate, baos.toByteArray());
     }
@@ -105,7 +108,7 @@ public class AccessToken {
             messageRawContent = packContent.rawMessage;
             Utils.unpack(messageRawContent, message);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("아고라 토큰 발급 에러");
             return false;
         }
         
