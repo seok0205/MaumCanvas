@@ -97,5 +97,8 @@ sonar {
     // Gradle 5.x 호환/암묵 컴파일 방지
     property "sonar.gradle.skipCompile", "true"
     // sonar.host.url, sonar.token(login)은 Jenkins에서 주
+
+    property "sonar.coverage.exclusions",
+      "**/*Application.java, **/*Config.java, **/dto/**, **/vo/**, **/exception/**, **/generated/**"
   }
 }
