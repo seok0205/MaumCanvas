@@ -1,5 +1,5 @@
 import type Konva from 'konva';
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useEffect, useMemo } from 'react';
 import { Layer, Line, Rect, Stage } from 'react-konva';
 
 import { Button } from '@/components/ui/interactive/button';
@@ -52,6 +52,20 @@ const DrawingStage = memo<DrawingStageProps>(
     isToolbarVisible = true,
   }) => {
     const reduceMotion = useReducedMotion();
+
+    // Konva 성능 최적화 설정 (Konva.js 공식 문서 기반)
+    useEffect(() => {
+      if (typeof window !== 'undefined') {
+        // 동적으로 Konva 접근
+        const konva = (window as any).Konva;
+        if (konva) {
+          // 드래그 중에도 모든 이벤트 허용 (멀티터치 감지를 위해 필요)
+          konva.hitOnDragEnabled = true;
+          // 포인터 이벤트 캡처 최적화
+          konva.capturePointerEventsEnabled = true;
+        }
+      }
+    }, []);
 
     // 메모이즈된 핸들러
     const handleReactivate = useCallback(() => {
@@ -245,16 +259,19 @@ const DrawingStage = memo<DrawingStageProps>(
             }
             return false;
           }}
+          onTouchMove={(e: any) => {
+            // 멀티터치 감지 및 그리기 중단 (성능 최적화)
+            if (e?.evt?.touches && e.evt.touches.length > 1) {
+              e.evt.preventDefault();
+              e.evt.stopPropagation();
+              console.log('Multi-touch detected on Stage, preventing default behavior');
+            }
+          }}
           className={`transition-all duration-200 will-change-transform transform-gpu ${
             isEditingActive
               ? 'cursor-crosshair'
               : 'cursor-not-allowed opacity-60'
           } bg-white rounded-xl ring-1 ring-inset ring-gray-200/50`}
-          style={{
-            // 추가 성능 최적화
-            contain: 'strict',
-            isolation: 'isolate',
-          }}
         >
           {/* 배경 레이어 (내보내기 시 흰색 배경 포함) */}
           <Layer listening={false}>

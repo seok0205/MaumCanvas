@@ -26,10 +26,6 @@ const PenSettings = memo(() => {
     setPenSettings({ touchRejection: !penSettings.touchRejection });
   };
 
-  const handleTiltSensitivityChange = () => {
-    setPenSettings({ tiltSensitivity: !penSettings.tiltSensitivity });
-  };
-
   const handlePressureMultiplierChange = (direction: 'up' | 'down') => {
     const step = 0.1;
     const current = penSettings.pressureMultiplier;
@@ -157,39 +153,13 @@ const PenSettings = memo(() => {
             </p>
           </div>
 
-          {/* 기울기 감지 */}
-          <div className='space-y-2'>
-            <div className='flex items-center justify-between'>
-              <div className='flex items-center gap-2'>
-                <div className='w-4 h-4 bg-purple-500 rounded transform rotate-12' />
-                <span className='text-sm font-medium text-gray-700'>
-                  기울기 감지
-                </span>
-              </div>
-              <button
-                onClick={handleTiltSensitivityChange}
-                className={`w-12 h-6 rounded-full transition-colors ${
-                  penSettings.tiltSensitivity ? 'bg-blue-600' : 'bg-gray-300'
-                }`}
-              >
-                <div
-                  className={`w-5 h-5 bg-white rounded-full transition-transform ${
-                    penSettings.tiltSensitivity
-                      ? 'translate-x-6'
-                      : 'translate-x-0.5'
-                  }`}
-                />
-              </button>
-            </div>
-            <p className='text-xs text-gray-500 ml-6'>
-              펜 기울기에 따른 효과 (실험적 기능)
-            </p>
-          </div>
-
           {/* 안내 메시지 */}
           <div className='mt-4 pt-3 border-t border-gray-200'>
             <p className='text-xs text-gray-500 text-center'>
               ✨ 터치펜이나 스타일러스로 그리기에 최적화된 설정입니다
+            </p>
+            <p className='text-xs text-gray-400 text-center mt-1'>
+              멀티터치 감지 시 그리기가 자동으로 중단됩니다
             </p>
           </div>
         </div>
