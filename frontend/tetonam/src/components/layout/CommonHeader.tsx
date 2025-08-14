@@ -4,7 +4,7 @@ import { getUserRoleLabel } from '@/constants/userRoles';
 import { useAuthActions } from '@/hooks/useAuthActions';
 import { useUserHomeInfo } from '@/hooks/useUserHomeInfo';
 import { getPrimaryRole } from '@/utils/userRoleMapping';
-import { AlertCircle, ArrowLeft, Heart, LogOut, User, X } from 'lucide-react';
+import { AlertCircle, ArrowLeft, LogOut, User, X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -116,7 +116,13 @@ export const CommonHeader = ({
             )}
 
             <div className='flex items-center space-x-2'>
-              <Heart className='h-5 w-5 text-primary' />
+              <div className='bg-gray-100/50 dark:bg-gray-800/30 p-1.5 rounded-lg'>
+                <img
+                  src='/logo.png'
+                  alt='마음 캔버스 로고'
+                  className='h-5 w-5 object-contain'
+                />
+              </div>
               <span className='font-bold text-lg text-foreground'>
                 {title || '마음 캔버스'}
               </span>

@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/interactive/button';
 import { UserRoleCard } from '@/components/ui/UserRoleCard';
 import type { UserRole } from '@/constants/userRoles';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { GraduationCap, Heart, Loader2 } from 'lucide-react';
+import { GraduationCap, Loader2, UserCheck } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,7 +18,7 @@ const USER_TYPES = [
     type: 'COUNSELOR' as const,
     title: '상담사로 시작하기',
     description: '전문 그림 상담사',
-    icon: Heart,
+    icon: UserCheck,
   },
 ] as const;
 
@@ -66,7 +66,11 @@ export const UserRoleSelection = () => {
       <div className={styles.content}>
         <div className={styles.header}>
           <div className={styles.titleContainer}>
-            <Heart className='w-8 h-8 text-mint mr-3' />
+            <img
+              src='/logo.png'
+              alt='마음 캔버스 로고'
+              className='w-8 h-8 object-contain mr-3'
+            />
             <h1 className={styles.title}>마음 캔버스</h1>
           </div>
           <p className={styles.subtitle}>

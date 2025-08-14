@@ -35,7 +35,7 @@ export default defineConfig(({ mode }) => ({
     }),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['MaumCanvasLogo.png', 'fonts/*.woff2'],
+      includeAssets: ['logo.png', 'fonts/*.woff2'],
       manifest: {
         name: '마음캔버스 - MaumCanvas',
         short_name: 'MaumCanvas',
@@ -48,14 +48,20 @@ export default defineConfig(({ mode }) => ({
         start_url: '/',
         icons: [
           {
-            src: 'MaumCanvasLogo.png',
+            src: 'logo.png',
             sizes: '192x192',
             type: 'image/png',
           },
           {
-            src: 'MaumCanvasLogo.png',
+            src: 'logo.png',
             sizes: '512x512',
             type: 'image/png',
+          },
+          {
+            src: 'logo.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable',
           },
         ],
       },
