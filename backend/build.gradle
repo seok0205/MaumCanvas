@@ -77,11 +77,10 @@ jacoco {
     toolVersion = "0.8.12"   // 최신권장 (Java 17+ 안정)
 }
 
-tasks.register('jacocoTestCoverageVerification', JacocoCoverageVerification) {
-    dependsOn tasks.test
+jacocoTestCoverageVerification {
+    dependsOn test
     violationRules {
         rule {
-            // 초기엔 낮게 시작 → 점진 상향 (New Code는 Sonar Gate로 관리)
             limit {
                 counter = 'LINE'
                 value = 'COVEREDRATIO'
