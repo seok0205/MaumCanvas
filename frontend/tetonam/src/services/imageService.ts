@@ -206,6 +206,23 @@ export const imageService = {
     return response.data.result ?? '저장되었습니다.';
   },
 
+  // 특정 drawing의 정보를 가져오기 (임시 해결책)
+  // 실제로는 백엔드에서 GET /api/image/drawing/{id} API가 필요함
+  getDrawingInfo: async (
+    drawingId: number | string
+  ): Promise<{ id: number; category: string; imageUrl: string } | null> => {
+    // 현재 백엔드 API 구조상 drawing ID만으로는 이미지 정보를 직접 가져올 수 없음
+    // 이는 백엔드에서 새로운 API가 필요한 상황
+    // 임시로 null을 반환하되, 추후 백엔드 API 추가 시 구현 예정
+
+    console.warn(
+      `DrawingID ${drawingId}에 대한 이미지 정보를 가져올 수 없습니다. ` +
+        '백엔드에서 GET /api/image/drawing/{id} API 구현이 필요합니다.'
+    );
+
+    return null;
+  },
+
   // 파일 유효성 검사
   validateImageFile: (file: File): boolean => {
     // 파일 크기 검사 (10MB 제한)
