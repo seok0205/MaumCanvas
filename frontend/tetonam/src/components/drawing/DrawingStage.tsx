@@ -173,7 +173,8 @@ const DrawingStage = memo<DrawingStageProps>(
               size='sm'
               variant='outline'
               className='bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm'
-              title='전체화면으로 보기'
+              title='전체화면으로 보기 (태블릿 최적화)'
+              aria-label='전체화면으로 보기'
             >
               <Maximize className='w-4 h-4' />
             </Button>
