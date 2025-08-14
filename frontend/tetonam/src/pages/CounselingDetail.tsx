@@ -49,6 +49,9 @@ export const CounselingDetail = () => {
     score: string | number;
   }> | null>(null);
 
+  // 사용자가 상담사인지 확인
+  const isCounselor = user?.roles?.includes('COUNSELOR') ?? false;
+
   useEffect(() => {
     if (!id) return;
     let mounted = true;
@@ -57,16 +60,24 @@ export const CounselingDetail = () => {
       try {
         setLoading(true);
         setError(null);
-        // 병렬 로딩: 상세 + 이미지 목록
-        const [d, imgs, qs] = await Promise.all([
+
+        // 상세 정보와 이미지 목록은 항상 로딩
+        const [d, imgs] = await Promise.all([
           counselingService.getCounselingDetail(id, ac.signal),
           imageService.getCounselingImages(id, ac.signal),
-          getAllQuestionnaireResults(),
         ]);
+
         if (!mounted) return;
         setDetail(d as unknown as CounselingDetailData);
         setImages(imgs);
-        setQuestionnaires(qs as any);
+
+        // 상담사가 아닐 때만 설문 결과 로딩
+        if (!isCounselor) {
+          const qs = await getAllQuestionnaireResults();
+          if (mounted) {
+            setQuestionnaires(qs as any);
+          }
+        }
       } catch (e: any) {
         if (mounted) setError(e?.message || '조회 실패');
       } finally {
@@ -77,7 +88,7 @@ export const CounselingDetail = () => {
       mounted = false;
       ac.abort();
     };
-  }, [id]);
+  }, [id, isCounselor]);
 
   const content = useMemo(() => {
     if (loading) {
@@ -156,26 +167,29 @@ export const CounselingDetail = () => {
           )}
         </div>
 
-        <div className='pt-4'>
-          <div className='text-sm font-medium mb-2'>최근 설문 결과</div>
-          {!questionnaires || questionnaires.length === 0 ? (
-            <div className='text-sm text-muted-foreground'>
-              설문 결과가 없습니다
-            </div>
-          ) : (
-            <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
-              {questionnaires.map((q, idx) => (
-                <div
-                  key={idx}
-                  className='rounded-lg border border-border/50 p-3 text-sm'
-                >
-                  <div className='text-muted-foreground'>{q.category}</div>
-                  <div className='text-foreground font-medium'>{q.score}</div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        {/* 상담사가 아닐 때만 설문 결과 영역 표시 */}
+        {!isCounselor && (
+          <div className='pt-4'>
+            <div className='text-sm font-medium mb-2'>최근 설문 결과</div>
+            {!questionnaires || questionnaires.length === 0 ? (
+              <div className='text-sm text-muted-foreground'>
+                설문 결과가 없습니다
+              </div>
+            ) : (
+              <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
+                {questionnaires.map((q, idx) => (
+                  <div
+                    key={idx}
+                    className='rounded-lg border border-border/50 p-3 text-sm'
+                  >
+                    <div className='text-muted-foreground'>{q.category}</div>
+                    <div className='text-foreground font-medium'>{q.score}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     );
   }, [detail, images, loading, error, navigate]);
