@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 /**
  * 캔버스 확대 모드 관리를 위한 커스텀 훅
  * 안내 영역 접기와 도구모음 팔레트 변환을 담당
+ * React 공식 문서 best practices 준수
  */
 export const useExpandedMode = () => {
   const [isExpandedMode, setIsExpandedMode] = useState(false);

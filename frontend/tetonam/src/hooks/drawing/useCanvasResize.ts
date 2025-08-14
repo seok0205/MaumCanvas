@@ -16,6 +16,7 @@ interface UseCanvasResizeProps {
 
 /**
  * 캔버스 크기 계산 및 리사이즈 처리를 담당하는 커스텀 훅
+ * React 공식 문서 best practices: useLayoutEffect로 시각적 업데이트 처리
  */
 export const useCanvasResize = ({
   containerRef,
@@ -74,7 +75,12 @@ export const useCanvasResize = ({
     });
   }, [containerRef, isEditingActive, setStageSize, isExpandedMode]);
 
-  // 초기 크기 설정
+  // 즉시 크기 재계산 함수 (디바운스 우회)
+  const calculateStageSizeImmediate = useCallback(() => {
+    calculateStageSize();
+  }, [calculateStageSize]);
+
+  // 초기 크기 설정 (React 공식 문서: useLayoutEffect로 시각적 업데이트 처리)
   useLayoutEffect(() => {
     calculateStageSize();
   }, [calculateStageSize, currentStep, isEditingActive, isExpandedMode]);
@@ -115,5 +121,8 @@ export const useCanvasResize = ({
     };
   }, [calculateStageSize]);
 
-  return { calculateStageSize };
+  return { 
+    calculateStageSize,
+    calculateStageSizeImmediate, 
+  };
 };
