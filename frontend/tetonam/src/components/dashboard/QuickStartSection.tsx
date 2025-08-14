@@ -65,24 +65,23 @@ export const QuickStartSection = ({
       <h2 className='text-2xl font-semibold text-foreground mb-6'>
         {userRole === 'COUNSELOR' ? '바로가기' : '바로가기'}
       </h2>
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+      <div className='grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch'>
         {actions.map((action, index) => {
           const Icon = getIcon(action.title);
           const { bg, color } = getIconStyles(index);
 
           return (
-            <div key={action.title}>
-              <QuickStartCard
-                title={action.title}
-                description={action.description}
-                icon={Icon}
-                actionText={action.actionText}
-                variant={action.variant}
-                onAction={() => handleAction(action)}
-                bgColor={bg}
-                iconColor={color}
-              />
-            </div>
+            <QuickStartCard
+              key={action.title}
+              title={action.title}
+              description={action.description}
+              icon={Icon}
+              actionText={action.actionText}
+              variant={action.variant}
+              onAction={() => handleAction(action)}
+              bgColor={bg}
+              iconColor={color}
+            />
           );
         })}
       </div>

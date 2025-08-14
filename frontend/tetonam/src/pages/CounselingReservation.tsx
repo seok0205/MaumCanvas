@@ -67,7 +67,7 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
         </header>
 
         {/* 날짜 선택 섹션 */}
-        <Card 
+        <Card
           className='bg-white border-0 drop-shadow-2xl'
           style={{ boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)' }}
         >
@@ -109,7 +109,7 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
         </Card>
 
         {/* 시간 선택 섹션 */}
-        <Card 
+        <Card
           className='bg-white border-0 drop-shadow-2xl'
           style={{ boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)' }}
         >
@@ -150,7 +150,7 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
 
         {/* 상담유형 선택 섹션 */}
         {selectedDate && selectedTime && (
-          <Card 
+          <Card
             className='bg-white border-0 drop-shadow-2xl'
             style={{ boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)' }}
           >
@@ -172,7 +172,7 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
 
         {/* 상담사 선택 섹션 */}
         {selectedDate && selectedTime && selectedCounselingType && (
-          <Card 
+          <Card
             className='bg-white border-0 drop-shadow-2xl'
             style={{ boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)' }}
           >
@@ -251,7 +251,7 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
           selectedTime &&
           selectedCounselingType &&
           selectedCounselor && (
-            <Card 
+            <Card
               className='bg-blue-50 border-blue-200 drop-shadow-2xl'
               style={{ boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)' }}
             >
@@ -288,7 +288,7 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
           )}
 
         {/* 예약 안내사항 */}
-        <Card 
+        <Card
           className='bg-white border-0 drop-shadow-2xl'
           style={{ boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)' }}
         >
@@ -303,10 +303,6 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
               <li className='flex items-start gap-2'>
                 <span className='text-blue-600 mt-0.5'>•</span>
                 <span>예약 시간 10분 전까지 접속해주세요</span>
-              </li>
-              <li className='flex items-start gap-2'>
-                <span className='text-blue-600 mt-0.5'>•</span>
-                <span>예약 변경은 24시간 전까지 가능합니다</span>
               </li>
               <li className='flex items-start gap-2'>
                 <span className='text-blue-600 mt-0.5'>•</span>
