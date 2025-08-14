@@ -17,7 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Component
@@ -35,6 +38,7 @@ public class Scheduler {
     @Transactional
     public void closeCounseling(){
         LocalDateTime thresholdTime = LocalDateTime.now().minusHours(1);
+
         List<Counseling> counselingsToClose = counselingRepository.findCounselingsToClose(Status.OPEN, thresholdTime);
         for (Counseling counseling : counselingsToClose) {
             counseling.setStatus(Status.CLOSE);

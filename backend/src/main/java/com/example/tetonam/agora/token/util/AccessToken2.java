@@ -1,10 +1,13 @@
 package com.example.tetonam.agora.token.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Map;
 import java.util.TreeMap;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+@Slf4j
 public class AccessToken2 {
     public enum PrivilegeRtc {
         PRIVILEGE_JOIN_CHANNEL(1), PRIVILEGE_PUBLISH_AUDIO_STREAM(2), PRIVILEGE_PUBLISH_VIDEO_STREAM(3), PRIVILEGE_PUBLISH_DATA_STREAM(4),;
@@ -167,7 +170,7 @@ public class AccessToken2 {
                 this.services.put(serviceType, service);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("아고라 토큰발급 에러");
             return false;
         }
 

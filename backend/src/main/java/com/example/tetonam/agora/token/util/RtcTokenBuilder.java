@@ -1,5 +1,8 @@
 package com.example.tetonam.agora.token.util;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class RtcTokenBuilder {
 	public enum Role {
         /**
@@ -101,7 +104,7 @@ public class RtcTokenBuilder {
     	try {
 			return builder.build();
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("아고라 토큰발급 에러");
 			return "";
 		}
     }
