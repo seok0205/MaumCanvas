@@ -132,13 +132,6 @@ export const DrawingImage = memo<DrawingImageProps>(
                 />
               )}
             </div>
-
-            {/* 추가 정보 (필요시) */}
-            {category && (
-              <div className='text-xs text-muted-foreground text-center'>
-                카테고리: {category}
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>
