@@ -48,13 +48,8 @@ export const OnboardingSlide = memo(function OnboardingSlide({
     }
   };
 
-  // 슬라이드별 레이아웃 방향 결정
-  const getLayoutDirection = () => {
-    if (currentSlide === 1) {
-      return 'flex-col md:flex-row-reverse'; // 두번째 슬라이드: 이미지 오른쪽, 텍스트 왼쪽
-    }
-    return 'flex-col md:flex-row'; // 첫번째, 세번째 슬라이드: 이미지 왼쪽, 텍스트 오른쪽
-  };
+  // 모든 슬라이드에 일관된 레이아웃 적용 (Best Practice)
+  const layoutDirection = 'flex-col md:flex-row';
 
   return (
     <div
@@ -65,47 +60,47 @@ export const OnboardingSlide = memo(function OnboardingSlide({
       aria-label='온보딩 슬라이드'
     >
       <div className='w-full max-w-2xl md:max-w-6xl lg:max-w-7xl mx-auto'>
-        {/* 메인 콘텐츠 */}
+        {/* 메인 콘텐츠 - 일관된 레이아웃 적용 */}
         <div
-          className={`flex ${getLayoutDirection()} items-center gap-8 md:gap-5 animate-fade-in`}
+          className={`flex ${layoutDirection} items-center gap-8 md:gap-12 animate-fade-in`}
         >
-          {/* 이미지 */}
-          <div className='w-80 h-80 md:w-[32rem] md:h-[32rem] lg:w-[36rem] lg:h-[36rem] mx-auto md:mx-0 flex-shrink-0 animate-float flex items-center justify-center'>
+          {/* 이미지 컨테이너 - 더 큰 크기로 조정 */}
+          <div className='w-full max-w-lg h-96 md:w-[32rem] md:h-[32rem] lg:w-[36rem] lg:h-[36rem] mx-auto md:mx-0 flex-shrink-0 animate-float flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-3xl p-6'>
             <OptimizedImage
               src={imageSrc}
               alt={title}
               isPreloaded={isImagePreloaded}
               priority={true}
-              className='max-w-full max-h-full object-contain rounded-2xl'
+              className='w-full h-full object-cover rounded-2xl'
               fallbackClassName='w-full h-full bg-muted rounded-2xl'
               skeletonClassName='rounded-2xl'
               onError={handleImageError}
             />
           </div>
 
-          {/* 텍스트 콘텐츠 */}
-          <div className='flex-1 space-y-4 text-center md:text-left'>
-            <h1 className='text-xl md:text-3xl lg:text-4xl font-bold text-foreground break-keep leading-tight tracking-wide'>
+          {/* 텍스트 콘텐츠 - 고정 높이로 일관성 확보 */}
+          <div className='flex-1 flex flex-col justify-center min-h-[20rem] md:min-h-[24rem] space-y-6 text-center md:text-left px-4 md:px-0'>
+            <h1 className='text-2xl md:text-4xl lg:text-5xl font-bold text-foreground break-keep leading-tight tracking-wide'>
               {title}
             </h1>
-            <div className='min-h-[3.5rem] flex items-center justify-center md:justify-start'>
-              <p className='text-muted-foreground text-sm md:text-lg lg:text-xl leading-relaxed tracking-wide font-medium max-w-2xl break-keep'>
+            <div className='flex items-center justify-center md:justify-start min-h-[6rem]'>
+              <p className='text-muted-foreground text-base md:text-xl lg:text-2xl leading-relaxed tracking-wide font-medium max-w-2xl break-keep'>
                 {description}
               </p>
             </div>
           </div>
         </div>
 
-        {/* 네비게이션 영역 */}
-        <div className='flex flex-col space-y-4 mt-16 max-w-md mx-auto'>
+        {/* 네비게이션 영역 - 컨테이너 높이 일관성 확보 */}
+        <div className='flex flex-col space-y-4 mt-8 md:mt-12 max-w-md mx-auto'>
           {/* 상단: 이전, 진행 표시기, 다음 버튼 */}
-          <div className='flex justify-between items-center'>
+          <div className='flex justify-between items-center h-12'>
             {/* 이전 버튼 */}
             <Button
               variant='ghost'
               onClick={onPrev}
               disabled={currentSlide === 0}
-              className='flex items-center gap-2 disabled:opacity-50'
+              className='flex items-center gap-2 disabled:opacity-50 h-10'
               aria-label='이전 슬라이드로 이동'
             >
               <ChevronLeft className='w-4 h-4' />
@@ -134,7 +129,7 @@ export const OnboardingSlide = memo(function OnboardingSlide({
             {/* 다음 버튼 */}
             <Button
               onClick={onNext}
-              className='flex items-center gap-2 bg-primary hover:bg-primary-dark text-primary-foreground px-6 py-2 rounded-full shadow-soft'
+              className='flex items-center gap-2 bg-primary hover:bg-primary-dark text-primary-foreground px-6 py-2 rounded-full shadow-soft h-10'
               aria-label={isLastSlide ? '온보딩 완료' : '다음 슬라이드로 이동'}
             >
               {isLastSlide ? '시작하기' : '다음'}
