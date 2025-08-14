@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   addDays,
   format,
@@ -64,6 +64,7 @@ interface UseCounselingReservationReturn {
 
 export const useCounselingReservation = (): UseCounselingReservationReturn => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [selectedCounselor, setSelectedCounselor] =
@@ -177,6 +178,8 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
     },
     onSuccess: () => {
       toast.success('상담이 성공적으로 예약되었습니다.');
+      // 상담 관련 쿼리 무효화로 대시보드 데이터 자동 갱신
+      queryClient.invalidateQueries({ queryKey: ['counseling', 'upcoming'] });
       navigate('/dashboard');
     },
     onError: (error: Error) => {
