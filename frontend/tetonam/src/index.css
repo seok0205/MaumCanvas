@@ -13,14 +13,7 @@
 }
 
 @font-face {
-  font-family: 'Pret  .animate-pulse-gentle {
-    animation: pulse-gentle 2s ease-in-out infinite;
-  }
-
-  /* 현재 미사용 애니메이션 */
-  /* .animate-wiggle {
-    animation: wiggle 1s ease-in-out infinite;
-  } */;
+  font-family: 'Pretendard';
   src: url('/fonts/Pretendard-Medium.woff2') format('woff2');
   font-weight: 500;
   font-style: normal;
@@ -340,16 +333,16 @@
     }
   }
 
-  /* GPU 가속 클래스 - 현재 미사용 */
-  /* .gpu-accelerated {
+  /* GPU 가속 클래스 */
+  .gpu-accelerated {
     transform: translateZ(0);
     will-change: transform;
-  } */
+  }
 }
 
 @layer components {
-  /* 청소년 친화적 버튼 스타일 - 현재 미사용 */
-  /* .btn-youth {
+  /* 청소년 친화적 버튼 스타일 */
+  .btn-youth {
     @apply rounded-2xl transition-all duration-300 active:scale-95 hover:scale-105 min-h-[44px] min-w-[44px] font-medium;
   }
 
@@ -363,17 +356,17 @@
 
   .btn-youth-accent {
     @apply btn-youth bg-accent hover:bg-accent/80 text-accent-foreground shadow-soft hover:shadow-medium;
-  } */
+  }
 
-  /* 청소년 친화적 카드 스타일 - 현재 미사용 */
-  /* .card-youth {
+  /* 청소년 친화적 카드 스타일 */
+  .card-youth {
     @apply rounded-2xl border border-border/50 bg-card text-card-foreground shadow-card transition-all duration-300 hover:shadow-hover;
-  } */
+  }
 
-  /* 청소년 친화적 입력 스타일 - 현재 미사용 */
-  /* .input-youth {
+  /* 청소년 친화적 입력 스타일 */
+  .input-youth {
     @apply h-12 rounded-xl border border-input bg-background px-4 py-3 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[44px];
-  } */
+  }
 
   /* 마이크로 인터랙션 - 브라우저 렌더링 파이프라인 최적화 */
   .micro-interaction {
@@ -402,7 +395,7 @@
 
   .animate-wiggle {
     animation: wiggle 1s ease-in-out infinite;
-  } */
+  }
 }
 
 @layer utilities {
@@ -424,14 +417,14 @@
     background: var(--gradient-blue);
   }
 
-  /* 새로운 그림자 유틸리티 - 현재 미사용 */
-  /* .shadow-youth {
+  /* 새로운 그림자 유틸리티 */
+  .shadow-youth {
     box-shadow: var(--shadow-soft);
   }
 
   .shadow-youth-hover {
     box-shadow: var(--shadow-hover);
-  } */
+  }
 
   /* GPU 가속 유틸리티 */
   .transform-gpu {
@@ -581,8 +574,8 @@
   background-size: 200% 100%;
 }
 
-/* Smooth fade-in for onboarding slides - 현재 미사용 */
-/* .onboarding-slide-enter {
+/* Smooth fade-in for onboarding slides */
+.onboarding-slide-enter {
   opacity: 0;
   transform: translateX(20px);
 }
@@ -606,12 +599,12 @@
   transition:
     opacity 200ms ease-in,
     transform 200ms ease-in;
-} */
+}
 
 @media (prefers-reduced-motion: reduce) {
   .image-preloader,
-  /* .onboarding-slide-enter-active,
-  .onboarding-slide-exit-active */ {
+  .onboarding-slide-enter-active,
+  .onboarding-slide-exit-active {
     transition: none;
   }
 

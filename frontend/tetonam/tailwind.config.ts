@@ -110,8 +110,8 @@ export default {
       },
       backgroundImage: {
         'gradient-warm': 'var(--gradient-warm)',
-        // 'gradient-primary': 'var(--gradient-primary)', // 미사용
-        // 'gradient-subtle': 'var(--gradient-subtle)', // 미사용
+        'gradient-primary': 'var(--gradient-primary)',
+        'gradient-subtle': 'var(--gradient-subtle)',
         'gradient-mint': 'var(--gradient-mint)',
         'gradient-yellow': 'var(--gradient-yellow)',
         'gradient-blue': 'var(--gradient-blue)',
@@ -121,15 +121,14 @@ export default {
         medium: 'var(--shadow-medium)',
         card: 'var(--shadow-card)',
         hover: 'var(--shadow-hover)',
-        // youth: 'var(--shadow-soft)', // 중복 (soft와 동일)
-        // 'youth-hover': 'var(--shadow-hover)', // 중복 (hover와 동일)
+        youth: 'var(--shadow-soft)',
+        'youth-hover': 'var(--shadow-hover)',
       },
-      // 전환 함수들 - 현재 미사용
-      // transitionTimingFunction: {
-      //   smooth: 'cubic-bezier(0.4, 0, 0.2, 1)',
-      //   bounce: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
-      //   spring: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-      // },
+      transitionTimingFunction: {
+        smooth: 'cubic-bezier(0.4, 0, 0.2, 1)',
+        bounce: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+        spring: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+      },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
@@ -138,23 +137,22 @@ export default {
         '2xl': 'var(--radius-xl)',
       },
       keyframes: {
-        // Accordion 애니메이션 - 현재 미사용 (Radix UI 설치되어 있지만 사용 안함)
-        // 'accordion-down': {
-        //   from: {
-        //     height: '0',
-        //   },
-        //   to: {
-        //     height: 'var(--radix-accordion-content-height)',
-        //   },
-        // },
-        // 'accordion-up': {
-        //   from: {
-        //     height: 'var(--radix-accordion-content-height)',
-        //   },
-        //   to: {
-        //     height: '0',
-        //   },
-        // },
+        'accordion-down': {
+          from: {
+            height: '0',
+          },
+          to: {
+            height: 'var(--radix-accordion-content-height)',
+          },
+        },
+        'accordion-up': {
+          from: {
+            height: 'var(--radix-accordion-content-height)',
+          },
+          to: {
+            height: '0',
+          },
+        },
         'fade-in': {
           '0%': {
             opacity: '0',
@@ -165,25 +163,24 @@ export default {
             transform: 'translateY(0)',
           },
         },
-        // 슬라이드 애니메이션들 - 현재 미사용
-        // 'slide-in-right': {
-        //   '0%': { transform: 'translateX(100%)' },
-        //   '100%': { transform: 'translateX(0)' },
-        // },
-        // 'slide-in-left': {
-        //   '0%': { transform: 'translateX(-100%)' },
-        //   '100%': { transform: 'translateX(0)' },
-        // },
-        // 'scale-in': {
-        //   '0%': {
-        //     transform: 'scale(0.95)',
-        //     opacity: '0',
-        //   },
-        //   '100%': {
-        //     transform: 'scale(1)',
-        //     opacity: '1',
-        //   },
-        // },
+        'slide-in-right': {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(0)' },
+        },
+        'slide-in-left': {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(0)' },
+        },
+        'scale-in': {
+          '0%': {
+            transform: 'scale(0.95)',
+            opacity: '0',
+          },
+          '100%': {
+            transform: 'scale(1)',
+            opacity: '1',
+          },
+        },
         float: {
           '0%, 100%': { transform: 'translateY(0px)' },
           '50%': { transform: 'translateY(-8px)' },
@@ -207,36 +204,31 @@ export default {
         },
       },
       animation: {
-        // Accordion 애니메이션 - 현재 미사용
-        // 'accordion-down': 'accordion-down 0.2s ease-out',
-        // 'accordion-up': 'accordion-up 0.2s ease-out',
+        'accordion-down': 'accordion-down 0.2s ease-out',
+        'accordion-up': 'accordion-up 0.2s ease-out',
         'fade-in': 'fade-in 0.5s ease-out',
-        // 슬라이드 애니메이션들 - 현재 미사용
-        // 'slide-in-right': 'slide-in-right 0.3s ease-out',
-        // 'slide-in-left': 'slide-in-left 0.3s ease-out',
-        // 'scale-in': 'scale-in 0.3s ease-out',
+        'slide-in-right': 'slide-in-right 0.3s ease-out',
+        'slide-in-left': 'slide-in-left 0.3s ease-out',
+        'scale-in': 'scale-in 0.3s ease-out',
         float: 'float 3s ease-in-out infinite',
         'bounce-gentle': 'bounce-gentle 0.6s ease-out',
         'scale-gentle': 'scale-gentle 0.3s ease-out',
         'pulse-gentle': 'pulse-gentle 2s ease-in-out infinite',
         wiggle: 'wiggle 1s ease-in-out infinite',
       },
-      // 커스텀 간격 - 현재 미사용
-      // spacing: {
-      //   '18': '4.5rem',
-      //   '88': '22rem',
-      //   '128': '32rem',
-      // },
-      // 최소 높이 - 현재 미사용
-      // minHeight: {
-      //   '44': '44px',
-      //   '56': '56px',
-      // },
-      // 최소 너비 - 현재 미사용
-      // minWidth: {
-      //   '44': '44px',
-      //   '56': '56px',
-      // },
+      spacing: {
+        '18': '4.5rem',
+        '88': '22rem',
+        '128': '32rem',
+      },
+      minHeight: {
+        '44': '44px',
+        '56': '56px',
+      },
+      minWidth: {
+        '44': '44px',
+        '56': '56px',
+      },
     },
   },
   plugins: [tailwindcssAnimate, typography],
