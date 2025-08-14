@@ -6,9 +6,8 @@ import { useUpcomingCounselingQuery } from '@/hooks/useUpcomingCounselingQuery';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { CounselingStatus, UpcomingCounseling } from '@/types/api';
 import { isValidUpcomingCounseling } from '@/types/api';
-import { isValidDateString } from '@/utils/counselingValidation';
-import { addMinutes, format, isAfter, isBefore } from 'date-fns';
-import { ko } from 'date-fns/locale';
+import { formatDateTime } from '@/utils/dateUtils';
+import { addMinutes, isAfter, isBefore } from 'date-fns';
 import {
   AlertCircle,
   Calendar,
@@ -53,32 +52,6 @@ const getStatusColor = (status: CounselingStatus): string => {
       return 'text-red-600 bg-red-100';
     default:
       return 'text-gray-600 bg-gray-100';
-  }
-};
-
-const formatDateTime = (dateTimeString: string) => {
-  try {
-    // 유효성 검사 추가
-    if (!isValidDateString(dateTimeString)) {
-      throw new Error('Invalid date string');
-    }
-
-    const date = new Date(dateTimeString);
-
-    // 유효한 날짜인지 확인
-    if (isNaN(date.getTime())) {
-      throw new Error('Invalid date');
-    }
-
-    return {
-      date: format(date, 'M월 d일 (E)', { locale: ko }),
-      time: format(date, 'HH:mm'),
-    };
-  } catch {
-    return {
-      date: '날짜 정보 없음',
-      time: '시간 정보 없음',
-    };
   }
 };
 
