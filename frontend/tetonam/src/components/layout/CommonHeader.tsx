@@ -108,7 +108,7 @@ export const CommonHeader = ({
                 variant='ghost'
                 size='sm'
                 onClick={handleBackClick}
-                className='text-muted-foreground hover:text-foreground'
+                className='hidden md:flex text-muted-foreground hover:text-foreground'
               >
                 <ArrowLeft className='mr-2 h-4 w-4' />
                 {backButtonText}
