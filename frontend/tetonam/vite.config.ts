@@ -107,9 +107,17 @@ export default defineConfig(({ mode }) => ({
           return 'assets/[name]-[hash][extname]';
         },
         manualChunks: {
-          // 벤더 라이브러리
+          // 핵심 React 라이브러리 (초기 로딩에 필요) - router 다시 포함
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-ui': [
+          // 필수 UI 컴포넌트 (LCP에 영향)
+          'vendor-ui-critical': [
+            '@radix-ui/react-slot',
+            'clsx',
+            'class-variance-authority',
+            'tailwind-merge',
+          ],
+          // 비필수 UI 컴포넌트 (지연 로딩 가능)
+          'vendor-ui-secondary': [
             '@radix-ui/react-dialog',
             '@radix-ui/react-dropdown-menu',
             '@radix-ui/react-select',
@@ -130,36 +138,42 @@ export default defineConfig(({ mode }) => ({
             '@radix-ui/react-scroll-area',
             '@radix-ui/react-separator',
             '@radix-ui/react-slider',
-            '@radix-ui/react-slot',
             '@radix-ui/react-switch',
             '@radix-ui/react-toast',
             '@radix-ui/react-toggle',
             '@radix-ui/react-toggle-group',
             '@radix-ui/react-tooltip',
-            'lucide-react',
           ],
+          // 아이콘 (초기 로딩에 영향)
+          'vendor-icons': ['lucide-react'],
           // 캔버스 관련 라이브러리들을 분리하여 동적 로딩 최적화
           'vendor-canvas-core': ['konva'],
           'vendor-canvas-react': ['react-konva'],
+          // 차트는 필요할 때만 로딩
           'vendor-charts': ['recharts'],
+          // 네트워크 관련
           'vendor-query': ['@tanstack/react-query', 'axios'],
+          // 폼 관련 (페이지별로 필요할 때만)
           'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
-          'vendor-utils': [
-            'clsx',
-            'class-variance-authority',
-            'tailwind-merge',
-            'date-fns',
-            'zustand',
-            'sonner',
-          ],
+          // 유틸리티
+          'vendor-utils': ['date-fns', 'zustand', 'sonner'],
         },
       },
     },
     target: 'es2020',
     minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: mode === 'production', // 프로덕션에서만 콘솔 로그 제거
+        drop_debugger: true,
+        pure_funcs:
+          mode === 'production' ? ['console.log', 'console.info'] : [],
+      },
+    },
     sourcemap: false,
     reportCompressedSize: false,
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 750, // 적당한 크기로 조정
+    cssCodeSplit: true,
   },
   test: {
     globals: true,

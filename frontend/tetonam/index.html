@@ -77,6 +77,117 @@
       }
     </style>
 
+    <!-- Critical CSS for LCP optimization -->
+    <style id="critical-css">
+      /* Critical text styles for LCP elements - 중복 없는 것만 */
+      .text-sm {
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+      }
+      .text-orange-800 {
+        color: #9a3412;
+      }
+      .text-green-600 {
+        color: #16a34a;
+      }
+      .text-red-600 {
+        color: #dc2626;
+      }
+      .text-gray-600 {
+        color: #4b5563;
+      }
+      .text-gray-700 {
+        color: #374151;
+      }
+      .text-gray-800 {
+        color: #1f2937;
+      }
+      .text-gray-900 {
+        color: #111827;
+      }
+
+      /* Critical layout styles */
+      .container {
+        width: 100%;
+      }
+      .mx-auto {
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .px-4 {
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+      .py-2 {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+      }
+      .py-4 {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+      }
+      .mb-4 {
+        margin-bottom: 1rem;
+      }
+      .mt-4 {
+        margin-top: 1rem;
+      }
+
+      /* Critical flex styles */
+      .flex {
+        display: flex;
+      }
+      .items-center {
+        align-items: center;
+      }
+      .justify-center {
+        justify-content: center;
+      }
+      .justify-between {
+        justify-content: space-between;
+      }
+
+      /* Critical background styles */
+      .bg-white {
+        background-color: #ffffff;
+      }
+      .bg-gray-50 {
+        background-color: #f9fafb;
+      }
+      .bg-gray-100 {
+        background-color: #f3f4f6;
+      }
+
+      /* Critical border styles */
+      .border {
+        border-width: 1px;
+      }
+      .border-gray-200 {
+        border-color: #e5e7eb;
+      }
+      .border-gray-300 {
+        border-color: #d1d5db;
+      }
+      .rounded {
+        border-radius: 0.25rem;
+      }
+      .rounded-lg {
+        border-radius: 0.5rem;
+      }
+
+      /* Critical visibility */
+      .opacity-0 {
+        opacity: 0;
+      }
+      .opacity-100 {
+        opacity: 1;
+      }
+      .transition-opacity {
+        transition-property: opacity;
+        transition-duration: 0.15s;
+      }
+    </style>
+
     <!-- FOUC 감소를 위한 전역 CSS 조기 로드 -->
     <link rel="stylesheet" href="/src/index.css" />
 
