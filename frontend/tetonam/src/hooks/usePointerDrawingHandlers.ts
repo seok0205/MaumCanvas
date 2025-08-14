@@ -44,25 +44,40 @@ export const usePointerDrawingHandlers = () => {
     };
   }, []);
 
-  // 터치 거부 로직
+  // 스마트한 터치 거부 로직 (태블릿 최적화)
   const shouldRejectPointer = useCallback(
     (pointerData: PenEventData): boolean => {
+      // 터치 거부가 비활성화된 경우 모든 입력 허용
       if (!penSettings.touchRejection) return false;
 
-      // 펜이 활성화되어 있고, 현재 입력이 펜이 아닌 경우 거부
+      // 펜이 활성화되어 있는 경우에만 터치 거부 로직 적용
       if (isPenActive && activePenPointerId !== null) {
-        return (
-          pointerData.pointerType !== 'pen' ||
-          pointerData.pointerId !== activePenPointerId
-        );
+        // 같은 펜 포인터는 항상 허용
+        if (
+          pointerData.pointerType === 'pen' &&
+          pointerData.pointerId === activePenPointerId
+        ) {
+          return false;
+        }
+
+        // 다른 펜 포인터나 터치의 경우
+        // 태블릿 환경에서는 더 관대한 정책 적용
+        if (pointerData.pointerType === 'touch') {
+          // 압력이 감지되지 않는 터치는 거부 (손바닥 터치 가능성)
+          return pointerData.pressure === 0 || pointerData.pressure > 0.8;
+        }
+
+        // 다른 펜 포인터는 허용 (멀티터치 지원)
+        return false;
       }
 
+      // 펜이 비활성화된 상태에서는 모든 입력 허용
       return false;
     },
     [penSettings.touchRejection, isPenActive, activePenPointerId]
   );
 
-  // 포인터 다운 핸들러
+  // 포인터 다운 핸들러 (태블릿 최적화)
   const handlePointerDown = useCallback(
     (e: Konva.KonvaEventObject<PointerEvent>) => {
       if (!isEditingActive) return;
@@ -72,13 +87,30 @@ export const usePointerDrawingHandlers = () => {
 
       // 터치 거부 확인
       if (shouldRejectPointer(pointerData)) {
+        console.log(
+          'Pointer rejected:',
+          pointerData.pointerType,
+          pointerData.pointerId
+        );
         return;
       }
 
-      // 펜 상태 업데이트
+      // 펜 상태 업데이트 (더 안전한 처리)
       if (pointerData.pointerType === 'pen') {
         setIsPenActive(true);
         setActivePenPointerId(pointerData.pointerId);
+      } else if (pointerData.pointerType === 'touch' && !isPenActive) {
+        // 펜이 비활성 상태일 때만 터치 허용
+        setIsPenActive(false);
+        setActivePenPointerId(null);
+      }
+
+      // 이벤트 기본 동작 방지 (스크롤, 줌 등)
+      if (e.evt.preventDefault) {
+        e.evt.preventDefault();
+      }
+      if (e.evt.stopPropagation) {
+        e.evt.stopPropagation();
       }
 
       setIsDrawing(true);
@@ -92,7 +124,7 @@ export const usePointerDrawingHandlers = () => {
           : brushSize;
 
       const newLine: DrawingLine = {
-        id: Date.now(),
+        id: Date.now() + Math.random(), // 더 유니크한 ID
         points: [pos.x, pos.y],
         stroke: isEraser ? 'rgba(0,0,0,1)' : brushColor,
         strokeWidth: dynamicStrokeWidth,
@@ -120,6 +152,7 @@ export const usePointerDrawingHandlers = () => {
       setIsDrawing,
       addLineToCurrentStep,
       calculateDynamicStrokeWidth,
+      isPenActive,
     ]
   );
 
