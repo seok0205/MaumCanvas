@@ -133,10 +133,12 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
                     'h-auto flex-col gap-1 p-3 transition-all rounded-lg',
                     option.isSelected
                       ? 'bg-yellow-100 border-yellow-300 text-yellow-900 hover:bg-yellow-200'
-                      : 'hover:bg-gray-50'
+                      : option.isDisabled
+                        ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+                        : 'hover:bg-gray-50'
                   )}
                   onClick={() => handleTimeSelect(option.time)}
-                  disabled={!selectedDate}
+                  disabled={!selectedDate || option.isDisabled}
                 >
                   <Clock className='h-4 w-4' />
                   <span className='text-sm font-medium'>
@@ -145,6 +147,12 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
                 </Button>
               ))}
             </div>
+            {selectedDate && (
+              <div className='mt-4 text-sm text-gray-600'>
+                <Info className='h-4 w-4 inline-block mr-2' />
+                이미 지난 시간은 선택할 수 없습니다.
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -302,11 +310,23 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
             <ul className='space-y-2 text-sm text-gray-700'>
               <li className='flex items-start gap-2'>
                 <span className='text-blue-600 mt-0.5'>•</span>
-                <span>예약 시간 10분 전까지 접속해주세요</span>
+                <span>모든 상담 내용은 비밀이 보장됩니다</span>
               </li>
               <li className='flex items-start gap-2'>
                 <span className='text-blue-600 mt-0.5'>•</span>
-                <span>상담 내용은 비밀이 보장됩니다</span>
+                <span>상담 시간은 1시간입니다.</span>
+              </li>
+              <li className='flex items-start gap-2'>
+                <span className='text-blue-600 mt-0.5'>•</span>
+                <span>화상상담 입장은 예약 시간 30분 전부터 가능합니다.</span>
+              </li>
+              <li className='flex items-start gap-2'>
+                <span className='text-blue-600 mt-0.5'>•</span>
+                <span>
+                  {' '}
+                  예약시간 이후에는 입장이 불가하오니 원활한 상담 진행을 위해
+                  예약 시간 10분 전까지 입장 부탁드립니다.
+                </span>
               </li>
             </ul>
           </CardContent>
