@@ -279,7 +279,7 @@ export const DrawingDetail = () => {
                     <Skeleton className='h-24 w-full' />
                   ) : (
                     <div className='whitespace-pre-wrap text-sm font-sans'>
-                      {aiText || '내용이 없습니다'}
+                      {preprocessText(aiText) || '내용이 없습니다'}
                     </div>
                   )}
                 </CardContent>
