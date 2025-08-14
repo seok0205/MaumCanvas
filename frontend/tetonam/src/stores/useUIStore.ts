@@ -82,10 +82,10 @@ const initialState: UIState = {
     height: CANVAS_CONFIG.HEIGHT,
   },
   saveAnimationKey: 0,
-  // 터치펜 설정 초기값
+  // 터치펜 설정 초기값 (태블릿 최적화)
   penSettings: {
     pressureSensitivity: true,
-    touchRejection: true,
+    touchRejection: false, // 태블릿에서 기본적으로 비활성화
     tiltSensitivity: false,
     pressureMultiplier: 1.0,
   },

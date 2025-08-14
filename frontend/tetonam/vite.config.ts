@@ -43,9 +43,12 @@ export default defineConfig(({ mode }) => ({
         theme_color: '#10b981',
         background_color: '#ffffff',
         display: 'standalone',
-        orientation: 'portrait',
+        orientation: 'any', // 태블릿 회전 지원
         scope: '/',
         start_url: '/',
+        // 태블릿 최적화 설정
+        categories: ['productivity', 'health'],
+        prefer_related_applications: false,
         icons: [
           {
             src: 'logo.png',
@@ -63,10 +66,24 @@ export default defineConfig(({ mode }) => ({
             type: 'image/png',
             purpose: 'any maskable',
           },
+          // 태블릿용 추가 아이콘 크기
+          {
+            src: 'logo.png',
+            sizes: '144x144',
+            type: 'image/png',
+          },
+          {
+            src: 'logo.png',
+            sizes: '256x256',
+            type: 'image/png',
+          },
         ],
       },
       workbox: {
+        // 캐시할 파일 크기 제한 (태블릿 메모리 고려)
+        maximumFileSizeToCacheInBytes: 2 * 1024 * 1024, // 2MB
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        // 메모리 효율적인 런타임 캐싱
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -74,8 +91,11 @@ export default defineConfig(({ mode }) => ({
             options: {
               cacheName: 'google-fonts-cache',
               expiration: {
-                maxEntries: 10,
+                maxEntries: 5, // 메모리 절약을 위해 제한
                 maxAgeSeconds: 60 * 60 * 24 * 365, // 1년
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
               },
             },
           },
@@ -85,12 +105,35 @@ export default defineConfig(({ mode }) => ({
             options: {
               cacheName: 'api-cache',
               expiration: {
-                maxEntries: 100,
+                maxEntries: 50, // API 응답 캐시 제한
                 maxAgeSeconds: 60 * 60 * 24, // 1일
+              },
+              networkTimeoutSeconds: 3, // 빠른 타임아웃
+            },
+          },
+          // 드로잉 데이터 캐싱 (메모리 효율적)
+          {
+            urlPattern: /\/api\/drawings\/.*/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'drawing-cache',
+              expiration: {
+                maxEntries: 20, // 최근 그림 20개만 캐시
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 1주일
               },
             },
           },
         ],
+        // 네비게이션 캐싱 최적화
+        navigateFallback: '/',
+        navigateFallbackDenylist: [
+          /^\/_/,
+          /\/api\//,
+          /\.(?:png|jpg|jpeg|svg)$/,
+        ],
+        // 청크 크기 최적화
+        skipWaiting: true,
+        clientsClaim: true,
       },
     }),
   ],

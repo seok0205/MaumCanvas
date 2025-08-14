@@ -3,6 +3,7 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import Fullscreen from 'react-fullscreen-crossbrowser';
 import { toast } from 'sonner';
 
+import { DrawingErrorBoundary } from '@/components/common/DrawingErrorBoundary';
 import { DrawingControls } from '@/components/drawing/DrawingControls';
 import { DrawingStage } from '@/components/drawing/DrawingStage';
 import { DrawingStepHeader } from '@/components/drawing/DrawingStepHeader';
@@ -25,6 +26,7 @@ import { useDrawingHandlers } from '@/hooks/useDrawingHandlers';
 import { useDrawingLocalStorage } from '@/hooks/useDrawingLocalStorage';
 import { useDrawingSave } from '@/hooks/useDrawingSave';
 import { useDrawingSubmit } from '@/hooks/useDrawingSubmit';
+import { useMemoryOptimization } from '@/hooks/useMemoryOptimization';
 import { usePageLeaveWarning } from '@/hooks/usePageLeaveWarning';
 import { usePointerDrawingHandlers } from '@/hooks/usePointerDrawingHandlers';
 import { usePreventDoubleClick } from '@/hooks/usePreventDoubleClick';
@@ -70,6 +72,14 @@ const DrawingCanvas = memo(() => {
 
   // 더블 클릭 방지 훅
   const { isBlocked, preventDoubleClick } = usePreventDoubleClick();
+
+  // 메모리 최적화 훅 (태블릿 PWA 환경용)
+  const { performMemoryCleanup, checkMemoryStatus } = useMemoryOptimization({
+    maxLinesPerStep: 800, // 태블릿 메모리 고려하여 제한
+    maxHistoryEntries: 8,
+    memoryCheckInterval: 45000, // 45초마다 체크
+    autoCleanup: true,
+  });
 
   // drawing handlers hook
   const { handleMouseDown, handleMouseMove, handleMouseUp } =
@@ -121,6 +131,9 @@ const DrawingCanvas = memo(() => {
           // 컨테이너 크기 기반으로 다시 계산
           const event = new Event('resize');
           window.dispatchEvent(event);
+
+          // 메모리 정리도 함께 수행
+          checkMemoryStatus();
         }
       }, 100);
 
@@ -128,7 +141,7 @@ const DrawingCanvas = memo(() => {
     }
 
     return undefined;
-  }, [isFullscreenEnabled]);
+  }, [isFullscreenEnabled, checkMemoryStatus]);
 
   // 캔버스 크기 관리 훅
   useCanvasResize({
@@ -234,167 +247,200 @@ const DrawingCanvas = memo(() => {
     return <div>잘못된 단계입니다.</div>;
   }
 
+  /**
+   * 에러 처리 콜백
+   */
+  const handleDrawingError = useCallback(
+    (error: Error, errorInfo: any) => {
+      console.error('Drawing canvas error:', error, errorInfo);
+
+      // 메모리 관련 에러인 경우 즉시 정리
+      const errorMessage = error.message.toLowerCase();
+      if (errorMessage.includes('memory') || errorMessage.includes('heap')) {
+        performMemoryCleanup();
+      }
+    },
+    [performMemoryCleanup]
+  );
+
   return (
-    <Fullscreen enabled={isFullscreenEnabled} onChange={handleFullscreenChange}>
-      <SidebarProvider>
-        {/* 편집(그리기) 중 텍스트 드래그/선택 방지: 페이지 루트에 select-none 적용 */}
-        <div
-          className={`flex w-full min-h-screen bg-orange-50/30 ${
-            isEditingActive ? 'select-none' : ''
-          } ${isFullscreenEnabled ? 'bg-black' : ''}`}
-        >
-          {!isFullscreenEnabled && <AppSidebar />}
+    <DrawingErrorBoundary
+      onError={handleDrawingError}
+      fallback={
+        <div className='min-h-screen flex items-center justify-center bg-gray-50'>
+          <div className='text-center'>
+            <h2 className='text-xl font-semibold mb-4'>
+              그리기 도구를 불러오는 중...
+            </h2>
+            <p className='text-gray-600'>잠시만 기다려주세요.</p>
+          </div>
+        </div>
+      }
+    >
+      <Fullscreen
+        enabled={isFullscreenEnabled}
+        onChange={handleFullscreenChange}
+      >
+        <SidebarProvider>
+          {/* 편집(그리기) 중 텍스트 드래그/선택 방지: 페이지 루트에 select-none 적용 */}
+          <div
+            className={`flex w-full min-h-screen bg-orange-50/30 ${
+              isEditingActive ? 'select-none' : ''
+            } ${isFullscreenEnabled ? 'bg-black' : ''}`}
+          >
+            {!isFullscreenEnabled && <AppSidebar />}
 
-          <div className='flex flex-1 flex-col'>
-            {!isFullscreenEnabled && <CommonHeader user={user!} />}
+            <div className='flex flex-1 flex-col'>
+              {!isFullscreenEnabled && <CommonHeader user={user!} />}
 
-            {/* 메인 콘텐츠 */}
-            <main className='flex-1 overflow-hidden flex flex-col'>
-              <div
-                className={`${isFullscreenEnabled ? 'p-0' : 'p-4 md:p-6'} flex-1 flex flex-col`}
-              >
-                {/* 헤더 (편집 시작 시 접기 - 진행 정보 & 썸네일) */}
-                {!isEditingActive && !isFullscreenEnabled && (
-                  <div className='mb-4 md:mb-4 transition-all duration-300'>
-                    <DrawingStepHeader
-                      currentStep={currentStep}
-                      currentStepData={currentStepData}
-                      saveStates={saveStates}
-                    />
-                    <DrawingThumbnails
-                      savedImages={savedImages}
-                      currentStep={currentStep}
-                      handleThumbnailSelect={handleThumbnailSelect}
-                    />
-                  </div>
-                )}
-
-                {/* 안내문 (전체화면이 아닐 때만 표시) */}
-                {!isFullscreenEnabled && (
-                  <div
-                    className={`mb-4 md:mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4 ${isEditingActive ? 'ring-1 ring-yellow-300' : ''}`}
-                  >
-                    <p
-                      className={`text-yellow-800 ${isEditingActive ? 'text-base md:text-lg font-semibold' : 'text-sm'} leading-relaxed`}
-                    >
-                      <strong className='mr-1'>안내:</strong>{' '}
-                      {currentStepData.instruction}
-                    </p>
-                  </div>
-                )}
-
-                {/* 도구모음 (편집 중이고 전체화면이 아닐 때만 표시) */}
-                {isEditingActive && !isFullscreenEnabled && (
-                  <div className='mb-4 md:mb-6 bg-white rounded-lg border border-gray-200 p-3 md:p-4 relative'>
-                    <DrawingToolbar
-                      sizePopoverRef={sizePopoverRef}
-                      colorPopoverRef={colorPopoverRef}
-                      handleSave={handleSave}
-                    />
-                  </div>
-                )}
-
-                {/* 캔버스 영역 */}
+              {/* 메인 콘텐츠 */}
+              <main className='flex-1 overflow-hidden flex flex-col'>
                 <div
-                  ref={canvasContainerRef}
-                  className={`flex-1 relative flex items-start justify-center pb-4 overscroll-contain ${
-                    isEditingActive ? 'touch-none select-none' : ''
-                  } ${isFullscreenEnabled ? 'items-center' : ''}`}
+                  className={`${isFullscreenEnabled ? 'p-0' : 'p-4 md:p-6'} flex-1 flex flex-col`}
                 >
-                  {/* 전체화면 전용 UI */}
-                  {isFullscreenEnabled && isEditingActive && (
-                    <>
-                      {/* 좌측 상단 팔레트 버튼 */}
-                      <div className='absolute top-4 left-4 z-20'>
-                        <div className='bg-white/90 backdrop-blur-sm rounded-lg border border-gray-200 p-3 shadow-lg'>
-                          <DrawingToolbar
-                            sizePopoverRef={sizePopoverRef}
-                            colorPopoverRef={colorPopoverRef}
-                            handleSave={handleSave}
-                          />
-                        </div>
-                      </div>
-
-                      {/* 우측 상단 전체화면 해제 버튼 */}
-                      <div className='absolute top-4 right-4 z-20'>
-                        <Button
-                          onClick={() => setIsFullscreenEnabled(false)}
-                          size='sm'
-                          variant='outline'
-                          className='bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm'
-                          title='전체화면 해제'
-                        >
-                          <svg
-                            className='w-4 h-4'
-                            fill='none'
-                            viewBox='0 0 24 24'
-                            stroke='currentColor'
-                          >
-                            <path
-                              strokeLinecap='round'
-                              strokeLinejoin='round'
-                              strokeWidth={2}
-                              d='M6 18L18 6M6 6l12 12'
-                            />
-                          </svg>
-                        </Button>
-                      </div>
-
-                      {/* 하단 네비게이션 (전체화면 전용) */}
-                      <div className='absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20'>
-                        <div className='bg-white/90 backdrop-blur-sm rounded-lg border border-gray-200 shadow-lg'>
-                          <DrawingControls
-                            saveStates={saveStates}
-                            onPrevStep={handlePrevStep}
-                            onNextStep={handleNextStep}
-                            onSubmit={preventDoubleClick(handleSubmit)}
-                            isBlocked={isBlocked}
-                            canGoNext={canGoNext}
-                          />
-                        </div>
-                      </div>
-                    </>
+                  {/* 헤더 (편집 시작 시 접기 - 진행 정보 & 썸네일) */}
+                  {!isEditingActive && !isFullscreenEnabled && (
+                    <div className='mb-4 md:mb-4 transition-all duration-300'>
+                      <DrawingStepHeader
+                        currentStep={currentStep}
+                        currentStepData={currentStepData}
+                        saveStates={saveStates}
+                      />
+                      <DrawingThumbnails
+                        savedImages={savedImages}
+                        currentStep={currentStep}
+                        handleThumbnailSelect={handleThumbnailSelect}
+                      />
+                    </div>
                   )}
 
-                  <DrawingStage
-                    stageRef={stageRef}
-                    stageSize={stageSize}
-                    currentLines={currentLines}
-                    isEditingActive={isEditingActive}
-                    onMouseDown={handleMouseDown}
-                    onMouseMove={handleMouseMove}
-                    onMouseUp={handleMouseUp}
-                    onPointerDown={handlePointerDown}
-                    onPointerMove={handlePointerMove}
-                    onPointerUp={handlePointerUp}
-                    onReactivate={() => setIsEditingActive(true)}
-                    saveAnimationKey={saveAnimationKey}
-                    reActivateButtonRef={reActivateButtonRef}
-                    onFullscreenToggle={handleFullscreenToggle}
-                    isFullscreen={isFullscreen}
-                  />
+                  {/* 안내문 (전체화면이 아닐 때만 표시) */}
+                  {!isFullscreenEnabled && (
+                    <div
+                      className={`mb-4 md:mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4 ${isEditingActive ? 'ring-1 ring-yellow-300' : ''}`}
+                    >
+                      <p
+                        className={`text-yellow-800 ${isEditingActive ? 'text-base md:text-lg font-semibold' : 'text-sm'} leading-relaxed`}
+                      >
+                        <strong className='mr-1'>안내:</strong>{' '}
+                        {currentStepData.instruction}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* 도구모음 (편집 중이고 전체화면이 아닐 때만 표시) */}
+                  {isEditingActive && !isFullscreenEnabled && (
+                    <div className='mb-4 md:mb-6 bg-white rounded-lg border border-gray-200 p-3 md:p-4 relative'>
+                      <DrawingToolbar
+                        sizePopoverRef={sizePopoverRef}
+                        colorPopoverRef={colorPopoverRef}
+                        handleSave={handleSave}
+                      />
+                    </div>
+                  )}
+
+                  {/* 캔버스 영역 */}
+                  <div
+                    ref={canvasContainerRef}
+                    className={`flex-1 relative flex items-start justify-center pb-4 overscroll-contain ${
+                      isEditingActive ? 'touch-none select-none' : ''
+                    } ${isFullscreenEnabled ? 'items-center' : ''}`}
+                  >
+                    {/* 전체화면 전용 UI */}
+                    {isFullscreenEnabled && isEditingActive && (
+                      <>
+                        {/* 좌측 상단 팔레트 버튼 */}
+                        <div className='absolute top-4 left-4 z-20'>
+                          <div className='bg-white/90 backdrop-blur-sm rounded-lg border border-gray-200 p-3 shadow-lg'>
+                            <DrawingToolbar
+                              sizePopoverRef={sizePopoverRef}
+                              colorPopoverRef={colorPopoverRef}
+                              handleSave={handleSave}
+                            />
+                          </div>
+                        </div>
+
+                        {/* 우측 상단 전체화면 해제 버튼 */}
+                        <div className='absolute top-4 right-4 z-20'>
+                          <Button
+                            onClick={() => setIsFullscreenEnabled(false)}
+                            size='sm'
+                            variant='outline'
+                            className='bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm'
+                            title='전체화면 해제'
+                          >
+                            <svg
+                              className='w-4 h-4'
+                              fill='none'
+                              viewBox='0 0 24 24'
+                              stroke='currentColor'
+                            >
+                              <path
+                                strokeLinecap='round'
+                                strokeLinejoin='round'
+                                strokeWidth={2}
+                                d='M6 18L18 6M6 6l12 12'
+                              />
+                            </svg>
+                          </Button>
+                        </div>
+
+                        {/* 하단 네비게이션 (전체화면 전용) */}
+                        <div className='absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20'>
+                          <div className='bg-white/90 backdrop-blur-sm rounded-lg border border-gray-200 shadow-lg'>
+                            <DrawingControls
+                              saveStates={saveStates}
+                              onPrevStep={handlePrevStep}
+                              onNextStep={handleNextStep}
+                              onSubmit={preventDoubleClick(handleSubmit)}
+                              isBlocked={isBlocked}
+                              canGoNext={canGoNext}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    <DrawingStage
+                      stageRef={stageRef}
+                      stageSize={stageSize}
+                      currentLines={currentLines}
+                      isEditingActive={isEditingActive}
+                      onMouseDown={handleMouseDown}
+                      onMouseMove={handleMouseMove}
+                      onMouseUp={handleMouseUp}
+                      onPointerDown={handlePointerDown}
+                      onPointerMove={handlePointerMove}
+                      onPointerUp={handlePointerUp}
+                      onReactivate={() => setIsEditingActive(true)}
+                      saveAnimationKey={saveAnimationKey}
+                      reActivateButtonRef={reActivateButtonRef}
+                      onFullscreenToggle={handleFullscreenToggle}
+                      isFullscreen={isFullscreen}
+                    />
+                  </div>
+
+                  {/* 네비게이션 버튼 (전체화면이 아닐 때만 표시) */}
+                  {!isFullscreenEnabled && (
+                    <DrawingControls
+                      saveStates={saveStates}
+                      onPrevStep={handlePrevStep}
+                      onNextStep={handleNextStep}
+                      onSubmit={preventDoubleClick(handleSubmit)}
+                      isBlocked={isBlocked}
+                      canGoNext={canGoNext}
+                    />
+                  )}
                 </div>
+              </main>
+            </div>
 
-                {/* 네비게이션 버튼 (전체화면이 아닐 때만 표시) */}
-                {!isFullscreenEnabled && (
-                  <DrawingControls
-                    saveStates={saveStates}
-                    onPrevStep={handlePrevStep}
-                    onNextStep={handleNextStep}
-                    onSubmit={preventDoubleClick(handleSubmit)}
-                    isBlocked={isBlocked}
-                    canGoNext={canGoNext}
-                  />
-                )}
-              </div>
-            </main>
+            {/* 모바일 사이드바 토글 버튼 */}
+            {!isFullscreenEnabled && <MobileSidebarToggle />}
           </div>
-
-          {/* 모바일 사이드바 토글 버튼 */}
-          {!isFullscreenEnabled && <MobileSidebarToggle />}
-        </div>
-      </SidebarProvider>
-    </Fullscreen>
+        </SidebarProvider>
+      </Fullscreen>
+    </DrawingErrorBoundary>
   );
 });
 

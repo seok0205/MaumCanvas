@@ -158,11 +158,14 @@ const DrawingStage = memo<DrawingStageProps>(
         style={{
           width: stageSize.width,
           height: stageSize.height,
-          // 터치펜 최적화 CSS
+          // 터치펜 최적화 CSS (태블릿 PWA 환경)
           touchAction: 'none',
           WebkitUserSelect: 'none',
           WebkitTouchCallout: 'none',
           WebkitTapHighlightColor: 'transparent',
+          // 성능 최적화
+          willChange: isEditingActive ? 'transform' : 'auto',
+          transform: 'translateZ(0)', // 하드웨어 가속 활성화
         }}
       >
         {/* 전체화면 버튼 (편집 중일 때만 표시) */}
