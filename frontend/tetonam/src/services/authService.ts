@@ -244,6 +244,11 @@ export const authService = {
         const apiError = axiosError.response.data;
         // 백엔드 API 문서의 에러 코드들에 대한 처리
         switch (apiError.code) {
+          case 'USER4002': // 해당 유저가 없습니다
+            throw new AuthenticationError(
+              apiError.code,
+              apiError.message || '해당 유저가 없습니다'
+            );
           case 'MAIL5000': // 이메일 전송에 에러가 발생했습니다
             throw new AuthenticationError(
               apiError.code,

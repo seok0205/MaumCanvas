@@ -26,6 +26,7 @@ export const STEP_DESCRIPTIONS = {
 // 에러 메시지 상수
 export const PASSWORD_RESET_ERROR_MESSAGES = {
   EMAIL_SEND_FAILED: '이메일 발송에 실패했습니다.',
+  USER_NOT_FOUND: '해당 유저가 없습니다',
   INVALID_VERIFICATION_CODE: '유효하지 않은 인증 코드입니다.',
   VERIFICATION_FAILED: '인증에 실패했습니다.',
   PASSWORD_RESET_FAILED: '비밀번호 재설정에 실패했습니다.',

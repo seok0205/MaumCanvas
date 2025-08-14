@@ -56,12 +56,11 @@ export const PasswordResetForm = React.memo(() => {
       try {
         await requestPasswordReset(data.email);
 
-        if (!emailStep.error) {
-          setEmailMessage({
-            type: 'success',
-            message: '입력하신 이메일로 인증 코드를 발송했습니다.',
-          });
-        }
+        // requestPasswordReset가 성공적으로 완료되면 성공 메시지 표시
+        setEmailMessage({
+          type: 'success',
+          message: '입력하신 이메일로 인증 코드를 발송했습니다.',
+        });
       } catch (error) {
         setEmailMessage({
           type: 'error',
@@ -72,7 +71,7 @@ export const PasswordResetForm = React.memo(() => {
         });
       }
     },
-    [requestPasswordReset, emailStep.error]
+    [requestPasswordReset]
   );
 
   const handleVerificationSubmit = useCallback(
