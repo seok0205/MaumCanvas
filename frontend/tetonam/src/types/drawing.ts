@@ -69,12 +69,15 @@ export interface UseDrawingLocalStorageReturn {
 export interface PenSettings {
   pressureSensitivity: boolean;
   touchRejection: boolean;
+  tiltSensitivity: boolean;
   pressureMultiplier: number; // 0.1 ~ 2.0
 }
 
 // 터치펜 이벤트 데이터 타입
 export interface PenEventData {
   pressure: number;
+  tiltX: number;
+  tiltY: number;
   pointerType: 'mouse' | 'pen' | 'touch';
   pointerId: number;
 }
@@ -89,6 +92,7 @@ export interface DrawingLine {
   // 터치펜 관련 확장 데이터
   pointerType?: 'mouse' | 'pen' | 'touch';
   pressureData?: number[]; // 각 포인트별 압력 값
+  tiltData?: Array<{ x: number; y: number }>; // 각 포인트별 기울기 값
 }
 
 // 그리기 도구 타입

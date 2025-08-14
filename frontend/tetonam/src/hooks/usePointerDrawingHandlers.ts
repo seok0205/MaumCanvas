@@ -37,29 +37,16 @@ export const usePointerDrawingHandlers = () => {
   const extractPointerData = useCallback((evt: PointerEvent): PenEventData => {
     return {
       pressure: evt.pressure || 0.5,
+      tiltX: evt.tiltX || 0,
+      tiltY: evt.tiltY || 0,
       pointerType: evt.pointerType as 'mouse' | 'pen' | 'touch',
       pointerId: evt.pointerId,
     };
   }, []);
 
-  // 멀티터치 감지 및 방지 로직 (Konva.js 최적화)
-  const shouldRejectMultiTouch = useCallback((evt: PointerEvent): boolean => {
-    // TouchEvent의 경우 touches 배열 확인
-    if ('touches' in evt && evt.touches && Array.isArray(evt.touches)) {
-      return evt.touches.length > 1;
-    }
-    return false;
-  }, []);
-
   // 스마트한 터치 거부 로직 (태블릿 최적화)
   const shouldRejectPointer = useCallback(
-    (pointerData: PenEventData, evt?: PointerEvent): boolean => {
-      // 멀티터치 감지 시 거부
-      if (evt && shouldRejectMultiTouch(evt)) {
-        console.log('Multi-touch detected, rejecting pointer');
-        return true;
-      }
-
+    (pointerData: PenEventData): boolean => {
       // 터치 거부가 비활성화된 경우 모든 입력 허용
       if (!penSettings.touchRejection) return false;
 
@@ -87,7 +74,7 @@ export const usePointerDrawingHandlers = () => {
       // 펜이 비활성화된 상태에서는 모든 입력 허용
       return false;
     },
-    [penSettings.touchRejection, isPenActive, activePenPointerId, shouldRejectMultiTouch]
+    [penSettings.touchRejection, isPenActive, activePenPointerId]
   );
 
   // 포인터 다운 핸들러 (태블릿 최적화)
@@ -98,8 +85,8 @@ export const usePointerDrawingHandlers = () => {
 
       const pointerData = extractPointerData(e.evt);
 
-      // 터치 거부 및 멀티터치 확인
-      if (shouldRejectPointer(pointerData, e.evt)) {
+      // 터치 거부 확인
+      if (shouldRejectPointer(pointerData)) {
         console.log(
           'Pointer rejected:',
           pointerData.pointerType,
@@ -145,6 +132,7 @@ export const usePointerDrawingHandlers = () => {
         pointerType: pointerData.pointerType,
         ...(pointerData.pointerType === 'pen' && {
           pressureData: [pointerData.pressure],
+          tiltData: [{ x: pointerData.tiltX, y: pointerData.tiltY }],
         }),
       };
 
@@ -176,8 +164,8 @@ export const usePointerDrawingHandlers = () => {
 
       const pointerData = extractPointerData(e.evt);
 
-      // 터치 거부 및 멀티터치 확인
-      if (shouldRejectPointer(pointerData, e.evt)) {
+      // 터치 거부 확인
+      if (shouldRejectPointer(pointerData)) {
         return;
       }
 
@@ -199,8 +187,8 @@ export const usePointerDrawingHandlers = () => {
           pointerData.pointerType === 'pen' &&
           lastLine.pointerType === 'pen'
         ) {
-          // 압력 데이터만 수집 (성능 최적화)
-          // 향후 압력에 따른 실시간 선 굵기 변화 등에 활용 가능
+          // 압력과 기울기 데이터는 나중에 고급 기능으로 활용 가능
+          // 현재는 기본 그리기 기능에 집중
         }
       }
     },

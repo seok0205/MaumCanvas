@@ -86,6 +86,7 @@ const initialState: UIState = {
   penSettings: {
     pressureSensitivity: true,
     touchRejection: false, // 태블릿에서 기본적으로 비활성화
+    tiltSensitivity: false,
     pressureMultiplier: 1.0,
   },
   isPenActive: false,
