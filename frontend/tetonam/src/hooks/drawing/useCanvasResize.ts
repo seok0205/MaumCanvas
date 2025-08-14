@@ -11,6 +11,7 @@ interface UseCanvasResizeProps {
   isEditingActive: boolean;
   setStageSize: (size: StageSize) => void;
   currentStep: number;
+  isFullscreen?: boolean;
 }
 
 /**
@@ -21,12 +22,35 @@ export const useCanvasResize = ({
   isEditingActive,
   setStageSize,
   currentStep,
+  isFullscreen = false,
 }: UseCanvasResizeProps) => {
   // Stage 크기 계산 (A4 비율)
   const calculateStageSize = useCallback(() => {
     const container = containerRef.current;
     if (!container) return;
 
+    // 전체화면 모드에서는 더 큰 캔버스 크기 계산
+    if (isFullscreen) {
+      const screenWidth = window.innerWidth;
+      const screenHeight = window.innerHeight;
+
+      // A4 비율을 유지하면서 화면에 맞는 최대 크기 계산 (여백 고려)
+      let height = screenHeight * 0.8; // 80% 사용 (상하단 UI 여백 고려)
+      let width = height / A4_RATIO;
+
+      if (width > screenWidth * 0.8) {
+        width = screenWidth * 0.8;
+        height = width * A4_RATIO;
+      }
+
+      setStageSize({
+        width: Math.floor(width),
+        height: Math.floor(height),
+      });
+      return;
+    }
+
+    // 일반 모드에서의 기존 로직
     const availWidth = container.clientWidth - CANVAS_PADDING * 2;
     const availHeight = container.clientHeight - CANVAS_PADDING * 2;
 
@@ -41,12 +65,12 @@ export const useCanvasResize = ({
       width: Math.floor(width),
       height: Math.floor(height),
     });
-  }, [containerRef, isEditingActive, setStageSize]);
+  }, [containerRef, isEditingActive, setStageSize, isFullscreen]);
 
   // 초기 크기 설정
   useLayoutEffect(() => {
     calculateStageSize();
-  }, [calculateStageSize, currentStep, isEditingActive]);
+  }, [calculateStageSize, currentStep, isEditingActive, isFullscreen]);
 
   // 리사이즈 이벤트 처리 (디바운스 적용)
   useEffect(() => {

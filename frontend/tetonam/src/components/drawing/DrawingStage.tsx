@@ -5,7 +5,7 @@ import { Layer, Line, Rect, Stage } from 'react-konva';
 import { Button } from '@/components/ui/interactive/button';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import type { DrawingLine, StageSize } from '@/types/drawing';
-import { Palette } from 'lucide-react';
+import { Maximize, Palette } from 'lucide-react';
 
 interface DrawingStageProps {
   stageRef: React.RefObject<Konva.Stage | null>;
@@ -18,6 +18,8 @@ interface DrawingStageProps {
   onReactivate: () => void;
   saveAnimationKey: number;
   reActivateButtonRef: React.RefObject<HTMLButtonElement | null>;
+  onFullscreenToggle?: () => void;
+  isFullscreen?: boolean;
 }
 
 /**
@@ -36,6 +38,8 @@ const DrawingStage = memo<DrawingStageProps>(
     onReactivate,
     saveAnimationKey,
     reActivateButtonRef,
+    onFullscreenToggle,
+    isFullscreen = false,
   }) => {
     const reduceMotion = useReducedMotion();
 
@@ -107,6 +111,21 @@ const DrawingStage = memo<DrawingStageProps>(
         }`}
         style={{ width: stageSize.width, height: stageSize.height }}
       >
+        {/* 전체화면 버튼 (편집 중일 때만 표시) */}
+        {isEditingActive && onFullscreenToggle && !isFullscreen && (
+          <div className='absolute top-2 right-2 z-10'>
+            <Button
+              onClick={onFullscreenToggle}
+              size='sm'
+              variant='outline'
+              className='bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm'
+              title='전체화면으로 보기'
+            >
+              <Maximize className='w-4 h-4' />
+            </Button>
+          </div>
+        )}
+
         <Stage
           ref={stageRef}
           width={stageSize.width}
