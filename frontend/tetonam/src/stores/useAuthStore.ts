@@ -13,7 +13,7 @@ export const useAuthStore = create<AuthState>()(
       set => ({
         user: null,
         isAuthenticated: false,
-        hasCompletedOnboarding: false,
+        // hasCompletedOnboarding 제거 - 항상 온보딩을 시작점으로 사용
         selectedUserRole: null,
         error: null,
         isLoading: false,
@@ -23,8 +23,7 @@ export const useAuthStore = create<AuthState>()(
         clearUser: () =>
           set({ user: null, isAuthenticated: false, error: null }),
 
-        setCompletedOnboarding: completed =>
-          set({ hasCompletedOnboarding: completed }),
+        // setCompletedOnboarding 제거
 
         setSelectedUserRole: type => set({ selectedUserRole: type }),
 
@@ -210,7 +209,7 @@ export const useAuthStore = create<AuthState>()(
           set({
             user: null,
             isAuthenticated: false,
-            hasCompletedOnboarding: false,
+            // hasCompletedOnboarding 제거 - 항상 온보딩을 시작점으로 사용
             selectedUserRole: null,
             error: null,
             isLoading: false, // 로딩 상태도 초기화
@@ -221,7 +220,7 @@ export const useAuthStore = create<AuthState>()(
       {
         name: 'auth-storage',
         partialize: state => ({
-          hasCompletedOnboarding: state.hasCompletedOnboarding,
+          // hasCompletedOnboarding 제거 - 온보딩 상태 추적하지 않음
           user: state.user,
           isAuthenticated: state.isAuthenticated,
           selectedUserRole: state.selectedUserRole, // selectedUserRole 추가

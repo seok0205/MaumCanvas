@@ -6,7 +6,7 @@ import { useUserHomeInfo } from '@/hooks/useUserHomeInfo';
 import { getPrimaryRole } from '@/utils/userRoleMapping';
 import { AlertCircle, ArrowLeft, Heart, LogOut, User, X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 // 타입 정의
 interface CommonHeaderProps {
@@ -32,7 +32,11 @@ export const CommonHeader = ({
 }: CommonHeaderProps) => {
   const { logout } = useAuthActions();
   const navigate = useNavigate();
+  const location = useLocation();
   const [logoutError, setLogoutError] = useState<string | null>(null);
+
+  // 커뮤니티 게시글 작성 페이지인지 확인
+  const isCommunityCreatePage = location.pathname === '/community/create';
 
   // 사용자 정보 조회 (이름 가져오기)
   const { userName, isLoading: isUserInfoLoading } = useUserHomeInfo({
@@ -99,7 +103,7 @@ export const CommonHeader = ({
       <header className='border-b border-border/50 bg-card/80 shadow-card backdrop-blur-sm rounded-2xl mx-4 mt-4'>
         <div className='flex items-center justify-between px-4 py-4'>
           <div className='flex items-center space-x-4'>
-            {showBackButton && (
+            {showBackButton && !isCommunityCreatePage && (
               <Button
                 variant='ghost'
                 size='sm'

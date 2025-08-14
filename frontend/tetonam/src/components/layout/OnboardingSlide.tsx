@@ -2,6 +2,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { memo, useState } from 'react';
 
 import { Button } from '@/components/ui/interactive/button';
+import { OptimizedImage } from '@/components/ui/OptimizedImage';
 
 interface OnboardingSlideProps {
   title: string;
@@ -12,6 +13,7 @@ interface OnboardingSlideProps {
   onNext: () => void;
   onPrev: () => void;
   isLastSlide: boolean;
+  isImagePreloaded?: boolean;
   className?: string;
 }
 
@@ -24,9 +26,10 @@ export const OnboardingSlide = memo(function OnboardingSlide({
   onNext,
   onPrev,
   isLastSlide,
+  isImagePreloaded = false,
   className,
 }: OnboardingSlideProps) {
-  const [imageError, setImageError] = useState(false);
+  const [, setImageError] = useState(false);
 
   const handleImageError = () => {
     setImageError(true);
@@ -45,6 +48,14 @@ export const OnboardingSlide = memo(function OnboardingSlide({
     }
   };
 
+  // 슬라이드별 레이아웃 방향 결정
+  const getLayoutDirection = () => {
+    if (currentSlide === 1) {
+      return 'flex-col md:flex-row-reverse'; // 두번째 슬라이드: 이미지 오른쪽, 텍스트 왼쪽
+    }
+    return 'flex-col md:flex-row'; // 첫번째, 세번째 슬라이드: 이미지 왼쪽, 텍스트 오른쪽
+  };
+
   return (
     <div
       className={`min-h-screen bg-gradient-warm flex flex-col items-center justify-center p-6 ${className || ''}`}
@@ -53,35 +64,32 @@ export const OnboardingSlide = memo(function OnboardingSlide({
       role='main'
       aria-label='온보딩 슬라이드'
     >
-      <div className='w-full max-w-2xl md:max-w-4xl lg:max-w-6xl mx-auto'>
+      <div className='w-full max-w-2xl md:max-w-6xl lg:max-w-7xl mx-auto'>
         {/* 메인 콘텐츠 */}
-        <div className='text-center space-y-8 animate-fade-in'>
+        <div
+          className={`flex ${getLayoutDirection()} items-center gap-8 md:gap-5 animate-fade-in`}
+        >
           {/* 이미지 */}
-          <div className='w-80 h-80 mx-auto mb-8 animate-float flex items-center justify-center'>
-            {!imageError ? (
-              <img
-                src={imageSrc}
-                alt={title}
-                className='max-w-full max-h-full object-contain rounded-2xl'
-                onError={handleImageError}
-                loading='lazy'
-              />
-            ) : (
-              <div className='w-full h-full bg-muted rounded-2xl flex items-center justify-center'>
-                <p className='text-muted-foreground text-sm'>
-                  이미지를 불러올 수 없습니다
-                </p>
-              </div>
-            )}
+          <div className='w-80 h-80 md:w-[32rem] md:h-[32rem] lg:w-[36rem] lg:h-[36rem] mx-auto md:mx-0 flex-shrink-0 animate-float flex items-center justify-center'>
+            <OptimizedImage
+              src={imageSrc}
+              alt={title}
+              isPreloaded={isImagePreloaded}
+              priority={true}
+              className='max-w-full max-h-full object-contain rounded-2xl'
+              fallbackClassName='w-full h-full bg-muted rounded-2xl'
+              skeletonClassName='rounded-2xl'
+              onError={handleImageError}
+            />
           </div>
 
           {/* 텍스트 콘텐츠 */}
-          <div className='space-y-4'>
-            <h1 className='text-2xl md:text-3xl font-bold text-foreground'>
+          <div className='flex-1 space-y-4 text-center md:text-left'>
+            <h1 className='text-xl md:text-3xl lg:text-4xl font-bold text-foreground break-keep leading-tight tracking-wide'>
               {title}
             </h1>
-            <div className='min-h-[3.5rem] flex items-center justify-center'>
-              <p className='text-muted-foreground text-base md:text-lg leading-relaxed'>
+            <div className='min-h-[3.5rem] flex items-center justify-center md:justify-start'>
+              <p className='text-muted-foreground text-sm md:text-lg lg:text-xl leading-relaxed tracking-wide font-medium max-w-2xl break-keep'>
                 {description}
               </p>
             </div>
@@ -89,7 +97,7 @@ export const OnboardingSlide = memo(function OnboardingSlide({
         </div>
 
         {/* 네비게이션 영역 */}
-        <div className='flex flex-col space-y-4 mt-12 max-w-md mx-auto'>
+        <div className='flex flex-col space-y-4 mt-16 max-w-md mx-auto'>
           {/* 상단: 이전, 진행 표시기, 다음 버튼 */}
           <div className='flex justify-between items-center'>
             {/* 이전 버튼 */}

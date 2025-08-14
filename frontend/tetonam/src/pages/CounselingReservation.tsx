@@ -9,6 +9,7 @@ import {
   User,
 } from 'lucide-react';
 
+import { ReservationGuideCard } from '@/components/dashboard/ReservationGuideCard';
 import { CounselingTypeSelector } from '@/components/ui/CounselingTypeSelector';
 import { Alert, AlertDescription } from '@/components/ui/feedback/alert';
 import { Button } from '@/components/ui/interactive/button';
@@ -67,7 +68,7 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
         </header>
 
         {/* 날짜 선택 섹션 */}
-        <Card 
+        <Card
           className='bg-white border-0 drop-shadow-2xl'
           style={{ boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)' }}
         >
@@ -109,7 +110,7 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
         </Card>
 
         {/* 시간 선택 섹션 */}
-        <Card 
+        <Card
           className='bg-white border-0 drop-shadow-2xl'
           style={{ boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)' }}
         >
@@ -133,10 +134,12 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
                     'h-auto flex-col gap-1 p-3 transition-all rounded-lg',
                     option.isSelected
                       ? 'bg-yellow-100 border-yellow-300 text-yellow-900 hover:bg-yellow-200'
-                      : 'hover:bg-gray-50'
+                      : option.isDisabled
+                        ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+                        : 'hover:bg-gray-50'
                   )}
                   onClick={() => handleTimeSelect(option.time)}
-                  disabled={!selectedDate}
+                  disabled={!selectedDate || option.isDisabled}
                 >
                   <Clock className='h-4 w-4' />
                   <span className='text-sm font-medium'>
@@ -145,12 +148,18 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
                 </Button>
               ))}
             </div>
+            {selectedDate && (
+              <div className='mt-4 text-sm text-gray-600'>
+                <Info className='h-4 w-4 inline-block mr-2' />
+                이미 지난 시간은 선택할 수 없습니다.
+              </div>
+            )}
           </CardContent>
         </Card>
 
         {/* 상담유형 선택 섹션 */}
         {selectedDate && selectedTime && (
-          <Card 
+          <Card
             className='bg-white border-0 drop-shadow-2xl'
             style={{ boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)' }}
           >
@@ -172,7 +181,7 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
 
         {/* 상담사 선택 섹션 */}
         {selectedDate && selectedTime && selectedCounselingType && (
-          <Card 
+          <Card
             className='bg-white border-0 drop-shadow-2xl'
             style={{ boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)' }}
           >
@@ -251,7 +260,7 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
           selectedTime &&
           selectedCounselingType &&
           selectedCounselor && (
-            <Card 
+            <Card
               className='bg-blue-50 border-blue-200 drop-shadow-2xl'
               style={{ boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)' }}
             >
@@ -288,33 +297,7 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
           )}
 
         {/* 예약 안내사항 */}
-        <Card 
-          className='bg-white border-0 drop-shadow-2xl'
-          style={{ boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)' }}
-        >
-          <CardHeader>
-            <CardTitle className='flex items-center gap-2 text-lg'>
-              <Info className='h-5 w-5 text-blue-600' />
-              예약 안내사항
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className='space-y-2 text-sm text-gray-700'>
-              <li className='flex items-start gap-2'>
-                <span className='text-blue-600 mt-0.5'>•</span>
-                <span>예약 시간 10분 전까지 접속해주세요</span>
-              </li>
-              <li className='flex items-start gap-2'>
-                <span className='text-blue-600 mt-0.5'>•</span>
-                <span>예약 변경은 24시간 전까지 가능합니다</span>
-              </li>
-              <li className='flex items-start gap-2'>
-                <span className='text-blue-600 mt-0.5'>•</span>
-                <span>상담 내용은 비밀이 보장됩니다</span>
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
+        <ReservationGuideCard variant='reservation' />
 
         {/* 예약 확정 버튼 */}
         <Button

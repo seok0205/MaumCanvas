@@ -1,5 +1,13 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { addDays, format, isWeekend, startOfDay } from 'date-fns';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  addDays,
+  format,
+  isBefore,
+  isToday,
+  isWeekend,
+  set,
+  startOfDay,
+} from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -22,6 +30,7 @@ interface TimeOption {
   time: string;
   formattedTime: string;
   isSelected: boolean;
+  isDisabled: boolean;
 }
 
 interface UseCounselingReservationReturn {
@@ -55,6 +64,7 @@ interface UseCounselingReservationReturn {
 
 export const useCounselingReservation = (): UseCounselingReservationReturn => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [selectedCounselor, setSelectedCounselor] =
@@ -87,6 +97,8 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
   // 시간 옵션 생성 (9시부터 20시까지, 1시간 단위)
   const timeOptions = useMemo((): TimeOption[] => {
     const options: TimeOption[] = [];
+    const now = new Date();
+    const isSelectedDateToday = selectedDate ? isToday(selectedDate) : false;
 
     for (
       let hour = COUNSELING_CONSTANTS.START_HOUR;
@@ -94,15 +106,29 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
       hour += COUNSELING_CONSTANTS.HOUR_INTERVAL
     ) {
       const time = `${hour.toString().padStart(2, '0')}:00`;
+
+      // 현재 날짜가 오늘이고, 선택하려는 시간이 현재 시간보다 이전인지 확인
+      let isDisabled = false;
+      if (isSelectedDateToday && selectedDate) {
+        const timeDate = set(selectedDate, {
+          hours: hour,
+          minutes: 0,
+          seconds: 0,
+          milliseconds: 0,
+        });
+        isDisabled = isBefore(timeDate, now);
+      }
+
       options.push({
         time,
         formattedTime: time,
         isSelected: selectedTime === time,
+        isDisabled,
       });
     }
 
     return options;
-  }, [selectedTime]);
+  }, [selectedTime, selectedDate]);
 
   // 상담사 조회 쿼리
   const {
@@ -152,6 +178,8 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
     },
     onSuccess: () => {
       toast.success('상담이 성공적으로 예약되었습니다.');
+      // 상담 관련 쿼리 무효화로 대시보드 데이터 자동 갱신
+      queryClient.invalidateQueries({ queryKey: ['counseling', 'upcoming'] });
       navigate('/dashboard');
     },
     onError: (error: Error) => {
@@ -164,17 +192,59 @@ export const useCounselingReservation = (): UseCounselingReservationReturn => {
   });
 
   // 날짜 선택 핸들러
-  const handleDateSelect = useCallback((date: Date) => {
-    setSelectedDate(date);
-    setSelectedTime('');
-    setSelectedCounselor(null);
-  }, []);
+  const handleDateSelect = useCallback(
+    (date: Date) => {
+      setSelectedDate(date);
+
+      // 선택된 시간이 있을 때, 새로운 날짜에서 해당 시간이 비활성화되는지 확인
+      if (selectedTime) {
+        const now = new Date();
+        const isNewDateToday = isToday(date);
+
+        if (isNewDateToday) {
+          const timeParts = selectedTime.split(':');
+          if (timeParts.length >= 2 && timeParts[0]) {
+            const selectedHour = parseInt(timeParts[0], 10);
+            if (!isNaN(selectedHour)) {
+              const timeDate = set(date, {
+                hours: selectedHour,
+                minutes: 0,
+                seconds: 0,
+                milliseconds: 0,
+              });
+
+              // 선택된 시간이 현재 시간보다 이전이면 시간 선택 해제
+              if (isBefore(timeDate, now)) {
+                setSelectedTime('');
+                toast.info(
+                  '선택된 시간이 이미 지나서 시간 선택이 해제되었습니다.'
+                );
+              }
+            }
+          }
+        }
+      }
+
+      setSelectedCounselor(null);
+    },
+    [selectedTime]
+  );
 
   // 시간 선택 핸들러
-  const handleTimeSelect = useCallback((time: string) => {
-    setSelectedTime(time);
-    setSelectedCounselor(null);
-  }, []);
+  const handleTimeSelect = useCallback(
+    (time: string) => {
+      // 비활성화된 시간인지 확인
+      const timeOption = timeOptions.find(option => option.time === time);
+      if (timeOption?.isDisabled) {
+        toast.error('이미 지난 시간은 선택할 수 없습니다.');
+        return;
+      }
+
+      setSelectedTime(time);
+      setSelectedCounselor(null);
+    },
+    [timeOptions]
+  );
 
   // 상담사 선택 핸들러
   const handleCounselorSelect = useCallback((counselor: CounselorInfo) => {
