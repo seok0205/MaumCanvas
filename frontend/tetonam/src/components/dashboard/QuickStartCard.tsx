@@ -29,14 +29,13 @@ export const QuickStartCard = ({
         h-full flex flex-col
         p-6 shadow-card border border-border/50
         bg-card/80 backdrop-blur-sm
-        transition-all duration-300
         micro-interaction
       '
     >
       <div className='text-center space-y-4 flex-1 flex flex-col justify-between'>
         <div className='space-y-4'>
           <div
-            className={`w-16 h-16 mx-auto ${bgColor} rounded-2xl flex items-center justify-center shadow-soft transition-all duration-300`}
+            className={`w-16 h-16 mx-auto ${bgColor} rounded-2xl flex items-center justify-center shadow-soft micro-interaction`}
             role='img'
             aria-label={`${title} 아이콘`}
           >

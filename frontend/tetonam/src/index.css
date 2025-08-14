@@ -368,9 +368,12 @@
     @apply h-12 rounded-xl border border-input bg-background px-4 py-3 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[44px];
   }
 
-  /* 마이크로 인터랙션 */
+  /* 마이크로 인터랙션 - 브라우저 렌더링 파이프라인 최적화 */
   .micro-interaction {
-    @apply transition-all duration-200 ease-out;
+    transition:
+      transform 200ms ease-out,
+      box-shadow 200ms ease-out,
+      opacity 200ms ease-out;
   }
 
   /* 애니메이션 유틸리티 */
