@@ -311,7 +311,7 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
     // 정상적인 상담 정보 표시 - 개선된 유효성 검사 적용
     const { date, time } = formatDateTime(validatedCounseling.time);
 
-    // 상담 입장 가능 여부 판단 로직 (상담시간 30분 전부터 상담시간까지만 활성화)
+    // 상담 입장 가능 여부 판단 로직 (상담시간 10분 전부터 상담시간+59분까지 활성화)
     const canStart = (() => {
       try {
         const now = new Date();
@@ -322,12 +322,14 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
           return false;
         }
 
-        // 상담시간 30분 전 시점 계산
-        const thirtyMinutesBefore = addMinutes(appointmentTime, -30);
+        // 상담시간 10분 전 시점과 59분 후 시점 계산
+        const tenMinutesBefore = addMinutes(appointmentTime, -10);
+        const fiftyNineMinutesAfter = addMinutes(appointmentTime, 59);
 
-        // 현재 시간이 30분 전 이후이고 상담시간 이전인지 확인
+        // 현재 시간이 10분 전 이후이고 59분 후 이전인지 확인
         const canStartNow =
-          isAfter(now, thirtyMinutesBefore) && isBefore(now, appointmentTime);
+          isAfter(now, tenMinutesBefore) &&
+          isBefore(now, fiftyNineMinutesAfter);
 
         return canStartNow;
       } catch (error) {
@@ -345,11 +347,12 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
       if (!canStart) {
         const now = new Date();
         const appointmentTime = new Date(validatedCounseling.time);
-        const thirtyMinutesBefore = addMinutes(appointmentTime, -30);
+        const tenMinutesBefore = addMinutes(appointmentTime, -10);
+        const fiftyNineMinutesAfter = addMinutes(appointmentTime, 59);
 
-        if (isBefore(now, thirtyMinutesBefore)) {
+        if (isBefore(now, tenMinutesBefore)) {
           return { text: '입장 대기', disabled: true };
-        } else if (isAfter(now, appointmentTime)) {
+        } else if (isAfter(now, fiftyNineMinutesAfter)) {
           return { text: '시간 만료', disabled: true };
         }
         return { text: '입장 불가', disabled: true };

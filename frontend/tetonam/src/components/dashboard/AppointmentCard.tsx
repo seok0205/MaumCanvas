@@ -37,12 +37,14 @@ export const AppointmentCard = ({
   };
 
   const canStartAppointment = (appointment: Appointment): boolean => {
-    // 테스트 기간: 언제든지 활성화하되, 상담 시간 30분 경과 후에는 비활성화
+    // 상담예약시간 10분 전부터 59분 후까지 활성화
     const now = new Date();
     const appointmentTime = new Date(`${appointment.date} ${appointment.time}`);
     const timeDiff = appointmentTime.getTime() - now.getTime();
     const minutesDiff = timeDiff / (1000 * 60);
-    return minutesDiff >= -30;
+
+    // 상담시간 10분 전(-10) ~ 상담시간 59분 후(-59) 구간에서 활성화
+    return minutesDiff >= -59 && minutesDiff <= 10;
   };
 
   const handleAppointmentAction = async (appointment: Appointment) => {
