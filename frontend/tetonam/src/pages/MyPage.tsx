@@ -422,7 +422,7 @@ const StudentCounselingTab = () => {
                 </div>
                 <div className='flex items-center gap-2 md:block'>
                   <span className='text-xs text-muted-foreground md:hidden'>
-                    시간:
+                    일시:
                   </span>
                   <div className='h-4 w-32 bg-muted animate-pulse rounded' />
                 </div>
