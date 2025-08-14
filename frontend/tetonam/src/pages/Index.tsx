@@ -143,7 +143,7 @@ export const Index = () => {
           마음 캔버스 ✨
         </h1>
         <p className='text-lg text-muted-foreground animate-pulse-gentle animation-delay-300 leading-relaxed'>
-          창의적인 마음의 여행을 준비하고 있어요... 🌈
+          당신만의 마음 캔버스를 준비하고 있어요... 🌈
         </p>
 
         <LoadingDots />
