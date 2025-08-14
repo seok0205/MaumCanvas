@@ -9,6 +9,7 @@ import type { User } from '@/types/user';
 import { getPrimaryRole } from '@/utils/userRoleMapping';
 import { DailyTips } from './DailyTips';
 import { QuickStartSection } from './QuickStartSection';
+import { ReservationGuideCard } from './ReservationGuideCard';
 import { SelfDiagnosisCard } from './SelfDiagnosisCard';
 import { UpcomingCounselingCard } from './UpcomingCounselingCard';
 import { WelcomeSection } from './WelcomeSection';
@@ -49,8 +50,8 @@ export const UserDashboard = memo<UserDashboardProps>(({ user }) => {
   return (
     <div className={`${paddingClass} space-y-6`}>
       {/* 환영 메시지 - 병렬 로딩된 데이터 사용 */}
-      <WelcomeSection 
-        userRole={primaryRole} 
+      <WelcomeSection
+        userRole={primaryRole}
         {...(data.userInfo?.name && { userName: data.userInfo.name })}
         {...(isLoading && !data.userInfo && { isLoading: true })}
       />
@@ -62,17 +63,20 @@ export const UserDashboard = memo<UserDashboardProps>(({ user }) => {
       />
 
       {/* 상담 관리 섹션 - 병렬 로딩된 데이터 사용 */}
-      <div className='grid grid-cols-1 lg:grid-cols-1 gap-6'>
+      <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch'>
         {/* 다가오는 상담 - 병렬 로딩 데이터 props 전달 */}
-        <UpcomingCounselingCard 
+        <UpcomingCounselingCard
           counselingData={data.counseling}
           isLoading={isLoading}
           isFetching={data.counseling === null && isLoading}
         />
+
+        {/* 예약 안내사항 */}
+        <ReservationGuideCard />
       </div>
 
       {/* 자가 진단 결과 섹션 - 병렬 로딩된 데이터 사용 */}
-      <SelfDiagnosisCard 
+      <SelfDiagnosisCard
         questionnaireData={data.questionnaire}
         isLoading={isLoading}
         isFetching={data.questionnaire === null && isLoading}

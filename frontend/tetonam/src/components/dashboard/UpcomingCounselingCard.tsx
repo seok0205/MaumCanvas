@@ -93,7 +93,7 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
     const navigate = useNavigate();
     const { user } = useAuthStore();
     const isCounselor = user?.roles?.some(r => r === 'COUNSELOR');
-    
+
     // 버튼 중복클릭 방지를 위한 상태
     const [isJoining, setIsJoining] = useState(false);
 
@@ -187,13 +187,13 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
     // Progressive Loading 로직 - Best Practice 적용
     if (showSkeleton) {
       return (
-        <Card className='p-6'>
+        <Card className='h-full flex flex-col p-6'>
           <div className='flex items-center justify-between mb-4'>
             <h3 className='text-lg font-semibold text-foreground'>
               다가오는 상담
             </h3>
           </div>
-          <div className='space-y-4'>
+          <div className='flex-1 flex flex-col justify-center space-y-4'>
             <div className='flex items-center justify-between p-4 bg-accent/50 rounded-lg'>
               <div className='flex items-center space-x-3'>
                 <div className='text-center space-y-2'>
@@ -223,13 +223,13 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
     // 에러 상태 처리 - 더 나은 UX와 명확한 안내
     if (error) {
       return (
-        <Card className='p-6'>
+        <Card className='h-full flex flex-col p-6'>
           <div className='flex items-center justify-between mb-4'>
             <h3 className='text-lg font-semibold text-foreground'>
               다가오는 상담
             </h3>
           </div>
-          <div className='text-center py-8'>
+          <div className='flex-1 flex flex-col justify-center text-center py-8'>
             <AlertCircle className='w-12 h-12 text-red-500 mx-auto mb-3' />
             <p className='text-muted-foreground mb-2'>
               상담 정보를 불러오지 못했습니다
@@ -259,13 +259,13 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
     // 상담이 없는 경우
     if (!upcomingCounseling) {
       return (
-        <Card className='p-6'>
+        <Card className='h-full flex flex-col p-6'>
           <div className='flex items-center justify-between mb-4'>
             <h3 className='text-lg font-semibold text-foreground'>
               다가오는 상담
             </h3>
           </div>
-          <div className='text-center py-8'>
+          <div className='flex-1 flex flex-col justify-center text-center py-8'>
             <Calendar className='w-12 h-12 text-muted-foreground mx-auto mb-3' />
             <p className='text-muted-foreground mb-2'>
               예정된 상담 일정이 없습니다
@@ -316,7 +316,7 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
       try {
         const now = new Date();
         const appointmentTime = new Date(validatedCounseling.time);
-        
+
         // 유효한 날짜인지 확인
         if (isNaN(appointmentTime.getTime())) {
           return false;
@@ -324,10 +324,11 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
 
         // 상담시간 30분 전 시점 계산
         const thirtyMinutesBefore = addMinutes(appointmentTime, -30);
-        
+
         // 현재 시간이 30분 전 이후이고 상담시간 이전인지 확인
-        const canStartNow = isAfter(now, thirtyMinutesBefore) && isBefore(now, appointmentTime);
-        
+        const canStartNow =
+          isAfter(now, thirtyMinutesBefore) && isBefore(now, appointmentTime);
+
         return canStartNow;
       } catch (error) {
         console.warn('상담 시간 계산 중 오류 발생:', error);
@@ -340,12 +341,12 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
       if (isJoining) {
         return { text: '입장 중...', disabled: true };
       }
-      
+
       if (!canStart) {
         const now = new Date();
         const appointmentTime = new Date(validatedCounseling.time);
         const thirtyMinutesBefore = addMinutes(appointmentTime, -30);
-        
+
         if (isBefore(now, thirtyMinutesBefore)) {
           return { text: '입장 대기', disabled: true };
         } else if (isAfter(now, appointmentTime)) {
@@ -353,14 +354,14 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
         }
         return { text: '입장 불가', disabled: true };
       }
-      
+
       return { text: '입장하기', disabled: false };
     };
 
     const buttonStatus = getButtonStatus();
 
     return (
-      <Card className='p-6'>
+      <Card className='h-full flex flex-col p-6'>
         <div className='flex items-center justify-between mb-4'>
           <h3 className='text-lg font-semibold text-foreground'>
             다가오는 상담
@@ -374,7 +375,7 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
           )}
         </div>
 
-        <div className='space-y-4'>
+        <div className='flex-1 flex flex-col justify-center'>
           <div className='flex items-center justify-between p-4 bg-accent/50 rounded-lg'>
             <div className='flex items-center space-x-3'>
               <div className='text-center'>

@@ -9,6 +9,7 @@ import {
   User,
 } from 'lucide-react';
 
+import { ReservationGuideCard } from '@/components/dashboard/ReservationGuideCard';
 import { CounselingTypeSelector } from '@/components/ui/CounselingTypeSelector';
 import { Alert, AlertDescription } from '@/components/ui/feedback/alert';
 import { Button } from '@/components/ui/interactive/button';
@@ -296,41 +297,7 @@ const CounselingReservation = ({}: CounselingReservationProps) => {
           )}
 
         {/* 예약 안내사항 */}
-        <Card
-          className='bg-white border-0 drop-shadow-2xl'
-          style={{ boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)' }}
-        >
-          <CardHeader>
-            <CardTitle className='flex items-center gap-2 text-lg'>
-              <Info className='h-5 w-5 text-blue-600' />
-              예약 안내사항
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className='space-y-2 text-sm text-gray-700'>
-              <li className='flex items-start gap-2'>
-                <span className='text-blue-600 mt-0.5'>•</span>
-                <span>모든 상담 내용은 비밀이 보장됩니다</span>
-              </li>
-              <li className='flex items-start gap-2'>
-                <span className='text-blue-600 mt-0.5'>•</span>
-                <span>상담 시간은 1시간입니다.</span>
-              </li>
-              <li className='flex items-start gap-2'>
-                <span className='text-blue-600 mt-0.5'>•</span>
-                <span>화상상담 입장은 예약 시간 30분 전부터 가능합니다.</span>
-              </li>
-              <li className='flex items-start gap-2'>
-                <span className='text-blue-600 mt-0.5'>•</span>
-                <span>
-                  {' '}
-                  예약시간 이후에는 입장이 불가하오니 원활한 상담 진행을 위해
-                  예약 시간 10분 전까지 입장 부탁드립니다.
-                </span>
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
+        <ReservationGuideCard variant='reservation' />
 
         {/* 예약 확정 버튼 */}
         <Button
