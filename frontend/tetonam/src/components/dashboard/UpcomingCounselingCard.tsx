@@ -145,10 +145,7 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
         const now = new Date();
 
         if (counselingDate < now) {
-          console.info('Counseling date is in the past:', {
-            counselingDate: counselingDate.toISOString(),
-            currentDate: now.toISOString(),
-          });
+            // 과거 날짜 상담에 대한 처리는 UI에서 자동으로 처리됨
         }
       } catch (error) {
         console.warn('Failed to parse counseling date:', counselingData.time);
