@@ -1,11 +1,13 @@
 import { userService } from '@/services/userService';
+import { useAuthStore } from '@/stores/useAuthStore';
 import type { MainMyInfoResponse } from '@/types/api';
-import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
-// React Query 키 상수
-const USER_QUERY_KEYS = {
-  HOME_MY_INFO: ['user', 'home-my-info'] as const,
-} as const;
+// React Query 키 상수 - 사용자별로 캐시 분리
+const createUserQueryKeys = (userEmail?: string) =>
+  ({
+    HOME_MY_INFO: ['user', 'home-my-info', userEmail] as const,
+  }) as const;
 
 interface UseUserHomeInfoOptions {
   enabled?: boolean;
@@ -37,17 +39,25 @@ interface UseUserHomeInfoReturn {
  * - gcTime을 30분으로 설정하여 캐시 보존
  * - 최대 3회 재시도로 네트워크 오류 대응
  */
-export const useUserHomeInfo = (options: UseUserHomeInfoOptions = {}): UseUserHomeInfoReturn => {
+export const useUserHomeInfo = (
+  options: UseUserHomeInfoOptions = {}
+): UseUserHomeInfoReturn => {
   const {
     enabled = true,
     staleTime = 10 * 60 * 1000, // 10분
     gcTime = 30 * 60 * 1000, // 30분
   } = options;
 
+  // 현재 로그인한 사용자 정보 가져오기
+  const { user } = useAuthStore();
+
+  // 사용자별 쿼리 키 생성 - 사용자가 바뀌면 캐시도 분리됨
+  const userQueryKeys = createUserQueryKeys(user?.email);
+
   const query = useQuery({
-    queryKey: USER_QUERY_KEYS.HOME_MY_INFO,
+    queryKey: userQueryKeys.HOME_MY_INFO,
     queryFn: ({ signal }) => userService.getHomeMyInfo(signal),
-    enabled, // 🔥 조건부 쿼리 실행 지원
+    enabled: enabled && !!user?.email, // 🔥 사용자 이메일이 있을 때만 실행
     staleTime,
     gcTime,
     placeholderData: keepPreviousData, // 🔥 매끄러운 리페치 전환
@@ -86,5 +96,5 @@ export const useUserHomeInfo = (options: UseUserHomeInfoOptions = {}): UseUserHo
   };
 };
 
-// Query Key 내보내기 (다른 곳에서 무효화할 때 사용)
-export { USER_QUERY_KEYS };
+// Query Key 생성 함수 내보내기 (다른 곳에서 무효화할 때 사용)
+export { createUserQueryKeys };

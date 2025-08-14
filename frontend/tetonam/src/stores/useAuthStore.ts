@@ -1,3 +1,4 @@
+import { queryClient } from '@/config/queryClient';
 import type { UserRole } from '@/constants/userRoles';
 import { authService } from '@/services/authService';
 import { userService } from '@/services/userService';
@@ -205,6 +206,13 @@ export const useAuthStore = create<AuthState>()(
         },
 
         logout: () => {
+          // React Query 캐시 전체 초기화 - 이전 사용자 데이터 완전 제거
+          queryClient.clear();
+
+          // localStorage에서 토큰 제거
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+
           // 모든 인증 관련 상태 완전 초기화
           set({
             user: null,
