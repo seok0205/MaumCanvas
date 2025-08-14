@@ -142,18 +142,9 @@ export const useDrawingStore = create<DrawingStore>()(
         const currentStepLines = newStepsLines[currentStep];
 
         if (currentStepLines && currentStepLines.length > 0) {
-          const lastLineIndex = currentStepLines.length - 1;
-          const lastLine = currentStepLines[lastLineIndex];
-
+          const lastLine = currentStepLines[currentStepLines.length - 1];
           if (lastLine) {
-            // 불변성을 지키면서 새 포인트 배열 생성
-            const newLines = [...currentStepLines];
-            newLines[lastLineIndex] = {
-              ...lastLine,
-              points: points, // 새로운 포인트 배열로 교체
-            };
-            newStepsLines[currentStep] = newLines;
-
+            lastLine.points = points;
             set({ stepsLines: newStepsLines }, false, 'updateLastLinePoints');
           }
         }

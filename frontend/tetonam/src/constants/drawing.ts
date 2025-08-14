@@ -98,11 +98,6 @@ export const CANVAS_CONFIG = {
   MAX_BRUSH_SIZE: 20,
   IMAGE_QUALITY: 1.0,
   PIXEL_RATIO: 2,
-
-  // 태블릿 성능 최적화 설정
-  TOUCH_THROTTLE_MS: 16, // 60fps (약 16ms)
-  MAX_POINTS_PER_LINE: 1000, // 선당 최대 포인트 수
-  TOUCH_SENSITIVITY: 2, // 터치 감도 (픽셀 단위)
 } as const;
 
 // 기본 색상 팔레트

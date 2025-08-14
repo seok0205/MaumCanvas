@@ -7,15 +7,6 @@ import { useReducedMotion } from '@/hooks/useReducedMotion';
 import type { DrawingLine, StageSize } from '@/types/drawing';
 import { Palette } from 'lucide-react';
 
-// Konva 성능 최적화 설정 - Best Practices 적용
-if (typeof window !== 'undefined' && 'Konva' in window) {
-  const konva = (window as any).Konva;
-  konva.capturePointerEventsEnabled = true;
-  konva.hitOnDragEnabled = false; // 성능 향상을 위해 비활성화
-  konva.perfectDrawEnabled = false; // 태블릿 성능 우선
-  konva.pixelRatio = Math.min(window.devicePixelRatio || 1, 2); // 고해상도 최적화
-}
-
 interface DrawingStageProps {
   stageRef: React.RefObject<Konva.Stage | null>;
   stageSize: StageSize;
@@ -58,84 +49,25 @@ const DrawingStage = memo<DrawingStageProps>(
       []
     );
 
-    // 포인터 이벤트 핸들러 (태블릿 최적화) - MDN Best Practices 적용
     const pointerHandlers = useMemo(
       () => ({
         onPointerDown: (e: any) => {
-          // MDN Best Practice: isPrimary와 pointerType 검증
-          if (e?.evt && !e.evt.isPrimary) return;
-          
-          const pointerType = e?.evt?.pointerType;
-          if (pointerType !== 'touch' && pointerType !== 'mouse' && pointerType !== 'pen') return;
-          
-          // 태블릿 펜/터치에 특화된 처리
-          if (e?.evt) {
+          if (e?.evt && typeof e.evt.preventDefault === 'function') {
             e.evt.preventDefault();
-            // 포인터 캡처로 터치 추적 개선 (에러 처리 포함)
-            if (
-              e.evt.target &&
-              e.evt.target.setPointerCapture &&
-              e.evt.pointerId
-            ) {
-              try {
-                e.evt.target.setPointerCapture(e.evt.pointerId);
-              } catch (error) {
-                console.warn('포인터 캡처 설정 실패:', error);
-              }
-            }
           }
           onMouseDown(e);
         },
         onPointerMove: (e: any) => {
-          // MDN Best Practice: isPrimary 검증
-          if (e?.evt && !e.evt.isPrimary) return;
-          
-          if (e?.evt) {
+          if (e?.evt && typeof e.evt.preventDefault === 'function') {
             e.evt.preventDefault();
           }
           onMouseMove(e);
         },
         onPointerUp: (e: any) => {
-          // MDN Best Practice: isPrimary 검증
-          if (e?.evt && !e.evt.isPrimary) return;
-          
-          if (e?.evt) {
+          if (e?.evt && typeof e.evt.preventDefault === 'function') {
             e.evt.preventDefault();
-            // 포인터 캡처 해제 (에러 처리 포함)
-            if (
-              e.evt.target &&
-              e.evt.target.releasePointerCapture &&
-              e.evt.pointerId
-            ) {
-              try {
-                e.evt.target.releasePointerCapture(e.evt.pointerId);
-              } catch (error) {
-                console.warn('포인터 캡처 해제 실패:', error);
-              }
-            }
           }
           onMouseUp(e);
-        },
-        onPointerCancel: (e: any) => {
-          // MDN Best Practice: isPrimary 검증
-          if (e?.evt && !e.evt.isPrimary) return;
-          
-          if (e?.evt) {
-            e.evt.preventDefault();
-            // 포인터 캡처 해제 (에러 처리 포함)
-            if (
-              e.evt.target &&
-              e.evt.target.releasePointerCapture &&
-              e.evt.pointerId
-            ) {
-              try {
-                e.evt.target.releasePointerCapture(e.evt.pointerId);
-              } catch (error) {
-                console.warn('포인터 캡처 해제 실패:', error);
-              }
-            }
-          }
-          onMouseUp(e); // 취소 시에도 그리기 종료
         },
       }),
       [onMouseDown, onMouseMove, onMouseUp]
@@ -191,20 +123,6 @@ const DrawingStage = memo<DrawingStageProps>(
               ? 'cursor-crosshair'
               : 'cursor-not-allowed opacity-60'
           } bg-white rounded-lg`}
-          style={{
-            // 태블릿 터치 최적화 CSS - Best Practices 적용
-            touchAction: isEditingActive ? 'none' : 'auto',
-            userSelect: 'none',
-            WebkitUserSelect: 'none',
-            WebkitTouchCallout: 'none',
-            msUserSelect: 'none', // IE/Edge 지원
-            WebkitTapHighlightColor: 'transparent', // 탭 하이라이트 제거
-          }}
-          // Konva Stage 최적화 props - Best Practices
-          listening={isEditingActive}
-          perfectDrawEnabled={false}
-          hitOnDragEnabled={false}
-          imageSmoothingEnabled={false}
         >
           {/* 배경 레이어 (내보내기 시 흰색 배경 포함) */}
           <Layer listening={false}>
@@ -227,10 +145,6 @@ const DrawingStage = memo<DrawingStageProps>(
                 lineCap='round'
                 lineJoin='round'
                 globalCompositeOperation={line.globalCompositeOperation}
-                // Konva 성능 최적화 설정
-                perfectDrawEnabled={false}
-                shadowForStrokeEnabled={false}
-                listening={false}
               />
             ))}
           </Layer>
