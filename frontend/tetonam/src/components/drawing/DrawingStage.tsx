@@ -156,9 +156,12 @@ const DrawingStage = memo<DrawingStageProps>(
 
     return (
       <div
-        className={`relative rounded-lg border border-gray-300 bg-white shadow-sm overscroll-contain ${
-          isEditingActive ? 'touch-none select-none' : ''
-        }`}
+        className={`relative rounded-xl border-2 border-gray-200 bg-white shadow-xl overscroll-contain 
+          before:absolute before:inset-0 before:rounded-xl before:shadow-inner before:pointer-events-none
+          before:bg-gradient-to-br before:from-gray-50/50 before:to-transparent
+          ring-2 ring-gray-100/50 ring-offset-2 ring-offset-orange-50/30
+          backdrop-blur-sm will-change-transform transform-gpu
+          ${isEditingActive ? 'touch-none select-none shadow-2xl ring-blue-200/60' : 'shadow-lg'}`}
         style={{
           width: stageSize.width,
           height: stageSize.height,
@@ -167,9 +170,12 @@ const DrawingStage = memo<DrawingStageProps>(
           WebkitUserSelect: 'none',
           WebkitTouchCallout: 'none',
           WebkitTapHighlightColor: 'transparent',
-          // 성능 최적화
-          willChange: isEditingActive ? 'transform' : 'auto',
+          // 브라우저 렌더링 파이프라인 성능 최적화
+          willChange: isEditingActive ? 'transform, box-shadow, filter' : 'auto',
           transform: 'translateZ(0)', // 하드웨어 가속 활성화
+          isolation: 'isolate', // 새로운 stacking context 생성
+          contain: 'layout style paint', // 렌더링 최적화
+          backfaceVisibility: 'hidden', // 뒷면 렌더링 방지
         }}
       >
         {/* 캔버스 확대 및 팔레트 버튼 (편집 중일 때만 표시) */}
@@ -239,11 +245,16 @@ const DrawingStage = memo<DrawingStageProps>(
             }
             return false;
           }}
-          className={`transition-all ${
+          className={`transition-all duration-200 will-change-transform transform-gpu ${
             isEditingActive
               ? 'cursor-crosshair'
               : 'cursor-not-allowed opacity-60'
-          } bg-white rounded-lg`}
+          } bg-white rounded-xl ring-1 ring-inset ring-gray-200/50`}
+          style={{
+            // 추가 성능 최적화
+            contain: 'strict',
+            isolation: 'isolate',
+          }}
         >
           {/* 배경 레이어 (내보내기 시 흰색 배경 포함) */}
           <Layer listening={false}>
