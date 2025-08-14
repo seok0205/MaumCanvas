@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/layout/card';
 import { useStudentCounselingList } from '@/hooks/useCounselingList';
 import { formatDateTimeSimple } from '@/utils/dateUtils';
+import { getPrimaryRole } from '@/utils/userRoleMapping';
 import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -300,6 +301,10 @@ export const MyPage = ({}: MyPageProps) => {
   const { userInfo, error, refetch, showSkeleton, isBackgroundFetching } =
     useUserInfo();
 
+  // 사용자 역할 확인 - 상담사인지 체크
+  const userRole = getPrimaryRole(user?.roles);
+  const isCounselor = userRole === 'COUNSELOR';
+
   // 재시도 핸들러
   const handleRetry = useCallback(() => {
     refetch();
@@ -346,7 +351,10 @@ export const MyPage = ({}: MyPageProps) => {
             <Tabs defaultValue='info' className='px-6 py-4'>
               <TabsList>
                 <TabsTrigger value='info'>내 정보</TabsTrigger>
-                <TabsTrigger value='counseling'>상담 내역</TabsTrigger>
+                {/* 상담사가 아닌 경우에만 상담내역 탭 표시 */}
+                {!isCounselor && (
+                  <TabsTrigger value='counseling'>상담 내역</TabsTrigger>
+                )}
               </TabsList>
 
               <TabsContent value='info'>
@@ -362,9 +370,12 @@ export const MyPage = ({}: MyPageProps) => {
                 {userInfo && <MyPageForm userInfo={userInfo} />}
               </TabsContent>
 
-              <TabsContent value='counseling'>
-                <StudentCounselingTab />
-              </TabsContent>
+              {/* 상담사가 아닌 경우에만 상담내역 탭 내용 렌더링 */}
+              {!isCounselor && (
+                <TabsContent value='counseling'>
+                  <StudentCounselingTab />
+                </TabsContent>
+              )}
             </Tabs>
           </main>
         </div>
