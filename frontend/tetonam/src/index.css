@@ -529,3 +529,86 @@
     animation: none;
   }
 }
+
+/* Image loading transitions for smooth onboarding experience */
+.image-preloader {
+  transition:
+    opacity 400ms ease-in-out,
+    filter 400ms ease-in-out;
+}
+
+.image-preloader--loading {
+  opacity: 0;
+  filter: blur(8px);
+}
+
+.image-preloader--loaded {
+  opacity: 1;
+  filter: blur(0);
+}
+
+.image-preloader--error {
+  opacity: 0.5;
+  filter: grayscale(1);
+}
+
+/* Skeleton loading effect for image placeholders */
+.image-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 0%, #e0e0e0 50%, #f0f0f0 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  border-radius: 0.5rem;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.dark .image-skeleton {
+  background: linear-gradient(90deg, #2a2a2a 0%, #3a3a3a 50%, #2a2a2a 100%);
+  background-size: 200% 100%;
+}
+
+/* Smooth fade-in for onboarding slides */
+.onboarding-slide-enter {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.onboarding-slide-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition:
+    opacity 300ms ease-out,
+    transform 300ms ease-out;
+}
+
+.onboarding-slide-exit {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.onboarding-slide-exit-active {
+  opacity: 0;
+  transform: translateX(-20px);
+  transition:
+    opacity 200ms ease-in,
+    transform 200ms ease-in;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .image-preloader,
+  .onboarding-slide-enter-active,
+  .onboarding-slide-exit-active {
+    transition: none;
+  }
+
+  .image-skeleton {
+    animation: none;
+  }
+}

@@ -2,6 +2,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { memo, useState } from 'react';
 
 import { Button } from '@/components/ui/interactive/button';
+import { OptimizedImage } from '@/components/ui/OptimizedImage';
 
 interface OnboardingSlideProps {
   title: string;
@@ -12,6 +13,7 @@ interface OnboardingSlideProps {
   onNext: () => void;
   onPrev: () => void;
   isLastSlide: boolean;
+  isImagePreloaded?: boolean;
   className?: string;
 }
 
@@ -24,9 +26,10 @@ export const OnboardingSlide = memo(function OnboardingSlide({
   onNext,
   onPrev,
   isLastSlide,
+  isImagePreloaded = false,
   className,
 }: OnboardingSlideProps) {
-  const [imageError, setImageError] = useState(false);
+  const [, setImageError] = useState(false);
 
   const handleImageError = () => {
     setImageError(true);
@@ -64,25 +67,20 @@ export const OnboardingSlide = memo(function OnboardingSlide({
       <div className='w-full max-w-2xl md:max-w-6xl lg:max-w-7xl mx-auto'>
         {/* 메인 콘텐츠 */}
         <div
-          className={`flex ${getLayoutDirection()} items-center gap-8 md:gap-16 animate-fade-in`}
+          className={`flex ${getLayoutDirection()} items-center gap-8 md:gap-5 animate-fade-in`}
         >
           {/* 이미지 */}
           <div className='w-80 h-80 md:w-[32rem] md:h-[32rem] lg:w-[36rem] lg:h-[36rem] mx-auto md:mx-0 flex-shrink-0 animate-float flex items-center justify-center'>
-            {!imageError ? (
-              <img
-                src={imageSrc}
-                alt={title}
-                className='max-w-full max-h-full object-contain rounded-2xl'
-                onError={handleImageError}
-                loading='lazy'
-              />
-            ) : (
-              <div className='w-full h-full bg-muted rounded-2xl flex items-center justify-center'>
-                <p className='text-muted-foreground text-sm'>
-                  이미지를 불러올 수 없습니다
-                </p>
-              </div>
-            )}
+            <OptimizedImage
+              src={imageSrc}
+              alt={title}
+              isPreloaded={isImagePreloaded}
+              priority={true}
+              className='max-w-full max-h-full object-contain rounded-2xl'
+              fallbackClassName='w-full h-full bg-muted rounded-2xl'
+              skeletonClassName='rounded-2xl'
+              onError={handleImageError}
+            />
           </div>
 
           {/* 텍스트 콘텐츠 */}
