@@ -65,6 +65,20 @@ export interface UseDrawingLocalStorageReturn {
 
 // ========== 캔버스 그리기 관련 타입 ==========
 
+// 펜 설정 타입
+export interface PenSettings {
+  pressureSensitivity: boolean;
+  touchRejection: boolean;
+  pressureMultiplier: number; // 0.1 ~ 2.0
+}
+
+// 터치펜 이벤트 데이터 타입
+export interface PenEventData {
+  pressure: number;
+  pointerType: 'mouse' | 'pen' | 'touch';
+  pointerId: number;
+}
+
 // 그리기 선 데이터 타입
 export interface DrawingLine {
   readonly id: number;
@@ -72,6 +86,9 @@ export interface DrawingLine {
   stroke: string;
   strokeWidth: number;
   globalCompositeOperation: 'source-over' | 'destination-out';
+  // 터치펜 관련 확장 데이터
+  pointerType?: 'mouse' | 'pen' | 'touch';
+  pressureData?: number[]; // 각 포인트별 압력 값
 }
 
 // 그리기 도구 타입

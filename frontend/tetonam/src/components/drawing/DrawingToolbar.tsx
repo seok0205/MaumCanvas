@@ -1,6 +1,7 @@
 import { memo, useCallback } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
+import { PenSettings } from '@/components/drawing/PenSettings';
 import { Button } from '@/components/ui/interactive/button';
 import {
   COLOR_PALETTE,
@@ -178,7 +179,7 @@ const DrawingToolbar = memo(
           )}
         </div>
 
-        {/* 실행취소 / 되돌리기 / 전체지우기 / 임시저장 */}
+        {/* 실행취소 / 되돌리기 / 전체지우기 / 임시저장 / 터치펜 설정 */}
         <div className='flex gap-2 ml-auto'>
           <Button
             variant='outline'
@@ -216,6 +217,8 @@ const DrawingToolbar = memo(
           >
             <Save className='w-4 h-4' /> 임시저장
           </Button>
+          {/* 터치펜 설정 */}
+          <PenSettings />
         </div>
       </div>
     );
