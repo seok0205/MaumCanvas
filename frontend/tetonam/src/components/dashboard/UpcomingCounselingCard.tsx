@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/interactive/button';
 import { Card } from '@/components/ui/layout/card';
 import { useProgressiveLoading } from '@/hooks/useDelayedLoading';
 import { useUpcomingCounselingQuery } from '@/hooks/useUpcomingCounselingQuery';
-import { useAuthStore } from '@/stores/useAuthStore';
 import type { CounselingStatus, UpcomingCounseling } from '@/types/api';
 import { isValidUpcomingCounseling } from '@/types/api';
 import { formatDateTime } from '@/utils/dateUtils';
@@ -64,8 +63,6 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
     onRefresh: propsOnRefresh,
   }) => {
     const navigate = useNavigate();
-    const { user } = useAuthStore();
-    const isCounselor = user?.roles?.some(r => r === 'COUNSELOR');
 
     // 버튼 중복클릭 방지를 위한 상태
     const [isJoining, setIsJoining] = useState(false);
@@ -145,7 +142,7 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
         const now = new Date();
 
         if (counselingDate < now) {
-            // 과거 날짜 상담에 대한 처리는 UI에서 자동으로 처리됨
+          // 과거 날짜 상담에 대한 처리는 UI에서 자동으로 처리됨
         }
       } catch (error) {
         console.warn('Failed to parse counseling date:', counselingData.time);
@@ -157,32 +154,33 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
     // Progressive Loading 로직 - Best Practice 적용
     if (showSkeleton) {
       return (
-        <Card className='h-full flex flex-col p-6'>
+        <Card className='h-full flex flex-col p-4 sm:p-6'>
           <div className='flex items-center justify-between mb-4'>
-            <h3 className='text-lg font-semibold text-foreground'>
+            <h3 className='text-base sm:text-lg font-semibold text-foreground'>
               다가오는 상담
             </h3>
           </div>
           <div className='flex-1 flex flex-col justify-center space-y-4'>
-            <div className='flex items-center justify-between p-4 bg-accent/50 rounded-lg'>
-              <div className='flex items-center space-x-3'>
-                <div className='text-center space-y-2'>
-                  <div className='h-4 w-16 bg-muted animate-pulse rounded'></div>
-                  <div className='h-3 w-12 bg-muted animate-pulse rounded'></div>
+            <div className='flex flex-col space-y-3 p-3 sm:p-4 bg-accent/50 rounded-lg sm:flex-row sm:items-center sm:justify-between sm:space-y-0'>
+              {/* 모바일: 세로 배치, 큰 화면: 가로 배치 */}
+              <div className='flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-3'>
+                <div className='text-center sm:text-left space-y-2'>
+                  <div className='h-4 w-16 bg-muted animate-pulse rounded mx-auto sm:mx-0'></div>
+                  <div className='h-3 w-12 bg-muted animate-pulse rounded mx-auto sm:mx-0'></div>
                 </div>
                 <div className='space-y-2'>
-                  <div className='h-4 w-24 bg-muted animate-pulse rounded'></div>
-                  <div className='h-3 w-16 bg-muted animate-pulse rounded'></div>
+                  <div className='h-4 w-24 bg-muted animate-pulse rounded mx-auto sm:mx-0'></div>
+                  <div className='h-3 w-16 bg-muted animate-pulse rounded mx-auto sm:mx-0'></div>
                 </div>
               </div>
-              <div className='text-right space-y-2'>
+              <div className='flex flex-col items-center space-y-2 sm:items-end'>
                 <div className='h-6 w-12 bg-muted animate-pulse rounded-full'></div>
-                <div className='h-8 w-16 bg-muted animate-pulse rounded'></div>
+                <div className='h-8 w-20 bg-muted animate-pulse rounded sm:w-16'></div>
               </div>
             </div>
           </div>
           <div className='text-center mt-4' aria-live='polite' role='status'>
-            <p className='text-sm text-muted-foreground'>
+            <p className='text-xs sm:text-sm text-muted-foreground'>
               상담 정보를 불러오는 중...
             </p>
           </div>
@@ -193,18 +191,18 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
     // 에러 상태 처리 - 더 나은 UX와 명확한 안내
     if (error) {
       return (
-        <Card className='h-full flex flex-col p-6'>
+        <Card className='h-full flex flex-col p-4 sm:p-6'>
           <div className='flex items-center justify-between mb-4'>
-            <h3 className='text-lg font-semibold text-foreground'>
+            <h3 className='text-base sm:text-lg font-semibold text-foreground'>
               다가오는 상담
             </h3>
           </div>
-          <div className='flex-1 flex flex-col justify-center text-center py-8'>
-            <AlertCircle className='w-12 h-12 text-red-500 mx-auto mb-3' />
-            <p className='text-muted-foreground mb-2'>
+          <div className='flex-1 flex flex-col justify-center text-center py-6 sm:py-8'>
+            <AlertCircle className='w-10 h-10 sm:w-12 sm:h-12 text-red-500 mx-auto mb-3' />
+            <p className='text-sm sm:text-base text-muted-foreground mb-2'>
               상담 정보를 불러오지 못했습니다
             </p>
-            <p className='text-sm text-muted-foreground mb-4'>
+            <p className='text-xs sm:text-sm text-muted-foreground mb-4 px-4'>
               네트워크 연결을 확인하거나 잠시 후 다시 시도해주세요
             </p>
             <div className='flex flex-col items-center space-y-2'>
@@ -212,12 +210,12 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
                 variant='outline'
                 size='sm'
                 onClick={() => refetch()}
-                className='text-xs'
+                className='text-xs sm:text-sm w-full max-w-32'
               >
                 <RefreshCw className='w-3 h-3 mr-1' />
                 다시 시도
               </Button>
-              <p className='text-xs text-muted-foreground'>
+              <p className='text-xs text-muted-foreground px-4'>
                 문제가 지속되면 새로고침을 해보세요
               </p>
             </div>
@@ -229,18 +227,18 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
     // 상담이 없는 경우
     if (!upcomingCounseling) {
       return (
-        <Card className='h-full flex flex-col p-6'>
+        <Card className='h-full flex flex-col p-4 sm:p-6'>
           <div className='flex items-center justify-between mb-4'>
-            <h3 className='text-lg font-semibold text-foreground'>
+            <h3 className='text-base sm:text-lg font-semibold text-foreground'>
               다가오는 상담
             </h3>
           </div>
-          <div className='flex-1 flex flex-col justify-center text-center py-8'>
-            <Calendar className='w-12 h-12 text-muted-foreground mx-auto mb-3' />
-            <p className='text-muted-foreground mb-2'>
+          <div className='flex-1 flex flex-col justify-center text-center py-6 sm:py-8'>
+            <Calendar className='w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground mx-auto mb-3' />
+            <p className='text-sm sm:text-base text-muted-foreground mb-2'>
               예정된 상담 일정이 없습니다
             </p>
-            <p className='text-sm text-muted-foreground'>
+            <p className='text-xs sm:text-sm text-muted-foreground px-4'>
               상담을 예약하거나 새로고침으로 최신 정보를 확인하세요
             </p>
           </div>
@@ -252,25 +250,27 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
     const validatedCounseling = validateCounselingData(upcomingCounseling);
     if (!validatedCounseling) {
       return (
-        <Card className='p-6'>
+        <Card className='p-4 sm:p-6'>
           <div className='flex items-center justify-between mb-4'>
-            <h3 className='text-lg font-semibold text-foreground'>
+            <h3 className='text-base sm:text-lg font-semibold text-foreground'>
               다가오는 상담
             </h3>
             <Button
               onClick={handleRefresh}
               variant='ghost'
               size='sm'
-              className='text-destructive hover:text-destructive/80'
+              className='text-destructive hover:text-destructive/80 text-xs sm:text-sm'
             >
               <RefreshCw className='w-3 h-3 mr-1' />
               다시 로드
             </Button>
           </div>
-          <div className='text-center py-8'>
-            <AlertCircle className='w-12 h-12 text-yellow-500 mx-auto mb-3' />
-            <p className='text-muted-foreground mb-2'>데이터 형식 오류</p>
-            <p className='text-sm text-muted-foreground'>
+          <div className='text-center py-6 sm:py-8'>
+            <AlertCircle className='w-10 h-10 sm:w-12 sm:h-12 text-yellow-500 mx-auto mb-3' />
+            <p className='text-sm sm:text-base text-muted-foreground mb-2'>
+              데이터 형식 오류
+            </p>
+            <p className='text-xs sm:text-sm text-muted-foreground px-4'>
               잘못된 형식의 데이터를 받았습니다. 다시 로드해주세요.
             </p>
           </div>
@@ -334,53 +334,51 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
     const buttonStatus = getButtonStatus();
 
     return (
-      <Card className='h-full flex flex-col p-6'>
+      <Card className='h-full flex flex-col p-4 sm:p-6'>
         <div className='flex items-center justify-between mb-4'>
-          <h3 className='text-lg font-semibold text-foreground'>
+          <h3 className='text-base sm:text-lg font-semibold text-foreground'>
             다가오는 상담
           </h3>
           {/* 백그라운드 업데이트 시 작은 로딩 인디케이터 */}
           {showBackgroundIndicator && (
             <div className='flex items-center text-xs text-muted-foreground'>
               <RefreshCw className='w-3 h-3 animate-spin mr-1' />
-              업데이트 중
+              <span className='hidden sm:inline'>업데이트 중</span>
             </div>
           )}
         </div>
 
         <div className='flex-1 flex flex-col justify-center'>
-          <div className='flex items-center justify-between p-4 bg-accent/50 rounded-lg'>
-            <div className='flex items-center space-x-3'>
-              <div className='text-center'>
-                <p className='text-sm font-medium text-foreground'>{date}</p>
-                <p className='text-xs text-muted-foreground flex items-center'>
+          <div className='flex flex-col space-y-3 p-3 sm:p-4 bg-accent/50 rounded-lg sm:flex-row sm:items-center sm:justify-between sm:space-y-0'>
+            {/* 상담 정보 영역 - 모바일에서 전체 너비, 큰 화면에서 flex */}
+            <div className='flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-3'>
+              {/* 날짜/시간 정보 */}
+              <div className='text-center sm:text-left'>
+                <p className='text-xs font-medium text-foreground sm:text-sm'>
+                  {date}
+                </p>
+                <p className='text-xs text-muted-foreground flex items-center justify-center sm:justify-start'>
                   <Clock className='w-3 h-3 mr-1' />
                   {time}
                 </p>
               </div>
+
+              {/* 상담자 정보 */}
               <div className='space-y-1'>
-                {isCounselor ? (
-                  // 상담사/학생 모두 백엔드에서 역할에 따라 상대방 이름을 name으로 반환
-                  <div className='flex items-center space-x-2'>
-                    <User className='w-4 h-4 text-muted-foreground' />
-                    <p className='font-medium text-foreground'>
-                      {validatedCounseling.name}
-                    </p>
-                  </div>
-                ) : (
-                  <div className='flex items-center space-x-2'>
-                    <User className='w-4 h-4 text-muted-foreground' />
-                    <p className='font-medium text-foreground'>
-                      {validatedCounseling.name}
-                    </p>
-                  </div>
-                )}
-                <p className='text-sm text-muted-foreground'>
+                <div className='flex items-center justify-center space-x-2 sm:justify-start'>
+                  <User className='w-3 h-3 text-muted-foreground sm:w-4 sm:h-4' />
+                  <p className='text-sm font-medium text-foreground break-words'>
+                    {validatedCounseling.name}
+                  </p>
+                </div>
+                <p className='text-xs text-muted-foreground text-center sm:text-left sm:text-sm'>
                   {validatedCounseling.type}
                 </p>
               </div>
             </div>
-            <div className='text-right'>
+
+            {/* 상태 및 버튼 영역 - 모바일에서 전체 너비 중앙 정렬 */}
+            <div className='flex flex-col items-center space-y-2 sm:items-end sm:text-right'>
               <span
                 className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
                   validatedCounseling.status
@@ -388,19 +386,18 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
               >
                 {getStatusText(validatedCounseling.status)}
               </span>
-              <div className='mt-2'>
-                <ApiButton
-                  variant={canStart ? 'default' : 'outline'}
-                  size='sm'
-                  disabled={buttonStatus.disabled}
-                  onClick={() => handleJoin(validatedCounseling.id)}
-                  isLoading={isJoining}
-                  loadingText='입장 중...'
-                  className='text-xs'
-                >
-                  <Video className='w-3 h-3 mr-1' /> {buttonStatus.text}
-                </ApiButton>
-              </div>
+
+              <ApiButton
+                variant={canStart ? 'default' : 'outline'}
+                size='sm'
+                disabled={buttonStatus.disabled}
+                onClick={() => handleJoin(validatedCounseling.id)}
+                isLoading={isJoining}
+                loadingText='입장 중...'
+                className='text-xs w-full sm:w-auto sm:text-xs'
+              >
+                <Video className='w-3 h-3 mr-1' /> {buttonStatus.text}
+              </ApiButton>
             </div>
           </div>
         </div>
