@@ -76,9 +76,9 @@ export const DrawingImage = memo<DrawingImageProps>(
     // 이미지 URL이 없는 경우
     if (!imageUrl) {
       return (
-        <Card className={`mx-auto max-w-2xl ${className}`}>
-          <CardContent className='p-6'>
-            <div className='flex items-center justify-center h-64 bg-muted rounded-lg'>
+        <Card className={`w-full mx-auto md:max-w-2xl ${className}`}>
+          <CardContent className='p-4 sm:p-6'>
+            <div className='flex items-center justify-center h-48 sm:h-64 bg-muted rounded-lg'>
               <div className='text-center text-muted-foreground'>
                 <div className='text-sm'>그림을 불러올 수 없습니다</div>
               </div>
@@ -89,12 +89,12 @@ export const DrawingImage = memo<DrawingImageProps>(
     }
 
     return (
-      <Card className={`mx-auto max-w-2xl ${className}`}>
-        <CardContent className='p-6'>
-          <div className='space-y-4'>
+      <Card className={`w-full mx-auto md:max-w-2xl ${className}`}>
+        <CardContent className='p-4 sm:p-6'>
+          <div className='space-y-3 sm:space-y-4'>
             {/* 그림 제목 */}
             <div className='text-center'>
-              <h2 className='text-lg font-semibold text-foreground'>
+              <h2 className='text-base sm:text-lg font-semibold text-foreground'>
                 {getCategoryName(category)}
               </h2>
             </div>
@@ -104,13 +104,13 @@ export const DrawingImage = memo<DrawingImageProps>(
               {/* 로딩 스켈레톤 */}
               {isLoading && (
                 <div className='absolute inset-0 z-10'>
-                  <Skeleton className='w-full h-64' />
+                  <Skeleton className='w-full h-48 sm:h-64 md:h-80' />
                 </div>
               )}
 
               {/* 에러 상태 */}
               {hasError && (
-                <div className='flex items-center justify-center h-64 bg-muted'>
+                <div className='flex items-center justify-center h-48 sm:h-64 md:h-80 bg-muted'>
                   <div className='text-center text-muted-foreground'>
                     <div className='text-sm'>이미지를 불러올 수 없습니다</div>
                   </div>
@@ -122,7 +122,7 @@ export const DrawingImage = memo<DrawingImageProps>(
                 <img
                   src={imageUrl}
                   alt={`${getCategoryName(category)} - HTP 검사 그림`}
-                  className={`w-full h-auto max-h-96 object-contain transition-opacity duration-200 ${
+                  className={`w-full h-auto max-h-48 sm:max-h-64 md:max-h-80 lg:max-h-96 object-contain transition-opacity duration-200 ${
                     isLoading ? 'opacity-0' : 'opacity-100'
                   }`}
                   onLoad={handleImageLoad}

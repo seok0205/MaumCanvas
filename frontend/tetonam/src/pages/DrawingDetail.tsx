@@ -260,25 +260,27 @@ export const DrawingDetail = () => {
           <CommonHeader user={user} title='그림 분석 결과' showBackButton />
 
           {/* 그림 표시 영역 - CommonHeader 아래, 분석 결과 위에 위치 */}
-          <div className='px-6 pt-6'>
+          <div className='px-4 sm:px-6 pt-4 sm:pt-6'>
             <DrawingImage
               imageUrl={imageUrl ?? undefined}
               category={category ?? undefined}
-              className='mb-6'
+              className='mb-4 sm:mb-6'
             />
           </div>
 
-          <main className='px-6 pb-6 space-y-6'>
+          <main className='px-4 sm:px-6 pb-4 sm:pb-6 space-y-4 sm:space-y-6'>
             {isCounselor && (
               <Card>
                 <CardHeader>
-                  <CardTitle>객체 탐지 결과</CardTitle>
+                  <CardTitle className='text-base sm:text-lg'>
+                    객체 탐지 결과
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {loadingAI ? (
-                    <Skeleton className='h-24 w-full' />
+                    <Skeleton className='h-20 sm:h-24 w-full' />
                   ) : (
-                    <div className='whitespace-pre-wrap text-sm font-sans'>
+                    <div className='whitespace-pre-wrap text-xs sm:text-sm font-sans leading-relaxed'>
                       {preprocessText(aiText) || '내용이 없습니다'}
                     </div>
                   )}
@@ -288,15 +290,17 @@ export const DrawingDetail = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>RAG 분석 결과</CardTitle>
+                <CardTitle className='text-base sm:text-lg'>
+                  RAG 분석 결과
+                </CardTitle>
               </CardHeader>
-              <CardContent className='space-y-4'>
+              <CardContent className='space-y-3 sm:space-y-4'>
                 {loadingRAG ? (
-                  <div className='text-sm text-muted-foreground'>
+                  <div className='text-xs sm:text-sm text-muted-foreground'>
                     분석 중...
                   </div>
                 ) : ragError ? (
-                  <div className='text-sm text-red-600'>
+                  <div className='text-xs sm:text-sm text-red-600'>
                     {ragError === 'UNAUTHORIZED'
                       ? '분석 결과를 확인할 권한이 없습니다.'
                       : ragError === 'NOT_FOUND'
@@ -307,18 +311,18 @@ export const DrawingDetail = () => {
                   </div>
                 ) : ragText ? (
                   <div
-                    className='prose prose-slate max-w-none font-sans leading-relaxed'
+                    className='prose prose-slate max-w-none font-sans leading-relaxed text-xs sm:text-sm'
                     style={{
                       fontFamily:
                         "'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif",
-                      fontSize: '14px',
+                      fontSize: 'inherit',
                       lineHeight: '1.7',
                       color: 'hsl(var(--foreground))',
                     }}
                     dangerouslySetInnerHTML={{ __html: ragHtml }}
                   />
                 ) : (
-                  <div className='text-sm text-muted-foreground'>
+                  <div className='text-xs sm:text-sm text-muted-foreground'>
                     {isCounselor
                       ? '프롬프트를 입력하시면 답변 드립니다.'
                       : '아직 결과가 없습니다.'}
@@ -326,16 +330,17 @@ export const DrawingDetail = () => {
                 )}
 
                 {isCounselor && (
-                  <div className='flex items-center space-x-2'>
+                  <div className='flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2'>
                     <input
                       value={prompt}
                       onChange={e => setPrompt(e.target.value)}
                       placeholder='프롬프트를 입력하세요'
-                      className='flex-1 h-10 px-3 rounded-md border border-border bg-background'
+                      className='flex-1 h-10 px-3 rounded-md border border-border bg-background text-sm'
                     />
                     <Button
                       onClick={handleSubmit}
                       disabled={submitting || !prompt.trim()}
+                      className='w-full sm:w-auto'
                     >
                       제출
                     </Button>
