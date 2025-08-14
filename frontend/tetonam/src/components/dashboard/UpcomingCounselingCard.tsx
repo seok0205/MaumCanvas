@@ -1,3 +1,4 @@
+import { ApiButton } from '@/components/ui/ApiButton';
 import { Button } from '@/components/ui/interactive/button';
 import { Card } from '@/components/ui/layout/card';
 import { useProgressiveLoading } from '@/hooks/useDelayedLoading';
@@ -6,7 +7,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import type { CounselingStatus, UpcomingCounseling } from '@/types/api';
 import { isValidUpcomingCounseling } from '@/types/api';
 import { isValidDateString } from '@/utils/counselingValidation';
-import { format } from 'date-fns';
+import { addMinutes, format, isAfter, isBefore } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import {
   AlertCircle,
@@ -16,7 +17,7 @@ import {
   User,
   Video,
 } from 'lucide-react';
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // Props 인터페이스 정의 - TanStack Query Best Practice
@@ -92,6 +93,9 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
     const navigate = useNavigate();
     const { user } = useAuthStore();
     const isCounselor = user?.roles?.some(r => r === 'COUNSELOR');
+    
+    // 버튼 중복클릭 방지를 위한 상태
+    const [isJoining, setIsJoining] = useState(false);
 
     // TanStack Query Best Practice: Props 우선, 개별 쿼리는 fallback
     const queryResult = useUpcomingCounselingQuery();
@@ -126,12 +130,20 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
       await refetch();
     }, [refetch]);
 
-    // Join 핸들러는 항상 동일한 순서로 Hook이 호출되도록 최상단에서 선언
+    // 입장하기 핸들러 - 중복클릭 방지 로직 추가
     const handleJoin = useCallback(
-      (id: number | string) => {
-        navigate(`/video-call/${id}`);
+      async (id: number | string) => {
+        if (isJoining) return; // 이미 처리 중이면 무시
+
+        try {
+          setIsJoining(true);
+          navigate(`/video-call/${id}`);
+        } finally {
+          // 네비게이션이 완료되면 상태 리셋 (실제로는 컴포넌트가 언마운트됨)
+          setTimeout(() => setIsJoining(false), 1000);
+        }
       },
-      [navigate]
+      [navigate, isJoining]
     );
 
     // 데이터 유효성 검사 함수 개선 - 더 구체적인 검증과 로깅
@@ -299,18 +311,53 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
     // 정상적인 상담 정보 표시 - 개선된 유효성 검사 적용
     const { date, time } = formatDateTime(validatedCounseling.time);
 
+    // 상담 입장 가능 여부 판단 로직 (상담시간 30분 전부터 상담시간까지만 활성화)
     const canStart = (() => {
-      // 테스트: 항상 활성화하되, 상담 시간 30분 경과 후에는 비활성화
       try {
         const now = new Date();
         const appointmentTime = new Date(validatedCounseling.time);
-        const diffMs = appointmentTime.getTime() - now.getTime();
-        const minutesDiff = diffMs / (1000 * 60);
-        return minutesDiff >= -30;
-      } catch {
-        return true;
+        
+        // 유효한 날짜인지 확인
+        if (isNaN(appointmentTime.getTime())) {
+          return false;
+        }
+
+        // 상담시간 30분 전 시점 계산
+        const thirtyMinutesBefore = addMinutes(appointmentTime, -30);
+        
+        // 현재 시간이 30분 전 이후이고 상담시간 이전인지 확인
+        const canStartNow = isAfter(now, thirtyMinutesBefore) && isBefore(now, appointmentTime);
+        
+        return canStartNow;
+      } catch (error) {
+        console.warn('상담 시간 계산 중 오류 발생:', error);
+        return false;
       }
     })();
+
+    // 버튼 텍스트와 상태 결정
+    const getButtonStatus = () => {
+      if (isJoining) {
+        return { text: '입장 중...', disabled: true };
+      }
+      
+      if (!canStart) {
+        const now = new Date();
+        const appointmentTime = new Date(validatedCounseling.time);
+        const thirtyMinutesBefore = addMinutes(appointmentTime, -30);
+        
+        if (isBefore(now, thirtyMinutesBefore)) {
+          return { text: '입장 대기', disabled: true };
+        } else if (isAfter(now, appointmentTime)) {
+          return { text: '시간 만료', disabled: true };
+        }
+        return { text: '입장 불가', disabled: true };
+      }
+      
+      return { text: '입장하기', disabled: false };
+    };
+
+    const buttonStatus = getButtonStatus();
 
     return (
       <Card className='p-6'>
@@ -368,15 +415,17 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
                 {getStatusText(validatedCounseling.status)}
               </span>
               <div className='mt-2'>
-                <Button
+                <ApiButton
                   variant={canStart ? 'default' : 'outline'}
                   size='sm'
-                  disabled={!canStart}
+                  disabled={buttonStatus.disabled}
                   onClick={() => handleJoin(validatedCounseling.id)}
+                  isLoading={isJoining}
+                  loadingText='입장 중...'
                   className='text-xs'
                 >
-                  <Video className='w-3 h-3 mr-1' /> 입장하기
-                </Button>
+                  <Video className='w-3 h-3 mr-1' /> {buttonStatus.text}
+                </ApiButton>
               </div>
             </div>
           </div>
