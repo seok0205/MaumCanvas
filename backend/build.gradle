@@ -1,11 +1,12 @@
 plugins {
     id 'java'
+//    id 'org.springframework.boot' version '3.4.5'
     id 'org.springframework.boot' version '3.3.1'
     id 'io.spring.dependency-management' version '1.1.7'
 
-    // SonarQube + JaCoCo
+// sonarqube plugin
     id 'org.sonarqube' version '5.1.0.4882'
-    id 'jacoco'
+    id "jacoco"
 }
 
 group = 'com.TeToNam'
@@ -35,109 +36,69 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-aop'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-
     implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
     implementation 'com.mysql:mysql-connector-j'
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-    runtimeOnly   'io.jsonwebtoken:jjwt-impl:0.11.5'
-    runtimeOnly   'io.jsonwebtoken:jjwt-jackson:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
 
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.3'
 
+//    implementation 'io.springfox:springfox-swagger2:2.9.2'
+//    implementation 'io.springfox:springfox-swagger-ui:2.9.2'
+
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     annotationProcessor 'org.projectlombok:lombok'
-
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
     implementation 'org.springframework:spring-context-support:5.3.9'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: '2.6.3'
-
     implementation 'org.redisson:redisson-spring-boot-starter:3.18.0'
-    implementation 'me.paulschwarz:spring-dotenv:3.0.0'
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation("me.paulschwarz:spring-dotenv:3.0.0")
+    implementation('org.springframework.boot:spring-boot-starter-webflux')
 
     testImplementation 'com.h2database:h2'
+
+
+
+
 }
 
-/** ---------- 테스트 & 커버리지 ---------- */
-tasks.withType(Test).configureEach {
+tasks.named('test') {
     useJUnitPlatform()
-    // 테스트 실패해도 파이프라인 계속 진행하려면 true 유지 (Sonar 리포트 생성 목적)
     ignoreFailures = true
-    finalizedBy jacocoTestReport
-    testLogging {
-        events "failed", "skipped"
-        exceptionFormat "full"
-    }
+    finalizedBy tasks.jacocoTestReport
 }
 
 jacoco {
-    toolVersion = "0.8.12"   // 최신권장 (Java 17+ 안정)
-}
-
-jacocoTestCoverageVerification {
-    dependsOn test
-    violationRules {
-        rule {
-            limit {
-                counter = 'LINE'
-                value = 'COVEREDRATIO'
-                minimum = 0.30
-            }
-        }
-    }
+  toolVersion = "0.8.12"
 }
 
 jacocoTestReport {
-    dependsOn tasks.test
+    dependsOn test
     reports {
-        xml.required.set(true)   // SonarQube가 읽을 XML
+        xml.required.set(true)  // SonarQube가 보는 리포트
         html.required.set(true)
         csv.required.set(false)
     }
-
-    // DTO/Config/예외 등 최소한만 제외
-    doFirst {
-        def excludes = [
-                '**/*Application.*',
-                '**/config/**',
-                '**/dto/**',
-                '**/vo/**',
-                '**/exception/**',
-                '**/generated/**'
-        ]
-        classDirectories.setFrom(
-                files(classDirectories.files.collect { dir ->
-                    fileTree(dir: dir, exclude: excludes)
-                })
-        )
-    }
 }
 
-// 로컬 `gradlew check` 시 커버리지 하한도 점검하려면 활성화
-// check.dependsOn jacocoTestCoverageVerification
+sonar {
+  properties {
+    property "sonar.projectKey", "backend_app"
+    property "sonar.projectName", "Backend App"
+    // 컴파일 산출물 경로(정확)
+    property "sonar.java.binaries", "$buildDir/classes/java/main"
 
-/** ---------- SonarQube(Gradle 플러그인) ---------- */
-sonarqube {
-    properties {
-        property "sonar.projectKey", "backend_app"
-        property "sonar.projectName", "Backend App"
+    // JaCoCo XML 리포트 경로
+    property "sonar.coverage.jacoco.xmlReportPaths", "$buildDir/reports/jacoco/test/jacocoTestReport.xml"
 
-        // 소스/테스트/바이너리 경로 (정확히 지정해야 커버리지/이슈 매핑이 정확)
-        property "sonar.sources", "src/main/java"
-        property "sonar.tests",   "src/test/java"
-        property "sonar.java.binaries", "$buildDir/classes/java/main"
+    // Gradle 5.x 호환/암묵 컴파일 방지
+    property "sonar.gradle.skipCompile", "true"
+    // sonar.host.url, sonar.token(login)은 Jenkins에서 주
 
-        // JaCoCo XML 리포트
-        property "sonar.coverage.jacoco.xmlReportPaths", "$buildDir/reports/jacoco/test/jacocoTestReport.xml"
-
-        // (필요 시) 제외
-        property "sonar.coverage.exclusions",
-                "**/*Application.java, **/*Config.java, **/dto/**, **/vo/**, **/exception/**, **/generated/**"
-
-        // Jenkins의 withSonarQubeEnv로 host.url/token 주입 예정
-        property "sonar.gradle.skipCompile", "true"
-    }
+    property "sonar.coverage.exclusions",
+      "**/*Application.java, **/*Config.java, **/dto/**, **/vo/**, **/exception/**, **/generated/**"
+  }
 }
