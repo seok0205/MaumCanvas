@@ -2,7 +2,6 @@ import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { ONBOARDING_DATA } from '@/constants/onboarding';
-import { useAuthStore } from '@/stores/useAuthStore';
 import { OnboardingSlide } from './OnboardingSlide';
 
 interface OnboardingContainerProps {
@@ -11,13 +10,12 @@ interface OnboardingContainerProps {
 
 export function OnboardingContainer({ className }: OnboardingContainerProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const { setCompletedOnboarding } = useAuthStore();
   const navigate = useNavigate();
 
   const handleComplete = useCallback(() => {
-    setCompletedOnboarding(true);
+    // 온보딩 완료 상태를 저장하지 않고 바로 로그인 페이지로 이동
     navigate('/login');
-  }, [setCompletedOnboarding, navigate]);
+  }, [navigate]);
 
   const handleNext = useCallback(() => {
     if (currentSlide < ONBOARDING_DATA.length - 1) {

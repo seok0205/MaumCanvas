@@ -14,7 +14,7 @@ export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];
 // 리다이렉트 로직을 커스텀 훅으로 분리
 export const useRedirectLogic = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, hasCompletedOnboarding } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
 
   useEffect(() => {
     try {
@@ -24,13 +24,7 @@ export const useRedirectLogic = () => {
         return;
       }
 
-      // 온보딩을 완료한 사용자는 사용자 타입 선택으로
-      if (hasCompletedOnboarding) {
-        navigate(ROUTES.USER_TYPE_SELECTION);
-        return;
-      }
-
-      // 처음 방문자는 온보딩으로
+      // 인증되지 않은 모든 사용자는 온보딩으로 (시작 페이지)
       navigate(ROUTES.ONBOARDING);
     } catch (error) {
       // 에러 발생 시 기본 경로로 리다이렉트
@@ -41,5 +35,5 @@ export const useRedirectLogic = () => {
         window.location.href = ROUTES.ONBOARDING;
       }
     }
-  }, [isAuthenticated, hasCompletedOnboarding, navigate]);
+  }, [isAuthenticated, navigate]);
 };

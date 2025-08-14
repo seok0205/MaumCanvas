@@ -6,7 +6,7 @@ import type { User } from './user';
 export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
-  hasCompletedOnboarding: boolean;
+  // hasCompletedOnboarding 제거 - 항상 온보딩 페이지를 시작점으로 사용
   selectedUserRole: UserRole | null;
   error: string | null;
   isLoading: boolean;
@@ -14,7 +14,7 @@ export interface AuthState {
   // Actions
   setUser: (user: User) => void;
   clearUser: () => void;
-  setCompletedOnboarding: (completed: boolean) => void;
+  // setCompletedOnboarding 제거
   setSelectedUserRole: (type: UserRole) => void;
   clearError: () => void;
   login: (email: string, password: string) => Promise<boolean>;

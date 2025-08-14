@@ -67,8 +67,8 @@ export const useAuthActions = (): UseAuthActionsReturn => {
       // localStorage에서 토큰 삭제
       authService.logout();
 
-      // 먼저 페이지 이동을 시작하여 컴포넌트 언마운트 시작
-      navigate('/login');
+      // 온보딩 페이지로 리다이렉트 (항상 웹사이트의 시작점으로)
+      navigate('/onboarding');
 
       // 지연 후 상태 초기화 (컴포넌트가 언마운트된 후)
       setTimeout(() => {
