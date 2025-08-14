@@ -34,8 +34,15 @@ export default defineConfig(({ mode }) => ({
       deleteOriginFile: false, // 원본 파일 유지
     }),
     VitePWA({
-      registerType: 'autoUpdate',
+      // PWA 리다이렉트 문제 해결을 위한 설정 조정
+      registerType: 'prompt', // autoUpdate에서 prompt로 변경 (안전한 업데이트)
       includeAssets: ['logo.png', 'fonts/*.woff2'],
+      // Service Worker 자동 등록 설정
+      injectRegister: 'auto',
+      // 개발 환경에서 Service Worker 비활성화 (리다이렉트 문제 방지)
+      devOptions: {
+        enabled: false, // 개발 중에는 Service Worker 비활성화
+      },
       manifest: {
         name: '마음캔버스 - MaumCanvas',
         short_name: 'MaumCanvas',
@@ -124,16 +131,34 @@ export default defineConfig(({ mode }) => ({
             },
           },
         ],
-        // 네비게이션 캐싱 최적화
+        // 네비게이션 캐싱 최적화 (PWA 리다이렉트 문제 해결)
         navigateFallback: '/',
         navigateFallbackDenylist: [
+          // 기본 제외 경로
           /^\/_/,
           /\/api\//,
-          /\.(?:png|jpg|jpeg|svg)$/,
+          /\.(?:png|jpg|jpeg|svg|woff2|woff|ico)$/,
+          // 그리기 관련 경로 제외 (리다이렉트 방지)
+          /^\/diagnosis\/drawing/,
+          /^\/drawing/,
+          // 기타 SPA 경로 제외
+          /^\/mypage/,
+          /^\/community/,
+          /^\/counseling/,
+          /^\/questionnaire/,
         ],
-        // 청크 크기 최적화
-        skipWaiting: true,
-        clientsClaim: true,
+        // 특정 경로만 허용 (더 안전한 접근)
+        navigateFallbackAllowlist: [
+          // 루트 경로와 대시보드만 허용
+          /^\/$/,
+          /^\/dashboard$/,
+          /^\/login$/,
+          /^\/register$/,
+          /^\/onboarding$/,
+          /^\/user-role-selection$/,
+        ],
+        // autoUpdate 모드에서는 skipWaiting과 clientsClaim이 자동 설정됨
+        // 명시적 설정 제거로 충돌 방지
       },
     }),
   ],

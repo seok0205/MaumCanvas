@@ -30,6 +30,7 @@ import { useMemoryOptimization } from '@/hooks/useMemoryOptimization';
 import { usePageLeaveWarning } from '@/hooks/usePageLeaveWarning';
 import { usePointerDrawingHandlers } from '@/hooks/usePointerDrawingHandlers';
 import { usePreventDoubleClick } from '@/hooks/usePreventDoubleClick';
+import { useSafeNavigation } from '@/hooks/useSafeNavigation';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useDrawingStore } from '@/stores/useDrawingStore';
 import { useUIStore } from '@/stores/useUIStore';
@@ -72,6 +73,9 @@ const DrawingCanvas = memo(() => {
 
   // 더블 클릭 방지 훅
   const { isBlocked, preventDoubleClick } = usePreventDoubleClick();
+
+  // 안전한 네비게이션 훅 (PWA 리다이렉트 방지)
+  const { setDrawingActive, allowNavigation } = useSafeNavigation();
 
   // 메모리 최적화 훅 (태블릿 PWA 환경용)
   const { performMemoryCleanup, checkMemoryStatus } = useMemoryOptimization({
@@ -185,6 +189,18 @@ const DrawingCanvas = memo(() => {
       goToNextStep,
     });
 
+  // 그리기 활성 상태 추적 (PWA 리다이렉트 방지)
+  useEffect(() => {
+    setDrawingActive(isEditingActive);
+  }, [isEditingActive, setDrawingActive]);
+
+  // 컴포넌트 언마운트 시 네비게이션 허용
+  useEffect(() => {
+    return () => {
+      allowNavigation();
+    };
+  }, [allowNavigation]);
+
   // 팝오버 관리 훅
   usePopoverManagement({
     showSizeOptions,
@@ -248,7 +264,7 @@ const DrawingCanvas = memo(() => {
   }
 
   /**
-   * 에러 처리 콜백
+   * 에러 처리 콜백 (PWA 리다이렉트 방지 개선)
    */
   const handleDrawingError = useCallback(
     (error: Error, errorInfo: any) => {
@@ -258,6 +274,18 @@ const DrawingCanvas = memo(() => {
       const errorMessage = error.message.toLowerCase();
       if (errorMessage.includes('memory') || errorMessage.includes('heap')) {
         performMemoryCleanup();
+      }
+
+      // 네트워크 관련 에러는 조용히 처리 (리다이렉트 방지)
+      if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+        console.warn('Network error in drawing canvas, continuing silently:', error);
+        return; // 에러를 더 이상 전파하지 않음
+      }
+
+      // Service Worker 관련 에러 조용히 처리
+      if (errorMessage.includes('service worker') || errorMessage.includes('sw.js')) {
+        console.warn('Service Worker error in drawing canvas, continuing silently:', error);
+        return;
       }
     },
     [performMemoryCleanup]
