@@ -1,91 +1,146 @@
 import type Konva from 'konva';
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 
 import { DRAWING_STEPS } from '@/constants/drawing';
 import { useDrawingStore } from '@/stores/useDrawingStore';
-import { useUIStore } from '@/stores/useUIStore';
 import type { DrawingLine } from '@/types/drawing';
+import {
+  calculateTouchSensitivity,
+  detectDeviceType,
+  filterPoints,
+  touchPerformanceMonitor,
+} from '@/utils/touchOptimization';
+
+// React 18 useEffectEvent 대체 패턴 활용
+function useEffectEvent<T extends (...args: any[]) => any>(fn: T): T {
+  const ref = useRef<T>(fn);
+  ref.current = fn;
+  return useCallback((...args: any[]) => ref.current(...args), []) as T;
+}
 
 export const useDrawingHandlers = () => {
-  const {
-    currentStep,
-    isDrawing,
-    setIsDrawing,
-    addLineToCurrentStep,
-    updateLastLinePoints,
-    saveToHistory,
-  } = useDrawingStore();
+  const { currentStep, addLineToCurrentStep, updateLastLinePoints, setIsDrawing } = useDrawingStore();
 
-  const { isEditingActive, isEraser, brushSize, brushColor } = useUIStore();
+  const isDrawing = useRef(false);
+  const rafId = useRef<number | null>(null);
+  const lastEventTime = useRef(0);
+  const deviceType = useRef(detectDeviceType());
 
-  // 그리기 시작
-  const handleMouseDown = useCallback(
-    (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
-      if (!isEditingActive) return; // 편집 비활성화 상태에서는 그리기 불가
-      if (currentStep < 0 || currentStep >= DRAWING_STEPS.length) return;
+  // useEffectEvent 패턴으로 성능 최적화된 점 처리 로직
+  const processPointsOptimized = useEffectEvent((points: number[]) => {
+    // filterPoints 함수를 실제로 활용하여 점 최적화
+    const optimizedPoints = filterPoints(points, 2); // sensitivity 값을 숫자로 전달
+    return optimizedPoints;
+  });
 
-      setIsDrawing(true);
-      const pos = e.target.getStage()?.getPointerPosition();
-      if (!pos) return;
+  // useEffectEvent 패턴으로 터치 감도 계산 로직
+  const calculateSensitivity = useEffectEvent(() => {
+    return calculateTouchSensitivity(deviceType.current);
+  });
 
-      const newLine: DrawingLine = {
-        id: Date.now(),
-        points: [pos.x, pos.y],
-        stroke: isEraser ? 'rgba(0,0,0,1)' : brushColor,
-        strokeWidth: brushSize,
-        globalCompositeOperation: isEraser ? 'destination-out' : 'source-over',
+  const handleMouseDown = useCallback((event: Konva.KonvaEventObject<PointerEvent>) => {
+    // MDN Best Practice: isPrimary와 pointerType 검증
+    const pointerEvent = event.evt;
+    
+    // 기본 터치만 처리 (멀티터치 방지)
+    if (!pointerEvent.isPrimary) return;
+    
+    // 포인터 타입별 최적화
+    const isTouch = pointerEvent.pointerType === 'touch';
+    const isMouse = pointerEvent.pointerType === 'mouse';
+    const isPen = pointerEvent.pointerType === 'pen';
+    
+    if (!isTouch && !isMouse && !isPen) return;
+
+    // 그리기 단계에서만 활성화
+    if (currentStep < 0 || currentStep >= DRAWING_STEPS.length) return;
+
+    isDrawing.current = true;
+    setIsDrawing(true);
+
+    const stage = event.target.getStage();
+    if (!stage) return;
+
+    const position = stage.getPointerPosition();
+    if (!position) return;
+
+    touchPerformanceMonitor.recordEvent();
+
+    // useEffectEvent 패턴으로 최적화된 감도 계산
+    const sensitivity = calculateSensitivity();
+    const adjustedPosition = {
+      x: position.x * sensitivity,
+      y: position.y * sensitivity,
+    };
+
+    const newLine: DrawingLine = {
+      id: Date.now(),
+      points: [adjustedPosition.x, adjustedPosition.y],
+      stroke: '#000000',
+      strokeWidth: 2,
+      globalCompositeOperation: 'source-over',
+    };
+
+    addLineToCurrentStep(newLine);
+  }, [currentStep, addLineToCurrentStep, setIsDrawing, calculateSensitivity]);
+
+  const handleMouseMove = useCallback((event: Konva.KonvaEventObject<PointerEvent>) => {
+    if (!isDrawing.current) return;
+
+    // MDN Best Practice: isPrimary 검증
+    const pointerEvent = event.evt;
+    if (!pointerEvent.isPrimary) return;
+
+    // requestAnimationFrame으로 성능 최적화
+    if (rafId.current) {
+      cancelAnimationFrame(rafId.current);
+    }
+
+    rafId.current = requestAnimationFrame(() => {
+      const currentTime = performance.now();
+      if (currentTime - lastEventTime.current < 16) return; // 60fps 제한
+
+      const stage = event.target.getStage();
+      if (!stage) return;
+
+      const position = stage.getPointerPosition();
+      if (!position) return;
+
+      // useEffectEvent 패턴으로 최적화된 감도 계산
+      const sensitivity = calculateSensitivity();
+      const adjustedPosition = {
+        x: position.x * sensitivity,
+        y: position.y * sensitivity,
       };
 
-      addLineToCurrentStep(newLine);
-    },
-    [
-      currentStep,
-      brushColor,
-      brushSize,
-      isEraser,
-      isEditingActive,
-      setIsDrawing,
-      addLineToCurrentStep,
-    ]
-  );
+      // 현재 라인의 점들 업데이트 (최적화 적용)
+      const newPoints = [adjustedPosition.x, adjustedPosition.y];
+      const optimizedPoints = processPointsOptimized(newPoints);
+      
+      updateLastLinePoints(optimizedPoints);
 
-  // 그리기 중
-  const handleMouseMove = useCallback(
-    (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
-      if (
-        !isDrawing ||
-        !isEditingActive ||
-        currentStep < 0 ||
-        currentStep >= DRAWING_STEPS.length
-      )
-        return;
+      touchPerformanceMonitor.recordEvent();
+      lastEventTime.current = currentTime;
+    });
+  }, [updateLastLinePoints, calculateSensitivity, processPointsOptimized]);
 
-      const stage = e.target.getStage();
-      const point = stage?.getPointerPosition();
-      if (!point) return;
+  const handleMouseUp = useCallback((event: Konva.KonvaEventObject<PointerEvent>) => {
+    // MDN Best Practice: isPrimary 검증
+    const pointerEvent = event.evt;
+    if (!pointerEvent.isPrimary) return;
 
-      // 마지막 선의 포인트 배열에 새 포인트 추가
-      const { stepsLines } = useDrawingStore.getState();
-      const currentStepLines = stepsLines[currentStep];
-      if (!currentStepLines || currentStepLines.length === 0) return;
+    if (!isDrawing.current) return;
 
-      const lastLine = currentStepLines[currentStepLines.length - 1];
-      if (lastLine) {
-        const newPoints = lastLine.points.concat([point.x, point.y]);
-        updateLastLinePoints(newPoints);
-      }
-    },
-    [isDrawing, isEditingActive, currentStep, updateLastLinePoints]
-  );
-
-  // 그리기 종료
-  const handleMouseUp = useCallback(() => {
-    if (!isEditingActive) return;
+    isDrawing.current = false;
     setIsDrawing(false);
 
-    // 히스토리에 현재 상태 저장 (실행취소용)
-    saveToHistory();
-  }, [isEditingActive, setIsDrawing, saveToHistory]);
+    if (rafId.current) {
+      cancelAnimationFrame(rafId.current);
+      rafId.current = null;
+    }
+
+    touchPerformanceMonitor.reset();
+  }, [setIsDrawing]);
 
   return {
     handleMouseDown,

@@ -233,6 +233,13 @@ const DrawingCanvas = memo(() => {
                 className={`flex-1 relative flex items-start justify-center pb-4 overscroll-contain ${
                   isEditingActive ? 'touch-none select-none' : ''
                 }`}
+                style={{
+                  // 태블릿 터치 최적화
+                  touchAction: isEditingActive ? 'none' : 'auto',
+                  WebkitTouchCallout: 'none',
+                  WebkitUserSelect: 'none',
+                  userSelect: 'none',
+                }}
               >
                 <DrawingStage
                   stageRef={stageRef}
