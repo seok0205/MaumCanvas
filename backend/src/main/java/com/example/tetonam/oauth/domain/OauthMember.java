@@ -1,10 +1,5 @@
 package com.example.tetonam.oauth.domain;
 
-public class OauthMember {
-    
-}
-package com.example.tetonam.oauth.domain;
-
 import static lombok.AccessLevel.PROTECTED;
 
 import jakarta.persistence.Embedded;
