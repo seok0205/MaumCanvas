@@ -16,7 +16,7 @@ interface UseCanvasResizeProps {
 
 /**
  * 캔버스 크기 계산 및 리사이즈 처리를 담당하는 커스텀 훅
- * React 공식 문서 best practices: useLayoutEffect로 시각적 업데이트 처리
+ * 웹 검색 결과: ResizeObserver 사용으로 즉시 반응성 구현
  */
 export const useCanvasResize = ({
   containerRef,
@@ -75,17 +75,34 @@ export const useCanvasResize = ({
     });
   }, [containerRef, isEditingActive, setStageSize, isExpandedMode]);
 
-  // 즉시 크기 재계산 함수 (디바운스 우회)
-  const calculateStageSizeImmediate = useCallback(() => {
-    calculateStageSize();
-  }, [calculateStageSize]);
-
-  // 초기 크기 설정 (React 공식 문서: useLayoutEffect로 시각적 업데이트 처리)
+  // 초기 크기 설정 (useLayoutEffect로 시각적 업데이트 처리)
   useLayoutEffect(() => {
     calculateStageSize();
   }, [calculateStageSize, currentStep, isEditingActive, isExpandedMode]);
 
-  // 리사이즈 이벤트 처리 (디바운스 적용)
+  // ResizeObserver를 사용한 즉시 반응 시스템 (웹 검색 결과 적용)
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    // ResizeObserver: paint 전에 실행되어 깜빡임 방지
+    const resizeObserver = new ResizeObserver(() => {
+      // 웹 검색 결과: ResizeObserver는 layout 후 paint 전에 실행됨
+      // 즉시 크기 재계산 (디바운스 없음)
+      calculateStageSize();
+    });
+
+    // 컨테이너 크기 변화 관찰 시작
+    resizeObserver.observe(container);
+
+    // cleanup
+    return () => {
+      resizeObserver.unobserve(container);
+      resizeObserver.disconnect();
+    };
+  }, [calculateStageSize, containerRef]);
+
+  // window resize는 기존 디바운스 유지 (일반적인 창 크기 조정용)
   useEffect(() => {
     let frame: number | null = null;
     let lastRun = 0;
@@ -123,6 +140,6 @@ export const useCanvasResize = ({
 
   return { 
     calculateStageSize,
-    calculateStageSizeImmediate, 
+    calculateStageSizeImmediate: calculateStageSize, // ResizeObserver로 대체되었지만 호환성 유지
   };
 };

@@ -1,7 +1,6 @@
 import type Konva from 'konva';
-import { memo, useCallback, useEffect, useRef, useLayoutEffect } from 'react';
+import { memo, useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
-import { flushSync } from 'react-dom';
 
 import { DrawingErrorBoundary } from '@/components/common/DrawingErrorBoundary';
 import { DrawingControls } from '@/components/drawing/DrawingControls';
@@ -78,7 +77,7 @@ const DrawingCanvas = memo(() => {
   const { setDrawingActive, allowNavigation } = useSafeNavigation();
 
   // 메모리 최적화 훅 (태블릿 PWA 환경용)
-  const { performMemoryCleanup, checkMemoryStatus } = useMemoryOptimization({
+  const { performMemoryCleanup } = useMemoryOptimization({
     maxLinesPerStep: 800, // 태블릿 메모리 고려하여 제한
     maxHistoryEntries: 8,
     memoryCheckInterval: 45000, // 45초마다 체크
@@ -122,30 +121,14 @@ const DrawingCanvas = memo(() => {
     toggleToolbar,
   } = useExpandedMode();
 
-  // 캔버스 크기 관리 훅
-  const { calculateStageSizeImmediate } = useCanvasResize({
+  // 캔버스 크기 관리 훅 (ResizeObserver로 즉시 반응)
+  useCanvasResize({
     containerRef: canvasContainerRef,
     isEditingActive,
     setStageSize,
     currentStep,
     isExpandedMode,
   });
-
-  // 확대 모드 해제 시 즉시 캔버스 크기 재계산 (React best practices: useLayoutEffect + flushSync)
-  useLayoutEffect(() => {
-    // 확대 모드에서 일반 모드로 전환될 때만 실행
-    if (!isExpandedMode) {
-      // React 공식 문서 권장: 시각적 업데이트는 useLayoutEffect에서 처리
-      // flushSync로 상태 변경을 즉시 DOM에 반영
-      flushSync(() => {
-        // 상태가 즉시 DOM에 반영됨을 보장
-      });
-      
-      // paint 전에 동기적으로 크기 재계산 (깜빡임 방지)
-      calculateStageSizeImmediate();
-      checkMemoryStatus();
-    }
-  }, [isExpandedMode, calculateStageSizeImmediate, checkMemoryStatus]);
 
   // 확대 모드 토글 핸들러
   const handleExpandedModeToggle = useCallback(() => {
