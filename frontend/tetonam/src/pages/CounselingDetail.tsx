@@ -136,7 +136,11 @@ export const CounselingDetail = () => {
                 <button
                   key={img.id}
                   className='group rounded-xl overflow-hidden border border-border/50 hover:shadow-hover transition'
-                  onClick={() => navigate(`/counseling/image/${img.id}`)}
+                  onClick={() =>
+                    navigate(
+                      `/counseling/image/${img.id}?imageUrl=${encodeURIComponent(img.imageUrl)}&category=${encodeURIComponent(img.category)}`
+                    )
+                  }
                 >
                   <img
                     src={img.imageUrl}

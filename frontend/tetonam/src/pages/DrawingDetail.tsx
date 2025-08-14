@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { CommonHeader } from '@/components/layout/CommonHeader';
+import { DrawingImage } from '@/components/ui/drawing/DrawingImage';
 import { Button } from '@/components/ui/interactive/button';
 import {
   Card,
@@ -21,7 +22,12 @@ import type { ApiErrorType } from '@/types/api';
 
 export const DrawingDetail = () => {
   const { drawingId } = useParams();
+  const [searchParams] = useSearchParams();
   const { user } = useAuthStore();
+
+  // URL 파라미터에서 이미지 정보 추출
+  const imageUrl = searchParams.get('imageUrl');
+  const category = searchParams.get('category');
 
   const [aiText, setAiText] = useState<string>('');
   const [ragText, setRagText] = useState<string | null>(null);
@@ -252,7 +258,17 @@ export const DrawingDetail = () => {
         <AppSidebar />
         <div className='flex-1 flex flex-col'>
           <CommonHeader user={user} title='그림 분석 결과' showBackButton />
-          <main className='p-6 space-y-6'>
+
+          {/* 그림 표시 영역 - CommonHeader 아래, 분석 결과 위에 위치 */}
+          <div className='px-6 pt-6'>
+            <DrawingImage
+              imageUrl={imageUrl ?? undefined}
+              category={category ?? undefined}
+              className='mb-6'
+            />
+          </div>
+
+          <main className='px-6 pb-6 space-y-6'>
             {isCounselor && (
               <Card>
                 <CardHeader>
