@@ -199,6 +199,21 @@ export const CommonHeader = ({
           </AlertDescription>
         </Alert>
       )}
+
+      {/* 모바일 전용 뒤로가기 버튼 - CommonHeader 아래 */}
+      {showBackButton && !isCommunityCreatePage && (
+        <div className='block md:hidden mx-4 mb-4'>
+          <Button
+            variant='ghost'
+            size='sm'
+            onClick={handleBackClick}
+            className='text-muted-foreground hover:text-foreground'
+          >
+            <ArrowLeft className='mr-2 h-4 w-4' />
+            {backButtonText}
+          </Button>
+        </div>
+      )}
     </>
   );
 };
