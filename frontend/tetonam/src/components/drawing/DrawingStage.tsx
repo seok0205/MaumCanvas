@@ -5,7 +5,7 @@ import { Layer, Line, Rect, Stage } from 'react-konva';
 import { Button } from '@/components/ui/interactive/button';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import type { DrawingLine, StageSize } from '@/types/drawing';
-import { Maximize, Palette } from 'lucide-react';
+import { Maximize, Palette, X } from 'lucide-react';
 
 interface DrawingStageProps {
   stageRef: React.RefObject<Konva.Stage | null>;
@@ -21,8 +21,10 @@ interface DrawingStageProps {
   onReactivate: () => void;
   saveAnimationKey: number;
   reActivateButtonRef: React.RefObject<HTMLButtonElement | null>;
-  onFullscreenToggle?: () => void;
-  isFullscreen?: boolean;
+  onExpandedModeToggle?: () => void;
+  onToolbarToggle?: () => void;
+  isExpandedMode?: boolean;
+  isToolbarVisible?: boolean;
 }
 
 /**
@@ -44,8 +46,10 @@ const DrawingStage = memo<DrawingStageProps>(
     onReactivate,
     saveAnimationKey,
     reActivateButtonRef,
-    onFullscreenToggle,
-    isFullscreen = false,
+    onExpandedModeToggle,
+    onToolbarToggle,
+    isExpandedMode = false,
+    isToolbarVisible = true,
   }) => {
     const reduceMotion = useReducedMotion();
 
@@ -168,19 +172,56 @@ const DrawingStage = memo<DrawingStageProps>(
           transform: 'translateZ(0)', // 하드웨어 가속 활성화
         }}
       >
-        {/* 전체화면 버튼 (편집 중일 때만 표시) */}
-        {isEditingActive && onFullscreenToggle && !isFullscreen && (
-          <div className='absolute top-2 right-2 z-10'>
-            <Button
-              onClick={onFullscreenToggle}
-              size='sm'
-              variant='outline'
-              className='bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm'
-              title='전체화면으로 보기 (태블릿 최적화)'
-              aria-label='전체화면으로 보기'
-            >
-              <Maximize className='w-4 h-4' />
-            </Button>
+        {/* 캔버스 확대 및 팔레트 버튼 (편집 중일 때만 표시) */}
+        {isEditingActive && (
+          <div className='absolute top-2 right-2 z-10 flex gap-2'>
+            {/* 팔레트 토글 버튼 (확대 모드일 때만 표시) */}
+            {isExpandedMode && onToolbarToggle && (
+              <Button
+                onClick={onToolbarToggle}
+                size='sm'
+                variant='outline'
+                className={`${
+                  isToolbarVisible
+                    ? 'bg-blue-500 text-white border-blue-500 hover:bg-blue-600'
+                    : 'bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm'
+                } transition-colors duration-200`}
+                title={isToolbarVisible ? '팔레트 숨기기' : '팔레트 보이기'}
+                aria-label={
+                  isToolbarVisible ? '팔레트 숨기기' : '팔레트 보이기'
+                }
+              >
+                <Palette className='w-4 h-4' />
+              </Button>
+            )}
+
+            {/* 확대 모드 토글 버튼 */}
+            {onExpandedModeToggle && (
+              <Button
+                onClick={onExpandedModeToggle}
+                size='sm'
+                variant='outline'
+                className={`${
+                  isExpandedMode
+                    ? 'bg-blue-500 text-white border-blue-500 hover:bg-blue-600'
+                    : 'bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm'
+                } transition-colors duration-200`}
+                title={
+                  isExpandedMode
+                    ? '일반 모드로 돌아가기'
+                    : '캔버스 확대 (태블릿 최적화)'
+                }
+                aria-label={
+                  isExpandedMode ? '일반 모드로 돌아가기' : '캔버스 확대'
+                }
+              >
+                {isExpandedMode ? (
+                  <X className='w-4 h-4' />
+                ) : (
+                  <Maximize className='w-4 h-4' />
+                )}
+              </Button>
+            )}
           </div>
         )}
 

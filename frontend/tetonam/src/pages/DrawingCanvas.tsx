@@ -1,6 +1,5 @@
 import type Konva from 'konva';
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import Fullscreen from 'react-fullscreen-crossbrowser';
+import { memo, useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 
 import { DrawingErrorBoundary } from '@/components/common/DrawingErrorBoundary';
@@ -11,7 +10,6 @@ import { DrawingThumbnails } from '@/components/drawing/DrawingThumbnails';
 import { DrawingToolbar } from '@/components/drawing/DrawingToolbar';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { CommonHeader } from '@/components/layout/CommonHeader';
-import { Button } from '@/components/ui/interactive/button';
 import {
   MobileSidebarToggle,
   SidebarProvider,
@@ -19,7 +17,7 @@ import {
 import { DRAWING_STEPS } from '@/constants/drawing';
 import { useCanvasResize } from '@/hooks/drawing/useCanvasResize';
 import { useDrawingNavigation } from '@/hooks/drawing/useDrawingNavigation';
-import { useFullscreenCanvas } from '@/hooks/drawing/useFullscreenCanvas';
+import { useExpandedMode } from '@/hooks/drawing/useExpandedMode';
 import { usePopoverManagement } from '@/hooks/drawing/usePopoverManagement';
 import { useCompressedLines } from '@/hooks/useCompressedLines';
 import { useDrawingHandlers } from '@/hooks/useDrawingHandlers';
@@ -113,23 +111,19 @@ const DrawingCanvas = memo(() => {
 
   const { decompress } = useCompressedLines();
 
-  // 전체화면 관리 훅
-  const { isFullscreen, enterFullscreen, exitFullscreen } = useFullscreenCanvas(
-    {
-      setStageSize,
-      onFullscreenChange: isFullscreenActive => {
-        setIsFullscreenEnabled(isFullscreenActive);
-      },
-    }
-  );
+  // 확대 모드 관리 훅
+  const {
+    isExpandedMode,
+    isToolbarVisible,
+    enterExpandedMode,
+    exitExpandedMode,
+    toggleToolbar,
+  } = useExpandedMode();
 
-  // 전체화면 상태 관리
-  const [isFullscreenEnabled, setIsFullscreenEnabled] = useState(false);
-
-  // 전체화면 해제 시 캔버스 크기 재계산 강제 트리거
+  // 확대 모드 해제 시 캔버스 크기 재계산 강제 트리거
   useEffect(() => {
-    if (!isFullscreenEnabled) {
-      // 전체화면에서 일반 모드로 돌아올 때 작은 지연 후 크기 재계산
+    if (!isExpandedMode) {
+      // 확대 모드에서 일반 모드로 돌아올 때 작은 지연 후 크기 재계산
       const timeoutId = setTimeout(() => {
         if (canvasContainerRef.current) {
           // 컨테이너 크기 기반으로 다시 계산
@@ -145,7 +139,7 @@ const DrawingCanvas = memo(() => {
     }
 
     return undefined;
-  }, [isFullscreenEnabled, checkMemoryStatus]);
+  }, [isExpandedMode, checkMemoryStatus]);
 
   // 캔버스 크기 관리 훅
   useCanvasResize({
@@ -153,30 +147,17 @@ const DrawingCanvas = memo(() => {
     isEditingActive,
     setStageSize,
     currentStep,
-    isFullscreen: isFullscreenEnabled,
+    isExpandedMode,
   });
 
-  // 전체화면 핸들러
-  const handleFullscreenToggle = useCallback(() => {
-    if (isFullscreenEnabled) {
-      setIsFullscreenEnabled(false);
-      exitFullscreen();
+  // 확대 모드 토글 핸들러
+  const handleExpandedModeToggle = useCallback(() => {
+    if (isExpandedMode) {
+      exitExpandedMode();
     } else {
-      setIsFullscreenEnabled(true);
-      enterFullscreen();
+      enterExpandedMode();
     }
-  }, [isFullscreenEnabled, enterFullscreen, exitFullscreen]);
-
-  // 전체화면 상태 변경 핸들러
-  const handleFullscreenChange = useCallback(
-    (isFullscreenActive: boolean) => {
-      setIsFullscreenEnabled(isFullscreenActive);
-      if (!isFullscreenActive) {
-        exitFullscreen();
-      }
-    },
-    [exitFullscreen]
-  );
+  }, [isExpandedMode, enterExpandedMode, exitExpandedMode]);
 
   // 네비게이션 관리 훅
   const { handlePrevStep, handleNextStep, handleThumbnailSelect, canGoNext } =
@@ -278,13 +259,22 @@ const DrawingCanvas = memo(() => {
 
       // 네트워크 관련 에러는 조용히 처리 (리다이렉트 방지)
       if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
-        console.warn('Network error in drawing canvas, continuing silently:', error);
+        console.warn(
+          'Network error in drawing canvas, continuing silently:',
+          error
+        );
         return; // 에러를 더 이상 전파하지 않음
       }
 
       // Service Worker 관련 에러 조용히 처리
-      if (errorMessage.includes('service worker') || errorMessage.includes('sw.js')) {
-        console.warn('Service Worker error in drawing canvas, continuing silently:', error);
+      if (
+        errorMessage.includes('service worker') ||
+        errorMessage.includes('sw.js')
+      ) {
+        console.warn(
+          'Service Worker error in drawing canvas, continuing silently:',
+          error
+        );
         return;
       }
     },
@@ -305,59 +295,55 @@ const DrawingCanvas = memo(() => {
         </div>
       }
     >
-      <Fullscreen
-        enabled={isFullscreenEnabled}
-        onChange={handleFullscreenChange}
-      >
-        <SidebarProvider>
-          {/* 편집(그리기) 중 텍스트 드래그/선택 방지: 페이지 루트에 select-none 적용 */}
-          <div
-            className={`flex w-full min-h-screen bg-orange-50/30 ${
-              isEditingActive ? 'select-none' : ''
-            } ${isFullscreenEnabled ? 'bg-black' : ''}`}
-          >
-            {!isFullscreenEnabled && <AppSidebar />}
+      <SidebarProvider>
+        {/* 편집(그리기) 중 텍스트 드래그/선택 방지: 페이지 루트에 select-none 적용 */}
+        <div
+          className={`flex w-full min-h-screen bg-orange-50/30 ${
+            isEditingActive ? 'select-none' : ''
+          } ${isExpandedMode ? 'bg-black' : ''}`}
+        >
+          {!isExpandedMode && <AppSidebar />}
 
-            <div className='flex flex-1 flex-col'>
-              {!isFullscreenEnabled && <CommonHeader user={user!} />}
+          <div className='flex flex-1 flex-col'>
+            {!isExpandedMode && <CommonHeader user={user!} />}{' '}
+            {/* 메인 콘텐츠 */}
+            <main className='flex-1 overflow-hidden flex flex-col'>
+              <div
+                className={`${isExpandedMode ? 'p-0' : 'p-4 md:p-6'} flex-1 flex flex-col`}
+              >
+                {/* 헤더 (편집 시작 시 접기 - 진행 정보 & 썸네일) */}
+                {!isEditingActive && !isExpandedMode && (
+                  <div className='mb-4 md:mb-4 transition-all duration-300'>
+                    <DrawingStepHeader
+                      currentStep={currentStep}
+                      currentStepData={currentStepData}
+                      saveStates={saveStates}
+                    />
+                    <DrawingThumbnails
+                      savedImages={savedImages}
+                      currentStep={currentStep}
+                      handleThumbnailSelect={handleThumbnailSelect}
+                    />
+                  </div>
+                )}
 
-              {/* 메인 콘텐츠 */}
-              <main className='flex-1 overflow-hidden flex flex-col'>
-                <div
-                  className={`${isFullscreenEnabled ? 'p-0' : 'p-4 md:p-6'} flex-1 flex flex-col`}
-                >
-                  {/* 헤더 (편집 시작 시 접기 - 진행 정보 & 썸네일) */}
-                  {!isEditingActive && !isFullscreenEnabled && (
-                    <div className='mb-4 md:mb-4 transition-all duration-300'>
-                      <DrawingStepHeader
-                        currentStep={currentStep}
-                        currentStepData={currentStepData}
-                        saveStates={saveStates}
-                      />
-                      <DrawingThumbnails
-                        savedImages={savedImages}
-                        currentStep={currentStep}
-                        handleThumbnailSelect={handleThumbnailSelect}
-                      />
-                    </div>
-                  )}
-
-                  {/* 안내문 (전체화면이 아닐 때만 표시) */}
-                  {!isFullscreenEnabled && (
-                    <div
-                      className={`mb-4 md:mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4 ${isEditingActive ? 'ring-1 ring-yellow-300' : ''}`}
+                {/* 안내문 (확대 모드가 아닐 때만 표시) */}
+                {!isExpandedMode && (
+                  <div
+                    className={`mb-4 md:mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4 ${isEditingActive ? 'ring-1 ring-yellow-300' : ''}`}
+                  >
+                    <p
+                      className={`text-yellow-800 ${isEditingActive ? 'text-base md:text-lg font-semibold' : 'text-sm'} leading-relaxed`}
                     >
-                      <p
-                        className={`text-yellow-800 ${isEditingActive ? 'text-base md:text-lg font-semibold' : 'text-sm'} leading-relaxed`}
-                      >
-                        <strong className='mr-1'>안내:</strong>{' '}
-                        {currentStepData.instruction}
-                      </p>
-                    </div>
-                  )}
+                      <strong className='mr-1'>안내:</strong>{' '}
+                      {currentStepData.instruction}
+                    </p>
+                  </div>
+                )}
 
-                  {/* 도구모음 (편집 중이고 전체화면이 아닐 때만 표시) */}
-                  {isEditingActive && !isFullscreenEnabled && (
+                {/* 도구모음 (편집 중이고 확대 모드가 아닐 때만 표시, 확대 모드에서는 팔레트 토글로 제어) */}
+                {isEditingActive &&
+                  (!isExpandedMode || (isExpandedMode && isToolbarVisible)) && (
                     <div className='mb-4 md:mb-6 bg-white rounded-lg border border-gray-200 p-3 md:p-4 relative'>
                       <DrawingToolbar
                         sizePopoverRef={sizePopoverRef}
@@ -367,107 +353,66 @@ const DrawingCanvas = memo(() => {
                     </div>
                   )}
 
-                  {/* 캔버스 영역 */}
-                  <div
-                    ref={canvasContainerRef}
-                    className={`flex-1 relative flex items-start justify-center pb-4 overscroll-contain ${
-                      isEditingActive ? 'touch-none select-none' : ''
-                    } ${isFullscreenEnabled ? 'items-center' : ''}`}
-                  >
-                    {/* 전체화면 전용 UI */}
-                    {isFullscreenEnabled && isEditingActive && (
-                      <>
-                        {/* 좌측 상단 팔레트 버튼 */}
-                        <div className='absolute top-4 left-4 z-20'>
-                          <div className='bg-white/90 backdrop-blur-sm rounded-lg border border-gray-200 p-3 shadow-lg'>
-                            <DrawingToolbar
-                              sizePopoverRef={sizePopoverRef}
-                              colorPopoverRef={colorPopoverRef}
-                              handleSave={handleSave}
-                            />
-                          </div>
-                        </div>
-
-                        {/* 우측 상단 전체화면 해제 버튼 */}
-                        <div className='absolute top-4 right-4 z-20'>
-                          <Button
-                            onClick={() => setIsFullscreenEnabled(false)}
-                            size='sm'
-                            variant='outline'
-                            className='bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm'
-                            title='전체화면 해제'
-                          >
-                            <svg
-                              className='w-4 h-4'
-                              fill='none'
-                              viewBox='0 0 24 24'
-                              stroke='currentColor'
-                            >
-                              <path
-                                strokeLinecap='round'
-                                strokeLinejoin='round'
-                                strokeWidth={2}
-                                d='M6 18L18 6M6 6l12 12'
-                              />
-                            </svg>
-                          </Button>
-                        </div>
-
-                        {/* 하단 네비게이션 (전체화면 전용) */}
-                        <div className='absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20'>
-                          <div className='bg-white/90 backdrop-blur-sm rounded-lg border border-gray-200 shadow-lg'>
-                            <DrawingControls
-                              saveStates={saveStates}
-                              onPrevStep={handlePrevStep}
-                              onNextStep={handleNextStep}
-                              onSubmit={preventDoubleClick(handleSubmit)}
-                              isBlocked={isBlocked}
-                              canGoNext={canGoNext}
-                            />
-                          </div>
-                        </div>
-                      </>
-                    )}
-
-                    <DrawingStage
-                      stageRef={stageRef}
-                      stageSize={stageSize}
-                      currentLines={currentLines}
-                      isEditingActive={isEditingActive}
-                      onMouseDown={handleMouseDown}
-                      onMouseMove={handleMouseMove}
-                      onMouseUp={handleMouseUp}
-                      onPointerDown={handlePointerDown}
-                      onPointerMove={handlePointerMove}
-                      onPointerUp={handlePointerUp}
-                      onReactivate={() => setIsEditingActive(true)}
-                      saveAnimationKey={saveAnimationKey}
-                      reActivateButtonRef={reActivateButtonRef}
-                      onFullscreenToggle={handleFullscreenToggle}
-                      isFullscreen={isFullscreen}
-                    />
-                  </div>
-
-                  {/* 네비게이션 버튼 (전체화면이 아닐 때만 표시) */}
-                  {!isFullscreenEnabled && (
-                    <DrawingControls
-                      saveStates={saveStates}
-                      onPrevStep={handlePrevStep}
-                      onNextStep={handleNextStep}
-                      onSubmit={preventDoubleClick(handleSubmit)}
-                      isBlocked={isBlocked}
-                      canGoNext={canGoNext}
-                    />
+                {/* 캔버스 영역 */}
+                <div
+                  ref={canvasContainerRef}
+                  className={`flex-1 relative flex items-start justify-center pb-4 overscroll-contain ${
+                    isEditingActive ? 'touch-none select-none' : ''
+                  } ${isExpandedMode ? 'items-center' : ''}`}
+                >
+                  {/* 확대 모드 전용 팔레트 UI (토글로 제어) */}
+                  {isExpandedMode && isEditingActive && isToolbarVisible && (
+                    <div className='absolute top-4 left-4 z-20'>
+                      <div className='bg-white/90 backdrop-blur-sm rounded-lg border border-gray-200 p-3 shadow-lg'>
+                        <DrawingToolbar
+                          sizePopoverRef={sizePopoverRef}
+                          colorPopoverRef={colorPopoverRef}
+                          handleSave={handleSave}
+                        />
+                      </div>
+                    </div>
                   )}
-                </div>
-              </main>
-            </div>
 
-            {/* 모바일 사이드바 토글 버튼 */}
-            {!isFullscreenEnabled && <MobileSidebarToggle />}
+                  <DrawingStage
+                    stageRef={stageRef}
+                    stageSize={stageSize}
+                    currentLines={currentLines}
+                    isEditingActive={isEditingActive}
+                    onMouseDown={handleMouseDown}
+                    onMouseMove={handleMouseMove}
+                    onMouseUp={handleMouseUp}
+                    onPointerDown={handlePointerDown}
+                    onPointerMove={handlePointerMove}
+                    onPointerUp={handlePointerUp}
+                    onReactivate={() => setIsEditingActive(true)}
+                    saveAnimationKey={saveAnimationKey}
+                    reActivateButtonRef={reActivateButtonRef}
+                    onExpandedModeToggle={handleExpandedModeToggle}
+                    onToolbarToggle={toggleToolbar}
+                    isExpandedMode={isExpandedMode}
+                    isToolbarVisible={isToolbarVisible}
+                  />
+                </div>
+
+                {/* 네비게이션 버튼 (확대 모드가 아닐 때만 표시) */}
+                {!isExpandedMode && (
+                  <DrawingControls
+                    saveStates={saveStates}
+                    onPrevStep={handlePrevStep}
+                    onNextStep={handleNextStep}
+                    onSubmit={preventDoubleClick(handleSubmit)}
+                    isBlocked={isBlocked}
+                    canGoNext={canGoNext}
+                  />
+                )}
+              </div>
+            </main>
           </div>
-        </SidebarProvider>
-      </Fullscreen>
+
+          {/* 모바일 사이드바 토글 버튼 */}
+          {!isExpandedMode && <MobileSidebarToggle />}
+        </div>
+      </SidebarProvider>
     </DrawingErrorBoundary>
   );
 });
