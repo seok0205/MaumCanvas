@@ -612,3 +612,39 @@
     animation: none;
   }
 }
+
+/* 터치펜 및 태블릿 최적화 */
+.touch-pen-optimized {
+  /* 모든 터치 제스처 비활성화 */
+  touch-action: none;
+  /* 텍스트 선택 방지 */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  /* iOS Safari 롱프레스 메뉴 방지 */
+  -webkit-touch-callout: none;
+  /* 탭 하이라이트 제거 */
+  -webkit-tap-highlight-color: transparent;
+  /* 드래그 방지 */
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+  /* 스크롤 바운스 방지 */
+  overscroll-behavior: none;
+}
+
+/* 터치펜 전용 커서 스타일 */
+.pen-cursor {
+  cursor: crosshair;
+}
+
+/* 모바일 환경에서 확대/축소 방지 */
+@media (max-width: 768px) {
+  .touch-pen-optimized {
+    /* 모바일에서 확대/축소 제스처 완전히 비활성화 */
+    touch-action: manipulation;
+  }
+}

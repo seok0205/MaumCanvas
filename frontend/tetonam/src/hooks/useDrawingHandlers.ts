@@ -6,6 +6,10 @@ import { useDrawingStore } from '@/stores/useDrawingStore';
 import { useUIStore } from '@/stores/useUIStore';
 import type { DrawingLine } from '@/types/drawing';
 
+/**
+ * 기존 마우스/터치 그리기 핸들러 (단순화)
+ * 안정적이고 검증된 기본 그리기 기능 제공
+ */
 export const useDrawingHandlers = () => {
   const {
     currentStep,
@@ -18,10 +22,10 @@ export const useDrawingHandlers = () => {
 
   const { isEditingActive, isEraser, brushSize, brushColor } = useUIStore();
 
-  // 그리기 시작
+  // 그리기 시작 (마우스/터치 전용)
   const handleMouseDown = useCallback(
     (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
-      if (!isEditingActive) return; // 편집 비활성화 상태에서는 그리기 불가
+      if (!isEditingActive) return;
       if (currentStep < 0 || currentStep >= DRAWING_STEPS.length) return;
 
       setIsDrawing(true);
@@ -34,6 +38,8 @@ export const useDrawingHandlers = () => {
         stroke: isEraser ? 'rgba(0,0,0,1)' : brushColor,
         strokeWidth: brushSize,
         globalCompositeOperation: isEraser ? 'destination-out' : 'source-over',
+        // 기본 포인터 타입 설정 (호환성)
+        pointerType: 'mouse',
       };
 
       addLineToCurrentStep(newLine);
@@ -49,22 +55,16 @@ export const useDrawingHandlers = () => {
     ]
   );
 
-  // 그리기 중
+  // 그리기 중 (마우스/터치 전용)
   const handleMouseMove = useCallback(
     (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
-      if (
-        !isDrawing ||
-        !isEditingActive ||
-        currentStep < 0 ||
-        currentStep >= DRAWING_STEPS.length
-      )
-        return;
+      if (!isDrawing || !isEditingActive) return;
+      if (currentStep < 0 || currentStep >= DRAWING_STEPS.length) return;
 
       const stage = e.target.getStage();
       const point = stage?.getPointerPosition();
       if (!point) return;
 
-      // 마지막 선의 포인트 배열에 새 포인트 추가
       const { stepsLines } = useDrawingStore.getState();
       const currentStepLines = stepsLines[currentStep];
       if (!currentStepLines || currentStepLines.length === 0) return;
@@ -78,12 +78,10 @@ export const useDrawingHandlers = () => {
     [isDrawing, isEditingActive, currentStep, updateLastLinePoints]
   );
 
-  // 그리기 종료
+  // 그리기 종료 (마우스/터치 전용)
   const handleMouseUp = useCallback(() => {
     if (!isEditingActive) return;
     setIsDrawing(false);
-
-    // 히스토리에 현재 상태 저장 (실행취소용)
     saveToHistory();
   }, [isEditingActive, setIsDrawing, saveToHistory]);
 

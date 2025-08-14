@@ -15,6 +15,9 @@ interface DrawingStageProps {
   onMouseDown: (e: any) => void;
   onMouseMove: (e: any) => void;
   onMouseUp: (e: any) => void;
+  onPointerDown?: (e: any) => void; // 터치펜 전용 핸들러
+  onPointerMove?: (e: any) => void; // 터치펜 전용 핸들러
+  onPointerUp?: (e: any) => void; // 터치펜 전용 핸들러
   onReactivate: () => void;
   saveAnimationKey: number;
   reActivateButtonRef: React.RefObject<HTMLButtonElement | null>;
@@ -35,6 +38,9 @@ const DrawingStage = memo<DrawingStageProps>(
     onMouseDown,
     onMouseMove,
     onMouseUp,
+    onPointerDown,
+    onPointerMove,
+    onPointerUp,
     onReactivate,
     saveAnimationKey,
     reActivateButtonRef,
@@ -56,25 +62,65 @@ const DrawingStage = memo<DrawingStageProps>(
     const pointerHandlers = useMemo(
       () => ({
         onPointerDown: (e: any) => {
+          // 터치펜 최적화: 더 세밀한 이벤트 제어
           if (e?.evt && typeof e.evt.preventDefault === 'function') {
             e.evt.preventDefault();
           }
-          onMouseDown(e);
+
+          if (e?.evt && typeof e.evt.stopPropagation === 'function') {
+            e.evt.stopPropagation();
+          }
+
+          // 전용 포인터 핸들러가 있으면 사용, 없으면 기본 핸들러 사용
+          if (onPointerDown) {
+            onPointerDown(e);
+          } else {
+            onMouseDown(e);
+          }
         },
         onPointerMove: (e: any) => {
           if (e?.evt && typeof e.evt.preventDefault === 'function') {
             e.evt.preventDefault();
           }
-          onMouseMove(e);
+
+          if (onPointerMove) {
+            onPointerMove(e);
+          } else {
+            onMouseMove(e);
+          }
         },
         onPointerUp: (e: any) => {
           if (e?.evt && typeof e.evt.preventDefault === 'function') {
             e.evt.preventDefault();
           }
-          onMouseUp(e);
+
+          if (onPointerUp) {
+            onPointerUp(e);
+          } else {
+            onMouseUp(e);
+          }
+        },
+        onPointerCancel: (e: any) => {
+          // 포인터가 취소된 경우 (예: 손바닥이 화면에 닿음) 그리기 중단
+          if (e?.evt && typeof e.evt.preventDefault === 'function') {
+            e.evt.preventDefault();
+          }
+
+          if (onPointerUp) {
+            onPointerUp(e);
+          } else {
+            onMouseUp(e);
+          }
         },
       }),
-      [onMouseDown, onMouseMove, onMouseUp]
+      [
+        onMouseDown,
+        onMouseMove,
+        onMouseUp,
+        onPointerDown,
+        onPointerMove,
+        onPointerUp,
+      ]
     );
 
     const mouseTouchHandlers = useMemo(
@@ -109,7 +155,15 @@ const DrawingStage = memo<DrawingStageProps>(
         className={`relative rounded-lg border border-gray-300 bg-white shadow-sm overscroll-contain ${
           isEditingActive ? 'touch-none select-none' : ''
         }`}
-        style={{ width: stageSize.width, height: stageSize.height }}
+        style={{
+          width: stageSize.width,
+          height: stageSize.height,
+          // 터치펜 최적화 CSS
+          touchAction: 'none',
+          WebkitUserSelect: 'none',
+          WebkitTouchCallout: 'none',
+          WebkitTapHighlightColor: 'transparent',
+        }}
       >
         {/* 전체화면 버튼 (편집 중일 때만 표시) */}
         {isEditingActive && onFullscreenToggle && !isFullscreen && (
@@ -132,10 +186,13 @@ const DrawingStage = memo<DrawingStageProps>(
           height={stageSize.height}
           {...(supportsPointer ? pointerHandlers : mouseTouchHandlers)}
           onContextMenu={(e: any) => {
-            // 롱프레스 컨텍스트 메뉴 방지 (iPad 등)
-            if (e?.evt && typeof e.evt.preventDefault === 'function') {
+            // 더 강력한 컨텍스트 메뉴 방지 (터치펜 롱프레스 포함)
+            if (e?.evt) {
               e.evt.preventDefault();
+              e.evt.stopPropagation();
+              e.evt.stopImmediatePropagation();
             }
+            return false;
           }}
           className={`transition-all ${
             isEditingActive

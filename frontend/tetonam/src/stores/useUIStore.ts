@@ -1,8 +1,9 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { useShallow } from 'zustand/react/shallow';
 
 import { CANVAS_CONFIG, COLOR_PALETTE } from '@/constants/drawing';
-import type { CanvasSize, DrawingColor } from '@/types/drawing';
+import type { DrawingColor, PenSettings, StageSize } from '@/types/drawing';
 
 interface UIState {
   // 편집 모드
@@ -18,10 +19,15 @@ interface UIState {
   brushColor: DrawingColor;
 
   // 캔버스 크기
-  stageSize: CanvasSize;
+  stageSize: StageSize;
 
   // 애니메이션
   saveAnimationKey: number;
+
+  // 터치펜 설정
+  penSettings: PenSettings;
+  isPenActive: boolean;
+  activePenPointerId: number | null;
 }
 
 interface UIActions {
@@ -44,10 +50,19 @@ interface UIActions {
   toggleEraser: () => void;
 
   // 캔버스 크기
-  setStageSize: (size: CanvasSize) => void;
+  setStageSize: (size: StageSize) => void;
 
   // 애니메이션
   triggerSaveAnimation: () => void;
+
+  // 터치펜 관리
+  setPenSettings: (settings: Partial<PenSettings>) => void;
+  setIsPenActive: (active: boolean) => void;
+  setActivePenPointerId: (pointerId: number | null) => void;
+  calculateDynamicStrokeWidth: (
+    baseBrushSize: number,
+    pressure: number
+  ) => number;
 
   // 초기화
   resetUIState: () => void;
@@ -67,6 +82,15 @@ const initialState: UIState = {
     height: CANVAS_CONFIG.HEIGHT,
   },
   saveAnimationKey: 0,
+  // 터치펜 설정 초기값
+  penSettings: {
+    pressureSensitivity: true,
+    touchRejection: true,
+    tiltSensitivity: false,
+    pressureMultiplier: 1.0,
+  },
+  isPenActive: false,
+  activePenPointerId: null,
 };
 
 export const useUIStore = create<UIStore>()(
@@ -198,6 +222,47 @@ export const useUIStore = create<UIStore>()(
         );
       },
 
+      // 터치펜 관리
+      setPenSettings: settings => {
+        const { penSettings } = get();
+        set(
+          { penSettings: { ...penSettings, ...settings } },
+          false,
+          'setPenSettings'
+        );
+      },
+
+      setIsPenActive: active => {
+        set({ isPenActive: active }, false, 'setIsPenActive');
+      },
+
+      setActivePenPointerId: pointerId => {
+        set({ activePenPointerId: pointerId }, false, 'setActivePenPointerId');
+      },
+
+      calculateDynamicStrokeWidth: (baseBrushSize, pressure) => {
+        const { penSettings } = get();
+        if (!penSettings.pressureSensitivity) {
+          return baseBrushSize;
+        }
+
+        // 압력 값은 0~1 범위, 기본값 0.5
+        const normalizedPressure = Math.max(
+          0.1,
+          Math.min(1.0, pressure || 0.5)
+        );
+        const pressureMultiplier = penSettings.pressureMultiplier;
+
+        // 최소 20%, 최대 150%의 브러시 크기 변화
+        const minScale = 0.2;
+        const maxScale = 1.5;
+        const scale =
+          minScale +
+          normalizedPressure * (maxScale - minScale) * pressureMultiplier;
+
+        return Math.round(baseBrushSize * scale);
+      },
+
       // 초기화
       resetUIState: () => {
         set(initialState, false, 'resetUIState');
@@ -209,14 +274,32 @@ export const useUIStore = create<UIStore>()(
 
 // 도구 관련 셀렉터들
 export const useBrushSettings = () =>
-  useUIStore(state => ({
-    isEraser: state.isEraser,
-    brushSize: state.brushSize,
-    brushColor: state.brushColor,
-  }));
+  useUIStore(
+    useShallow(state => ({
+      isEraser: state.isEraser,
+      brushSize: state.brushSize,
+      brushColor: state.brushColor,
+    }))
+  );
 
 export const usePopoverStates = () =>
-  useUIStore(state => ({
-    showSizeOptions: state.showSizeOptions,
-    showColorOptions: state.showColorOptions,
-  }));
+  useUIStore(
+    useShallow(state => ({
+      showSizeOptions: state.showSizeOptions,
+      showColorOptions: state.showColorOptions,
+    }))
+  );
+
+// 터치펜 관련 셀렉터들
+export const usePenSettings = () =>
+  useUIStore(
+    useShallow(state => ({
+      penSettings: state.penSettings,
+      isPenActive: state.isPenActive,
+      activePenPointerId: state.activePenPointerId,
+      calculateDynamicStrokeWidth: state.calculateDynamicStrokeWidth,
+      setPenSettings: state.setPenSettings,
+      setIsPenActive: state.setIsPenActive,
+      setActivePenPointerId: state.setActivePenPointerId,
+    }))
+  );

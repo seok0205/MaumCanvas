@@ -26,6 +26,7 @@ import { useDrawingLocalStorage } from '@/hooks/useDrawingLocalStorage';
 import { useDrawingSave } from '@/hooks/useDrawingSave';
 import { useDrawingSubmit } from '@/hooks/useDrawingSubmit';
 import { usePageLeaveWarning } from '@/hooks/usePageLeaveWarning';
+import { usePointerDrawingHandlers } from '@/hooks/usePointerDrawingHandlers';
 import { usePreventDoubleClick } from '@/hooks/usePreventDoubleClick';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useDrawingStore } from '@/stores/useDrawingStore';
@@ -73,6 +74,10 @@ const DrawingCanvas = memo(() => {
   // drawing handlers hook
   const { handleMouseDown, handleMouseMove, handleMouseUp } =
     useDrawingHandlers();
+
+  // 터치펜 전용 핸들러 (선택적 사용)
+  const { handlePointerDown, handlePointerMove, handlePointerUp } =
+    usePointerDrawingHandlers();
 
   // localStorage 관리 훅
   const { getSaveStates, hasUnsavedChanges, restoreFromStorage, saveDrawing } =
@@ -359,6 +364,9 @@ const DrawingCanvas = memo(() => {
                     onMouseDown={handleMouseDown}
                     onMouseMove={handleMouseMove}
                     onMouseUp={handleMouseUp}
+                    onPointerDown={handlePointerDown}
+                    onPointerMove={handlePointerMove}
+                    onPointerUp={handlePointerUp}
                     onReactivate={() => setIsEditingActive(true)}
                     saveAnimationKey={saveAnimationKey}
                     reActivateButtonRef={reActivateButtonRef}
