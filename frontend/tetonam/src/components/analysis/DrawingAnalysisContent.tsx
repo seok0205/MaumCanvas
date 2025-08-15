@@ -10,7 +10,6 @@ import {
   CardTitle,
 } from '@/components/ui/layout/card';
 import { Separator } from '@/components/ui/layout/separator';
-import { Skeleton } from '@/components/ui/layout/skeleton';
 import { useDrawingAnalysis } from '@/hooks/useDrawingAnalysis';
 
 // TypeScript 인터페이스 정의
@@ -113,10 +112,14 @@ export const DrawingAnalysisContent = memo<DrawingAnalysisContentProps>(({
           <Separator />
           <CardContent className={compact ? 'p-0 pt-3' : 'pt-6'}>
             {loadingAI ? (
-              <div className='space-y-2'>
-                <Skeleton className={`h-${compact ? '3' : '4'} w-full`} />
-                <Skeleton className={`h-${compact ? '3' : '4'} w-3/4`} />
-                <Skeleton className={`h-${compact ? '3' : '4'} w-1/2`} />
+              <div className="flex flex-col items-center justify-center py-6">
+                <LoadingAnimation
+                  size={compact ? "sm" : "md"}
+                  title="객체 탐지 중 🔍"
+                  message="그림 속 요소들을 분석하고 있어요..."
+                  showLoadingDots={true}
+                  className={compact ? "scale-75" : "scale-90"}
+                />
               </div>
             ) : aiText ? (
               <div
@@ -150,25 +153,38 @@ export const DrawingAnalysisContent = memo<DrawingAnalysisContentProps>(({
         <Separator />
         <CardContent className={`space-y-${compact ? '3' : '4'} ${compact ? 'p-0 pt-3' : 'pt-6'}`}>
           {/* 분석 결과 표시 */}
-          {loadingRAG ? (
+          {loadingRAG || isPollingAfterPrompt ? (
             <div className="flex flex-col items-center justify-center py-8">
               <LoadingAnimation
-                size="md"
-                title="AI 분석 중..."
+                size={compact ? "sm" : "md"}
+                title={isPollingAfterPrompt ? "분석 처리 중 🧠✨" : "AI 분석 중 💫"}
                 message={
                   isPollingAfterPrompt
-                    ? "분석을 진행중입니다. 분석 완료 시 카카오톡 알림을 보내드립니다."
-                    : "창의적인 마음을 깊이 들여다보고 있어요 ✨"
+                    ? "작성해주신 관찰 내용을 바탕으로 심층 분석을 진행하고 있어요... 🎨🔍"
+                    : "창의적인 마음을 깊이 들여다보고 있어요... ✨"
                 }
                 showLoadingDots={true}
+                className={compact ? "scale-75" : ""}
               />
+              {isPollingAfterPrompt && (
+                <div className="mt-4 text-center">
+                  <p className={`${compact ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
+                    💡 분석이 완료되면 자동으로 결과가 표시됩니다
+                  </p>
+                  <p className={`${compact ? 'text-xs' : 'text-sm'} text-muted-foreground mt-1`}>
+                    ⏱️ 보통 30초 ~ 1분 정도 소요됩니다
+                  </p>
+                </div>
+              )}
             </div>
           ) : submitting ? (
-            <div className="flex flex-col items-center justify-center py-6 space-y-3">
+            <div className="flex flex-col items-center justify-center py-6">
               <LoadingAnimation
                 size="sm"
-                message="제출 중..."
+                title="제출 중 📝"
+                message="관찰 내용을 전송하고 있어요..."
                 showLoadingDots={true}
+                className="scale-75"
               />
             </div>
           ) : ragError ? (
