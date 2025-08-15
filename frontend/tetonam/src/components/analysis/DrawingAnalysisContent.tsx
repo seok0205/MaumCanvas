@@ -20,7 +20,6 @@ interface DrawingAnalysisContentProps {
   compact?: boolean;
   className?: string;
   autoFetch?: boolean;
-  enablePolling?: boolean;
   showImage?: boolean;
   onSubmitSuccess?: () => void;
   onSubmitError?: (error: Error) => void;
@@ -41,7 +40,6 @@ export const DrawingAnalysisContent = memo<DrawingAnalysisContentProps>(({
   compact = false,
   className = '',
   autoFetch = true,
-  enablePolling = true,
   showImage = true,
   onSubmitSuccess,
   onSubmitError,
@@ -56,13 +54,13 @@ export const DrawingAnalysisContent = memo<DrawingAnalysisContentProps>(({
     loadingAI,
     loadingRAG,
     submitting,
+    isPollingAfterPrompt,
     setPrompt,
     submitPrompt,
     isCounselor,
   } = useDrawingAnalysis({
     drawingId,
     autoFetch,
-    enablePolling,
   });
 
   // 프롬프트 제출 핸들러 (에러 처리 포함)
@@ -142,7 +140,11 @@ export const DrawingAnalysisContent = memo<DrawingAnalysisContentProps>(({
               <LoadingAnimation
                 size="md"
                 title="AI 분석 중..."
-                message="창의적인 마음을 깊이 들여다보고 있어요 ✨"
+                message={
+                  isPollingAfterPrompt 
+                    ? "분석을 진행중입니다. 분석 완료 시 카카오톡 알림을 보내드립니다." 
+                    : "창의적인 마음을 깊이 들여다보고 있어요 ✨"
+                }
                 showLoadingDots={true}
               />
             </div>

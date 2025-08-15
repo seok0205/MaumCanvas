@@ -43,7 +43,6 @@ export const DrawingDetail = () => {
               compact={false}
               showImage={false}
               autoFetch={true}
-              enablePolling={true}
             />
           </main>
         </div>

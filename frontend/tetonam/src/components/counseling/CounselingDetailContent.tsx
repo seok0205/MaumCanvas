@@ -382,7 +382,6 @@ export const CounselingDetailContent = memo<CounselingDetailContentProps>(
                 compact={compact}
                 showImage={false} // 이미 위에서 그림을 보여줬으므로 중복 표시 안함
                 autoFetch={true}
-                enablePolling={true}
               />
             </div>
           )}
