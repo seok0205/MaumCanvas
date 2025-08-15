@@ -24,7 +24,11 @@ export const useAgoraClient = () => {
   const isLeavingRef = useRef(false);
 
   useEffect(() => {
-    const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+    // Agora 공식 권장사항: 1:1 화상통화는 rtc 모드 사용
+    const client = AgoraRTC.createClient({ 
+      mode: 'rtc', // live 대신 rtc 모드 (1:1 통신에 적합)
+      codec: 'vp8' // 기본 코덱 사용
+    });
 
     // 사용자 채널 참여 이벤트 (Agora Best Practice)
     client.on('user-joined', (user: IAgoraRTCRemoteUser) => {
@@ -249,23 +253,32 @@ export const useAgoraClient = () => {
     // 예외 이벤트 리스너 추가 (Agora Best Practice) - 강화된 오류 처리
     client.on('exception', async event => {
       console.error('❌ [useAgoraClient] Agora 예외 발생:', event);
-      
-      // 심각한 오류들 - 자동으로 방을 나가야 하는 경우들
+
+      // 심각한 오류들 - 자동으로 방을 나가야 하는 경우들 (추가 오류 유형 포함)
       const criticalErrors = [
         'SEND_AUDIO_BITRATE_TOO_LOW',
-        'NETWORK_UNAVAILABLE', 
+        'NETWORK_UNAVAILABLE',
         'WEBSOCKET_DISCONNECTED',
         'ICE_CONNECTION_FAILED',
-        'CONNECTION_TIMEOUT'
+        'CONNECTION_TIMEOUT',
+        'WEBRTC_CONNECTION_FAILED', // WebRTC 연결 실패
+        'TOKEN_EXPIRED', // 토큰 만료
+        'INVALID_PARAMETER', // 잘못된 파라미터
+        'NETWORK_ERROR', // 네트워크 오류
+        'SERVER_ERROR', // 서버 오류
       ];
-      
-      const isCriticalError = criticalErrors.some(error => 
-        event.msg?.includes(error) || event.code?.toString().includes(error)
+
+      const isCriticalError = criticalErrors.some(
+        error =>
+          event.msg?.includes(error) || event.code?.toString().includes(error)
       );
-      
+
       if (isCriticalError) {
-        console.error('💥 [useAgoraClient] 심각한 연결 오류 감지, 자동으로 방을 나갑니다:', event.msg);
-        
+        console.error(
+          '💥 [useAgoraClient] 심각한 연결 오류 감지, 자동으로 방을 나갑니다:',
+          event.msg
+        );
+
         // 자동으로 방 나가기 (비동기 처리로 blocking 방지)
         setTimeout(async () => {
           try {
@@ -278,7 +291,7 @@ export const useAgoraClient = () => {
           }
         }, 1000); // 1초 후 자동 퇴장
       }
-      
+
       setState(prev => ({
         ...prev,
         error: `연결 오류: ${event.msg || event.code || '알 수 없는 오류'}`,
@@ -293,6 +306,8 @@ export const useAgoraClient = () => {
   }, []);
 
   const join = useCallback(async (config: AgoraConfig) => {
+    console.log('🚀 [useAgoraClient] join 함수 시작:', config);
+    
     if (!clientRef.current || isLeavingRef.current) {
       console.error(
         '❌ [useAgoraClient] join 실패: 클라이언트가 없거나 종료 중'
@@ -300,8 +315,11 @@ export const useAgoraClient = () => {
       return;
     }
 
+    console.log('🔄 [useAgoraClient] 연결 시작 - isConnecting: true로 설정');
     setState(prev => ({ ...prev, isConnecting: true, error: null }));
+    
     try {
+      console.log('🔍 [useAgoraClient] 브라우저 호환성 확인 중...');
       // Agora Best Practice: 브라우저 호환성 체크
       const isSupported = AgoraRTC.checkSystemRequirements();
       if (!isSupported) {
@@ -310,35 +328,14 @@ export const useAgoraClient = () => {
         );
       }
 
-      // Agora Best Practice: 안정적인 오디오/비디오 설정 (모노 고품질)
+      // Agora 공식 권장사항: 간단한 기본 설정으로 시작
       const [audioTrack, videoTrack] = await Promise.all([
-        AgoraRTC.createMicrophoneAudioTrack({
-          // 안정적인 모노 설정으로 변경 (스테레오보다 안정적)
-          encoderConfig: {
-            sampleRate: 48000,
-            stereo: false, // 모노로 설정하여 비트레이트 안정성 확보
-            bitrate: 64, // 명시적 비트레이트 설정 (64kbps - 안정적인 값)
-          },
-          // 에코 제거 및 노이즈 억제 활성화
-          AEC: true,
-          AGC: true,
-          ANS: true,
-        }),
-        AgoraRTC.createCameraVideoTrack({
-          // 안정적인 비디오 설정 (초기에는 낮은 화질로 시작)
-          encoderConfig: {
-            width: { ideal: 640, max: 1280 }, // 초기에는 720p 대신 480p
-            height: { ideal: 480, max: 720 },
-            frameRate: 24, // 30fps 대신 24fps로 안정성 확보
-            bitrateMin: 400, // 최소 비트레이트 상향
-            bitrateMax: 1500, // 최대 비트레이트 하향
-          },
-          optimizationMode: 'balanced', // detail 대신 balanced로 안정성 확보
-          // 얼굴 인식 최적화
-          facingMode: 'user',
-        }),
+        AgoraRTC.createMicrophoneAudioTrack(),
+        AgoraRTC.createCameraVideoTrack(),
       ]);
+      console.log('✅ [useAgoraClient] 기본 미디어 트랙 생성 성공');
 
+      // RTC 모드에서는 setClientRole 호출 불필요
       // 채널 참여
       await clientRef.current.join(
         config.appId,
@@ -346,9 +343,11 @@ export const useAgoraClient = () => {
         config.token ?? null,
         config.uid ?? null
       );
+      console.log('✅ [useAgoraClient] 채널 참여 성공');
 
       // 미디어 스트림 발행
       await clientRef.current.publish([audioTrack, videoTrack]);
+      console.log('✅ [useAgoraClient] 미디어 스트림 발행 성공');
 
       setState(prev => ({
         ...prev,
