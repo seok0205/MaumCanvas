@@ -150,12 +150,9 @@ export const CommunityPostDetail = () => {
     // 개발 모드에서만 디버깅 정보 출력 (React Best Practice)
     if (import.meta.env.DEV) {
       console.log('🔍 isAuthor 디버깅:', {
-        user: user ? { id: user.id, nickname: user.nickname, email: user.email } : null,
-        post: post ? { id: post.id, isAuthor: post.isAuthor, title: post.title } : null,
+        user: user ? { id: user.id, nickname: user.nickname } : null,
+        post: post ? { id: post.id, isAuthor: post.isAuthor } : null,
         result,
-        hasUser: !!user,
-        hasPost: !!post,
-        postIsAuthor: post?.isAuthor,
       });
     }
     return result;

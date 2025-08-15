@@ -124,20 +124,12 @@ export const communityService = {
     signal?: AbortSignal
   ): Promise<PostListResponse> => {
     try {
-      console.log('🔍 API 호출: getPostById', { id, hasToken: !!localStorage.getItem('tetonam_access_token') });
-      
       const response = await apiClient.get<ApiResponse<PostListDto>>(
         COMMUNITY_ENDPOINTS.GET_POST_BY_ID(id),
         {
           ...(signal && { signal }),
         }
       );
-
-      console.log('🔍 API 응답: getPostById', {
-        success: response.data.isSuccess,
-        result: response.data.result,
-        isAuthor: response.data.result?.isAuthor
-      });
 
       if (!response.data.isSuccess || !response.data.result) {
         throw new AuthenticationError(
@@ -159,8 +151,6 @@ export const communityService = {
         createdDate: safeConvertDateTime(raw.createdDate), // 백엔드 필드명 사용
         isAuthor: raw.isAuthor ?? false, // 누락된 isAuthor 필드 추가
       };
-
-      console.log('🔍 정규화된 데이터:', normalized);
 
       return normalized;
     } catch (error) {
