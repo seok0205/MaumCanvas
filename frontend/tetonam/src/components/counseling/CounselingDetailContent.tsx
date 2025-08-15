@@ -441,6 +441,7 @@ export const CounselingDetailContent = memo<CounselingDetailContentProps>(
                   compact={compact}
                   showImage={false} // 이미 위에서 그림을 보여줬으므로 중복 표시 안함
                   autoFetch={true}
+                  inVideoCall={inVideoCall}
                 />
               </div>
             </>
@@ -483,17 +484,15 @@ export const CounselingDetailContent = memo<CounselingDetailContentProps>(
     // 🎯 렌더링 (조건부 래핑)
     if (compact) {
       return (
-        <div
-          className={`h-full overflow-y-auto bg-white/95 p-4 backdrop-blur-sm ${className}`}
-        >
-          <div className='mb-4'>
-            <h3 className='text-lg font-semibold text-foreground'>
-              상담 상세정보
-            </h3>
-          </div>
-          <Separator className="mb-4" />
-          {content}
-        </div>
+        <Card className={`h-full flex flex-col ${className}`}>
+          <CardHeader className="flex-shrink-0 pb-3">
+            <CardTitle className="text-lg">상담 상세정보</CardTitle>
+          </CardHeader>
+          <Separator />
+          <CardContent className="flex-1 overflow-y-auto pt-4 pb-4">
+            {content}
+          </CardContent>
+        </Card>
       );
     }
 

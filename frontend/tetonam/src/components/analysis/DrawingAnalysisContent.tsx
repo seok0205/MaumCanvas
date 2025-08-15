@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/layout/card';
+import { Separator } from '@/components/ui/layout/separator';
 import { Skeleton } from '@/components/ui/layout/skeleton';
 import { useDrawingAnalysis } from '@/hooks/useDrawingAnalysis';
 
@@ -21,6 +22,7 @@ interface DrawingAnalysisContentProps {
   className?: string;
   autoFetch?: boolean;
   showImage?: boolean;
+  inVideoCall?: boolean; // 화상상담 중인지 여부
   onSubmitSuccess?: () => void;
   onSubmitError?: (error: Error) => void;
 }
@@ -41,6 +43,7 @@ export const DrawingAnalysisContent = memo<DrawingAnalysisContentProps>(({
   className = '',
   autoFetch = true,
   showImage = true,
+  inVideoCall = false,
   onSubmitSuccess,
   onSubmitError,
 }) => {
@@ -106,8 +109,8 @@ export const DrawingAnalysisContent = memo<DrawingAnalysisContentProps>(({
               객체 탐지 결과
             </CardTitle>
           </CardHeader>
-          {/* 구분선 - 적당히 눈에 띄는 스타일 */}
-          <div className="border-t border-border opacity-80 mx-4"></div>
+          {/* 구분선 */}
+          <Separator />
           <CardContent className={compact ? 'p-0 pt-3' : 'pt-6'}>
             {loadingAI ? (
               <div className='space-y-2'>
@@ -143,8 +146,8 @@ export const DrawingAnalysisContent = memo<DrawingAnalysisContentProps>(({
             {isCounselor ? 'AI 분석 결과' : '분석 결과'}
           </CardTitle>
         </CardHeader>
-        {/* 구분선 - 적당히 눈에 띄는 스타일 */}
-        <div className="border-t border-border opacity-80 mx-4"></div>
+        {/* 구분선 */}
+        <Separator />
         <CardContent className={`space-y-${compact ? '3' : '4'} ${compact ? 'p-0 pt-3' : 'pt-6'}`}>
           {/* 분석 결과 표시 */}
           {loadingRAG ? (
@@ -203,8 +206,8 @@ export const DrawingAnalysisContent = memo<DrawingAnalysisContentProps>(({
             </div>
           )}
 
-          {/* 상담사용 프롬프트 입력 */}
-          {isCounselor && (
+          {/* 상담사용 프롬프트 입력 - 화상상담 중에는 숨김 */}
+          {isCounselor && !inVideoCall && (
             <div className={`${compact ? 'space-y-2' : 'space-y-3'}`}>
               {!compact && (
                 <div className='text-sm text-muted-foreground bg-muted/50 p-4 rounded-md'>
