@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/interactive/button';
 import { UserRoleCard } from '@/components/ui/UserRoleCard';
 import type { UserRole } from '@/constants/userRoles';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { GraduationCap, Loader2, UserCheck } from 'lucide-react';
+import { BookOpen, Loader2, Heart } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -12,13 +12,13 @@ const USER_TYPES = [
     type: 'USER' as const,
     title: '학생으로 시작하기',
     description: '상담을 받고 싶은 청소년',
-    icon: GraduationCap,
+    icon: BookOpen,
   },
   {
     type: 'COUNSELOR' as const,
     title: '상담사로 시작하기',
     description: '전문 그림 상담사',
-    icon: UserCheck,
+    icon: Heart,
   },
 ] as const;
 
