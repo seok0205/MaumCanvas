@@ -156,7 +156,7 @@ const DrawingStage = memo<DrawingStageProps>(
 
     return (
       <div
-        className={`relative rounded-lg border border-gray-300 bg-white shadow-sm overscroll-contain ${
+        className={`relative rounded-2xl bg-white/90 shadow-2xl overscroll-contain backdrop-blur-md backdrop-saturate-150 ${
           isEditingActive ? 'touch-none select-none' : ''
         }`}
         style={{
@@ -243,7 +243,7 @@ const DrawingStage = memo<DrawingStageProps>(
             isEditingActive
               ? 'cursor-crosshair'
               : 'cursor-not-allowed opacity-60'
-          } bg-white rounded-lg`}
+          } bg-white rounded-lg overflow-hidden`}
         >
           {/* 배경 레이어 (내보내기 시 흰색 배경 포함) */}
           <Layer listening={false}>
