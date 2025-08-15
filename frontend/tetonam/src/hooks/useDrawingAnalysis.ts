@@ -79,6 +79,7 @@ export const useDrawingAnalysis = ({
   const [submitting, setSubmitting] = useState(false);
   const [pollingType, setPollingType] = useState<PollingType>('none');
   const [isPollingAfterPrompt, setIsPollingAfterPrompt] = useState(false);
+  const [isPollingReady, setIsPollingReady] = useState(false);
 
   // Refs for cleanup
   const pollTimer = useRef<number | null>(null);
@@ -114,7 +115,9 @@ export const useDrawingAnalysis = ({
       if (!drawingId) throw new Error('Drawing ID is required');
       return imageService.getRagResult(drawingId);
     },
-    enabled: !!(drawingId && autoFetch),
+    enabled: !!(drawingId && autoFetch && (
+      pollingType !== 'after-prompt' || isPollingReady
+    )), // 프롬프트 제출 후에는 isPollingReady가 true일 때만 쿼리 활성화
     staleTime: isCounselor ? 0 : 5 * 60 * 1000, // 상담사: 즉시 stale, 학생: 5분간 fresh
     gcTime: 30 * 60 * 1000, // 30분간 캐시 유지
     refetchOnWindowFocus: false,
@@ -230,14 +233,11 @@ export const useDrawingAnalysis = ({
       if (isCounselor) {
         setPollingType('after-prompt');
         setIsPollingAfterPrompt(true);
+        setIsPollingReady(false); // 초기에는 폴링 비활성화
         
         // 15초 후 폴링 시작을 위한 타이머 설정
         pollTimer.current = window.setTimeout(() => {
-          // RAG 쿼리 invalidate하여 즉시 refetch 트리거
-          queryClient.invalidateQueries({ 
-            queryKey: queryKeys.ragResult(drawingId),
-            exact: true 
-          });
+          setIsPollingReady(true); // 15초 후에 폴링 활성화
         }, 15000);
       }
     } catch (error) {
@@ -259,6 +259,7 @@ export const useDrawingAnalysis = ({
     }
     setPollingType('none');
     setIsPollingAfterPrompt(false);
+    setIsPollingReady(false);
 
     // TanStack Query를 사용한 수동 리페치
     try {
@@ -306,6 +307,7 @@ export const useDrawingAnalysis = ({
     if (ragResult && !ragResult.error && pollingType === 'after-prompt') {
       setPollingType('none');
       setIsPollingAfterPrompt(false);
+      setIsPollingReady(false);
       
       if (pollTimer.current) {
         clearTimeout(pollTimer.current);
