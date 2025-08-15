@@ -36,15 +36,22 @@ export const AppointmentCard = ({
     }
   };
 
-  const canStartAppointment = (appointment: Appointment): boolean => {
+  const canStartAppointment = (_appointment: Appointment): boolean => {
+    // 🚧 테스트용: 화상통화 테스트를 위해 시간 제한 로직을 주석처리하고 상시 활성화
+    // 테스트용: 항상 true 반환 (상시 활성화)
+    return true;
+
+    // 원래 로직 (테스트 완료 후 주석해제)
+    /*
     // 상담예약시간 10분 전부터 59분 후까지 활성화
     const now = new Date();
-    const appointmentTime = new Date(`${appointment.date} ${appointment.time}`);
+    const appointmentTime = new Date(`${_appointment.date} ${_appointment.time}`);
     const timeDiff = appointmentTime.getTime() - now.getTime();
     const minutesDiff = timeDiff / (1000 * 60);
 
     // 상담시간 10분 전(-10) ~ 상담시간 59분 후(-59) 구간에서 활성화
     return minutesDiff >= -59 && minutesDiff <= 10;
+    */
   };
 
   const handleAppointmentAction = async (appointment: Appointment) => {
