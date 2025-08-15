@@ -7,7 +7,7 @@ import { agoraService } from '@/services/agoraService';
 import { useAuthStore } from '@/stores/useAuthStore';
 import AgoraRTC from 'agora-rtc-sdk-ng';
 import { Loader2, Mic, MicOff, PhoneOff, Video, VideoOff, X } from 'lucide-react';
-import { useEffect, useRef, useState, useCallback, memo } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 
 interface VideoCallProps {
   appointmentId: string;
