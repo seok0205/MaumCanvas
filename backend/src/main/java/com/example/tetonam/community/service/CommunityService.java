@@ -70,8 +70,16 @@ public class CommunityService {
         User currentUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BoardHandler(ErrorStatus.USER_NOT_FOUND));
         communityRepository.save(community);
-        // email로 작성자 비교 (nickname보다 정확함)
-        boolean isAuthor = currentUser.getEmail().equals(community.getAuthor().getEmail());
+        
+        // email로 작성자 비교 (nickname보다 정확함) - null-safe 비교
+        String currentUserEmail = currentUser.getEmail();
+        String authorEmail = community.getAuthor() != null ? community.getAuthor().getEmail() : null;
+        boolean isAuthor = currentUserEmail != null && authorEmail != null && currentUserEmail.equals(authorEmail);
+        
+        // 디버깅 로그 추가
+        log.info("게시글 작성자 확인 - PostId: {}, CurrentUser: {}, Author: {}, IsAuthor: {}", 
+                id, currentUserEmail, authorEmail, isAuthor);
+                
         return PostListDto.from(community, isAuthor);
     }
 
