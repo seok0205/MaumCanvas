@@ -146,12 +146,23 @@ export const CommunityPostDetail = () => {
 
   // 현재 사용자가 작성자인지 확인 - useMemo로 최적화
   const isAuthor = useMemo(() => {
-    return user && post && post.isAuthor;
+    const result = user && post && post.isAuthor;
+    // 개발 모드에서만 디버깅 정보 출력 (React Best Practice)
+    if (import.meta.env.DEV) {
+      console.log('🔍 isAuthor 디버깅:', {
+        user: user ? { id: user.id, nickname: user.nickname } : null,
+        post: post ? { id: post.id, isAuthor: post.isAuthor } : null,
+        result,
+      });
+    }
+    return result;
   }, [user, post]);
 
   // 시간 포맷팅 함수 - useCallback으로 최적화
-  const safeRelativeTime = useCallback((value?: string) =>
-    value ? formatRelativeTime(value) : '', []);
+  const safeRelativeTime = useCallback(
+    (value?: string) => (value ? formatRelativeTime(value) : ''),
+    []
+  );
 
   if (isLoading) {
     return (
@@ -244,7 +255,7 @@ export const CommunityPostDetail = () => {
               </div>
 
               {/* 작성자 액션 메뉴 - React 조건부 렌더링 (&&) 사용 */}
-              {isAuthor && (
+              {Boolean(isAuthor) && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant='ghost' size='icon' className='h-8 w-8'>
@@ -346,6 +357,17 @@ export const CommunityPostDetail = () => {
                   // 댓글 작성자 확인 - nickname 비교 (CommentListDto에는 isAuthor 필드 없음)
                   const isOwner =
                     user && user.nickname && user.nickname === c.nickname;
+
+                  // 개발 모드에서만 디버깅 정보 출력 (React Best Practice)
+                  if (import.meta.env.DEV) {
+                    console.log('🔍 isOwner 디버깅 (댓글 ID: ' + c.id + '):', {
+                      user: user
+                        ? { id: user.id, nickname: user.nickname }
+                        : null,
+                      comment: { id: c.id, nickname: c.nickname },
+                      isOwner,
+                    });
+                  }
                   return (
                     <div
                       key={c.id}
@@ -360,7 +382,7 @@ export const CommunityPostDetail = () => {
                           </span>
                         </div>
                         {/* 댓글 수정/삭제 버튼 - React 조건부 렌더링 (&&) 사용 */}
-                        {isOwner && !isEditing && (
+                        {Boolean(isOwner && !isEditing) && (
                           <div className='flex gap-1 opacity-0 group-hover:opacity-100 transition'>
                             <Button
                               variant='ghost'
