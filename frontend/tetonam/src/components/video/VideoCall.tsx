@@ -80,7 +80,7 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
 
         if (cancelled) return;
 
-        // 환경변수 접근 방식 통일 (dot notation 사용)
+        // 환경변수 접근 방식 통일 (dot notation 사용) - 강화된 체크
         const appId = import.meta.env.VITE_AGORA_APP_ID?.trim();
 
         if (!appId) {
@@ -91,7 +91,14 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
             '❌ [VideoCall] 환경변수 전체 목록:',
             Object.keys(import.meta.env)
           );
-          throw new Error('VITE_AGORA_APP_ID 환경변수가 설정되지 않았습니다.');
+          throw new Error('Agora App ID가 설정되지 않았습니다. 관리자에게 문의하세요.');
+        }
+
+        if (appId.length < 32) {
+          console.error(
+            '❌ [VideoCall] 유효하지 않은 VITE_AGORA_APP_ID 형식입니다.'
+          );
+          throw new Error('Agora App ID 형식이 올바르지 않습니다. 관리자에게 문의하세요.');
         }
 
         await join({
@@ -130,8 +137,30 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
       onEnd();
     } catch (e) {
       console.error('통화 종료 실패:', e);
+      // 오류가 발생해도 화면을 나가도록 처리
+      onEnd();
     }
   };
+
+  // 🎯 오류 발생 시 자동으로 방 나가기 (useEffect 추가)
+  useEffect(() => {
+    if (error) {
+      console.log('❌ [VideoCall] 오류 감지, 3초 후 자동으로 화면을 나갑니다:', error);
+      
+      // 3초 후 자동으로 화면 나가기
+      const autoExitTimeout = setTimeout(() => {
+        console.log('🚪 [VideoCall] 오류로 인한 자동 퇴장 실행');
+        handleEndCall();
+      }, 3000);
+
+      return () => {
+        clearTimeout(autoExitTimeout);
+      };
+    }
+    
+    // error가 없는 경우에도 cleanup 함수 반환
+    return () => {};
+  }, [error, leave, onEnd]);
 
   const handleToggleAudio = async () => {
     await toggleAudio(!isAudioOn);
@@ -146,8 +175,28 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
   if (error) {
     return (
       <div className='flex flex-col items-center justify-center h-screen bg-background'>
-        <p className='text-destructive mb-4'>연결 오류: {error}</p>
-        <Button onClick={onEnd}>돌아가기</Button>
+        <div className='max-w-md text-center p-6 bg-card rounded-lg shadow-lg border'>
+          <div className='text-destructive mb-4 text-lg font-semibold'>
+            연결 오류가 발생했습니다
+          </div>
+          <p className='text-muted-foreground mb-4 text-sm'>
+            {error}
+          </p>
+          <div className='mb-4 text-sm text-muted-foreground'>
+            잠시 후 자동으로 화면이 전환됩니다...
+          </div>
+          <div className='flex gap-2 justify-center'>
+            <Button onClick={handleEndCall} variant="outline">
+              즉시 나가기
+            </Button>
+            <Button 
+              onClick={() => window.location.reload()} 
+              variant="default"
+            >
+              다시 연결 시도
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }

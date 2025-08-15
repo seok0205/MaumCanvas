@@ -173,40 +173,40 @@ export const useAgoraClient = () => {
         // 네트워크 상태에 따른 자동 화질 조정 (Stale Closure 방지)
         if (prev.localVideoTrack && downlinkQuality) {
           if (downlinkQuality <= 2) {
-            // 네트워크 상태가 나쁘면 화질 낮춤
+            // 네트워크 상태가 나쁘면 화질 낮춤 (더 보수적인 설정)
             prev.localVideoTrack.setEncoderConfiguration({
-              width: 640,
-              height: 480,
+              width: 480,
+              height: 360,
               frameRate: 15,
-              bitrateMax: 800,
-              bitrateMin: 300,
+              bitrateMax: 500,
+              bitrateMin: 200,
             });
             console.log(
               '🔽 [useAgoraClient] 네트워크 상태 불량으로 화질을 낮췄습니다'
             );
           } else if (downlinkQuality >= 4) {
-            // 네트워크 상태가 좋으면 고화질 유지
-            prev.localVideoTrack.setEncoderConfiguration({
-              width: 1280,
-              height: 720,
-              frameRate: 30,
-              bitrateMax: 3000,
-              bitrateMin: 1000,
-            });
-            console.log(
-              '🔼 [useAgoraClient] 네트워크 상태 양호로 고화질을 사용합니다'
-            );
-          } else {
-            // 중간 화질 사용
+            // 네트워크 상태가 좋으면 중간 화질 사용 (고화질 대신 안정성 우선)
             prev.localVideoTrack.setEncoderConfiguration({
               width: 960,
               height: 540,
               frameRate: 24,
-              bitrateMax: 2000,
+              bitrateMax: 1500,
               bitrateMin: 600,
             });
             console.log(
-              '🔄 [useAgoraClient] 네트워크 상태에 따라 중간 화질을 사용합니다'
+              '🔼 [useAgoraClient] 네트워크 상태 양호로 중간 화질을 사용합니다'
+            );
+          } else {
+            // 기본 화질 사용 (더 안정적인 설정)
+            prev.localVideoTrack.setEncoderConfiguration({
+              width: 640,
+              height: 480,
+              frameRate: 20,
+              bitrateMax: 1000,
+              bitrateMin: 400,
+            });
+            console.log(
+              '🔄 [useAgoraClient] 네트워크 상태에 따라 기본 화질을 사용합니다'
             );
           }
         }
@@ -218,8 +218,8 @@ export const useAgoraClient = () => {
       });
     });
 
-    // 연결 상태 변화 이벤트 리스너 추가 (Agora Best Practice)
-    client.on('connection-state-change', (curState, revState) => {
+    // 연결 상태 변화 이벤트 리스너 추가 (Agora Best Practice) - 강화된 연결 관리
+    client.on('connection-state-change', async (curState, revState) => {
       console.log(
         `🔄 [useAgoraClient] 연결 상태 변화: ${revState} -> ${curState}`
       );
@@ -229,6 +229,7 @@ export const useAgoraClient = () => {
           ...prev,
           isConnected: true,
           waitingForUsers: true,
+          error: null, // 연결 성공 시 이전 오류 초기화
         }));
       } else if (curState === 'DISCONNECTED') {
         setState(prev => ({
@@ -236,15 +237,51 @@ export const useAgoraClient = () => {
           isConnected: false,
           waitingForUsers: false,
         }));
+      } else if (curState === 'RECONNECTING') {
+        console.log('🔄 [useAgoraClient] 연결 재시도 중...');
+        setState(prev => ({
+          ...prev,
+          error: '연결이 불안정합니다. 재연결을 시도하고 있습니다...',
+        }));
       }
     });
 
-    // 예외 이벤트 리스너 추가 (Agora Best Practice)
-    client.on('exception', event => {
+    // 예외 이벤트 리스너 추가 (Agora Best Practice) - 강화된 오류 처리
+    client.on('exception', async event => {
       console.error('❌ [useAgoraClient] Agora 예외 발생:', event);
+      
+      // 심각한 오류들 - 자동으로 방을 나가야 하는 경우들
+      const criticalErrors = [
+        'SEND_AUDIO_BITRATE_TOO_LOW',
+        'NETWORK_UNAVAILABLE', 
+        'WEBSOCKET_DISCONNECTED',
+        'ICE_CONNECTION_FAILED',
+        'CONNECTION_TIMEOUT'
+      ];
+      
+      const isCriticalError = criticalErrors.some(error => 
+        event.msg?.includes(error) || event.code?.toString().includes(error)
+      );
+      
+      if (isCriticalError) {
+        console.error('💥 [useAgoraClient] 심각한 연결 오류 감지, 자동으로 방을 나갑니다:', event.msg);
+        
+        // 자동으로 방 나가기 (비동기 처리로 blocking 방지)
+        setTimeout(async () => {
+          try {
+            if (clientRef.current && !isLeavingRef.current) {
+              console.log('🚪 [useAgoraClient] 오류로 인한 자동 퇴장 시작...');
+              await leave();
+            }
+          } catch (leaveError) {
+            console.error('❌ [useAgoraClient] 자동 퇴장 중 오류:', leaveError);
+          }
+        }, 1000); // 1초 후 자동 퇴장
+      }
+      
       setState(prev => ({
         ...prev,
-        error: `연결 오류: ${event.msg || '알 수 없는 오류'}`,
+        error: `연결 오류: ${event.msg || event.code || '알 수 없는 오류'}`,
       }));
     });
 
@@ -273,24 +310,30 @@ export const useAgoraClient = () => {
         );
       }
 
-      // Agora Best Practice: 고품질 오디오/비디오 설정
+      // Agora Best Practice: 안정적인 오디오/비디오 설정 (모노 고품질)
       const [audioTrack, videoTrack] = await Promise.all([
         AgoraRTC.createMicrophoneAudioTrack({
-          encoderConfig: 'high_quality_stereo',
+          // 안정적인 모노 설정으로 변경 (스테레오보다 안정적)
+          encoderConfig: {
+            sampleRate: 48000,
+            stereo: false, // 모노로 설정하여 비트레이트 안정성 확보
+            bitrate: 64, // 명시적 비트레이트 설정 (64kbps - 안정적인 값)
+          },
           // 에코 제거 및 노이즈 억제 활성화
           AEC: true,
           AGC: true,
           ANS: true,
         }),
         AgoraRTC.createCameraVideoTrack({
+          // 안정적인 비디오 설정 (초기에는 낮은 화질로 시작)
           encoderConfig: {
-            width: { ideal: 1280, max: 1920 },
-            height: { ideal: 720, max: 1080 },
-            frameRate: 30,
-            bitrateMin: 1000,
-            bitrateMax: 3000,
+            width: { ideal: 640, max: 1280 }, // 초기에는 720p 대신 480p
+            height: { ideal: 480, max: 720 },
+            frameRate: 24, // 30fps 대신 24fps로 안정성 확보
+            bitrateMin: 400, // 최소 비트레이트 상향
+            bitrateMax: 1500, // 최대 비트레이트 하향
           },
-          optimizationMode: 'detail', // 화질 우선
+          optimizationMode: 'balanced', // detail 대신 balanced로 안정성 확보
           // 얼굴 인식 최적화
           facingMode: 'user',
         }),
@@ -353,12 +396,15 @@ export const useAgoraClient = () => {
     try {
       console.log('🔌 [useAgoraClient] 화상 통화 연결 해제 시작...');
 
+      // 현재 상태 참조 (closure 문제 방지)
+      const currentState = state;
+
       // Agora Best Practice: 리소스 정리 순서
       // 1. 먼저 unpublish 수행
-      if (state.localAudioTrack || state.localVideoTrack) {
+      if (currentState.localAudioTrack || currentState.localVideoTrack) {
         const tracksToUnpublish = [
-          state.localAudioTrack,
-          state.localVideoTrack,
+          currentState.localAudioTrack,
+          currentState.localVideoTrack,
         ].filter((track): track is NonNullable<typeof track> => track !== null);
 
         if (tracksToUnpublish.length > 0) {
@@ -368,13 +414,13 @@ export const useAgoraClient = () => {
       }
 
       // 2. 트랙 정리
-      if (state.localAudioTrack) {
-        state.localAudioTrack.close();
+      if (currentState.localAudioTrack) {
+        currentState.localAudioTrack.close();
         console.log('🎤 [useAgoraClient] 오디오 트랙 정리 완료');
       }
 
-      if (state.localVideoTrack) {
-        state.localVideoTrack.close();
+      if (currentState.localVideoTrack) {
+        currentState.localVideoTrack.close();
         console.log('📹 [useAgoraClient] 비디오 트랙 정리 완료');
       }
 
@@ -399,7 +445,7 @@ export const useAgoraClient = () => {
     } finally {
       isLeavingRef.current = false;
     }
-  }, [state.localAudioTrack, state.localVideoTrack]);
+  }, []); // dependency 제거 - state를 직접 참조
 
   const toggleAudio = useCallback(
     async (enabled: boolean) => {
