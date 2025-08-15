@@ -1,6 +1,7 @@
 import { memo } from 'react';
 
 import { DrawingImage } from '@/components/ui/drawing/DrawingImage';
+import { LoadingAnimation } from '@/components/ui/LoadingAnimation';
 import { Button } from '@/components/ui/interactive/button';
 import {
   Card,
@@ -87,7 +88,7 @@ export const DrawingAnalysisContent = memo<DrawingAnalysisContentProps>(({
   }
 
   return (
-    <div className={`space-y-${compact ? '3' : '6'} ${className}`}>
+    <div className={`space-y-${compact ? '3' : '4'} ${className}`}>
       {/* 그림 표시 영역 */}
       {showImage && imageUrl && (
         <div className="flex justify-center mb-6">
@@ -99,100 +100,109 @@ export const DrawingAnalysisContent = memo<DrawingAnalysisContentProps>(({
         </div>
       )}
 
-      {/* AI 객체 탐지 결과 - 모든 사용자에게 표시 */}
-      <Card className={compact ? 'p-3' : ''}>
-        <CardHeader className={compact ? 'p-0 pb-2' : ''}>
-          <CardTitle className={compact ? 'text-sm' : 'text-base'}>
-            AI 객체 탐지 결과
-          </CardTitle>
-        </CardHeader>
-        <CardContent className={compact ? 'p-0' : ''}>
-          {loadingAI ? (
-            <div className='space-y-2'>
-              <Skeleton className={`h-${compact ? '3' : '4'} w-3/4`} />
-              <Skeleton className={`h-${compact ? '3' : '4'} w-1/2`} />
-              <Skeleton className={`h-${compact ? '3' : '4'} w-2/3`} />
-            </div>
-          ) : aiText ? (
-            <pre className={`whitespace-pre-wrap ${compact ? 'text-xs' : 'text-sm'} text-muted-foreground bg-muted ${compact ? 'p-2' : 'p-4'} rounded-md`}>
-              {aiText}
-            </pre>
-          ) : (
-            <div className={`${compact ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
-              객체 탐지 결과가 없습니다.
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* 심리 분석 결과 - 상담사에게만 표시 */}
+      {/* 상담사용 객체 탐지 결과 */}
       {isCounselor && (
         <Card className={compact ? 'p-3' : ''}>
           <CardHeader className={compact ? 'p-0 pb-2' : ''}>
             <CardTitle className={compact ? 'text-sm' : 'text-base'}>
-              RAG 분석 결과
+              객체 탐지 결과
             </CardTitle>
           </CardHeader>
-          <CardContent className={`space-y-${compact ? '3' : '4'} ${compact ? 'p-0' : ''}`}>
-            {/* 분석 결과 표시 */}
-            {loadingRAG ? (
+          <CardContent className={compact ? 'p-0' : ''}>
+            {loadingAI ? (
               <div className='space-y-2'>
                 <Skeleton className={`h-${compact ? '3' : '4'} w-full`} />
                 <Skeleton className={`h-${compact ? '3' : '4'} w-3/4`} />
                 <Skeleton className={`h-${compact ? '3' : '4'} w-1/2`} />
               </div>
-            ) : submitting ? (
-              <div className={`${compact ? 'text-xs' : 'text-sm'} text-muted-foreground flex items-center space-x-2`}>
-                <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-primary'></div>
-                <span>분석 중...</span>
+            ) : aiText ? (
+              <pre className={`whitespace-pre-wrap font-mono ${compact ? 'text-xs' : 'text-sm'} text-foreground`}>
+                {aiText}
+              </pre>
+            ) : (
+              <div className={`${compact ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
+                객체 탐지 결과가 없습니다.
               </div>
-            ) : ragError ? (
-              <div className={`text-center ${compact ? 'p-3' : 'p-6'} text-muted-foreground`}>
-                <p className={`mb-2 ${compact ? 'text-xs' : 'text-sm'}`}>
-                  {ragError === 'UNAUTHORIZED'
-                    ? '분석 결과를 확인할 권한이 없습니다.'
-                    : ragError === 'NOT_FOUND' || ragError === 'RAG_NOT_READY'
-                      ? '분석을 준비 중입니다...'
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 분석 결과 */}
+      <Card className={compact ? 'p-3' : ''}>
+        <CardHeader className={compact ? 'p-0 pb-2' : ''}>
+          <CardTitle className={compact ? 'text-sm' : 'text-base'}>
+            {isCounselor ? 'AI 분석 결과' : '분석 결과'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className={`space-y-${compact ? '3' : '4'} ${compact ? 'p-0' : ''}`}>
+          {/* 분석 결과 표시 */}
+          {loadingRAG ? (
+            <div className="flex flex-col items-center justify-center py-8">
+              <LoadingAnimation
+                size="md"
+                title="AI 분석 중..."
+                message="창의적인 마음을 깊이 들여다보고 있어요 ✨"
+                showLoadingDots={true}
+              />
+            </div>
+          ) : submitting ? (
+            <div className="flex flex-col items-center justify-center py-6 space-y-3">
+              <LoadingAnimation
+                size="sm"
+                message="제출 중..."
+                showLoadingDots={true}
+              />
+            </div>
+          ) : ragError ? (
+            <div className={`${compact ? 'text-xs' : 'text-sm'} text-red-600`}>
+              {ragError === 'UNAUTHORIZED'
+                ? '분석 결과를 확인할 권한이 없습니다.'
+                : ragError === 'NOT_FOUND'
+                  ? '아직 분석 결과가 없습니다.'
+                  : ragError === 'RAG_NOT_READY'
+                    ? '분석이 진행 중입니다. 잠시만 기다려주세요.'
+                    : ragError === 'TIMEOUT'
+                      ? '분석 시간이 초과되었습니다. 다시 시도해주세요.'
                       : ragError === 'NETWORK'
                         ? '네트워크 오류로 결과를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.'
                         : '알 수 없는 오류가 발생했습니다.'}
-                </p>
-                {(ragError === 'NOT_FOUND' || ragError === 'RAG_NOT_READY') && (
-                  <p className={`${compact ? 'text-2xs' : 'text-sm'} text-muted-foreground`}>
-                    잠시 후 다시 시도해주세요.
-                  </p>
-                )}
-              </div>
-            ) : ragText && ragHtml ? (
-              <div className='space-y-4'>
-                <div
-                  className={`prose prose-slate max-w-none font-sans leading-relaxed ${compact ? 'text-xs prose-sm' : 'text-sm'} text-muted-foreground`}
-                  style={{
-                    fontFamily: "'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif",
-                    fontSize: 'inherit',
-                    lineHeight: '1.7',
-                    color: 'hsl(var(--foreground))',
-                  }}
-                  dangerouslySetInnerHTML={{ __html: ragHtml }}
-                />
-              </div>
-            ) : (
-              <div className={`text-center ${compact ? 'p-3' : 'p-6'} text-muted-foreground`}>
-                <p className={compact ? 'text-xs' : 'text-sm'}>심리 분석 결과가 아직 없습니다.</p>
-                <p className={`${compact ? 'text-2xs' : 'text-sm'} mt-2`}>
-                  아래에서 분석을 요청할 수 있습니다.
-                </p>
-              </div>
-            )}
+            </div>
+          ) : ragText && ragHtml ? (
+            <div
+              className={`prose prose-slate max-w-none font-sans leading-relaxed ${compact ? 'text-xs prose-sm' : 'text-sm'}`}
+              style={{
+                fontFamily: "'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif",
+                fontSize: 'inherit',
+                lineHeight: '1.7',
+                color: 'hsl(var(--foreground))',
+              }}
+              dangerouslySetInnerHTML={{ __html: ragHtml }}
+            />
+          ) : (
+            <div className={`${compact ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
+              {isCounselor
+                ? '프롬프트를 입력하시면 답변 드립니다.'
+                : '아직 결과가 없습니다.'}
+            </div>
+          )}
 
-            {/* 상담사용 프롬프트 입력 */}
-            <div className={`flex ${compact ? 'flex-col space-y-2' : 'flex-col sm:flex-row'} ${compact ? '' : 'items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2'}`}>
-              <input
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder={compact ? '분석 요청...' : '그림에 대해 궁금한 점을 입력하세요...'}
-                disabled={submitting}
-                className={`${compact ? 'text-xs' : 'text-sm'} flex-1 ${compact ? 'h-8 px-2' : 'h-10 px-3'} rounded-md border border-border bg-background`}
+          {/* 상담사용 프롬프트 입력 */}
+          {isCounselor && (
+            <div className={`${compact ? 'space-y-2' : 'space-y-3'}`}>
+              {!compact && (
+                <div className='text-xs text-muted-foreground bg-muted/50 p-3 rounded-md'>
+                  <div className='font-medium mb-1'>예시:</div>
+                  집의 크기는 적절하다. 지붕이 존재하나, 굴뚝이 존재하지 않는다. 창문의 개수는 2개이며 집의 크기에 비해 작은 편이다.
+                </div>
+              )}
+              <div className={`flex ${compact ? 'flex-col space-y-2' : 'flex-col sm:flex-row'} ${compact ? '' : 'items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2'}`}>
+                <input
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  placeholder='최소 4가지 특징에 대해서 묘사해주세요.'
+                  disabled={submitting}
+                  className={`${compact ? 'text-xs' : 'text-sm'} flex-1 ${compact ? 'h-8 px-2' : 'h-10 px-3'} rounded-md border border-border bg-background`}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey && prompt.trim() && !submitting) {
                     e.preventDefault();
@@ -200,18 +210,19 @@ export const DrawingAnalysisContent = memo<DrawingAnalysisContentProps>(({
                   }
                 }}
               />
-              <Button
-                onClick={handleSubmitPrompt}
-                disabled={submitting || !prompt.trim()}
-                size={compact ? 'sm' : 'default'}
-                className='w-full sm:w-auto'
-              >
-                {submitting ? '분석 중...' : '분석 요청'}
-              </Button>
+                <Button
+                  onClick={handleSubmitPrompt}
+                  disabled={submitting || !prompt.trim()}
+                  size={compact ? 'sm' : 'default'}
+                  className='w-full sm:w-auto'
+                >
+                  {submitting ? '제출 중...' : '제출'}
+                </Button>
+              </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 });
