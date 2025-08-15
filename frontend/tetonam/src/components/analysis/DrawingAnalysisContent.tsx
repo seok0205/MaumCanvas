@@ -161,7 +161,9 @@ export const DrawingAnalysisContent = memo<DrawingAnalysisContentProps>(({
                 : ragError === 'NOT_FOUND'
                   ? '아직 분석 결과가 없습니다.'
                   : ragError === 'RAG_NOT_READY'
-                    ? '분석이 진행 중입니다. 잠시만 기다려주세요.'
+                    ? isCounselor
+                      ? '아직 분석을 시작하지 않았습니다. 예시를 참고하여 구체적으로 기술해주시면 더 정확한 분석이 가능합니다.'
+                      : '아직 그림 분석이 진행되지 않았습니다. 분석이 완료되면 결과를 확인할 수 있습니다.'
                     : ragError === 'TIMEOUT'
                       ? '분석 시간이 초과되었습니다. 다시 시도해주세요.'
                       : ragError === 'NETWORK'

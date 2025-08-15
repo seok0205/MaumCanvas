@@ -163,6 +163,10 @@ export const imageService = {
         }
       );
       if (!response.data.isSuccess) {
+        // 백엔드 에러 코드가 DRAWING5001인 경우 RAG_NOT_READY로 처리
+        if (response.data.code === 'DRAWING5001') {
+          return { data: null, error: 'RAG_NOT_READY' };
+        }
         return { data: null, error: 'NOT_FOUND' };
       }
       return { data: response.data.result || null };
@@ -173,7 +177,13 @@ export const imageService = {
       }
 
       if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as AxiosError;
+        const axiosError = error as AxiosError<ApiResponse<null>>;
+        
+        // 응답에 구체적인 에러 코드가 있는 경우 먼저 확인
+        if (axiosError.response?.data?.code === 'DRAWING5001') {
+          return { data: null, error: 'RAG_NOT_READY' };
+        }
+        
         if (
           axiosError.response?.status === 401 ||
           axiosError.response?.status === 403
