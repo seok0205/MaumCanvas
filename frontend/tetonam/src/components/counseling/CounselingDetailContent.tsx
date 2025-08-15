@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from '@/components/ui/layout/card';
 import { Skeleton } from '@/components/ui/layout/skeleton';
+import { useImageModal } from '@/contexts/ImageModalContext';
 import { counselingService } from '@/services/counselingService';
 import { imageService } from '@/services/imageService';
 import { getAllQuestionnaireResults } from '@/services/questionnaireService';
@@ -39,14 +40,27 @@ interface CounselingDetailContentProps {
   isCounselor: boolean;
   compact?: boolean; // VideoCall에서 사용할 때 컴팩트 모드
   className?: string; // 추가 스타일링을 위한 className
+  inVideoCall?: boolean; // 화상상담 중인지 여부
 }
 
-// 🎯 최적화된 이미지 그리드 컴포넌트 (React.memo 적용)
+// 최적화된 이미지 그리드 컴포넌트 (React.memo 적용)
 const ImageGrid = memo<{
   images: CounselingImageItem[] | null;
   compact: boolean;
   onImageClick: (imageId: number, imageUrl: string, category: string) => void;
-}>(({ images, compact, onImageClick }) => {
+  inVideoCall?: boolean;
+}>(({ images, compact, onImageClick, inVideoCall = false }) => {
+  const { openModal } = useImageModal();
+
+  const handleImageClick = useCallback((imageId: number, imageUrl: string, category: string) => {
+    if (inVideoCall) {
+      // 화상상담 중일 때는 모달로 열기
+      openModal({ imageId, imageUrl, category });
+    } else {
+      // 일반 페이지에서는 기존 방식으로 페이지 이동
+      onImageClick(imageId, imageUrl, category);
+    }
+  }, [inVideoCall, openModal, onImageClick]);
   if (!images || images.length === 0) {
     return (
       <div className={`text-${compact ? 'xs' : 'sm'} text-muted-foreground`}>
@@ -66,7 +80,7 @@ const ImageGrid = memo<{
           key={img.id}
           type='button'
           className='group overflow-hidden rounded-xl border border-border/50 transition hover:shadow-hover'
-          onClick={() => onImageClick(img.id, img.imageUrl, img.category)}
+          onClick={() => handleImageClick(img.id, img.imageUrl, img.category)}
           aria-label={`${img.category} 그림 보기`}
         >
           <img
@@ -90,7 +104,7 @@ const ImageGrid = memo<{
 
 ImageGrid.displayName = 'ImageGrid';
 
-// 🎯 최적화된 설문 결과 그리드 컴포넌트 (React.memo 적용)
+// 최적화된 설문 결과 그리드 컴포넌트 (React.memo 적용)
 const QuestionnaireGrid = memo<{
   questionnaires: QuestionnaireResult[] | null;
   compact: boolean;
@@ -126,9 +140,9 @@ const QuestionnaireGrid = memo<{
 
 QuestionnaireGrid.displayName = 'QuestionnaireGrid';
 
-// 🎯 메인 컴포넌트 (React.memo로 최적화)
+// 메인 컴포넌트 (React.memo로 최적화)
 export const CounselingDetailContent = memo<CounselingDetailContentProps>(
-  ({ appointmentId, isCounselor, compact = false, className = '' }) => {
+  ({ appointmentId, isCounselor, compact = false, className = '', inVideoCall = false }) => {
     const navigate = useNavigate();
 
     // 🔄 상태 관리
@@ -151,7 +165,7 @@ export const CounselingDetailContent = memo<CounselingDetailContentProps>(
       [navigate]
     );
 
-    // 🔄 데이터 페칭 (useEffect 최적화)
+    // 데이터 페칭 (useEffect 최적화)
     useEffect(() => {
       if (!appointmentId) return;
 
@@ -211,7 +225,7 @@ export const CounselingDetailContent = memo<CounselingDetailContentProps>(
       };
     }, [appointmentId, isCounselor]);
 
-    // 🎯 시간 정보 메모이제이션 (useMemo 최적화)
+    // 시간 정보 메모이제이션 (useMemo 최적화)
     const formattedTime = useMemo(() => {
       if (!detail?.time) return '';
       return Array.isArray(detail.time) ? detail.time.join('-') : detail.time;
@@ -336,6 +350,7 @@ export const CounselingDetailContent = memo<CounselingDetailContentProps>(
               images={images}
               compact={compact}
               onImageClick={handleImageClick}
+              inVideoCall={inVideoCall}
             />
           </div>
 

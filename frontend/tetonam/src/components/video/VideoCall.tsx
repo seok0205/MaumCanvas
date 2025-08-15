@@ -2,6 +2,8 @@ import { Button } from '@/components/ui/interactive/button';
 import { RemoteUserStatusOverlay } from '@/components/video/RemoteUserStatusOverlay';
 import { WaitingForConnection } from '@/components/video/WaitingForConnection';
 import { CounselingDetailContent } from '@/components/counseling/CounselingDetailContent';
+import { ImageModalProvider } from '@/contexts/ImageModalContext';
+import { ImageModalRenderer } from '@/components/modal/DrawingDetailModal';
 import { useAgoraClient } from '@/hooks/useAgoraClient';
 import { agoraService } from '@/services/agoraService';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -43,7 +45,7 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
   const remoteUser = Array.from(remoteUsers.values())[0];
   const hasRemoteUsers = remoteUsers.size > 0;
 
-  // 🎯 패널 토글 핸들러 (useCallback으로 최적화)
+  // 패널 토글 핸들러 (useCallback으로 최적화)
   const handleToggleDetailPanel = useCallback(() => {
     setShowDetailPanel(prev => !prev);
   }, []);
@@ -142,11 +144,11 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
     }
   };
 
-  // 🎯 오류 발생 시 자동으로 방 나가기 (useEffect 추가)
+  // 오류 발생 시 자동으로 방 나가기 (useEffect 추가)
   useEffect(() => {
     if (error) {
       console.log('❌ [VideoCall] 오류 감지, 3초 후 자동으로 화면을 나갑니다:', error);
-      
+
       // 3초 후 자동으로 화면 나가기
       const autoExitTimeout = setTimeout(() => {
         console.log('🚪 [VideoCall] 오류로 인한 자동 퇴장 실행');
@@ -157,7 +159,7 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
         clearTimeout(autoExitTimeout);
       };
     }
-    
+
     // error가 없는 경우에도 cleanup 함수 반환
     return () => {};
   }, [error, leave, onEnd]);
@@ -189,8 +191,8 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
             <Button onClick={handleEndCall} variant="outline">
               즉시 나가기
             </Button>
-            <Button 
-              onClick={() => window.location.reload()} 
+            <Button
+              onClick={() => window.location.reload()}
               variant="default"
             >
               다시 연결 시도
@@ -201,14 +203,15 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
     );
   }
 
-  // 🎯 상담사용 레이아웃 (우측 패널 포함)
+  // 상담사용 레이아웃 (우측 패널 포함)
   if (isCounselor) {
     return (
-      <div className='flex h-screen bg-black'>
-        {/* 비디오 콜 영역 (좌측) */}
-        <div className={`relative transition-all duration-300 ${
-          showDetailPanel ? 'w-3/4' : 'w-full'
-        }`}>
+      <ImageModalProvider inVideoCall={true}>
+        <div className='flex h-screen bg-black'>
+          {/* 비디오 콜 영역 (좌측) */}
+          <div className={`relative transition-all duration-300 ${
+            showDetailPanel ? 'w-3/4' : 'w-full'
+          }`}>
           {/* 원격 비디오 영역 */}
           <div className='relative w-full h-full'>
             <div ref={remoteVideoRef} className='w-full h-full' />
@@ -355,14 +358,19 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
               isCounselor={true}
               compact={true}
               className='h-full'
+              inVideoCall={true}
             />
           </div>
         )}
+
+        {/* 모달 렌더러 */}
+        <ImageModalRenderer />
       </div>
+      </ImageModalProvider>
     );
   }
 
-  // 🎯 기본 레이아웃 (학생용 - 전체 화면)
+  // 기본 레이아웃 (학생용 - 전체 화면)
   return (
     <div className='relative h-screen bg-black'>
       {/* 원격 비디오 영역 */}
