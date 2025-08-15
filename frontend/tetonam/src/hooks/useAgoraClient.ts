@@ -4,6 +4,7 @@ import type {
   VideoCallState,
 } from '@/types/agora';
 import AgoraRTC, {
+  ConnectionDisconnectedReason,
   IAgoraRTCClient,
   IAgoraRTCRemoteUser,
 } from 'agora-rtc-sdk-ng';
@@ -207,9 +208,9 @@ export const useAgoraClient = () => {
       } else if (curState === 'DISCONNECTED') {
         // reason에 따라 다른 메시지 표시
         let errorMessage = null;
-        if (reason === 'NETWORK_ERROR') {
+        if (reason === ConnectionDisconnectedReason.NETWORK_ERROR) {
           errorMessage = '네트워크 오류로 연결이 끊어졌습니다.';
-        } else if (reason === 'SERVER_ERROR') {
+        } else if (reason === ConnectionDisconnectedReason.SERVER_ERROR) {
           errorMessage = '서버 오류로 연결이 끊어졌습니다.';
         }
 
@@ -228,6 +229,28 @@ export const useAgoraClient = () => {
         setState(prev => ({
           ...prev,
           error: '연결을 종료하는 중입니다...',
+        }));
+      } else if (curState === 'RECONNECTING') {
+        setState(prev => ({
+          ...prev,
+          error: '연결이 끊어져 재연결을 시도하고 있습니다...',
+        }));
+      } else if (curState === 'FAILED') {
+        let errorMessage = '연결에 실패했습니다.';
+        if (reason === ConnectionDisconnectedReason.UID_BANNED) {
+          errorMessage = '서버에 의해 차단되었습니다.';
+        } else if (reason === ConnectionDisconnectedReason.NETWORK_ERROR) {
+          errorMessage =
+            '네트워크 오류로 연결에 실패했습니다. 다시 시도해주세요.';
+        } else if (reason === ConnectionDisconnectedReason.TOKEN_EXPIRE) {
+          errorMessage = '인증 토큰이 만료되었습니다.';
+        }
+
+        setState(prev => ({
+          ...prev,
+          isConnected: false,
+          waitingForUsers: false,
+          error: errorMessage,
         }));
       }
     });
@@ -272,81 +295,127 @@ export const useAgoraClient = () => {
       return;
     }
 
+    // 중복 join 방지 (Agora 권장사항)
+    if (state.isConnecting || state.isConnected) {
+      console.warn(
+        '⚠️ [useAgoraClient] 중복 join 시도 방지: 이미 연결 중이거나 연결된 상태입니다.'
+      );
+      return;
+    }
+
     setState(prev => ({ ...prev, isConnecting: true, error: null }));
 
+    // Join with timeout to prevent infinite waiting
+    const joinWithTimeout = async () => {
+      try {
+        // 브라우저 호환성 체크
+        const isSupported = AgoraRTC.checkSystemRequirements();
+        if (!isSupported) {
+          throw new Error(
+            '현재 브라우저는 화상 통화를 지원하지 않습니다. 최신 버전의 Chrome, Firefox, Safari를 사용해주세요.'
+          );
+        }
+
+        // 고품질 설정으로 미디어 트랙 생성 (SEND_AUDIO_BITRATE_TOO_LOW 에러 해결)
+        const [audioTrack, videoTrack] = await Promise.all([
+          AgoraRTC.createMicrophoneAudioTrack({
+            encoderConfig: 'high_quality_stereo',
+          }),
+          AgoraRTC.createCameraVideoTrack(),
+        ]);
+        console.log('✅ [useAgoraClient] 미디어 트랙 생성 성공');
+
+        try {
+          // 채널 참여
+          await clientRef.current!.join(
+            config.appId,
+            config.channel,
+            config.token ?? null,
+            config.uid ?? null
+          );
+          console.log('✅ [useAgoraClient] 채널 참여 성공');
+
+          // 미디어 스트림 발행
+          await clientRef.current!.publish([audioTrack, videoTrack]);
+          console.log('✅ [useAgoraClient] 미디어 스트림 발행 성공');
+
+          setState(prev => ({
+            ...prev,
+            isConnecting: false,
+            isConnected: true,
+            localAudioTrack: audioTrack,
+            localVideoTrack: videoTrack,
+            waitingForUsers: true,
+            isAudioEnabled: true,
+            isVideoEnabled: true,
+          }));
+
+          console.log('✅ [useAgoraClient] 화상 통화 연결 성공');
+        } catch (joinError) {
+          // Join 실패 시 생성된 tracks 즉시 정리 (리소스 waste 방지)
+          console.log(
+            '🧹 [useAgoraClient] Join 실패, 생성된 tracks 정리 중...'
+          );
+          try {
+            audioTrack?.close();
+            videoTrack?.close();
+            console.log('✅ [useAgoraClient] Tracks 정리 완료');
+          } catch (cleanupError) {
+            console.warn(
+              '⚠️ [useAgoraClient] Tracks 정리 중 오류:',
+              cleanupError
+            );
+          }
+          throw joinError;
+        }
+      } catch (err: any) {
+        console.error('❌ [useAgoraClient] join 실패:', err);
+
+        // 에러 타입에 따른 사용자 친화적 메시지
+        let errorMessage = '연결 실패';
+        if (err.code === 'PERMISSION_DENIED') {
+          errorMessage =
+            '카메라 또는 마이크 권한이 필요합니다. 브라우저 설정에서 권한을 허용해주세요.';
+        } else if (err.code === 'DEVICE_NOT_FOUND') {
+          errorMessage =
+            '카메라 또는 마이크를 찾을 수 없습니다. 장치가 연결되어 있는지 확인해주세요.';
+        } else if (err.code === 'NETWORK_ERROR') {
+          errorMessage = '네트워크 연결을 확인해주세요.';
+        } else if (err.code === 'SEND_AUDIO_BITRATE_TOO_LOW') {
+          errorMessage =
+            '오디오 품질 설정 오류입니다. 잠시 후 다시 시도해주세요.';
+        } else {
+          errorMessage = err?.message ?? '알 수 없는 오류가 발생했습니다.';
+        }
+
+        setState(prev => ({
+          ...prev,
+          isConnecting: false,
+          error: errorMessage,
+        }));
+        throw err;
+      }
+    };
+
+    // 30초 timeout으로 join 시도
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(
+        () =>
+          reject(new Error('연결 시간이 초과되었습니다. 다시 시도해주세요.')),
+        30000
+      )
+    );
+
     try {
-      // 브라우저 호환성 체크
-      const isSupported = AgoraRTC.checkSystemRequirements();
-      if (!isSupported) {
-        throw new Error(
-          '현재 브라우저는 화상 통화를 지원하지 않습니다. 최신 버전의 Chrome, Firefox, Safari를 사용해주세요.'
-        );
-      }
-
-      // 고품질 설정으로 미디어 트랙 생성 (SEND_AUDIO_BITRATE_TOO_LOW 에러 해결)
-      const [audioTrack, videoTrack] = await Promise.all([
-        AgoraRTC.createMicrophoneAudioTrack({
-          encoderConfig: 'high_quality_stereo',
-        }),
-        AgoraRTC.createCameraVideoTrack(),
-      ]);
-      console.log('✅ [useAgoraClient] 미디어 트랙 생성 성공');
-
-      // 채널 참여
-      await clientRef.current.join(
-        config.appId,
-        config.channel,
-        config.token ?? null,
-        config.uid ?? null
-      );
-      console.log('✅ [useAgoraClient] 채널 참여 성공');
-
-      // 미디어 스트림 발행
-      await clientRef.current.publish([audioTrack, videoTrack]);
-      console.log('✅ [useAgoraClient] 미디어 스트림 발행 성공');
-
+      await Promise.race([joinWithTimeout(), timeoutPromise]);
+    } catch (error: any) {
+      console.error('❌ [useAgoraClient] join timeout 또는 에러:', error);
       setState(prev => ({
         ...prev,
         isConnecting: false,
-        isConnected: true,
-        localAudioTrack: audioTrack,
-        localVideoTrack: videoTrack,
-        waitingForUsers: true,
-        isAudioEnabled: true,
-        isVideoEnabled: true,
+        error: error.message || '연결에 실패했습니다.',
       }));
-
-      console.log('✅ [useAgoraClient] 화상 통화 연결 성공');
-    } catch (err: any) {
-      console.error('❌ [useAgoraClient] join 실패:', err);
-
-      // join 실패 시 생성된 tracks 즉시 정리 (리소스 waste 방지)
-      // audioTrack과 videoTrack은 try 블록 내에서만 정의되므로 여기서는 접근 불가
-      // 대신 전역적으로 정리 시도
-
-      // 에러 타입에 따른 사용자 친화적 메시지
-      let errorMessage = '연결 실패';
-      if (err.code === 'PERMISSION_DENIED') {
-        errorMessage =
-          '카메라 또는 마이크 권한이 필요합니다. 브라우저 설정에서 권한을 허용해주세요.';
-      } else if (err.code === 'DEVICE_NOT_FOUND') {
-        errorMessage =
-          '카메라 또는 마이크를 찾을 수 없습니다. 장치가 연결되어 있는지 확인해주세요.';
-      } else if (err.code === 'NETWORK_ERROR') {
-        errorMessage = '네트워크 연결을 확인해주세요.';
-      } else if (err.code === 'SEND_AUDIO_BITRATE_TOO_LOW') {
-        errorMessage =
-          '오디오 품질 설정 오류입니다. 잠시 후 다시 시도해주세요.';
-      } else {
-        errorMessage = err?.message ?? '알 수 없는 오류가 발생했습니다.';
-      }
-
-      setState(prev => ({
-        ...prev,
-        isConnecting: false,
-        error: errorMessage,
-      }));
-      throw err;
+      throw error;
     }
   }, []);
 
