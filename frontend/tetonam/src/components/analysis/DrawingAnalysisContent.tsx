@@ -89,11 +89,11 @@ export const DrawingAnalysisContent = memo<DrawingAnalysisContentProps>(({
     <div className={`space-y-${compact ? '3' : '4'} ${className}`}>
       {/* 그림 표시 영역 */}
       {showImage && imageUrl && (
-        <div className="flex justify-center mb-6">
+        <div className="mb-6">
           <DrawingImage
             imageUrl={imageUrl}
             category={category}
-            className="max-w-md max-h-96 object-contain rounded-lg"
+            className=""
           />
         </div>
       )}
@@ -106,7 +106,9 @@ export const DrawingAnalysisContent = memo<DrawingAnalysisContentProps>(({
               객체 탐지 결과
             </CardTitle>
           </CardHeader>
-          <CardContent className={compact ? 'p-0' : ''}>
+          {/* 구분선 */}
+          <div className="border-t-2 border-black"></div>
+          <CardContent className={compact ? 'p-0 pt-2' : 'pt-4'}>
             {loadingAI ? (
               <div className='space-y-2'>
                 <Skeleton className={`h-${compact ? '3' : '4'} w-full`} />
@@ -114,9 +116,17 @@ export const DrawingAnalysisContent = memo<DrawingAnalysisContentProps>(({
                 <Skeleton className={`h-${compact ? '3' : '4'} w-1/2`} />
               </div>
             ) : aiText ? (
-              <pre className={`whitespace-pre-wrap font-mono ${compact ? 'text-xs' : 'text-sm'} text-foreground`}>
-                {aiText}
-              </pre>
+              <div
+                className={`prose prose-slate max-w-none font-sans leading-relaxed whitespace-pre-wrap ${compact ? 'text-xs prose-sm' : 'text-sm'} text-foreground`}
+                style={{
+                  fontFamily: "'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif",
+                  fontSize: 'inherit',
+                  lineHeight: '1.7',
+                  color: 'hsl(var(--foreground))',
+                }}
+              >
+                {aiText.replace(/"/g, '')}
+              </div>
             ) : (
               <div className={`${compact ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
                 객체 탐지 결과가 없습니다.
@@ -133,7 +143,9 @@ export const DrawingAnalysisContent = memo<DrawingAnalysisContentProps>(({
             {isCounselor ? 'AI 분석 결과' : '분석 결과'}
           </CardTitle>
         </CardHeader>
-        <CardContent className={`space-y-${compact ? '3' : '4'} ${compact ? 'p-0' : ''}`}>
+        {/* 구분선 */}
+        <div className="border-t-2 border-black"></div>
+        <CardContent className={`space-y-${compact ? '3' : '4'} ${compact ? 'p-0 pt-2' : 'pt-4'}`}>
           {/* 분석 결과 표시 */}
           {loadingRAG ? (
             <div className="flex flex-col items-center justify-center py-8">
@@ -141,8 +153,8 @@ export const DrawingAnalysisContent = memo<DrawingAnalysisContentProps>(({
                 size="md"
                 title="AI 분석 중..."
                 message={
-                  isPollingAfterPrompt 
-                    ? "분석을 진행중입니다. 분석 완료 시 카카오톡 알림을 보내드립니다." 
+                  isPollingAfterPrompt
+                    ? "분석을 진행중입니다. 분석 완료 시 카카오톡 알림을 보내드립니다."
                     : "창의적인 마음을 깊이 들여다보고 있어요 ✨"
                 }
                 showLoadingDots={true}
@@ -195,30 +207,30 @@ export const DrawingAnalysisContent = memo<DrawingAnalysisContentProps>(({
           {isCounselor && (
             <div className={`${compact ? 'space-y-2' : 'space-y-3'}`}>
               {!compact && (
-                <div className='text-xs text-muted-foreground bg-muted/50 p-3 rounded-md'>
-                  <div className='font-medium mb-1'>예시:</div>
+                <div className='text-sm text-muted-foreground bg-muted/50 p-4 rounded-md'>
+                  <div className='font-medium mb-2 text-base'>예시:</div>
                   집의 크기는 적절하다. 지붕이 존재하나, 굴뚝이 존재하지 않는다. 창문의 개수는 2개이며 집의 크기에 비해 작은 편이다.
                 </div>
               )}
-              <div className={`flex ${compact ? 'flex-col space-y-2' : 'flex-col sm:flex-row'} ${compact ? '' : 'items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2'}`}>
+              <div className={`${compact ? 'space-y-2' : 'space-y-3'}`}>
                 <input
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder='최소 4가지 특징에 대해서 묘사해주세요.'
                   disabled={submitting}
-                  className={`${compact ? 'text-xs' : 'text-sm'} flex-1 ${compact ? 'h-8 px-2' : 'h-10 px-3'} rounded-md border border-border bg-background`}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey && prompt.trim() && !submitting) {
-                    e.preventDefault();
-                    handleSubmitPrompt();
-                  }
-                }}
-              />
+                  className={`w-full ${compact ? 'text-xs h-8 px-2' : 'text-sm h-12 px-4'} rounded-md border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey && prompt.trim() && !submitting) {
+                      e.preventDefault();
+                      handleSubmitPrompt();
+                    }
+                  }}
+                />
                 <Button
                   onClick={handleSubmitPrompt}
                   disabled={submitting || !prompt.trim()}
                   size={compact ? 'sm' : 'default'}
-                  className='w-full sm:w-auto'
+                  className={`w-full ${compact ? 'h-8' : 'h-12'}`}
                 >
                   {submitting ? '제출 중...' : '제출'}
                 </Button>

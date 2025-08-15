@@ -89,7 +89,7 @@ export const DrawingImage = memo<DrawingImageProps>(
     }
 
     return (
-      <Card className={`w-full mx-auto md:max-w-2xl ${className}`}>
+      <Card className={`w-full mx-auto max-w-lg ${className}`}>
         <CardContent className='p-4 sm:p-6'>
           <div className='space-y-3 sm:space-y-4'>
             {/* 그림 제목 */}
