@@ -7,7 +7,6 @@ import {
   AlertTriangle,
   ArrowLeft,
   CheckCircle,
-  Heart,
   Loader2,
   Mail,
 } from 'lucide-react';
@@ -467,7 +466,7 @@ export const RegisterForm = () => {
               <ArrowLeft className='w-6 h-6' />
             </Link>
             <div className='flex items-center'>
-              <Heart className='w-6 h-6 text-mint mr-3' />
+              <img src='/logo.png' alt='로고' className='w-6 h-6 mr-3' />
               <h1 className='text-xl font-bold text-foreground'>회원가입</h1>
             </div>
             <div className='w-6' />

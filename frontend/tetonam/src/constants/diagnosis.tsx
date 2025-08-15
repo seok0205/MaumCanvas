@@ -1,5 +1,5 @@
 import { DiagnosisCategory } from '@/types/diagnosis';
-import { AlertTriangle, Frown, Heart, Palette, Zap } from 'lucide-react';
+import { AlertTriangle, Frown, Palette, Zap } from 'lucide-react';
 
 export const DIAGNOSIS_CATEGORIES: DiagnosisCategory[] = [
   {
@@ -41,7 +41,7 @@ export const DIAGNOSIS_CATEGORIES: DiagnosisCategory[] = [
     title: '자살위험성',
     description:
       '자살 생각이나 계획의 위험성을 평가하고 도움을 요청할 수 있도록 합니다.',
-    icon: <Heart className='h-8 w-8 text-orange-500' />,
+    icon: <img src='/logo.png' alt='로고' className='h-8 w-8' />,
     color: 'bg-orange-50 border-orange-200 text-orange-700',
     path: '/questionnaire/suicide-risk',
   },

@@ -1,5 +1,5 @@
 import { PASSWORD_RESET_CONSTANTS } from '@/constants/passwordReset';
-import { ArrowLeft, Heart } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface FormHeaderProps {
@@ -17,7 +17,7 @@ export const FormHeader = ({ title }: FormHeaderProps) => {
         <ArrowLeft className='w-5 h-5' aria-hidden='true' />
       </Link>
       <div className='flex items-center'>
-        <Heart className='w-5 h-5 text-primary mr-2' aria-hidden='true' />
+        <img src='/logo.png' alt='로고' className='w-5 h-5 mr-2' />
         <h1 className='text-lg font-bold text-foreground'>{title}</h1>
       </div>
       <div className='w-5' />

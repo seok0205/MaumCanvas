@@ -1,4 +1,4 @@
-import { ArrowLeft, Heart } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import { cn } from '@/utils/cn';
@@ -45,7 +45,7 @@ export const FormLayout = ({
                 <ArrowLeft className='w-6 h-6' />
               </Link>
               <div className='flex items-center'>
-                <Heart className='w-6 h-6 text-mint mr-3' />
+                <img src='/logo.png' alt='로고' className='w-6 h-6 mr-3' />
                 <h1 className='text-xl font-bold text-foreground'>{title}</h1>
               </div>
               <div className='w-6' />
