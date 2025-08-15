@@ -24,13 +24,9 @@ export const useAgoraClient = () => {
   const isLeavingRef = useRef(false);
 
   useEffect(() => {
-    // Agora 공식 권장사항: 1:1 화상통화는 rtc 모드 사용
-    const client = AgoraRTC.createClient({ 
-      mode: 'rtc', // live 대신 rtc 모드 (1:1 통신에 적합)
-      codec: 'vp8' // 기본 코덱 사용
-    });
+    const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
 
-    // 사용자 채널 참여 이벤트 (Agora Best Practice)
+    // 사용자 채널 참여 이벤트
     client.on('user-joined', (user: IAgoraRTCRemoteUser) => {
       console.log(
         '✅ [useAgoraClient] 사용자가 채널에 참여했습니다:',
@@ -51,7 +47,7 @@ export const useAgoraClient = () => {
         return {
           ...prev,
           remoteUsers: newUsers,
-          waitingForUsers: false, // 사용자가 참여했으므로 대기 상태 해제
+          waitingForUsers: false,
         };
       });
     });
@@ -64,24 +60,23 @@ export const useAgoraClient = () => {
           setState(prev => {
             const newUsers = new Map(prev.remoteUsers);
             const existingUser = newUsers.get(user.uid.toString());
-            if (existingUser) {
+            if (existingUser && user.videoTrack) {
               newUsers.set(user.uid.toString(), {
                 ...existingUser,
-                ...user,
+                videoTrack: user.videoTrack,
                 hasVideo: true,
               });
-            } else {
+            } else if (user.videoTrack) {
               // user-joined 이벤트 없이 바로 published된 경우 대비
-              const remoteUserWithState: IAgoraRTCRemoteUser & RemoteUserState =
-                {
-                  ...user,
-                  uid: user.uid,
-                  hasAudio: false,
-                  hasVideo: true,
-                  userName: `사용자 ${user.uid}`,
-                  joinedAt: new Date(),
-                  connectionQuality: 0,
-                };
+              const remoteUserWithState: IAgoraRTCRemoteUser & RemoteUserState = {
+                ...user,
+                uid: user.uid,
+                hasAudio: false,
+                hasVideo: true,
+                userName: `사용자 ${user.uid}`,
+                joinedAt: new Date(),
+                connectionQuality: 0,
+              };
               newUsers.set(user.uid.toString(), remoteUserWithState);
             }
             return {
@@ -97,24 +92,23 @@ export const useAgoraClient = () => {
           setState(prev => {
             const newUsers = new Map(prev.remoteUsers);
             const existingUser = newUsers.get(user.uid.toString());
-            if (existingUser) {
+            if (existingUser && user.audioTrack) {
               newUsers.set(user.uid.toString(), {
                 ...existingUser,
-                ...user,
+                audioTrack: user.audioTrack,
                 hasAudio: true,
               });
-            } else {
+            } else if (user.audioTrack) {
               // user-joined 이벤트 없이 바로 published된 경우 대비
-              const remoteUserWithState: IAgoraRTCRemoteUser & RemoteUserState =
-                {
-                  ...user,
-                  uid: user.uid,
-                  hasAudio: true,
-                  hasVideo: false,
-                  userName: `사용자 ${user.uid}`,
-                  joinedAt: new Date(),
-                  connectionQuality: 0,
-                };
+              const remoteUserWithState: IAgoraRTCRemoteUser & RemoteUserState = {
+                ...user,
+                uid: user.uid,
+                hasAudio: true,
+                hasVideo: false,
+                userName: `사용자 ${user.uid}`,
+                joinedAt: new Date(),
+                connectionQuality: 0,
+              };
               newUsers.set(user.uid.toString(), remoteUserWithState);
             }
             return {
@@ -164,66 +158,22 @@ export const useAgoraClient = () => {
         return {
           ...prev,
           remoteUsers: newUsers,
-          waitingForUsers: newUsers.size === 0, // 모든 사용자가 떠나면 대기 상태로 전환
+          waitingForUsers: newUsers.size === 0,
         };
       });
     });
 
-    // 네트워크 품질 모니터링 및 자동 화질 조정 (Agora Best Practice)
+    // 네트워크 품질 모니터링 (간소화)
     client.on('network-quality', stats => {
       const downlinkQuality = stats.downlinkNetworkQuality;
-
-      setState(prev => {
-        // 네트워크 상태에 따른 자동 화질 조정 (Stale Closure 방지)
-        if (prev.localVideoTrack && downlinkQuality) {
-          if (downlinkQuality <= 2) {
-            // 네트워크 상태가 나쁘면 화질 낮춤 (더 보수적인 설정)
-            prev.localVideoTrack.setEncoderConfiguration({
-              width: 480,
-              height: 360,
-              frameRate: 15,
-              bitrateMax: 500,
-              bitrateMin: 200,
-            });
-            console.log(
-              '🔽 [useAgoraClient] 네트워크 상태 불량으로 화질을 낮췄습니다'
-            );
-          } else if (downlinkQuality >= 4) {
-            // 네트워크 상태가 좋으면 중간 화질 사용 (고화질 대신 안정성 우선)
-            prev.localVideoTrack.setEncoderConfiguration({
-              width: 960,
-              height: 540,
-              frameRate: 24,
-              bitrateMax: 1500,
-              bitrateMin: 600,
-            });
-            console.log(
-              '🔼 [useAgoraClient] 네트워크 상태 양호로 중간 화질을 사용합니다'
-            );
-          } else {
-            // 기본 화질 사용 (더 안정적인 설정)
-            prev.localVideoTrack.setEncoderConfiguration({
-              width: 640,
-              height: 480,
-              frameRate: 20,
-              bitrateMax: 1000,
-              bitrateMin: 400,
-            });
-            console.log(
-              '🔄 [useAgoraClient] 네트워크 상태에 따라 기본 화질을 사용합니다'
-            );
-          }
-        }
-
-        return {
-          ...prev,
-          networkQuality: downlinkQuality,
-        };
-      });
+      setState(prev => ({
+        ...prev,
+        networkQuality: downlinkQuality,
+      }));
     });
 
-    // 연결 상태 변화 이벤트 리스너 추가 (Agora Best Practice) - 강화된 연결 관리
-    client.on('connection-state-change', async (curState, revState) => {
+    // 연결 상태 변화 이벤트 리스너
+    client.on('connection-state-change', (curState, revState) => {
       console.log(
         `🔄 [useAgoraClient] 연결 상태 변화: ${revState} -> ${curState}`
       );
@@ -233,7 +183,7 @@ export const useAgoraClient = () => {
           ...prev,
           isConnected: true,
           waitingForUsers: true,
-          error: null, // 연결 성공 시 이전 오류 초기화
+          error: null,
         }));
       } else if (curState === 'DISCONNECTED') {
         setState(prev => ({
@@ -241,60 +191,15 @@ export const useAgoraClient = () => {
           isConnected: false,
           waitingForUsers: false,
         }));
-      } else if (curState === 'RECONNECTING') {
-        console.log('🔄 [useAgoraClient] 연결 재시도 중...');
-        setState(prev => ({
-          ...prev,
-          error: '연결이 불안정합니다. 재연결을 시도하고 있습니다...',
-        }));
       }
     });
 
-    // 예외 이벤트 리스너 추가 (Agora Best Practice) - 강화된 오류 처리
-    client.on('exception', async event => {
+    // 예외 이벤트 리스너
+    client.on('exception', event => {
       console.error('❌ [useAgoraClient] Agora 예외 발생:', event);
-
-      // 심각한 오류들 - 자동으로 방을 나가야 하는 경우들 (추가 오류 유형 포함)
-      const criticalErrors = [
-        'SEND_AUDIO_BITRATE_TOO_LOW',
-        'NETWORK_UNAVAILABLE',
-        'WEBSOCKET_DISCONNECTED',
-        'ICE_CONNECTION_FAILED',
-        'CONNECTION_TIMEOUT',
-        'WEBRTC_CONNECTION_FAILED', // WebRTC 연결 실패
-        'TOKEN_EXPIRED', // 토큰 만료
-        'INVALID_PARAMETER', // 잘못된 파라미터
-        'NETWORK_ERROR', // 네트워크 오류
-        'SERVER_ERROR', // 서버 오류
-      ];
-
-      const isCriticalError = criticalErrors.some(
-        error =>
-          event.msg?.includes(error) || event.code?.toString().includes(error)
-      );
-
-      if (isCriticalError) {
-        console.error(
-          '💥 [useAgoraClient] 심각한 연결 오류 감지, 자동으로 방을 나갑니다:',
-          event.msg
-        );
-
-        // 자동으로 방 나가기 (비동기 처리로 blocking 방지)
-        setTimeout(async () => {
-          try {
-            if (clientRef.current && !isLeavingRef.current) {
-              console.log('🚪 [useAgoraClient] 오류로 인한 자동 퇴장 시작...');
-              await leave();
-            }
-          } catch (leaveError) {
-            console.error('❌ [useAgoraClient] 자동 퇴장 중 오류:', leaveError);
-          }
-        }, 1000); // 1초 후 자동 퇴장
-      }
-
       setState(prev => ({
         ...prev,
-        error: `연결 오류: ${event.msg || event.code || '알 수 없는 오류'}`,
+        error: `연결 오류: ${event.msg || '알 수 없는 오류'}`,
       }));
     });
 
@@ -315,12 +220,10 @@ export const useAgoraClient = () => {
       return;
     }
 
-    console.log('🔄 [useAgoraClient] 연결 시작 - isConnecting: true로 설정');
     setState(prev => ({ ...prev, isConnecting: true, error: null }));
     
     try {
-      console.log('🔍 [useAgoraClient] 브라우저 호환성 확인 중...');
-      // Agora Best Practice: 브라우저 호환성 체크
+      // 브라우저 호환성 체크
       const isSupported = AgoraRTC.checkSystemRequirements();
       if (!isSupported) {
         throw new Error(
@@ -328,14 +231,13 @@ export const useAgoraClient = () => {
         );
       }
 
-      // Agora 공식 권장사항: 간단한 기본 설정으로 시작
+      // 기본 설정으로 미디어 트랙 생성
       const [audioTrack, videoTrack] = await Promise.all([
         AgoraRTC.createMicrophoneAudioTrack(),
         AgoraRTC.createCameraVideoTrack(),
       ]);
-      console.log('✅ [useAgoraClient] 기본 미디어 트랙 생성 성공');
+      console.log('✅ [useAgoraClient] 미디어 트랙 생성 성공');
 
-      // RTC 모드에서는 setClientRole 호출 불필요
       // 채널 참여
       await clientRef.current.join(
         config.appId,
@@ -355,7 +257,7 @@ export const useAgoraClient = () => {
         isConnected: true,
         localAudioTrack: audioTrack,
         localVideoTrack: videoTrack,
-        waitingForUsers: true, // 연결 후 상대방을 기다리는 상태
+        waitingForUsers: true,
       }));
 
       console.log('✅ [useAgoraClient] 화상 통화 연결 성공');
@@ -395,33 +297,36 @@ export const useAgoraClient = () => {
     try {
       console.log('🔌 [useAgoraClient] 화상 통화 연결 해제 시작...');
 
-      // 현재 상태 참조 (closure 문제 방지)
-      const currentState = state;
+      // 현재 상태를 직접 가져와서 사용 (closure 문제 방지)
+      setState(prev => {
+        // 리소스 정리 순서
+        // 1. 먼저 unpublish 수행
+        if (prev.localAudioTrack || prev.localVideoTrack) {
+          const tracksToUnpublish = [
+            prev.localAudioTrack,
+            prev.localVideoTrack,
+          ].filter((track): track is NonNullable<typeof track> => track !== null);
 
-      // Agora Best Practice: 리소스 정리 순서
-      // 1. 먼저 unpublish 수행
-      if (currentState.localAudioTrack || currentState.localVideoTrack) {
-        const tracksToUnpublish = [
-          currentState.localAudioTrack,
-          currentState.localVideoTrack,
-        ].filter((track): track is NonNullable<typeof track> => track !== null);
-
-        if (tracksToUnpublish.length > 0) {
-          await clientRef.current.unpublish(tracksToUnpublish);
-          console.log('📤 [useAgoraClient] 로컬 미디어 스트림 발행 중단');
+          if (tracksToUnpublish.length > 0 && clientRef.current) {
+            clientRef.current.unpublish(tracksToUnpublish).then(() => {
+              console.log('📤 [useAgoraClient] 로컬 미디어 스트림 발행 중단');
+            }).catch(console.error);
+          }
         }
-      }
 
-      // 2. 트랙 정리
-      if (currentState.localAudioTrack) {
-        currentState.localAudioTrack.close();
-        console.log('🎤 [useAgoraClient] 오디오 트랙 정리 완료');
-      }
+        // 2. 트랙 정리
+        if (prev.localAudioTrack) {
+          prev.localAudioTrack.close();
+          console.log('🎤 [useAgoraClient] 오디오 트랙 정리 완료');
+        }
 
-      if (currentState.localVideoTrack) {
-        currentState.localVideoTrack.close();
-        console.log('📹 [useAgoraClient] 비디오 트랙 정리 완료');
-      }
+        if (prev.localVideoTrack) {
+          prev.localVideoTrack.close();
+          console.log('📹 [useAgoraClient] 비디오 트랙 정리 완료');
+        }
+
+        return prev; // 상태는 아래에서 한 번에 업데이트
+      });
 
       // 3. 채널 떠나기
       await clientRef.current.leave();
@@ -444,7 +349,7 @@ export const useAgoraClient = () => {
     } finally {
       isLeavingRef.current = false;
     }
-  }, []); // dependency 제거 - state를 직접 참조
+  }, []);
 
   const toggleAudio = useCallback(
     async (enabled: boolean) => {
