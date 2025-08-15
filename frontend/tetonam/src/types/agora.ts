@@ -29,6 +29,8 @@ export interface VideoCallState {
   error: string | null;
   networkQuality?: number;
   waitingForUsers: boolean;
+  isAudioEnabled: boolean;
+  isVideoEnabled: boolean;
 }
 
 export interface TokenResponse {

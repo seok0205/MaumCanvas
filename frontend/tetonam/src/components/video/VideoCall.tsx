@@ -22,8 +22,6 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
   const remoteVideoRef = useRef<HTMLDivElement>(null);
   const uidRef = useRef<number | null>(null);
 
-  const [isAudioOn, setIsAudioOn] = useState(true);
-  const [isVideoOn, setIsVideoOn] = useState(true);
   const [showDetailPanel, setShowDetailPanel] = useState(isCounselor); // 상담사일 때 기본적으로 패널 표시
 
   const {
@@ -34,6 +32,8 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
     error,
     waitingForUsers,
     networkQuality,
+    isAudioEnabled,
+    isVideoEnabled,
     join,
     leave,
     toggleAudio,
@@ -165,13 +165,11 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
   }, [error, leave, onEnd]);
 
   const handleToggleAudio = async () => {
-    await toggleAudio(!isAudioOn);
-    setIsAudioOn(prev => !prev);
+    await toggleAudio();
   };
 
   const handleToggleVideo = async () => {
-    await toggleVideo(!isVideoOn);
-    setIsVideoOn(prev => !prev);
+    await toggleVideo();
   };
 
   if (error) {
@@ -260,7 +258,7 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
             <div ref={localVideoRef} className='w-full h-full' />
 
             {/* 내 비디오가 꺼져있을 때 */}
-            {!isVideoOn && (
+            {!isVideoEnabled && (
               <div className='absolute inset-0 flex flex-col items-center justify-center bg-gray-800'>
                 <VideoOff className='w-8 h-8 text-gray-400 mb-2' />
                 <span className='text-gray-400 text-xs'>내 카메라 꺼짐</span>
@@ -268,7 +266,7 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
             )}
 
             {/* 내 음소거 상태 표시 */}
-            {!isAudioOn && (
+            {!isAudioEnabled && (
               <div className='absolute bottom-2 left-2 w-6 h-6 bg-red-600 rounded-full flex items-center justify-center'>
                 <MicOff className='w-3 h-3 text-white' />
               </div>
@@ -313,12 +311,12 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
             <div className='absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 p-4 bg-black/70 rounded-full backdrop-blur-sm'>
               <Button
                 size='icon'
-                variant={isAudioOn ? 'secondary' : 'destructive'}
+                variant={isAudioEnabled ? 'secondary' : 'destructive'}
                 onClick={handleToggleAudio}
                 className='rounded-full w-12 h-12'
-                aria-label={isAudioOn ? '마이크 끄기' : '마이크 켜기'}
+                aria-label={isAudioEnabled ? '마이크 끄기' : '마이크 켜기'}
               >
-                {isAudioOn ? (
+                {isAudioEnabled ? (
                   <Mic className='w-5 h-5' />
                 ) : (
                   <MicOff className='w-5 h-5' />
@@ -326,12 +324,12 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
               </Button>
               <Button
                 size='icon'
-                variant={isVideoOn ? 'secondary' : 'destructive'}
+                variant={isVideoEnabled ? 'secondary' : 'destructive'}
                 onClick={handleToggleVideo}
                 className='rounded-full w-12 h-12'
-                aria-label={isVideoOn ? '카메라 끄기' : '카메라 켜기'}
+                aria-label={isVideoEnabled ? '카메라 끄기' : '카메라 켜기'}
               >
-                {isVideoOn ? (
+                {isVideoEnabled ? (
                   <Video className='w-5 h-5' />
                 ) : (
                   <VideoOff className='w-5 h-5' />
@@ -403,7 +401,7 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
         <div ref={localVideoRef} className='w-full h-full' />
 
         {/* 내 비디오가 꺼져있을 때 */}
-        {!isVideoOn && (
+        {!isVideoEnabled && (
           <div className='absolute inset-0 flex flex-col items-center justify-center bg-gray-800'>
             <VideoOff className='w-8 h-8 text-gray-400 mb-2' />
             <span className='text-gray-400 text-xs'>내 카메라 꺼짐</span>
@@ -411,7 +409,7 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
         )}
 
         {/* 내 음소거 상태 표시 */}
-        {!isAudioOn && (
+        {!isAudioEnabled && (
           <div className='absolute bottom-2 left-2 w-6 h-6 bg-red-600 rounded-full flex items-center justify-center'>
             <MicOff className='w-3 h-3 text-white' />
           </div>
@@ -456,12 +454,12 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
         <div className='absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 p-4 bg-black/70 rounded-full backdrop-blur-sm'>
           <Button
             size='icon'
-            variant={isAudioOn ? 'secondary' : 'destructive'}
+            variant={isAudioEnabled ? 'secondary' : 'destructive'}
             onClick={handleToggleAudio}
             className='rounded-full w-12 h-12'
-            aria-label={isAudioOn ? '마이크 끄기' : '마이크 켜기'}
+            aria-label={isAudioEnabled ? '마이크 끄기' : '마이크 켜기'}
           >
-            {isAudioOn ? (
+            {isAudioEnabled ? (
               <Mic className='w-5 h-5' />
             ) : (
               <MicOff className='w-5 h-5' />
@@ -469,12 +467,12 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
           </Button>
           <Button
             size='icon'
-            variant={isVideoOn ? 'secondary' : 'destructive'}
+            variant={isVideoEnabled ? 'secondary' : 'destructive'}
             onClick={handleToggleVideo}
             className='rounded-full w-12 h-12'
-            aria-label={isVideoOn ? '카메라 끄기' : '카메라 켜기'}
+            aria-label={isVideoEnabled ? '카메라 끄기' : '카메라 켜기'}
           >
-            {isVideoOn ? (
+            {isVideoEnabled ? (
               <Video className='w-5 h-5' />
             ) : (
               <VideoOff className='w-5 h-5' />

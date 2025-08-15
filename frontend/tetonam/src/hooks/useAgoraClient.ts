@@ -18,6 +18,8 @@ export const useAgoraClient = () => {
     remoteUsers: new Map<string, IAgoraRTCRemoteUser & RemoteUserState>(),
     error: null,
     waitingForUsers: false,
+    isAudioEnabled: true,
+    isVideoEnabled: true,
   });
 
   const clientRef = useRef<IAgoraRTCClient | null>(null);
@@ -258,6 +260,8 @@ export const useAgoraClient = () => {
         localAudioTrack: audioTrack,
         localVideoTrack: videoTrack,
         waitingForUsers: true,
+        isAudioEnabled: true,
+        isVideoEnabled: true,
       }));
 
       console.log('✅ [useAgoraClient] 화상 통화 연결 성공');
@@ -341,6 +345,8 @@ export const useAgoraClient = () => {
         remoteUsers: new Map<string, IAgoraRTCRemoteUser & RemoteUserState>(),
         error: null,
         waitingForUsers: false,
+        isAudioEnabled: true,
+        isVideoEnabled: true,
       });
 
       console.log('✅ [useAgoraClient] 화상 통화 연결 해제 완료');
@@ -351,23 +357,27 @@ export const useAgoraClient = () => {
     }
   }, []);
 
-  const toggleAudio = useCallback(
-    async (enabled: boolean) => {
-      if (state.localAudioTrack) {
-        await state.localAudioTrack.setEnabled(enabled);
-      }
-    },
-    [state.localAudioTrack]
-  );
+  const toggleAudio = useCallback(async () => {
+    if (state.localAudioTrack) {
+      const newEnabled = !state.isAudioEnabled;
+      await state.localAudioTrack.setEnabled(newEnabled);
+      setState(prev => ({
+        ...prev,
+        isAudioEnabled: newEnabled,
+      }));
+    }
+  }, [state.localAudioTrack, state.isAudioEnabled]);
 
-  const toggleVideo = useCallback(
-    async (enabled: boolean) => {
-      if (state.localVideoTrack) {
-        await state.localVideoTrack.setEnabled(enabled);
-      }
-    },
-    [state.localVideoTrack]
-  );
+  const toggleVideo = useCallback(async () => {
+    if (state.localVideoTrack) {
+      const newEnabled = !state.isVideoEnabled;
+      await state.localVideoTrack.setEnabled(newEnabled);
+      setState(prev => ({
+        ...prev,
+        isVideoEnabled: newEnabled,
+      }));
+    }
+  }, [state.localVideoTrack, state.isVideoEnabled]);
 
   return {
     ...state,
