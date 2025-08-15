@@ -301,40 +301,41 @@ export const useAgoraClient = () => {
     try {
       console.log('🔌 [useAgoraClient] 화상 통화 연결 해제 시작...');
 
-      // 현재 상태를 직접 가져와서 사용 (closure 문제 방지)
-      setState(prev => {
-        // 리소스 정리 순서
-        // 1. 먼저 unpublish 수행
-        if (prev.localAudioTrack || prev.localVideoTrack) {
-          const tracksToUnpublish = [
-            prev.localAudioTrack,
-            prev.localVideoTrack,
-          ].filter((track): track is NonNullable<typeof track> => track !== null);
+      // 현재 상태 가져오기
+      const currentState = state;
+      
+      // 1. 채널에 연결된 상태에서만 unpublish 수행 (Agora 공식 권장사항)
+      if (currentState.isConnected && (currentState.localAudioTrack || currentState.localVideoTrack)) {
+        const tracksToUnpublish = [
+          currentState.localAudioTrack,
+          currentState.localVideoTrack,
+        ].filter((track): track is NonNullable<typeof track> => track !== null);
 
-          if (tracksToUnpublish.length > 0 && clientRef.current) {
-            clientRef.current.unpublish(tracksToUnpublish).then(() => {
-              console.log('📤 [useAgoraClient] 로컬 미디어 스트림 발행 중단');
-            }).catch(console.error);
+        if (tracksToUnpublish.length > 0) {
+          try {
+            await clientRef.current.unpublish(tracksToUnpublish);
+            console.log('📤 [useAgoraClient] 로컬 미디어 스트림 발행 중단 완료');
+          } catch (unpublishError) {
+            // unpublish 실패는 로그만 남기고 계속 진행 (채널 나가기는 수행)
+            console.warn('⚠️ [useAgoraClient] unpublish 실패, 계속 진행:', unpublishError);
           }
         }
+      }
 
-        // 2. 트랙 정리
-        if (prev.localAudioTrack) {
-          prev.localAudioTrack.close();
-          console.log('🎤 [useAgoraClient] 오디오 트랙 정리 완료');
-        }
-
-        if (prev.localVideoTrack) {
-          prev.localVideoTrack.close();
-          console.log('📹 [useAgoraClient] 비디오 트랙 정리 완료');
-        }
-
-        return prev; // 상태는 아래에서 한 번에 업데이트
-      });
-
-      // 3. 채널 떠나기
+      // 2. 채널 떠나기
       await clientRef.current.leave();
       console.log('👋 [useAgoraClient] 채널 나가기 완료');
+
+      // 3. 트랙 정리
+      if (currentState.localAudioTrack) {
+        currentState.localAudioTrack.close();
+        console.log('🎤 [useAgoraClient] 오디오 트랙 정리 완료');
+      }
+
+      if (currentState.localVideoTrack) {
+        currentState.localVideoTrack.close();
+        console.log('� [useAgoraClient] 비디오 트랙 정리 완료');
+      }
 
       // 4. 상태 초기화
       setState({
@@ -355,7 +356,7 @@ export const useAgoraClient = () => {
     } finally {
       isLeavingRef.current = false;
     }
-  }, []);
+  }, [state.isConnected, state.localAudioTrack, state.localVideoTrack]);
 
   const toggleAudio = useCallback(async () => {
     if (state.localAudioTrack) {
