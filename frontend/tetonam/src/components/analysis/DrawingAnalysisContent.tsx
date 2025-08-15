@@ -106,9 +106,9 @@ export const DrawingAnalysisContent = memo<DrawingAnalysisContentProps>(({
               객체 탐지 결과
             </CardTitle>
           </CardHeader>
-          {/* 구분선 */}
-          <div className="border-t-2 border-black"></div>
-          <CardContent className={compact ? 'p-0 pt-2' : 'pt-4'}>
+          {/* 구분선 - 적당히 눈에 띄는 스타일 */}
+          <div className="border-t border-border opacity-80 mx-4"></div>
+          <CardContent className={compact ? 'p-0 pt-3' : 'pt-6'}>
             {loadingAI ? (
               <div className='space-y-2'>
                 <Skeleton className={`h-${compact ? '3' : '4'} w-full`} />
@@ -143,9 +143,9 @@ export const DrawingAnalysisContent = memo<DrawingAnalysisContentProps>(({
             {isCounselor ? 'AI 분석 결과' : '분석 결과'}
           </CardTitle>
         </CardHeader>
-        {/* 구분선 */}
-        <div className="border-t-2 border-black"></div>
-        <CardContent className={`space-y-${compact ? '3' : '4'} ${compact ? 'p-0 pt-2' : 'pt-4'}`}>
+        {/* 구분선 - 적당히 눈에 띄는 스타일 */}
+        <div className="border-t border-border opacity-80 mx-4"></div>
+        <CardContent className={`space-y-${compact ? '3' : '4'} ${compact ? 'p-0 pt-3' : 'pt-6'}`}>
           {/* 분석 결과 표시 */}
           {loadingRAG ? (
             <div className="flex flex-col items-center justify-center py-8">
