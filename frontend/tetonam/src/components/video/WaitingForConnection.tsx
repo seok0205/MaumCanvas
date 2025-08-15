@@ -31,7 +31,7 @@ export const WaitingForConnection = ({
   };
 
   return (
-    <div className='absolute inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm'>
+    <div className='absolute inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm select-none'>
       <div className='text-center space-y-8 max-w-md px-6'>
         {/* 메인 아이콘과 메시지 */}
         {isConnecting ? (
@@ -41,8 +41,8 @@ export const WaitingForConnection = ({
               <div className='absolute inset-0 w-16 h-16 border-4 border-blue-500/20 rounded-full mx-auto animate-pulse'></div>
             </div>
             <div className='space-y-3'>
-              <h3 className='text-white text-2xl font-bold'>연결 중입니다</h3>
-              <p className='text-gray-300 text-base leading-relaxed'>
+              <h3 className='text-white text-2xl font-bold select-none'>연결 중입니다</h3>
+              <p className='text-gray-300 text-base leading-relaxed select-none'>
                 화상 통화 서버에 연결하고 있습니다.
                 <br />
                 잠시만 기다려주세요...
@@ -56,14 +56,14 @@ export const WaitingForConnection = ({
                 <Users className='w-8 h-8 text-blue-500' />
               </div>
               <div className='absolute -top-1 -right-1 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center animate-pulse'>
-                <span className='text-white text-xs font-bold'>!</span>
+                <span className='text-white text-xs font-bold select-none'>!</span>
               </div>
             </div>
             <div className='space-y-3'>
-              <h3 className='text-white text-2xl font-bold'>
+              <h3 className='text-white text-2xl font-bold select-none'>
                 상대방을 기다리고 있습니다
               </h3>
-              <p className='text-gray-300 text-base leading-relaxed'>
+              <p className='text-gray-300 text-base leading-relaxed select-none'>
                 상대방이 화상 통화에 참여할 때까지
                 <br />
                 기다려주세요
@@ -79,7 +79,7 @@ export const WaitingForConnection = ({
               className={`w-4 h-4 ${getNetworkQualityColor(networkQuality)}`}
             />
             <span
-              className={`text-sm font-medium ${getNetworkQualityColor(networkQuality)}`}
+              className={`text-sm font-medium select-none ${getNetworkQualityColor(networkQuality)}`}
             >
               {getNetworkQualityText(networkQuality)}
             </span>
@@ -88,7 +88,7 @@ export const WaitingForConnection = ({
 
         {/* 힌트 메시지 */}
         <div className='text-center'>
-          <p className='text-gray-500 text-sm'>💡 화면을 새로고침하지 마세요</p>
+          <p className='text-gray-500 text-sm select-none'>💡 화면을 새로고침하지 마세요</p>
         </div>
       </div>
     </div>

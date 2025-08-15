@@ -15,7 +15,7 @@ export const VideoCallPage = () => {
 
   if (!appointmentId) {
     return (
-      <div className='flex items-center justify-center h-screen bg-background'>
+      <div className='flex items-center justify-center h-screen bg-background select-none'>
         <div className='text-center'>
           <h2 className='text-lg font-semibold text-foreground mb-2'>
             잘못된 접근입니다
@@ -25,7 +25,7 @@ export const VideoCallPage = () => {
           </p>
           <button
             onClick={() => navigate('/dashboard')}
-            className='px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90'
+            className='px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 select-none'
           >
             대시보드로 돌아가기
           </button>

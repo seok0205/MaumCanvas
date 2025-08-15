@@ -174,7 +174,7 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
 
   if (error) {
     return (
-      <div className='flex flex-col items-center justify-center h-screen bg-background'>
+      <div className='flex flex-col items-center justify-center h-screen bg-background select-none'>
         <div className='max-w-md text-center p-6 bg-card rounded-lg shadow-lg border'>
           <div className='text-destructive mb-4 text-lg font-semibold'>
             연결 오류가 발생했습니다
@@ -205,7 +205,7 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
   if (isCounselor) {
     return (
       <ImageModalProvider inVideoCall={true}>
-        <div className='flex h-screen bg-black'>
+        <div className='flex h-screen bg-black select-none'>
           {/* 비디오 콜 영역 (좌측) */}
           <div className={`relative transition-all duration-300 ${
             showDetailPanel ? 'w-3/4' : 'w-full'
@@ -228,7 +228,7 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
             {hasRemoteUsers && !remoteUser?.hasAudio && (
               <div className='absolute top-4 left-4 flex items-center space-x-2 px-3 py-2 bg-red-600/90 rounded-full backdrop-blur-sm'>
                 <MicOff className='w-4 h-4 text-white' />
-                <span className='text-white text-sm font-medium'>
+                <span className='text-white text-sm font-medium select-none'>
                   상대방 음소거
                 </span>
               </div>
@@ -261,7 +261,7 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
             {!isVideoEnabled && (
               <div className='absolute inset-0 flex flex-col items-center justify-center bg-gray-800'>
                 <VideoOff className='w-8 h-8 text-gray-400 mb-2' />
-                <span className='text-gray-400 text-xs'>내 카메라 꺼짐</span>
+                <span className='text-gray-400 text-xs select-none'>내 카메라 꺼짐</span>
               </div>
             )}
 
@@ -292,7 +292,7 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
           {/* 상대방 대기 중일 때 추가 안내 */}
           {isConnected && waitingForUsers && !hasRemoteUsers && (
             <div className='absolute bottom-32 left-1/2 -translate-x-1/2 px-4 py-2 bg-blue-600/80 rounded-full backdrop-blur-sm'>
-              <span className='text-white text-sm font-medium'>
+              <span className='text-white text-sm font-medium select-none'>
                 💬 상대방을 기다리는 중...
               </span>
             </div>
@@ -302,7 +302,7 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
           {isConnecting && (
             <div className='absolute inset-0 flex items-center justify-center bg-black/50'>
               <Loader2 className='w-8 h-8 text-white animate-spin' />
-              <span className='ml-2 text-white'>연결 중...</span>
+              <span className='ml-2 text-white select-none'>연결 중...</span>
             </div>
           )}
 
@@ -370,7 +370,7 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
 
   // 기본 레이아웃 (학생용 - 전체 화면)
   return (
-    <div className='relative h-screen bg-black'>
+    <div className='relative h-screen bg-black select-none'>
       {/* 원격 비디오 영역 */}
       <div className='relative w-full h-full'>
         <div ref={remoteVideoRef} className='w-full h-full' />
@@ -389,7 +389,7 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
         {hasRemoteUsers && !remoteUser?.hasAudio && (
           <div className='absolute top-4 left-4 flex items-center space-x-2 px-3 py-2 bg-red-600/90 rounded-full backdrop-blur-sm'>
             <MicOff className='w-4 h-4 text-white' />
-            <span className='text-white text-sm font-medium'>
+            <span className='text-white text-sm font-medium select-none'>
               상대방 음소거
             </span>
           </div>
@@ -404,7 +404,7 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
         {!isVideoEnabled && (
           <div className='absolute inset-0 flex flex-col items-center justify-center bg-gray-800'>
             <VideoOff className='w-8 h-8 text-gray-400 mb-2' />
-            <span className='text-gray-400 text-xs'>내 카메라 꺼짐</span>
+            <span className='text-gray-400 text-xs select-none'>내 카메라 꺼짐</span>
           </div>
         )}
 
@@ -435,7 +435,7 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
       {/* 상대방 대기 중일 때 추가 안내 */}
       {isConnected && waitingForUsers && !hasRemoteUsers && (
         <div className='absolute bottom-32 left-1/2 -translate-x-1/2 px-4 py-2 bg-blue-600/80 rounded-full backdrop-blur-sm'>
-          <span className='text-white text-sm font-medium'>
+          <span className='text-white text-sm font-medium select-none'>
             💬 상대방을 기다리는 중...
           </span>
         </div>
@@ -445,7 +445,7 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
       {isConnecting && (
         <div className='absolute inset-0 flex items-center justify-center bg-black/50'>
           <Loader2 className='w-8 h-8 text-white animate-spin' />
-          <span className='ml-2 text-white'>연결 중...</span>
+          <span className='ml-2 text-white select-none'>연결 중...</span>
         </div>
       )}
 
