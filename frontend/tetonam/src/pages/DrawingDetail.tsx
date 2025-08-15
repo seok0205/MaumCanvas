@@ -3,6 +3,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { DrawingAnalysisContent } from '@/components/analysis/DrawingAnalysisContent';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { CommonHeader } from '@/components/layout/CommonHeader';
+import { DrawingImage } from '@/components/ui/drawing/DrawingImage';
 import {
   MobileSidebarToggle,
   SidebarProvider,
@@ -27,13 +28,20 @@ export const DrawingDetail = () => {
         <div className='flex-1 flex flex-col'>
           <CommonHeader user={user} title='그림 분석 결과' showBackButton />
 
-          <main className='px-4 sm:px-6 py-4 sm:py-6'>
+          {/* 그림 표시 영역 - CommonHeader 아래, 분석 결과 위에 위치 */}
+          <div className='px-4 sm:px-6 pt-4 sm:pt-6'>
+            <DrawingImage
+              imageUrl={imageUrl ?? undefined}
+              category={category ?? undefined}
+              className='mb-4 sm:mb-6'
+            />
+          </div>
+
+          <main className='px-4 sm:px-6 pb-4 sm:pb-6'>
             <DrawingAnalysisContent
               drawingId={drawingId || null}
-              {...(imageUrl && { imageUrl })}
-              {...(category && { category })}
               compact={false}
-              showImage={true}
+              showImage={false}
               autoFetch={true}
               enablePolling={true}
             />
