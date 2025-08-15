@@ -11,7 +11,7 @@ import {
   User,
   X,
 } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { CommonHeader } from '@/components/layout/CommonHeader';
@@ -124,31 +124,34 @@ export const CommunityPostDetail = () => {
 
   const deletePostMutation = useDeletePost();
 
-  // 뒤로 가기
-  const handleGoBack = () => {
+  // 뒤로 가기 - useCallback으로 최적화
+  const handleGoBack = useCallback(() => {
     navigate('/community');
-  };
+  }, [navigate]);
 
-  // 수정
-  const handleEdit = () => {
+  // 수정 - useCallback으로 최적화 (postId 의존성 추가)
+  const handleEdit = useCallback(() => {
     navigate(`/community/${postId}/edit`);
-  };
+  }, [navigate, postId]);
 
-  // 삭제
-  const handleDelete = () => {
+  // 삭제 - useCallback으로 최적화
+  const handleDelete = useCallback(() => {
     deletePostMutation.mutate(postId, {
       onSuccess: () => {
         setShowDeleteDialog(false);
         navigate('/community');
       },
     });
-  };
+  }, [deletePostMutation, postId, navigate]);
 
-  // 현재 사용자가 작성자인지 확인 (백엔드 isAuthor 필드 사용)
-  const isAuthor = user && post && post.isAuthor;
+  // 현재 사용자가 작성자인지 확인 - useMemo로 최적화
+  const isAuthor = useMemo(() => {
+    return user && post && post.isAuthor;
+  }, [user, post]);
 
-  const safeRelativeTime = (value?: string) =>
-    value ? formatRelativeTime(value) : '';
+  // 시간 포맷팅 함수 - useCallback으로 최적화
+  const safeRelativeTime = useCallback((value?: string) =>
+    value ? formatRelativeTime(value) : '', []);
 
   if (isLoading) {
     return (
