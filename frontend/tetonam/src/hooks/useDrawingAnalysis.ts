@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { imageService } from '@/services/imageService';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -34,11 +35,19 @@ interface UseDrawingAnalysisReturn {
   isCounselor: boolean;
 }
 
+// 쿼리 키 팩토리
+const queryKeys = {
+  drawingAnalysis: (drawingId: string) => ['drawing-analysis', drawingId] as const,
+  aiDetection: (drawingId: string) => ['ai-detection', drawingId] as const,
+  ragResult: (drawingId: string) => ['rag-result', drawingId] as const,
+};
+
 /**
- * 그림 분석 관련 비즈니스 로직을 담당하는 커스텀 훅
+ * 그림 분석 관련 비즈니스 로직을 담당하는 커스텀 훅 (TanStack Query 최적화 버전)
  *
  * @description AI 분석 결과, RAG 결과 페칭, 마크다운 처리, 프롬프트 제출 등
  * 그림 분석과 관련된 모든 비즈니스 로직을 캡슐화합니다.
+ * TanStack Query를 사용하여 자동 캐싱, 백그라운드 업데이트, 에러 처리를 최적화했습니다.
  *
  * @param options 훅 설정 옵션
  * @returns 그림 분석 관련 상태와 액션들
@@ -53,8 +62,7 @@ interface UseDrawingAnalysisReturn {
  *   isCounselor
  * } = useDrawingAnalysis({
  *   drawingId: '123',
- *   autoFetch: true,
- *   enablePolling: true
+ *   autoFetch: true
  * });
  * ```
  */
@@ -63,25 +71,77 @@ export const useDrawingAnalysis = ({
   autoFetch = true,
 }: UseDrawingAnalysisOptions): UseDrawingAnalysisReturn => {
   const { user } = useAuthStore();
+  const queryClient = useQueryClient();
 
   // 상태 관리
-  const [aiText, setAiText] = useState<string>('');
-  const [ragText, setRagText] = useState<string | null>(null);
-  const [ragError, setRagError] = useState<ApiErrorType | null>(null);
   const [ragHtml, setRagHtml] = useState<string>('');
   const [prompt, setPrompt] = useState('');
-  const [loadingAI, setLoadingAI] = useState(true);
-  const [loadingRAG, setLoadingRAG] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [pollingType, setPollingType] = useState<PollingType>('none');
   const [isPollingAfterPrompt, setIsPollingAfterPrompt] = useState(false);
 
   // Refs for cleanup
   const pollTimer = useRef<number | null>(null);
-  const abortController = useRef<AbortController | null>(null);
 
   // 상담사 여부 확인 (메모이제이션)
   const isCounselor = user?.roles?.includes('COUNSELOR') ?? false;
+
+  // AI 감지 결과 쿼리 (상담사만 사용)
+  const {
+    data: aiText = '',
+    isLoading: loadingAI,
+  } = useQuery({
+    queryKey: queryKeys.aiDetection(drawingId || ''),
+    queryFn: async () => {
+      if (!drawingId) throw new Error('Drawing ID is required');
+      return imageService.getAiDetectionText(drawingId);
+    },
+    enabled: !!(drawingId && autoFetch && isCounselor),
+    staleTime: 10 * 60 * 1000, // 10분간 fresh 유지
+    gcTime: 30 * 60 * 1000, // 30분간 캐시 유지
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: true,
+  });
+
+  // RAG 결과 쿼리 (역할 기반 폴링 설정)
+  const {
+    data: ragResult,
+    isLoading: loadingRAG,
+    refetch: refetchRag,
+  } = useQuery({
+    queryKey: queryKeys.ragResult(drawingId || ''),
+    queryFn: async () => {
+      if (!drawingId) throw new Error('Drawing ID is required');
+      return imageService.getRagResult(drawingId);
+    },
+    enabled: !!(drawingId && autoFetch),
+    staleTime: isCounselor ? 0 : 5 * 60 * 1000, // 상담사: 즉시 stale, 학생: 5분간 fresh
+    gcTime: 30 * 60 * 1000, // 30분간 캐시 유지
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: true,
+    // 역할 기반 폴링 설정
+    refetchInterval: (query) => {
+      // 학생은 폴링 비활성화
+      if (!isCounselor) return false;
+      
+      // 프롬프트 제출 후 폴링 모드가 아니면 비활성화
+      if (pollingType !== 'after-prompt') return false;
+      
+      // RAG 결과가 성공적이면 폴링 중지
+      const data = query.state.data as Awaited<ReturnType<typeof imageService.getRagResult>> | undefined;
+      if (data && !data.error) {
+        return false;
+      }
+      
+      // 에러가 있으면 3초 간격으로 폴링
+      return 3000;
+    },
+    refetchIntervalInBackground: true, // 백그라운드에서도 폴링 유지
+  });
+
+  // RAG 결과에서 데이터와 에러 추출
+  const ragText = ragResult?.data || null;
+  const ragError = ragResult?.error || null;
 
   // 텍스트 전처리 함수 (useCallback으로 최적화)
   const preprocessText = useCallback((text: string): string => {
@@ -166,14 +226,18 @@ export const useDrawingAnalysis = ({
       await imageService.submitRagPrompt(drawingId, prompt);
       setPrompt('');
 
-      // 프롬프트 제출 후 폴링 설정
+      // 프롬프트 제출 후 폴링 설정 (상담사만)
       if (isCounselor) {
         setPollingType('after-prompt');
         setIsPollingAfterPrompt(true);
         
-        // 15초 후 첫 GET 요청을 위한 타이머 설정
+        // 15초 후 폴링 시작을 위한 타이머 설정
         pollTimer.current = window.setTimeout(() => {
-          setPollingType('after-prompt'); // 폴링 상태 유지하여 useEffect 트리거
+          // RAG 쿼리 invalidate하여 즉시 refetch 트리거
+          queryClient.invalidateQueries({ 
+            queryKey: queryKeys.ragResult(drawingId),
+            exact: true 
+          });
         }, 15000);
       }
     } catch (error) {
@@ -182,7 +246,7 @@ export const useDrawingAnalysis = ({
     } finally {
       setSubmitting(false);
     }
-  }, [prompt, drawingId, submitting, isCounselor]);
+  }, [prompt, drawingId, submitting, isCounselor, queryClient]);
 
   // 수동 리페치 함수
   const refetch = useCallback(async (): Promise<void> => {
@@ -196,58 +260,23 @@ export const useDrawingAnalysis = ({
     setPollingType('none');
     setIsPollingAfterPrompt(false);
 
-    // 수동 페칭 실행
-    if (abortController.current) {
-      abortController.current.abort();
-    }
-
-    abortController.current = new AbortController();
-    const signal = abortController.current.signal;
-
+    // TanStack Query를 사용한 수동 리페치
     try {
-      setLoadingRAG(true);
-      setRagError(null);
-
+      // RAG 결과 리페치
+      await refetchRag();
+      
+      // 상담사인 경우 AI 결과도 같이 리페치
       if (isCounselor) {
-        setLoadingAI(true);
-
-        const [aiResult, ragResult] = await Promise.all([
-          imageService.getAiDetectionText(drawingId, signal),
-          imageService.getRagResult(drawingId, signal),
-        ]);
-
-        if (signal.aborted) return;
-
-        setAiText(aiResult);
-        setRagText(ragResult.data);
-
-        if (ragResult.error) {
-          setRagError(ragResult.error);
-        }
-
-        setLoadingAI(false);
-      } else {
-        const ragResult = await imageService.getRagResult(drawingId, signal);
-
-        if (signal.aborted) return;
-
-        setRagText(ragResult.data);
-
-        if (ragResult.error) {
-          setRagError(ragResult.error);
-        }
+        await queryClient.refetchQueries({ 
+          queryKey: queryKeys.aiDetection(drawingId),
+          exact: true 
+        });
       }
-    } catch (error: any) {
-      if (signal.aborted) return;
-
+    } catch (error) {
       console.error('❌ [useDrawingAnalysis] 수동 리페치 실패:', error);
-      setRagError(error?.type || 'UNKNOWN_ERROR');
-    } finally {
-      if (!signal.aborted) {
-        setLoadingRAG(false);
-      }
+      throw error;
     }
-  }, [drawingId, isCounselor]);
+  }, [drawingId, isCounselor, refetchRag, queryClient]);
 
   // RAG 텍스트가 변경될 때 HTML 변환
   useEffect(() => {
@@ -272,152 +301,24 @@ export const useDrawingAnalysis = ({
     };
   }, [ragText, convertMarkdownToHtml]);
 
-  // 데이터 자동 페칭 (최초 1회만)
+  // 폴링 성공 시 상태 초기화
   useEffect(() => {
-    if (!drawingId || !autoFetch) return;
-
-    // fetchData 함수를 useEffect 내부로 이동 (React 공식문서 권장 패턴)
-    const fetchDataInternal = async (id: string): Promise<void> => {
-      // 이전 요청 취소
-      if (abortController.current) {
-        abortController.current.abort();
-      }
-
-      // 새로운 AbortController 생성
-      abortController.current = new AbortController();
-      const signal = abortController.current.signal;
-
-      try {
-        setLoadingRAG(true);
-        setRagError(null);
-
-        if (isCounselor) {
-          // 상담사: AI 결과와 RAG 결과 모두 요청
-          setLoadingAI(true);
-
-          const [aiResult, ragResult] = await Promise.all([
-            imageService.getAiDetectionText(id, signal),
-            imageService.getRagResult(id, signal),
-          ]);
-
-          if (signal.aborted) return;
-
-          setAiText(aiResult);
-          setRagText(ragResult.data);
-
-          if (ragResult.error) {
-            setRagError(ragResult.error);
-          } else {
-            // 성공 시 폴링 상태 초기화는 여기서 하지 않음 (최초 로딩이므로)
-          }
-
-          setLoadingAI(false);
-        } else {
-          // 학생: RAG 결과만 요청 (폴링 없음)
-          const ragResult = await imageService.getRagResult(id, signal);
-
-          if (signal.aborted) return;
-
-          setRagText(ragResult.data);
-
-          if (ragResult.error) {
-            setRagError(ragResult.error);
-          }
-        }
-      } catch (error: any) {
-        if (signal.aborted) return;
-
-        console.error('❌ [useDrawingAnalysis] 데이터 페칭 실패:', error);
-        setRagError(error?.type || 'UNKNOWN_ERROR');
-      } finally {
-        if (!signal.aborted) {
-          setLoadingRAG(false);
-        }
-      }
-    };
-
-    // 최초 1회만 페칭 (폴링 없음)
-    fetchDataInternal(drawingId);
-
-    // 클린업 함수
-    return () => {
+    if (ragResult && !ragResult.error && pollingType === 'after-prompt') {
+      setPollingType('none');
+      setIsPollingAfterPrompt(false);
+      
       if (pollTimer.current) {
         clearTimeout(pollTimer.current);
         pollTimer.current = null;
       }
-      if (abortController.current) {
-        abortController.current.abort();
-        abortController.current = null;
-      }
-    };
-  }, [drawingId, autoFetch, isCounselor]);
-
-  // 프롬프트 제출 후 폴링을 위한 별도 useEffect
-  useEffect(() => {
-    if (!drawingId || !isCounselor || pollingType !== 'after-prompt') return;
-
-    // 폴링을 위한 함수 정의
-    const pollForResults = async (): Promise<void> => {
-      if (abortController.current) {
-        abortController.current.abort();
-      }
-
-      abortController.current = new AbortController();
-      const signal = abortController.current.signal;
-
-      try {
-        const ragResult = await imageService.getRagResult(drawingId, signal);
-
-        if (signal.aborted) return;
-
-        setRagText(ragResult.data);
-
-        if (ragResult.error) {
-          setRagError(ragResult.error);
-
-          // 에러가 여전히 있으면 3초 후 다시 시도
-          if (ragResult.error === 'NOT_FOUND' || ragResult.error === 'RAG_NOT_READY') {
-            pollTimer.current = window.setTimeout(() => {
-              pollForResults();
-            }, 3000);
-          }
-        } else {
-          // 성공 시 폴링 상태 초기화
-          setPollingType('none');
-          setIsPollingAfterPrompt(false);
-        }
-      } catch (error: any) {
-        if (signal.aborted) return;
-
-        console.error('❌ [useDrawingAnalysis] 폴링 중 오류:', error);
-        setRagError(error?.type || 'UNKNOWN_ERROR');
-      }
-    };
-
-    // 폴링 시작
-    pollForResults();
-
-    // 클린업 함수
-    return () => {
-      if (pollTimer.current) {
-        clearTimeout(pollTimer.current);
-        pollTimer.current = null;
-      }
-      if (abortController.current) {
-        abortController.current.abort();
-        abortController.current = null;
-      }
-    };
-  }, [drawingId, isCounselor, pollingType]);
+    }
+  }, [ragResult, pollingType]);
 
   // 컴포넌트 언마운트 시 클린업
   useEffect(() => {
     return () => {
       if (pollTimer.current) {
         clearTimeout(pollTimer.current);
-      }
-      if (abortController.current) {
-        abortController.current.abort();
       }
     };
   }, []);
