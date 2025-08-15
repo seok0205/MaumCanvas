@@ -5,7 +5,6 @@ import { useSidebar } from '@/components/ui/navigation/sidebar';
 import {
   DAILY_TIPS,
   DASHBOARD_CONSTANTS,
-  MOCK_STATS,
 } from '@/constants/dashboard';
 import type { CommunityActivity as CommunityActivityType } from '@/types/dashboard';
 import type { User } from '@/types/user';
@@ -80,7 +79,7 @@ export const CounselorDashboard = ({ user }: CounselorDashboardProps) => {
 
         {/* 자기 진단 결과 */}
         <div>
-          <StatisticsCard stats={MOCK_STATS.COUNSELOR} />
+          <StatisticsCard />
         </div>
       </div>
 

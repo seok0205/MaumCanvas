@@ -1,64 +1,72 @@
-import { Button } from '@/components/ui/interactive/button';
 import { Card } from '@/components/ui/layout/card';
-import type { DashboardStats } from '@/types/dashboard';
-import { BarChart3 } from 'lucide-react';
+import { useCounselorTotalCount, useCounselorWeeklyCount } from '@/hooks/useCounselorStatistics';
+import { BarChart3, Users, Calendar } from 'lucide-react';
 
-interface StatisticsCardProps {
-  stats: DashboardStats;
-}
-
-export const StatisticsCard = ({ stats }: StatisticsCardProps) => {
-  const handleViewDetails = () => {
-    // TODO: 상세 통계 페이지로 이동
-  };
+export const StatisticsCard = () => {
+  // 🎯 각 통계별로 개별 구독 - 해당 값 변경시만 리렌더링
+  const { 
+    data: totalCounselors = 0, 
+    isLoading: isTotalLoading 
+  } = useCounselorTotalCount();
+  
+  const { 
+    data: weeklyCounselings = 0, 
+    isLoading: isWeeklyLoading 
+  } = useCounselorWeeklyCount();
+  
+  const isLoading = isTotalLoading || isWeeklyLoading;
 
   return (
     <Card
       className='
-      p-6 shadow-card border border-border/50
-      bg-card/80 backdrop-blur-sm
+      p-6 shadow-lg border border-border/30
+      bg-gradient-to-br from-card/90 to-card/60 backdrop-blur-md
+      hover:shadow-xl transition-all duration-300
     '
     >
-      <div className='flex items-center justify-between mb-4'>
+      <div className='flex items-center justify-between mb-6'>
         <h3
           className='
-          text-lg font-semibold text-foreground
-          flex items-center
+          text-xl font-bold text-foreground
+          flex items-center gap-2
         '
         >
-          <BarChart3 className='w-5 h-5 text-primary mr-2' />
+          <div className='p-2 rounded-lg bg-primary/10'>
+            <BarChart3 className='w-5 h-5 text-primary' />
+          </div>
           상담 통계
         </h3>
       </div>
-      <div className='space-y-4'>
-        <div className='text-center'>
-          <div className='grid grid-cols-3 gap-4 mb-4'>
-            <div>
-              <div className='text-2xl font-bold text-primary'>
-                {stats.totalCounselings}
-              </div>
-              <div className='text-sm text-muted-foreground'>총 상담자 수</div>
-            </div>
-            <div>
-              <div className='text-2xl font-bold text-secondary'>
-                {stats.weeklyCounselings}
-              </div>
-              <div className='text-sm text-muted-foreground'>이번 주 상담</div>
-            </div>
-            <div>
-              <div className='text-2xl font-bold text-accent'>
-                {stats.satisfactionRate}
-              </div>
-              <div className='text-sm text-muted-foreground'>만족도 평균</div>
+      
+      <div className='grid grid-cols-2 gap-6'>
+        {/* 총 상담자 수 */}
+        <div className='text-center p-4 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200'>
+          <div className='flex items-center justify-center mb-2'>
+            <div className='p-2 rounded-lg bg-blue-100'>
+              <Users className='w-4 h-4 text-blue-600' />
             </div>
           </div>
-          <Button
-            className='w-full'
-            onClick={handleViewDetails}
-            aria-label='상세 통계 보기'
-          >
-            상세 통계 보기
-          </Button>
+          <div className='text-3xl font-bold text-blue-600 mb-1'>
+            {isLoading ? '...' : totalCounselors}
+          </div>
+          <div className='text-sm font-medium text-muted-foreground'>
+            총 상담 학생 수
+          </div>
+        </div>
+        
+        {/* 이번 주 상담 건수 */}
+        <div className='text-center p-4 rounded-xl bg-gradient-to-br from-green-50 to-green-100 border border-green-200'>
+          <div className='flex items-center justify-center mb-2'>
+            <div className='p-2 rounded-lg bg-green-100'>
+              <Calendar className='w-4 h-4 text-green-600' />
+            </div>
+          </div>
+          <div className='text-3xl font-bold text-green-600 mb-1'>
+            {isLoading ? '...' : weeklyCounselings}
+          </div>
+          <div className='text-sm font-medium text-muted-foreground'>
+            이번 주 상담 수
+          </div>
         </div>
       </div>
     </Card>
