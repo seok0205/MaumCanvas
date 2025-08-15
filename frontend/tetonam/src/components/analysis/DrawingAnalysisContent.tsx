@@ -90,22 +90,13 @@ export const DrawingAnalysisContent = memo<DrawingAnalysisContentProps>(({
     <div className={`space-y-${compact ? '3' : '6'} ${className}`}>
       {/* 그림 표시 영역 */}
       {showImage && imageUrl && (
-        <Card className={compact ? 'p-3' : ''}>
-          <CardHeader className={compact ? 'p-0 pb-2' : ''}>
-            <CardTitle className={compact ? 'text-sm' : 'text-base'}>
-              그림
-            </CardTitle>
-          </CardHeader>
-          <CardContent className={compact ? 'p-0' : ''}>
-            <div className='flex justify-center'>
-              <DrawingImage
-                imageUrl={imageUrl}
-                category={category}
-                className={compact ? 'max-h-48' : 'max-w-md max-h-96 object-contain rounded-lg'}
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex justify-center mb-6">
+          <DrawingImage
+            imageUrl={imageUrl}
+            category={category}
+            className="max-w-md max-h-96 object-contain rounded-lg"
+          />
+        </div>
       )}
 
       {/* AI 객체 탐지 결과 - 모든 사용자에게 표시 */}
