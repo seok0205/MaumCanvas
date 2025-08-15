@@ -1,7 +1,13 @@
 package com.example.tetonam.community.service;
 
-import com.example.tetonam.community.dto.PostListDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.example.tetonam.community.domain.Community;
+import com.example.tetonam.community.dto.PostListDto;
 import com.example.tetonam.community.dto.PostPageDto;
 import com.example.tetonam.community.dto.PostUpdateDto;
 import com.example.tetonam.community.dto.PostWriteDto;
@@ -11,17 +17,9 @@ import com.example.tetonam.exception.handler.BoardHandler;
 import com.example.tetonam.response.code.status.ErrorStatus;
 import com.example.tetonam.user.domain.User;
 import com.example.tetonam.user.repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -69,10 +67,12 @@ public class CommunityService {
         community.increaseViewCount();
         //댓글 개수
         community.setCommentCount(commentRepository.countByCommunity_Id(id));
-        User author = userRepository.findByEmail(email)
+        User currentUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BoardHandler(ErrorStatus.USER_NOT_FOUND));
         communityRepository.save(community);
-        return PostListDto.from(community, author.getNickname().equals(community.getAuthor().getNickname()));
+        // email로 작성자 비교 (nickname보다 정확함)
+        boolean isAuthor = currentUser.getEmail().equals(community.getAuthor().getEmail());
+        return PostListDto.from(community, isAuthor);
     }
 
 
