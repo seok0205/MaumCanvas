@@ -1,6 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { DrawingAnalysisContent } from '@/components/analysis/DrawingAnalysisContent';
 import {
   Card,
   CardContent,
@@ -8,7 +9,6 @@ import {
   CardTitle,
 } from '@/components/ui/layout/card';
 import { Skeleton } from '@/components/ui/layout/skeleton';
-import { useImageModal } from '@/contexts/ImageModalContext';
 import { counselingService } from '@/services/counselingService';
 import { imageService } from '@/services/imageService';
 import { getAllQuestionnaireResults } from '@/services/questionnaireService';
@@ -49,18 +49,17 @@ const ImageGrid = memo<{
   compact: boolean;
   onImageClick: (imageId: number, imageUrl: string, category: string) => void;
   inVideoCall?: boolean;
-}>(({ images, compact, onImageClick, inVideoCall = false }) => {
-  const { openModal } = useImageModal();
-
+  onImageAnalysisRequest?: (imageId: number, imageUrl: string, category: string) => void;
+}>(({ images, compact, onImageClick, inVideoCall = false, onImageAnalysisRequest }) => {
   const handleImageClick = useCallback((imageId: number, imageUrl: string, category: string) => {
-    if (inVideoCall) {
-      // 화상상담 중일 때는 모달로 열기
-      openModal({ imageId, imageUrl, category });
+    if (inVideoCall && onImageAnalysisRequest) {
+      // 화상상담 중일 때는 분석 결과를 상담 상세 영역에 표시
+      onImageAnalysisRequest(imageId, imageUrl, category);
     } else {
       // 일반 페이지에서는 기존 방식으로 페이지 이동
       onImageClick(imageId, imageUrl, category);
     }
-  }, [inVideoCall, openModal, onImageClick]);
+  }, [inVideoCall, onImageAnalysisRequest, onImageClick]);
   if (!images || images.length === 0) {
     return (
       <div className={`text-${compact ? 'xs' : 'sm'} text-muted-foreground`}>
@@ -152,6 +151,13 @@ export const CounselingDetailContent = memo<CounselingDetailContentProps>(
     const [error, setError] = useState<string | null>(null);
     const [questionnaires, setQuestionnaires] =
       useState<QuestionnaireResult[] | null>(null);
+    
+    // 화상상담 중 선택된 그림 분석 상태
+    const [selectedImageAnalysis, setSelectedImageAnalysis] = useState<{
+      imageId: number;
+      imageUrl: string;
+      category: string;
+    } | null>(null);
 
     // 🎯 useCallback으로 이벤트 핸들러 최적화
     const handleImageClick = useCallback(
@@ -163,6 +169,14 @@ export const CounselingDetailContent = memo<CounselingDetailContentProps>(
         );
       },
       [navigate]
+    );
+
+    // 🎯 화상상담 중 그림 분석 요청 핸들러
+    const handleImageAnalysisRequest = useCallback(
+      (imageId: number, imageUrl: string, category: string) => {
+        setSelectedImageAnalysis({ imageId, imageUrl, category });
+      },
+      []
     );
 
     // 데이터 페칭 (useEffect 최적화)
@@ -351,8 +365,27 @@ export const CounselingDetailContent = memo<CounselingDetailContentProps>(
               compact={compact}
               onImageClick={handleImageClick}
               inVideoCall={inVideoCall}
+              onImageAnalysisRequest={handleImageAnalysisRequest}
             />
           </div>
+
+          {/* 화상상담 중 선택된 그림 분석 결과 */}
+          {inVideoCall && selectedImageAnalysis && (
+            <div className='pt-4'>
+              <div className={`mb-2 font-medium text-${compact ? 'xs' : 'sm'}`}>
+                그림 분석 결과 - {selectedImageAnalysis.category}
+              </div>
+              <DrawingAnalysisContent
+                drawingId={selectedImageAnalysis.imageId.toString()}
+                imageUrl={selectedImageAnalysis.imageUrl}
+                category={selectedImageAnalysis.category}
+                compact={compact}
+                showImage={false} // 이미 위에서 그림을 보여줬으므로 중복 표시 안함
+                autoFetch={true}
+                enablePolling={true}
+              />
+            </div>
+          )}
 
           {/* 상담사가 아닐 때만 설문 결과 영역 표시 */}
           {!isCounselor && (
@@ -378,8 +411,11 @@ export const CounselingDetailContent = memo<CounselingDetailContentProps>(
       formattedTime,
       images,
       handleImageClick,
+      handleImageAnalysisRequest,
       isCounselor,
       questionnaires,
+      inVideoCall,
+      selectedImageAnalysis,
     ]);
 
     // 🎯 렌더링 (조건부 래핑)

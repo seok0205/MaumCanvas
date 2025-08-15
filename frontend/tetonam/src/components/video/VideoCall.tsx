@@ -2,8 +2,6 @@ import { Button } from '@/components/ui/interactive/button';
 import { RemoteUserStatusOverlay } from '@/components/video/RemoteUserStatusOverlay';
 import { WaitingForConnection } from '@/components/video/WaitingForConnection';
 import { CounselingDetailContent } from '@/components/counseling/CounselingDetailContent';
-import { ImageModalProvider } from '@/contexts/ImageModalContext';
-import { ImageModalRenderer } from '@/components/modal/DrawingDetailModal';
 import { useAgoraClient } from '@/hooks/useAgoraClient';
 import { agoraService } from '@/services/agoraService';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -204,12 +202,11 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
   // 상담사용 레이아웃 (우측 패널 포함)
   if (isCounselor) {
     return (
-      <ImageModalProvider inVideoCall={true}>
-        <div className='flex h-screen bg-black select-none'>
-          {/* 비디오 콜 영역 (좌측) */}
-          <div className={`relative transition-all duration-300 ${
-            showDetailPanel ? 'w-3/4' : 'w-full'
-          }`}>
+      <div className='flex h-screen bg-black select-none'>
+        {/* 비디오 콜 영역 (좌측) */}
+        <div className={`relative transition-all duration-300 ${
+          showDetailPanel ? 'w-3/4' : 'w-full'
+        }`}>
           {/* 원격 비디오 영역 */}
           <div className='relative w-full h-full'>
             <div ref={remoteVideoRef} className='w-full h-full' />
@@ -360,11 +357,7 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
             />
           </div>
         )}
-
-        {/* 모달 렌더러 */}
-        <ImageModalRenderer />
       </div>
-      </ImageModalProvider>
     );
   }
 
