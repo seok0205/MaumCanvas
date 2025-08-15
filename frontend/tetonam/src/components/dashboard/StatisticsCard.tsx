@@ -19,9 +19,9 @@ export const StatisticsCard = () => {
   return (
     <Card
       className='
-      p-6 shadow-lg border border-border/30
-      bg-gradient-to-br from-card/90 to-card/60 backdrop-blur-md
-      hover:shadow-xl transition-all duration-300
+      p-6 shadow-card border border-border/50
+      bg-card backdrop-blur-sm
+      transition-all duration-300
     '
     >
       <div className='flex items-center justify-between mb-6'>

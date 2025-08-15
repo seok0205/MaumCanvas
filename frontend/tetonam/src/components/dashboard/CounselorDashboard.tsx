@@ -6,14 +6,13 @@ import {
   DAILY_TIPS,
   DASHBOARD_CONSTANTS,
 } from '@/constants/dashboard';
-import type { CommunityActivity as CommunityActivityType } from '@/types/dashboard';
 import type { User } from '@/types/user';
 import { getPrimaryRole } from '@/utils/userRoleMapping';
 // 학생 대시보드와 동일한 API 기반 구성 재사용
 import { UpcomingCounselingCard } from './UpcomingCounselingCard';
 // NOTE: 상담사 전용 개별 Hook 활성화
 import { useCounselorUpcomingCounseling } from '@/hooks/useCounselorUpcomingCounseling';
-import { CommunityActivity } from './CommunityActivity';
+import { CommunityGuidelinesCard } from './CommunityGuidelinesCard';
 import { DailyTips } from './DailyTips';
 import { QuickStartSection } from './QuickStartSection';
 import { StatisticsCard } from './StatisticsCard';
@@ -37,19 +36,6 @@ export const CounselorDashboard = ({ user }: CounselorDashboardProps) => {
 
   // 사이드바가 expanded 상태일 때 더 많은 패딩 적용
   const paddingClass = state === 'expanded' ? 'p-8' : 'p-6';
-
-  const communityActivities: CommunityActivityType[] = [
-    {
-      title: '스트레스 관리법',
-      description: '학생들을 위한 효과적인 스트레스 관리 방법을 공유했습니다.',
-      type: 'contribution',
-    },
-    {
-      title: '진로 상담 노하우',
-      description: '진로 고민 학생들을 위한 상담 접근법을 공유했습니다.',
-      type: 'contribution',
-    },
-  ];
 
   return (
     <div className={`${paddingClass} space-y-8`}>
@@ -83,11 +69,11 @@ export const CounselorDashboard = ({ user }: CounselorDashboardProps) => {
         </div>
       </div>
 
-      {/* 커뮤니티 활동 및 오늘의 팁 */}
+      {/* 커뮤니티 가이드라인 및 오늘의 팁 */}
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
-        {/* 커뮤니티 활동 */}
+        {/* 전문가 행동강령 */}
         <div>
-          <CommunityActivity activities={communityActivities} />
+          <CommunityGuidelinesCard />
         </div>
         {/* 오늘의 팁 */}
         <div>
