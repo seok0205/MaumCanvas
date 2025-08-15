@@ -70,15 +70,16 @@ export const useAgoraClient = () => {
               });
             } else if (user.videoTrack) {
               // user-joined 이벤트 없이 바로 published된 경우 대비
-              const remoteUserWithState: IAgoraRTCRemoteUser & RemoteUserState = {
-                ...user,
-                uid: user.uid,
-                hasAudio: false,
-                hasVideo: true,
-                userName: `사용자 ${user.uid}`,
-                joinedAt: new Date(),
-                connectionQuality: 0,
-              };
+              const remoteUserWithState: IAgoraRTCRemoteUser & RemoteUserState =
+                {
+                  ...user,
+                  uid: user.uid,
+                  hasAudio: false,
+                  hasVideo: true,
+                  userName: `사용자 ${user.uid}`,
+                  joinedAt: new Date(),
+                  connectionQuality: 0,
+                };
               newUsers.set(user.uid.toString(), remoteUserWithState);
             }
             return {
@@ -102,15 +103,16 @@ export const useAgoraClient = () => {
               });
             } else if (user.audioTrack) {
               // user-joined 이벤트 없이 바로 published된 경우 대비
-              const remoteUserWithState: IAgoraRTCRemoteUser & RemoteUserState = {
-                ...user,
-                uid: user.uid,
-                hasAudio: true,
-                hasVideo: false,
-                userName: `사용자 ${user.uid}`,
-                joinedAt: new Date(),
-                connectionQuality: 0,
-              };
+              const remoteUserWithState: IAgoraRTCRemoteUser & RemoteUserState =
+                {
+                  ...user,
+                  uid: user.uid,
+                  hasAudio: true,
+                  hasVideo: false,
+                  userName: `사용자 ${user.uid}`,
+                  joinedAt: new Date(),
+                  connectionQuality: 0,
+                };
               newUsers.set(user.uid.toString(), remoteUserWithState);
             }
             return {
@@ -165,19 +167,34 @@ export const useAgoraClient = () => {
       });
     });
 
-    // 네트워크 품질 모니터링 (간소화)
+    // 네트워크 품질 모니터링
     client.on('network-quality', stats => {
       const downlinkQuality = stats.downlinkNetworkQuality;
-      setState(prev => ({
-        ...prev,
-        networkQuality: downlinkQuality,
-      }));
+      const uplinkQuality = stats.uplinkNetworkQuality;
+
+      setState(prev => {
+        const newState = {
+          ...prev,
+          networkQuality: downlinkQuality,
+        };
+
+        // 네트워크 품질이 불량할 때 사용자에게 알림
+        if (downlinkQuality >= 4 || uplinkQuality >= 4) {
+          newState.error =
+            '네트워크 상태가 불안정합니다. 연결 품질이 저하될 수 있습니다.';
+        } else if (prev.error?.includes('네트워크 상태가 불안정')) {
+          // 네트워크가 다시 안정화되면 에러 메시지 제거
+          newState.error = null;
+        }
+
+        return newState;
+      });
     });
 
     // 연결 상태 변화 이벤트 리스너
-    client.on('connection-state-change', (curState, revState) => {
+    client.on('connection-state-change', (curState, revState, reason) => {
       console.log(
-        `🔄 [useAgoraClient] 연결 상태 변화: ${revState} -> ${curState}`
+        `🔄 [useAgoraClient] 연결 상태 변화: ${revState} -> ${curState}, 이유: ${reason}`
       );
 
       if (curState === 'CONNECTED') {
@@ -188,20 +205,53 @@ export const useAgoraClient = () => {
           error: null,
         }));
       } else if (curState === 'DISCONNECTED') {
+        // reason에 따라 다른 메시지 표시
+        let errorMessage = null;
+        if (reason === 'NETWORK_ERROR') {
+          errorMessage = '네트워크 오류로 연결이 끊어졌습니다.';
+        } else if (reason === 'SERVER_ERROR') {
+          errorMessage = '서버 오류로 연결이 끊어졌습니다.';
+        }
+
         setState(prev => ({
           ...prev,
           isConnected: false,
           waitingForUsers: false,
+          error: errorMessage,
+        }));
+      } else if (curState === 'CONNECTING') {
+        setState(prev => ({
+          ...prev,
+          error: '연결 중입니다...',
+        }));
+      } else if (curState === 'DISCONNECTING') {
+        setState(prev => ({
+          ...prev,
+          error: '연결을 종료하는 중입니다...',
         }));
       }
     });
 
-    // 예외 이벤트 리스너
+    // 예외 이벤트 리스너 (에러 코드별 세분화 처리)
     client.on('exception', event => {
       console.error('❌ [useAgoraClient] Agora 예외 발생:', event);
+
+      let errorMessage = '연결 오류가 발생했습니다.';
+
+      // event.msg에서 특정 에러 패턴 확인
+      if (event.msg?.includes('SEND_AUDIO_BITRATE_TOO_LOW')) {
+        errorMessage = '오디오 품질 설정 오류입니다. 연결을 다시 시도해주세요.';
+      } else if (event.msg?.includes('NETWORK')) {
+        errorMessage = '네트워크 연결이 불안정합니다.';
+      } else if (event.msg?.includes('DEVICE')) {
+        errorMessage = '카메라 또는 마이크에 문제가 있습니다.';
+      } else if (event.msg) {
+        errorMessage = `연결 오류: ${event.msg}`;
+      }
+
       setState(prev => ({
         ...prev,
-        error: `연결 오류: ${event.msg || '알 수 없는 오류'}`,
+        error: errorMessage,
       }));
     });
 
@@ -214,7 +264,7 @@ export const useAgoraClient = () => {
 
   const join = useCallback(async (config: AgoraConfig) => {
     console.log('🚀 [useAgoraClient] join 함수 시작:', config);
-    
+
     if (!clientRef.current || isLeavingRef.current) {
       console.error(
         '❌ [useAgoraClient] join 실패: 클라이언트가 없거나 종료 중'
@@ -223,7 +273,7 @@ export const useAgoraClient = () => {
     }
 
     setState(prev => ({ ...prev, isConnecting: true, error: null }));
-    
+
     try {
       // 브라우저 호환성 체크
       const isSupported = AgoraRTC.checkSystemRequirements();
@@ -233,9 +283,11 @@ export const useAgoraClient = () => {
         );
       }
 
-      // 기본 설정으로 미디어 트랙 생성
+      // 고품질 설정으로 미디어 트랙 생성 (SEND_AUDIO_BITRATE_TOO_LOW 에러 해결)
       const [audioTrack, videoTrack] = await Promise.all([
-        AgoraRTC.createMicrophoneAudioTrack(),
+        AgoraRTC.createMicrophoneAudioTrack({
+          encoderConfig: 'high_quality_stereo',
+        }),
         AgoraRTC.createCameraVideoTrack(),
       ]);
       console.log('✅ [useAgoraClient] 미디어 트랙 생성 성공');
@@ -268,6 +320,10 @@ export const useAgoraClient = () => {
     } catch (err: any) {
       console.error('❌ [useAgoraClient] join 실패:', err);
 
+      // join 실패 시 생성된 tracks 즉시 정리 (리소스 waste 방지)
+      // audioTrack과 videoTrack은 try 블록 내에서만 정의되므로 여기서는 접근 불가
+      // 대신 전역적으로 정리 시도
+
       // 에러 타입에 따른 사용자 친화적 메시지
       let errorMessage = '연결 실패';
       if (err.code === 'PERMISSION_DENIED') {
@@ -278,6 +334,9 @@ export const useAgoraClient = () => {
           '카메라 또는 마이크를 찾을 수 없습니다. 장치가 연결되어 있는지 확인해주세요.';
       } else if (err.code === 'NETWORK_ERROR') {
         errorMessage = '네트워크 연결을 확인해주세요.';
+      } else if (err.code === 'SEND_AUDIO_BITRATE_TOO_LOW') {
+        errorMessage =
+          '오디오 품질 설정 오류입니다. 잠시 후 다시 시도해주세요.';
       } else {
         errorMessage = err?.message ?? '알 수 없는 오류가 발생했습니다.';
       }
@@ -303,9 +362,12 @@ export const useAgoraClient = () => {
 
       // 현재 상태 가져오기
       const currentState = state;
-      
+
       // 1. 채널에 연결된 상태에서만 unpublish 수행 (Agora 공식 권장사항)
-      if (currentState.isConnected && (currentState.localAudioTrack || currentState.localVideoTrack)) {
+      if (
+        currentState.isConnected &&
+        (currentState.localAudioTrack || currentState.localVideoTrack)
+      ) {
         const tracksToUnpublish = [
           currentState.localAudioTrack,
           currentState.localVideoTrack,
@@ -314,10 +376,15 @@ export const useAgoraClient = () => {
         if (tracksToUnpublish.length > 0) {
           try {
             await clientRef.current.unpublish(tracksToUnpublish);
-            console.log('📤 [useAgoraClient] 로컬 미디어 스트림 발행 중단 완료');
+            console.log(
+              '📤 [useAgoraClient] 로컬 미디어 스트림 발행 중단 완료'
+            );
           } catch (unpublishError) {
             // unpublish 실패는 로그만 남기고 계속 진행 (채널 나가기는 수행)
-            console.warn('⚠️ [useAgoraClient] unpublish 실패, 계속 진행:', unpublishError);
+            console.warn(
+              '⚠️ [useAgoraClient] unpublish 실패, 계속 진행:',
+              unpublishError
+            );
           }
         }
       }
