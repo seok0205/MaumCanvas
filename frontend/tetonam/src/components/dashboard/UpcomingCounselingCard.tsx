@@ -2,7 +2,7 @@ import { ApiButton } from '@/components/ui/ApiButton';
 import { Button } from '@/components/ui/interactive/button';
 import { Card } from '@/components/ui/layout/card';
 import { useProgressiveLoading } from '@/hooks/useDelayedLoading';
-import { useUpcomingCounselingQuery } from '@/hooks/useUpcomingCounselingQuery';
+import { useCounselingJoin } from '@/hooks/useCounselingJoin';
 import type { CounselingStatus, UpcomingCounseling } from '@/types/api';
 import { isValidUpcomingCounseling } from '@/types/api';
 import { formatDateTime } from '@/utils/dateUtils';
@@ -15,8 +15,7 @@ import {
   User,
   Video,
 } from 'lucide-react';
-import { memo, useCallback, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { memo, useCallback } from 'react';
 
 // Props 인터페이스 정의 - TanStack Query Best Practice
 interface UpcomingCounselingCardProps {
@@ -62,28 +61,29 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
     error: propsError = null,
     onRefresh: propsOnRefresh,
   }) => {
-    const navigate = useNavigate();
+    // 🔥 NEW: 통합된 상담 입장 훅 사용
+    const {
+      upcomingCounseling: hookCounseling,
+      isLoading: hookIsLoading,
+      isFetching: hookIsFetching,
+      error: hookError,
+      isJoining,
+      handleJoin,
+      refetch: hookRefetch,
+    } = useCounselingJoin();
 
-    // 버튼 중복클릭 방지를 위한 상태
-    const [isJoining, setIsJoining] = useState(false);
-
-    // TanStack Query Best Practice: Props 우선, 개별 쿼리는 fallback
-    const queryResult = useUpcomingCounselingQuery();
-
-    // Props에서 데이터가 제공되면 사용, 없으면 개별 쿼리 결과 사용
+    // Props에서 데이터가 제공되면 사용, 없으면 훅 결과 사용
     const upcomingCounseling =
-      counselingData !== undefined
-        ? counselingData
-        : queryResult.upcomingCounseling;
+      counselingData !== undefined ? counselingData : hookCounseling;
     const isLoading =
-      counselingData !== undefined ? propsIsLoading : queryResult.isLoading;
+      counselingData !== undefined ? propsIsLoading : hookIsLoading;
     const isFetching =
-      counselingData !== undefined ? propsIsFetching : queryResult.isFetching;
-    const error = counselingData !== undefined ? propsError : queryResult.error;
+      counselingData !== undefined ? propsIsFetching : hookIsFetching;
+    const error = counselingData !== undefined ? propsError : hookError;
     const refetch =
       counselingData !== undefined
         ? propsOnRefresh || (() => {})
-        : queryResult.refetch;
+        : hookRefetch;
 
     // Progressive Loading 상태 - 300ms 지연 + 800ms 최소 표시 시간 적용
     const { showSkeleton, isBackgroundFetching: showBackgroundIndicator } =
@@ -99,22 +99,6 @@ export const UpcomingCounselingCard = memo<UpcomingCounselingCardProps>(
     const handleRefresh = useCallback(async () => {
       await refetch();
     }, [refetch]);
-
-    // 입장하기 핸들러 - 중복클릭 방지 로직 추가
-    const handleJoin = useCallback(
-      async (id: number | string) => {
-        if (isJoining) return; // 이미 처리 중이면 무시
-
-        try {
-          setIsJoining(true);
-          navigate(`/video-call/${id}`);
-        } finally {
-          // 네비게이션이 완료되면 상태 리셋 (실제로는 컴포넌트가 언마운트됨)
-          setTimeout(() => setIsJoining(false), 1000);
-        }
-      },
-      [navigate, isJoining]
-    );
 
     // 데이터 유효성 검사 함수 개선 - 더 구체적인 검증과 로깅
     const validateCounselingData = useCallback((data: unknown) => {

@@ -2,6 +2,7 @@ import type { QuickAction } from '@/types/dashboard';
 import { BookOpen, Calendar, Heart, MessageSquare, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { QuickStartCard } from './QuickStartCard';
+import { useCounselingJoin } from '@/hooks/useCounselingJoin';
 
 interface QuickStartSectionProps {
   actions: readonly QuickAction[];
@@ -36,6 +37,9 @@ export const QuickStartSection = ({
   userRole,
 }: QuickStartSectionProps) => {
   const navigate = useNavigate();
+  
+  // 🔥 NEW: 상담 입장 로직 훅 사용
+  const { joinUpcomingCounseling, hasUpcomingCounseling } = useCounselingJoin();
 
   const handleAction = (action: QuickAction) => {
     switch (action.title) {
@@ -52,7 +56,14 @@ export const QuickStartSection = ({
         navigate('/counseling-management');
         break;
       case '학생 상담 시작하기':
-        // TODO: 상담 시작 페이지로 이동
+        // 🔥 NEW: "다가오는 상담"의 "입장하기"와 동일한 로직 적용
+        if (hasUpcomingCounseling) {
+          joinUpcomingCounseling();
+        } else {
+          // 다가오는 상담이 없으면 상담 예약 페이지로 안내
+          console.warn('다가오는 상담이 없습니다. 상담 예약 페이지로 이동합니다.');
+          navigate('/counseling-reservation');
+        }
         break;
       default:
         // 기본 동작 없음
