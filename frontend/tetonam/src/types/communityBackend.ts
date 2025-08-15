@@ -53,6 +53,7 @@ export interface PostListDto {
   viewCount: number;
   commentCount: number;
   createdDate: number[] | string; // LocalDateTime 배열 또는 이미 변환된 문자열
+  isAuthor: boolean; // 현재 사용자가 작성자인지 여부
 }
 
 // 백엔드 CommentListDto 타입

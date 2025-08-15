@@ -149,6 +149,7 @@ export const communityService = {
         viewCount: raw.viewCount ?? 0,
         commentCount: raw.commentCount ?? 0,
         createdDate: safeConvertDateTime(raw.createdDate), // 백엔드 필드명 사용
+        isAuthor: raw.isAuthor ?? false, // 누락된 isAuthor 필드 추가
       };
 
       return normalized;
