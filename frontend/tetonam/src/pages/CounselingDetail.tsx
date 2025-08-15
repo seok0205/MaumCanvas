@@ -24,7 +24,7 @@ export const CounselingDetail = () => {
         <div className='flex w-full min-h-screen bg-gradient-warm'>
           <AppSidebar />
           <div className='flex-1 flex flex-col'>
-            <CommonHeader user={user} title='상담 상세' showBackButton />
+            <CommonHeader user={user} title='상담 상세정보' showBackButton />
             <main className='p-6'>
               <div className='text-center'>
                 <h2 className='text-lg font-semibold text-foreground mb-2'>
@@ -47,7 +47,7 @@ export const CounselingDetail = () => {
       <div className='flex w-full min-h-screen bg-gradient-warm'>
         <AppSidebar />
         <div className='flex-1 flex flex-col'>
-          <CommonHeader user={user} title='상담 상세' showBackButton />
+          <CommonHeader user={user} title='상담 상세정보' showBackButton />
           <main className='p-6'>
             <CounselingDetailContent
               appointmentId={id}

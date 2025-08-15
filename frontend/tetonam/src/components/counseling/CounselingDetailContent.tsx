@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/layout/card';
+import { Separator } from '@/components/ui/layout/separator';
 import { Skeleton } from '@/components/ui/layout/skeleton';
 import { counselingService } from '@/services/counselingService';
 import { imageService } from '@/services/imageService';
@@ -242,7 +243,62 @@ export const CounselingDetailContent = memo<CounselingDetailContentProps>(
     // 시간 정보 메모이제이션 (useMemo 최적화)
     const formattedTime = useMemo(() => {
       if (!detail?.time) return '';
-      return Array.isArray(detail.time) ? detail.time.join('-') : detail.time;
+      
+      if (Array.isArray(detail.time)) {
+        // 배열 형태의 시간 데이터를 사용자 친화적으로 포맷
+        if (detail.time.length >= 2) {
+          const date = detail.time[0];
+          const time = detail.time[1];
+          
+          // 날짜와 시간을 조합해서 Date 객체 생성 시도
+          try {
+            const dateTimeString = `${date} ${time}`;
+            const dateObj = new Date(dateTimeString);
+            
+            if (!isNaN(dateObj.getTime())) {
+              return dateObj.toLocaleString('ko-KR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                weekday: 'short',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+              });
+            }
+          } catch {
+            // Date 생성 실패 시 원래 형식으로 표시
+          }
+          
+          return `${date} ${time}`;
+        }
+        return detail.time.join(' ');
+      }
+      
+      // 문자열 형태의 시간 데이터 처리
+      if (typeof detail.time === 'string') {
+        // ISO 날짜 형식이면 포맷팅
+        if (detail.time.includes('T') || detail.time.includes('-')) {
+          try {
+            const dateObj = new Date(detail.time);
+            if (!isNaN(dateObj.getTime())) {
+              return dateObj.toLocaleString('ko-KR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                weekday: 'short',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+              });
+            }
+          } catch {
+            return detail.time;
+          }
+        }
+      }
+      
+      return detail.time;
     }, [detail?.time]);
 
     // 🎯 콘텐츠 렌더링 메모이제이션
@@ -354,6 +410,7 @@ export const CounselingDetailContent = memo<CounselingDetailContentProps>(
           </div>
 
           {/* 그림 목록 */}
+          <Separator className="my-4" />
           <div className='pt-2'>
             <div
               className={`mb-2 font-medium text-${compact ? 'xs' : 'sm'}`}
@@ -371,34 +428,40 @@ export const CounselingDetailContent = memo<CounselingDetailContentProps>(
 
           {/* 화상상담 중 선택된 그림 분석 결과 */}
           {inVideoCall && selectedImageAnalysis && (
-            <div className='pt-4'>
-              <div className={`mb-2 font-medium text-${compact ? 'xs' : 'sm'}`}>
-                그림 분석 결과 - {selectedImageAnalysis.category}
+            <>
+              <Separator className="my-4" />
+              <div className='pt-4'>
+                <div className={`mb-2 font-medium text-${compact ? 'xs' : 'sm'}`}>
+                  그림 분석 결과 - {selectedImageAnalysis.category}
+                </div>
+                <DrawingAnalysisContent
+                  drawingId={selectedImageAnalysis.imageId.toString()}
+                  imageUrl={selectedImageAnalysis.imageUrl}
+                  category={selectedImageAnalysis.category}
+                  compact={compact}
+                  showImage={false} // 이미 위에서 그림을 보여줬으므로 중복 표시 안함
+                  autoFetch={true}
+                />
               </div>
-              <DrawingAnalysisContent
-                drawingId={selectedImageAnalysis.imageId.toString()}
-                imageUrl={selectedImageAnalysis.imageUrl}
-                category={selectedImageAnalysis.category}
-                compact={compact}
-                showImage={false} // 이미 위에서 그림을 보여줬으므로 중복 표시 안함
-                autoFetch={true}
-              />
-            </div>
+            </>
           )}
 
           {/* 상담사가 아닐 때만 설문 결과 영역 표시 */}
           {!isCounselor && (
-            <div className='pt-4'>
-              <div
-                className={`mb-2 font-medium text-${compact ? 'xs' : 'sm'}`}
-              >
-                최근 설문 결과
+            <>
+              <Separator className="my-4" />
+              <div className='pt-4'>
+                <div
+                  className={`mb-2 font-medium text-${compact ? 'xs' : 'sm'}`}
+                >
+                  최근 설문 결과
+                </div>
+                <QuestionnaireGrid
+                  questionnaires={questionnaires}
+                  compact={compact}
+                />
               </div>
-              <QuestionnaireGrid
-                questionnaires={questionnaires}
-                compact={compact}
-              />
-            </div>
+            </>
           )}
         </div>
       );
@@ -425,9 +488,10 @@ export const CounselingDetailContent = memo<CounselingDetailContentProps>(
         >
           <div className='mb-4'>
             <h3 className='text-lg font-semibold text-foreground'>
-              상담 상세
+              상담 상세정보
             </h3>
           </div>
+          <Separator className="mb-4" />
           {content}
         </div>
       );
@@ -438,7 +502,8 @@ export const CounselingDetailContent = memo<CounselingDetailContentProps>(
         <CardHeader>
           <CardTitle>상담 상세정보</CardTitle>
         </CardHeader>
-        <CardContent>{content}</CardContent>
+        <Separator />
+        <CardContent className="pt-6">{content}</CardContent>
       </Card>
     );
   }
