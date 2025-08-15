@@ -144,8 +144,8 @@ export const CommunityPostDetail = () => {
     });
   };
 
-  // 현재 사용자가 작성자인지 확인 (nickname 기반)
-  const isAuthor = user && post && user.nickname === post.nickname;
+  // 현재 사용자가 작성자인지 확인 (백엔드 isAuthor 필드 사용)
+  const isAuthor = user && post && post.isAuthor;
 
   const safeRelativeTime = (value?: string) =>
     value ? formatRelativeTime(value) : '';
@@ -240,7 +240,7 @@ export const CommunityPostDetail = () => {
                 </div>
               </div>
 
-              {/* 작성자 액션 메뉴 */}
+              {/* 작성자 액션 메뉴 - React 조건부 렌더링 (&&) 사용 */}
               {isAuthor && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -340,6 +340,7 @@ export const CommunityPostDetail = () => {
               {comments &&
                 comments.map(c => {
                   const isEditing = editingCommentId === c.id;
+                  // 댓글 작성자 확인 - nickname 비교 (CommentListDto에는 isAuthor 필드 없음)
                   const isOwner =
                     user && user.nickname && user.nickname === c.nickname;
                   return (
@@ -355,6 +356,7 @@ export const CommunityPostDetail = () => {
                             • {safeRelativeTime(c.createdDate) || ''}
                           </span>
                         </div>
+                        {/* 댓글 수정/삭제 버튼 - React 조건부 렌더링 (&&) 사용 */}
                         {isOwner && !isEditing && (
                           <div className='flex gap-1 opacity-0 group-hover:opacity-100 transition'>
                             <Button

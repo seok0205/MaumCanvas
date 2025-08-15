@@ -79,6 +79,7 @@ export interface PostListResponse {
   viewCount: number;
   commentCount: number; // 백엔드 PostListDto의 commentCount 포함
   readonly createdDate: string; // 백엔드 필드명에 맞춤 (createdDate)
+  readonly isAuthor: boolean; // 백엔드 PostListDto의 isAuthor 필드 추가
 }
 
 // 게시글 페이지(목록) 조회 응답 (PostPageDto - 백엔드와 일치)
