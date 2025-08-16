@@ -214,8 +214,7 @@ export default defineConfig(({ mode }) => ({
           'vendor-icons': ['lucide-react'],
           // 캔버스 관련 라이브러리들을 manualChunks에서 제거
           // konva와 react-konva는 DrawingCanvas가 로드될 때만 자동으로 번들링됨
-          // 차트는 필요할 때만 로딩
-          'vendor-charts': ['recharts'],
+          // 차트도 Dashboard에서만 사용되므로 함께 번들링하여 최적화
           // 네트워크 관련
           'vendor-query': ['@tanstack/react-query', 'axios'],
           // 폼 관련 (페이지별로 필요할 때만)
