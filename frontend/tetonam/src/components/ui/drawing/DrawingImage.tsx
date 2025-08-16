@@ -78,7 +78,13 @@ export const DrawingImage = memo<DrawingImageProps>(
       return (
         <Card className={`w-full mx-auto md:max-w-2xl ${className}`}>
           <CardContent className='p-4 sm:p-6'>
-            <div className='flex items-center justify-center h-48 sm:h-64 bg-muted rounded-lg'>
+            <div 
+              className='flex items-center justify-center bg-muted rounded-lg'
+              style={{
+                aspectRatio: '4 / 3',
+                minHeight: '192px',
+              }}
+            >
               <div className='text-center text-muted-foreground'>
                 <div className='text-sm'>그림을 불러올 수 없습니다</div>
               </div>
@@ -99,36 +105,45 @@ export const DrawingImage = memo<DrawingImageProps>(
               </h2>
             </div>
 
-            {/* 이미지 컨테이너 */}
-            <div className='relative rounded-lg overflow-hidden bg-background border'>
-              {/* 로딩 스켈레톤 */}
+            {/* 이미지 컨테이너 - CLS 최적화를 위한 고정 aspect ratio */}
+            <div 
+              className='relative rounded-lg overflow-hidden bg-background border'
+              style={{
+                aspectRatio: '4 / 3', // 일반적인 그림 비율 4:3 고정
+                minHeight: '192px', // min-h-48 (12rem = 192px) 고정
+              }}
+            >
+              {/* 로딩 스켈레톤 - 컨테이너와 동일한 크기 */}
               {isLoading && (
                 <div className='absolute inset-0 z-10'>
-                  <Skeleton className='w-full h-48 sm:h-64 md:h-80' />
+                  <Skeleton className='w-full h-full' />
                 </div>
               )}
 
-              {/* 에러 상태 */}
+              {/* 에러 상태 - 컨테이너와 동일한 크기 */}
               {hasError && (
-                <div className='flex items-center justify-center h-48 sm:h-64 md:h-80 bg-muted'>
+                <div className='flex items-center justify-center w-full h-full bg-muted'>
                   <div className='text-center text-muted-foreground'>
                     <div className='text-sm'>이미지를 불러올 수 없습니다</div>
                   </div>
                 </div>
               )}
 
-              {/* 실제 이미지 */}
+              {/* 실제 이미지 - object-contain으로 비율 유지하며 컨테이너에 맞춤 */}
               {!hasError && (
                 <img
                   src={imageUrl}
                   alt={`${getCategoryName(category)} - HTP 검사 그림`}
-                  className={`w-full h-auto max-h-48 sm:max-h-64 md:max-h-80 lg:max-h-96 object-contain transition-opacity duration-200 ${
+                  className={`w-full h-full object-contain transition-opacity duration-200 ${
                     isLoading ? 'opacity-0' : 'opacity-100'
                   }`}
                   onLoad={handleImageLoad}
                   onError={handleImageError}
                   loading='eager' // 중요한 이미지이므로 즉시 로드
                   decoding='async' // 비동기 디코딩으로 메인 스레드 블로킹 방지
+                  // CLS 방지를 위한 이미지 크기 힌트 (대략적인 크기)
+                  width='400'
+                  height='300'
                 />
               )}
             </div>

@@ -111,33 +111,39 @@ export const DrawingAnalysisContent = memo<DrawingAnalysisContentProps>(({
           {/* 구분선 */}
           <Separator />
           <CardContent className={compact ? 'p-0 pt-3' : 'pt-6'}>
-            {loadingAI ? (
-              <div className="flex flex-col items-center justify-center py-6">
-                <LoadingAnimation
-                  size={compact ? "sm" : "md"}
-                  title="객체 탐지 중 🔍"
-                  message="그림 속 요소들을 분석하고 있어요..."
-                  showLoadingDots={true}
-                  className={compact ? "scale-75" : "scale-90"}
-                />
-              </div>
-            ) : aiText ? (
-              <div
-                className={`prose prose-slate max-w-none font-sans leading-relaxed whitespace-pre-wrap ${compact ? 'text-xs prose-sm' : 'text-sm'} text-foreground`}
-                style={{
-                  fontFamily: "'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif",
-                  fontSize: 'inherit',
-                  lineHeight: '1.7',
-                  color: 'hsl(var(--foreground))',
-                }}
-              >
-                {aiText.replace(/"/g, '')}
-              </div>
-            ) : (
-              <div className={`${compact ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
-                객체 탐지 결과가 없습니다.
-              </div>
-            )}
+            {/* CLS 최적화: 로딩 상태에서도 일정한 높이 유지 */}
+            <div 
+              className="min-h-[200px] flex flex-col justify-center"
+              style={{ minHeight: compact ? '150px' : '200px' }}
+            >
+              {loadingAI ? (
+                <div className="flex flex-col items-center justify-center py-6">
+                  <LoadingAnimation
+                    size={compact ? "sm" : "md"}
+                    title="객체 탐지 중 🔍"
+                    message="그림 속 요소들을 분석하고 있어요..."
+                    showLoadingDots={true}
+                    className={compact ? "scale-75" : "scale-90"}
+                  />
+                </div>
+              ) : aiText ? (
+                <div
+                  className={`prose prose-slate max-w-none font-sans leading-relaxed whitespace-pre-wrap ${compact ? 'text-xs prose-sm' : 'text-sm'} text-foreground`}
+                  style={{
+                    fontFamily: "'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif",
+                    fontSize: 'inherit',
+                    lineHeight: '1.7',
+                    color: 'hsl(var(--foreground))',
+                  }}
+                >
+                  {aiText.replace(/"/g, '')}
+                </div>
+              ) : (
+                <div className={`${compact ? 'text-xs' : 'text-sm'} text-muted-foreground text-center`}>
+                  객체 탐지 결과가 없습니다.
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
       )}
@@ -152,75 +158,81 @@ export const DrawingAnalysisContent = memo<DrawingAnalysisContentProps>(({
         {/* 구분선 */}
         <Separator />
         <CardContent className={`space-y-${compact ? '3' : '4'} ${compact ? 'p-0 pt-3' : 'pt-6'}`}>
-          {/* 분석 결과 표시 */}
-          {loadingRAG || isPollingAfterPrompt ? (
-            <div className="flex flex-col items-center justify-center py-8">
-              <LoadingAnimation
-                size={compact ? "sm" : "md"}
-                title={isPollingAfterPrompt ? "분석 처리 중 🧠✨" : "AI 분석 중 💫"}
-                message={
-                  isPollingAfterPrompt
-                    ? "작성해주신 관찰 내용을 바탕으로 심층 분석을 진행하고 있어요... 🎨🔍"
-                    : "창의적인 마음을 깊이 들여다보고 있어요... ✨"
-                }
-                showLoadingDots={true}
-                className={compact ? "scale-75" : ""}
-              />
-              {isPollingAfterPrompt && (
-                <div className="mt-4 text-center">
-                  <p className={`${compact ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
-                    💡 분석이 완료되면 자동으로 결과가 표시됩니다
-                  </p>
-                  <p className={`${compact ? 'text-xs' : 'text-sm'} text-muted-foreground mt-1`}>
-                    ⏱️ 보통 30초 ~ 1분 정도 소요됩니다
-                  </p>
-                </div>
-              )}
-            </div>
-          ) : submitting ? (
-            <div className="flex flex-col items-center justify-center py-6">
-              <LoadingAnimation
-                size="sm"
-                title="제출 중 📝"
-                message="관찰 내용을 전송하고 있어요..."
-                showLoadingDots={true}
-                className="scale-75"
-              />
-            </div>
-          ) : ragError ? (
-            <div className={`${compact ? 'text-xs' : 'text-sm'} text-red-600`}>
-              {ragError === 'UNAUTHORIZED'
-                ? '분석 결과를 확인할 권한이 없습니다.'
-                : ragError === 'NOT_FOUND'
-                  ? '아직 분석 결과가 없습니다.'
-                  : ragError === 'RAG_NOT_READY'
-                    ? isCounselor
-                      ? '아직 분석을 시작하지 않았습니다. 예시를 참고하여 구체적으로 기술해주시면 더 정확한 분석이 가능합니다.'
-                      : '아직 그림 분석이 진행되지 않았습니다. 분석이 완료되면 결과를 확인할 수 있습니다.'
-                    : ragError === 'TIMEOUT'
+          {/* CLS 최적화: 분석 결과 영역의 최소 높이 설정 */}
+          <div 
+            className="min-h-[300px] flex flex-col justify-center"
+            style={{ minHeight: compact ? '250px' : '300px' }}
+          >
+            {/* 분석 결과 표시 */}
+            {loadingRAG || isPollingAfterPrompt ? (
+              <div className="flex flex-col items-center justify-center py-8">
+                <LoadingAnimation
+                  size={compact ? "sm" : "md"}
+                  title={isPollingAfterPrompt ? "분석 처리 중 🧠✨" : "AI 분석 중 💫"}
+                  message={
+                    isPollingAfterPrompt
+                      ? "작성해주신 관찰 내용을 바탕으로 심층 분석을 진행하고 있어요... 🎨🔍"
+                      : "창의적인 마음을 깊이 들여다보고 있어요... ✨"
+                  }
+                  showLoadingDots={true}
+                  className={compact ? "scale-75" : ""}
+                />
+                {isPollingAfterPrompt && (
+                  <div className="mt-4 text-center">
+                    <p className={`${compact ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
+                      💡 분석이 완료되면 자동으로 결과가 표시됩니다
+                    </p>
+                    <p className={`${compact ? 'text-xs' : 'text-sm'} text-muted-foreground mt-1`}>
+                      ⏱️ 보통 30초 ~ 1분 정도 소요됩니다
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : submitting ? (
+              <div className="flex flex-col items-center justify-center py-6">
+                <LoadingAnimation
+                  size="sm"
+                  title="제출 중 📝"
+                  message="관찰 내용을 전송하고 있어요..."
+                  showLoadingDots={true}
+                  className="scale-75"
+                />
+              </div>
+            ) : ragError ? (
+              <div className={`${compact ? 'text-xs' : 'text-sm'} text-red-600 text-center`}>
+                {ragError === 'UNAUTHORIZED'
+                  ? '분석 결과를 확인할 권한이 없습니다.'
+                  : ragError === 'NOT_FOUND'
+                    ? '아직 분석 결과가 없습니다.'
+                    : ragError === 'RAG_NOT_READY'
+                      ? isCounselor
+                        ? '아직 분석을 시작하지 않았습니다. 예시를 참고하여 구체적으로 기술해주시면 더 정확한 분석이 가능합니다.'
+                        : '아직 그림 분석이 진행되지 않았습니다. 분석이 완료되면 결과를 확인할 수 있습니다.'
+                      : ragError === 'TIMEOUT'
                       ? '분석 시간이 초과되었습니다. 다시 시도해주세요.'
                       : ragError === 'NETWORK'
                         ? '네트워크 오류로 결과를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.'
                         : '알 수 없는 오류가 발생했습니다.'}
-            </div>
-          ) : ragText && ragHtml ? (
-            <div
-              className={`prose prose-slate max-w-none font-sans leading-relaxed ${compact ? 'text-xs prose-sm' : 'text-sm'}`}
-              style={{
-                fontFamily: "'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif",
-                fontSize: 'inherit',
-                lineHeight: '1.7',
-                color: 'hsl(var(--foreground))',
-              }}
-              dangerouslySetInnerHTML={{ __html: ragHtml }}
-            />
-          ) : (
-            <div className={`${compact ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
-              {isCounselor
+              </div>
+            ) : ragText && ragHtml ? (
+              <div
+                className={`prose prose-slate max-w-none font-sans leading-relaxed ${compact ? 'text-xs prose-sm' : 'text-sm'}`}
+                style={{
+                  fontFamily: "'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif",
+                  fontSize: 'inherit',
+                  lineHeight: '1.7',
+                  color: 'hsl(var(--foreground))',
+                }}
+                dangerouslySetInnerHTML={{ __html: ragHtml }}
+              />
+            ) : (
+                <div className={`${compact ? 'text-xs' : 'text-sm'} text-muted-foreground text-center`}>
+                {isCounselor
                 ? '프롬프트를 입력하시면 답변 드립니다.'
                 : '아직 결과가 없습니다.'}
-            </div>
-          )}
+              </div>
+            )}
+          </div>
 
           {/* 상담사용 프롬프트 입력 - 화상상담 중에는 숨김 */}
           {isCounselor && !inVideoCall && (
