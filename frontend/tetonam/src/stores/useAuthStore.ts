@@ -2,6 +2,7 @@ import { queryClient } from '@/config/queryClient';
 import { authService } from '@/services/authService';
 import type { AuthError } from '@/types/auth';
 import type { AuthState } from '@/types/store';
+import type { UserRole } from '@/constants/userRoles';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
@@ -12,13 +13,21 @@ export const useAuthStore = create<AuthState>()(
         token: null,
         isAuthenticated: false,
         selectedUserRole: null,
+        user: null,
         error: null,
         isLoading: false,
 
         setToken: token => set({ token, isAuthenticated: !!token, error: null }),
 
+        setUser: user => set({ user }),
+
         clearAuth: () =>
-          set({ token: null, isAuthenticated: false, error: null }),
+          set({ 
+            token: null, 
+            isAuthenticated: false, 
+            user: null, 
+            error: null 
+          }),
 
         setSelectedUserRole: type => set({ selectedUserRole: type }),
 
@@ -32,15 +41,34 @@ export const useAuthStore = create<AuthState>()(
             // 로그인 시 이전 선택된 역할 초기화 (백엔드 실제 역할 우선)
             set({ selectedUserRole: null });
 
-            // ✅ 순수 인증 상태만 관리 - token 저장
+            // ✅ JWT 토큰에서 역할 정보 추출하여 기본 user 객체 생성
+            const basicUser = {
+              id: '0', // JWT에서 추출 필요
+              email,
+              name: '', // 곧 업데이트될 예정
+              nickname: '', // 곧 업데이트될 예정
+              gender: '',
+              phone: '',
+              school: '',
+              birthday: '',
+              roles: tokenResponse.role as UserRole[], // JWT에서 역할 정보 추출
+              createdAt: new Date().toISOString(),
+            };
+
+            // ✅ 인증 상태와 기본 사용자 정보 저장
             set({
               token: tokenResponse.accessToken,
               isAuthenticated: true,
+              user: basicUser,
               isLoading: false,
             });
 
             // 인증 완료 후 약간의 지연을 두어 토큰이 완전히 설정되도록 함
             await new Promise(resolve => setTimeout(resolve, 100));
+
+            // TODO: 여기서 사용자 상세 정보를 가져와서 user 업데이트
+            // const userInfo = await authService.getMyInfo();
+            // set({ user: { ...basicUser, ...userInfo } });
 
             return true;
           } catch (error) {
@@ -142,6 +170,7 @@ export const useAuthStore = create<AuthState>()(
           set({
             token: null,
             isAuthenticated: false,
+            user: null,
             selectedUserRole: null,
             error: null,
             isLoading: false,
@@ -154,6 +183,7 @@ export const useAuthStore = create<AuthState>()(
         partialize: state => ({
           token: state.token,
           isAuthenticated: state.isAuthenticated,
+          user: state.user,
           selectedUserRole: state.selectedUserRole,
         }),
       }

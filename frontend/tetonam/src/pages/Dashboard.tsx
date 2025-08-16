@@ -51,10 +51,8 @@ export const Dashboard = () => {
     return <LoadingSpinner />;
   }
 
-  // roles 배열에서 주요 역할 결정 (원래 방식)
-  const primaryRole = getPrimaryRole(user.roles);
-
-  // 대시보드 콘텐츠 렌더링 (Hook 미사용 함수로 구성)
+  // roles 배열에서 주요 역할 결정
+  const primaryRole = getPrimaryRole(user.roles);  // 대시보드 콘텐츠 렌더링 (Hook 미사용 함수로 구성)
   const renderDashboardContent = () => {
     switch (primaryRole) {
       case 'USER':
