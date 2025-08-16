@@ -220,9 +220,8 @@ export default defineConfig(({ mode }) => ({
           ],
           // 아이콘 (초기 로딩에 영향)
           'vendor-icons': ['lucide-react'],
-          // 캔버스 관련 라이브러리들을 분리하여 동적 로딩 최적화
-          'vendor-canvas-core': ['konva'],
-          'vendor-canvas-react': ['react-konva'],
+          // 캔버스 관련 라이브러리들을 manualChunks에서 제거
+          // konva와 react-konva는 DrawingCanvas가 로드될 때만 자동으로 번들링됨
           // 차트는 필요할 때만 로딩
           'vendor-charts': ['recharts'],
           // 네트워크 관련
