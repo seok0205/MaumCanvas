@@ -80,56 +80,57 @@ export const CommunityPostDetail = () => {
 
   const handleSubmitComment = useCallback(() => {
     if (!commentContent.trim()) return;
-    
+
     // 사용자 데이터가 로딩되지 않은 경우 대기
     if (!user || !user.nickname) {
       console.log('🚫 중복 방지: 사용자 데이터 로딩 중');
       return;
     }
-    
+
     const now = Date.now();
-    
+
     // 다중 레벨 중복 방지 체크
     // 1. TanStack Query isPending 체크
     if (createCommentMutation.isPending) {
       console.log('🚫 중복 방지: TanStack Query isPending');
       return;
     }
-    
+
     // 2. ref를 통한 실행 중 체크
     if (isSubmittingRef.current) {
       console.log('🚫 중복 방지: isSubmittingRef');
       return;
     }
-    
+
     // 3. 시간 기반 중복 방지 (500ms 내 재실행 방지)
     if (now - lastSubmitTimeRef.current < 500) {
       console.log('🚫 중복 방지: 시간 기반 방지', now - lastSubmitTimeRef.current, 'ms');
       return;
     }
-    
+
     // 실행 플래그 설정
     isSubmittingRef.current = true;
     lastSubmitTimeRef.current = now;
-    
-    console.log('✅ 댓글 작성 시작:', commentContent.trim(), '사용자:', user.nickname);
-    
+
+    const contentToSubmit = commentContent.trim();
+    console.log('✅ 댓글 작성 시작:', contentToSubmit, '사용자:', user.nickname);
+
     createCommentMutation.mutate(
-      { content: commentContent.trim() },
+      { content: contentToSubmit },
       {
         onSuccess: () => {
+          // 성공 시 입력창 즉시 초기화
           setCommentContent('');
-          isSubmittingRef.current = false;
-          console.log('✅ 댓글 작성 성공');
+          console.log('✅ 댓글 작성 성공 - 입력창 초기화');
         },
         onError: (error) => {
-          isSubmittingRef.current = false;
           console.log('❌ 댓글 작성 실패:', error);
           // 에러 시에도 입력 내용은 유지하여 재시도 가능하게 함
         },
         onSettled: () => {
           // 무조건 실행되는 cleanup
           isSubmittingRef.current = false;
+          console.log('🧹 댓글 작성 완료 - cleanup');
         },
       }
     );
@@ -148,18 +149,29 @@ export const CommunityPostDetail = () => {
   const submitEditComment = useCallback(() => {
     if (!editingCommentId) return;
     if (!editingContent.trim()) return;
-    
+
     // 이미 수정 중인 경우 중복 요청 방지
-    if (updateCommentMutation.isPending) return;
-    
+    if (updateCommentMutation.isPending) {
+      console.log('🚫 댓글 수정 중복 방지: 이미 진행 중');
+      return;
+    }
+
+    console.log('✅ 댓글 수정 시작:', editingCommentId, editingContent.trim());
+
     updateCommentMutation.mutate(
       { id: editingCommentId, data: { content: editingContent.trim() } },
       {
         onSuccess: () => {
-          cancelEditComment();
+          console.log('✅ 댓글 수정 성공');
         },
-        onError: () => {
+        onError: (error) => {
+          console.log('❌ 댓글 수정 실패:', error);
           // 에러 발생 시에도 편집 상태는 유지하여 재시도 가능하게 함
+        },
+        onSettled: () => {
+          // 성공/실패 관계없이 편집 모드 해제
+          console.log('🧹 댓글 수정 완료 - 편집 모드 해제');
+          cancelEditComment();
         },
       }
     );
@@ -174,7 +186,7 @@ export const CommunityPostDetail = () => {
     (id: number) => {
       // 이미 삭제 중인 경우 중복 요청 방지
       if (deleteCommentMutation.isPending) return;
-      
+
       deleteCommentMutation.mutate(id, {
         onSuccess: () => {
           if (editingCommentId === id) cancelEditComment();
@@ -190,7 +202,7 @@ export const CommunityPostDetail = () => {
   // 댓글 목록 렌더링 최적화 - 의존성 기반 메모이제이션
   const renderedComments = useMemo(() => {
     if (!comments) return null;
-    
+
     return comments.map(c => {
       const isEditing = editingCommentId === c.id;
       // 댓글 작성자 확인 - nickname 비교 (CommentListDto에는 isAuthor 필드 없음)
@@ -198,7 +210,7 @@ export const CommunityPostDetail = () => {
 
       return (
         <div
-          key={c.id}
+          key={`comment-${c.id}`} // 더 명확한 key 값
           className='group rounded-lg border-2 border-slate-200 bg-white hover:bg-slate-50 transition p-4 shadow-lg hover:shadow-xl hover:border-orange-200'
         >
           <div className='flex justify-between items-start mb-2'>
@@ -323,11 +335,11 @@ export const CommunityPostDetail = () => {
     console.log('🔍 현재 로그인한 사용자:', user?.nickname);
     console.log('🔍 게시글 작성자:', post?.nickname);
     console.log('🔍 백엔드에서 계산된 isAuthor:', post?.isAuthor);
-    
+
     // 백엔드 isAuthor가 잘못 계산되므로 프론트엔드에서 닉네임 비교
     const calculatedIsAuthor = user?.nickname === post?.nickname;
     console.log('🔍 프론트엔드에서 계산된 isAuthor:', calculatedIsAuthor);
-    
+
     return calculatedIsAuthor;
   }, [post, user]);
 
@@ -496,7 +508,7 @@ export const CommunityPostDetail = () => {
                     isLoading={createCommentMutation.isPending}
                     loadingText='작성 중...'
                     disabled={
-                      createCommentMutation.isPending || 
+                      createCommentMutation.isPending ||
                       !commentContent.trim() ||
                       !user?.nickname ||
                       isSubmittingRef.current

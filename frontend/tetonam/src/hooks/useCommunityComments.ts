@@ -66,7 +66,7 @@ export const useCreateComment = (postId: number) => {
     onSuccess: (newComment, _variables, context) => {
       // 방어적 프로그래밍: author 정보가 없는 경우 처리
       console.log('🔍 댓글 생성 응답:', newComment);
-      
+
       if (!newComment || !newComment.author) {
         console.error('❌ 댓글 생성 응답에 author 정보가 없습니다:', newComment);
         // author 정보가 없어도 기본값으로 처리
@@ -76,7 +76,7 @@ export const useCreateComment = (postId: number) => {
           nickname: '사용자', // fallback 닉네임
           createdDate: new Date().toISOString(),
         };
-        
+
         queryClient.setQueryData<CommentListResponse[]>(
           ['community', 'comments', postId],
           (old) => {
@@ -116,7 +116,7 @@ export const useCreateComment = (postId: number) => {
 
     onError: (err: any, _variables, context) => {
       console.error('❌ 댓글 작성 API 에러:', err);
-      
+
       // 실패 시 이전 상태로 롤백
       if (context?.previousComments) {
         queryClient.setQueryData(
@@ -124,12 +124,12 @@ export const useCreateComment = (postId: number) => {
           context.previousComments
         );
       }
-      
+
       // 에러 메시지 표시 (네트워크 에러와 일반 에러 구분)
-      const errorMessage = err?.name === 'AbortError' 
-        ? '요청이 취소되었습니다.' 
+      const errorMessage = err?.name === 'AbortError'
+        ? '요청이 취소되었습니다.'
         : err?.message || '댓글 작성에 실패했습니다.';
-      
+
       toast.error(errorMessage);
     },
 
@@ -140,7 +140,7 @@ export const useCreateComment = (postId: number) => {
 
     // 중복 방지를 위한 retry 설정: 댓글 작성은 재시도하지 않음
     retry: false,
-    
+
     // 네트워크 모드 설정: 오프라인에서도 optimistic update 동작
     networkMode: 'offlineFirst',
   });
@@ -151,23 +151,23 @@ export const useUpdateComment = (postId: number) => {
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: CommentWriteRequest }) =>
       communityService.updateComment(postId, id, data),
-    
+
     // TanStack Query Mutation Scope를 사용하여 동일한 댓글의 중복 수정 방지
     scope: {
       id: `comment-update-${postId}`,
     },
-    
+
     // Optimistic Update: 즉시 UI 업데이트
     onMutate: async ({ id, data }) => {
       // 중복 요청 방지: 진행 중인 쿼리들을 취소
-      await queryClient.cancelQueries({ 
-        queryKey: ['community', 'comments', postId] 
+      await queryClient.cancelQueries({
+        queryKey: ['community', 'comments', postId]
       });
 
       // 이전 데이터 스냅샷 저장 (롤백용)
       const previousComments = queryClient.getQueryData<CommentListResponse[]>([
-        'community', 
-        'comments', 
+        'community',
+        'comments',
         postId
       ]);
 
@@ -221,15 +221,17 @@ export const useUpdateComment = (postId: number) => {
       toast.error(err?.message || '댓글 수정 실패');
     },
 
-    // 최종적으로 서버 상태와 동기화
+    // onSettled에서 invalidateQueries 제거 - optimistic update로 충분
+    // 중복 요청을 방지하고 성능을 개선하기 위해 서버 상태 동기화는 제거
     onSettled: () => {
-      // 백그라운드에서 최신 데이터를 가져와 동기화
-      queryClient.invalidateQueries({
-        queryKey: ['community', 'comments', postId],
-      });
+      // 필요시에만 background refetch (현재는 optimistic update로 충분)
+      // queryClient.invalidateQueries({
+      //   queryKey: ['community', 'comments', postId],
+      // });
     },
 
-    retry: 1,
+    // 재시도 없음 - 댓글 수정 실패 시 사용자가 직접 재시도
+    retry: false,
   });
 };
 
