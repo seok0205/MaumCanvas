@@ -142,7 +142,7 @@ export const CommunityPage = ({}: CommunityPageProps) => {
                   value={searchType}
                   onValueChange={(value: 'nickname' | 'title') => setSearchType(value)}
                 >
-                  <SelectTrigger className='w-36 border-2 border-slate-200 bg-white hover:border-slate-300 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 rounded-lg shadow-sm transition-colors'>
+                  <SelectTrigger className='w-36 h-12 px-4 border-2 border-slate-200 bg-white hover:border-slate-300 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 rounded-xl shadow-sm transition-colors'>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className='border-2 border-slate-200 bg-white shadow-xl rounded-lg overflow-hidden'>
@@ -174,7 +174,7 @@ export const CommunityPage = ({}: CommunityPageProps) => {
                   }
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className='border-2 border-slate-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 flex-1 shadow-sm bg-white rounded-lg py-2.5 text-sm font-medium hover:border-slate-300 transition-colors'
+                  className='border-2 border-slate-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 flex-1 shadow-sm bg-white rounded-xl text-sm font-medium hover:border-slate-300 transition-colors'
                   aria-label='검색어'
                 />
               </div>
