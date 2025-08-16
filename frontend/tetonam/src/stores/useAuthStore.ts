@@ -41,34 +41,30 @@ export const useAuthStore = create<AuthState>()(
             // 로그인 시 이전 선택된 역할 초기화 (백엔드 실제 역할 우선)
             set({ selectedUserRole: null });
 
-            // ✅ JWT 토큰에서 역할 정보 추출하여 기본 user 객체 생성
-            const basicUser = {
-              id: '0', // JWT에서 추출 필요
+            // ✅ 로그인 응답에서 바로 역할 정보 사용하여 user 객체 생성
+            const user = {
+              id: '0', // 필요시 별도 API에서 가져올 수 있음
               email,
-              name: '', // 곧 업데이트될 예정
-              nickname: '', // 곧 업데이트될 예정
+              name: '', // 별도 API에서 가져올 수 있음
+              nickname: '', // 별도 API에서 가져올 수 있음
               gender: '',
               phone: '',
               school: '',
               birthday: '',
-              roles: tokenResponse.role as UserRole[], // JWT에서 역할 정보 추출
+              roles: tokenResponse.role as UserRole[], // 로그인 응답에서 바로 사용
               createdAt: new Date().toISOString(),
             };
 
-            // ✅ 인증 상태와 기본 사용자 정보 저장
+            // ✅ 인증 상태와 사용자 정보 저장
             set({
               token: tokenResponse.accessToken,
               isAuthenticated: true,
-              user: basicUser,
+              user,
               isLoading: false,
             });
 
             // 인증 완료 후 약간의 지연을 두어 토큰이 완전히 설정되도록 함
             await new Promise(resolve => setTimeout(resolve, 100));
-
-            // TODO: 여기서 사용자 상세 정보를 가져와서 user 업데이트
-            // const userInfo = await authService.getMyInfo();
-            // set({ user: { ...basicUser, ...userInfo } });
 
             return true;
           } catch (error) {
