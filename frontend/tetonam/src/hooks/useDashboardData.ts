@@ -5,20 +5,20 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import type { MainMyInfoResponse, UpcomingCounseling } from '@/types/api';
 import type { QuestionnaireCategory } from '@/types/api';
 import { useQueries, keepPreviousData } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 
 // 쿼리 키 상수
 const DASHBOARD_QUERY_KEYS = {
   USER_HOME_INFO: ['user', 'home-my-info'] as const,
   UPCOMING_COUNSELING: (userId?: string | number) => ['counseling', 'upcoming', userId] as const,
-  QUESTIONNAIRE_RESULTS: (categories: QuestionnaireCategory[]) =>
+  QUESTIONNAIRE_RESULTS: (categories: QuestionnaireCategory[]) => 
     ['questionnaire-results', categories] as const,
 } as const;
 
 // 설문조사 카테고리 상수
 const QUESTIONNAIRE_CATEGORIES: QuestionnaireCategory[] = [
   '스트레스',
-  '우울',
+  '우울', 
   '불안',
   '자살',
 ];
@@ -41,13 +41,13 @@ interface DashboardState {
 
 /**
  * 대시보드 병렬 데이터 로딩 훅
- *
+ * 
  * TanStack Query v5 Best Practice:
  * - useQueries로 독립적 데이터 소스 병렬 로딩
  * - combine 옵션으로 쿼리 결과 집계
  * - placeholderData로 매끄러운 전환
  * - 조건부 쿼리 실행으로 성능 최적화
- *
+ * 
  * 개선 사항:
  * - 이전 병렬 로딩 대비 request waterfall 제거
  * - LCP 개선: 가장 빠른 데이터부터 렌더링 가능
@@ -60,7 +60,7 @@ export const useDashboardData = (): DashboardState => {
   const queries = useMemo(() => [
     {
       queryKey: DASHBOARD_QUERY_KEYS.USER_HOME_INFO,
-      queryFn: ({ signal }: { signal?: AbortSignal }) =>
+      queryFn: ({ signal }: { signal?: AbortSignal }) => 
         userService.getHomeMyInfo(signal),
       enabled: isAuthenticated && !!user,
       staleTime: 10 * 60 * 1000, // 10분
@@ -77,7 +77,7 @@ export const useDashboardData = (): DashboardState => {
     },
     {
       queryKey: DASHBOARD_QUERY_KEYS.UPCOMING_COUNSELING(user?.id),
-      queryFn: ({ signal }: { signal?: AbortSignal }) =>
+      queryFn: ({ signal }: { signal?: AbortSignal }) => 
         counselingService.getUpcomingCounseling(signal),
       enabled: isAuthenticated && !!user,
       staleTime: 5 * 60 * 1000, // 5분 - 상담 데이터는 더 자주 업데이트
@@ -98,8 +98,8 @@ export const useDashboardData = (): DashboardState => {
         Object.entries(raw).forEach(([k, arr]) => {
           normalized[k] = (arr as any[]).map(item => ({
             category: k,
-            score: typeof item.score === 'number'
-              ? item.score
+            score: typeof item.score === 'number' 
+              ? item.score 
               : parseInt(item.score, 10) || 0,
             createdDate: item.createdDate,
           }));
@@ -126,7 +126,7 @@ export const useDashboardData = (): DashboardState => {
       const userQuery = results[0];
       const counselingQuery = results[1];
       const questionnaireQuery = results[2];
-
+      
       // 🎯 TanStack Query 결과를 authStore에 동기화
       if (userQuery?.data && userQuery.isSuccess) {
         const userInfo = userQuery.data as MainMyInfoResponse;
@@ -139,7 +139,7 @@ export const useDashboardData = (): DashboardState => {
           }),
         });
       }
-
+      
       return {
         data: {
           userInfo: userQuery?.data ?? null,
@@ -163,7 +163,7 @@ export const useDashboardData = (): DashboardState => {
 
 /**
  * Suspense 기반 대시보드 데이터 훅
- *
+ * 
  * TanStack Query v5 useSuspenseQueries 사용
  * 선언적 로딩 상태 관리를 원할 때 사용
  * Suspense boundary와 Error boundary가 필요함
@@ -186,7 +186,7 @@ export const useDashboardDataSuspense = () => {
   // useSuspenseQueries는 향후 구현 예정
   // 현재는 일반 useQueries 사용을 권장
   const result = useDashboardData();
-
+  
   return {
     data: result.data,
     refetchAll: result.refetchAll,
