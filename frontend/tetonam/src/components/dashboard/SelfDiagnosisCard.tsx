@@ -1,14 +1,14 @@
 import { Button } from '@/components/ui/interactive/button';
 import { Card } from '@/components/ui/layout/card';
 import { useQuestionnaireResults } from '@/hooks/useQuestionnaireResults';
-import type { QuestionnaireCategory } from '@/types/api';
+import type { QuestionnaireCategory, QuestionnaireResult } from '@/types/api';
 import { AlertCircle, RefreshCw, TrendingUp } from 'lucide-react';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { QuestionnaireChart } from './QuestionnaireChart';
 
 // Props 인터페이스 정의 - TanStack Query Best Practice
 interface SelfDiagnosisCardProps {
-  questionnaireData?: Record<string, any> | null;
+  questionnaireData?: Record<string, QuestionnaireResult[]> | null;
   isLoading?: boolean;
   isFetching?: boolean;
 }

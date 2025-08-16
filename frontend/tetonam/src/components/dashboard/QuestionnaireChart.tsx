@@ -22,6 +22,16 @@ interface ChartData {
   formattedDate: string;
 }
 
+// Recharts Tooltip Props 타입 정의
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    value: number;
+    payload: ChartData;
+  }>;
+  label?: string | number;
+}
+
 export const QuestionnaireChart = memo(
   ({ results, categoryName }: QuestionnaireChartProps) => {
     const chartData: ChartData[] = useMemo(() => {
@@ -102,23 +112,22 @@ export const QuestionnaireChart = memo(
     }, [chartData]);
 
     // 성능 최적화: 커스텀 툴팁 컴포넌트를 메모이제이션
-    const customTooltip = useMemo(
-      () =>
-        ({ active, payload, label }: any) => {
-          if (active && payload && payload.length) {
-            const data = payload[0].payload as ChartData;
-            return (
-              <div className='bg-white border border-gray-200 rounded-lg shadow-lg p-3'>
-                <p className='font-medium text-gray-900'>{categoryName}</p>
-                <p className='text-sm text-gray-600'>{label}</p>
-                <p className='text-lg font-semibold text-blue-600'>
-                  {data.score}점
-                </p>
-              </div>
-            );
-          }
-          return null;
-        },
+    const customTooltip = useCallback(
+      ({ active, payload, label }: CustomTooltipProps) => {
+        if (active && payload && payload.length && payload[0]) {
+          const data = payload[0].payload;
+          return (
+            <div className='bg-white border border-gray-200 rounded-lg shadow-lg p-3'>
+              <p className='font-medium text-gray-900'>{categoryName}</p>
+              <p className='text-sm text-gray-600'>{label}</p>
+              <p className='text-lg font-semibold text-blue-600'>
+                {data.score}점
+              </p>
+            </div>
+          );
+        }
+        return null;
+      },
       [categoryName]
     );
 
@@ -146,6 +155,8 @@ export const QuestionnaireChart = memo(
               left: 20,
               bottom: 20,
             }}
+            accessibilityLayer={true}
+            title={`${categoryName} 자가 진단 결과 추이 차트`}
           >
             <XAxis
               dataKey='formattedDate'
