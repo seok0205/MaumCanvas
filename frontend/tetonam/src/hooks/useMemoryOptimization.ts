@@ -86,7 +86,6 @@ export const useMemoryOptimization = (
 
       if (hasChanges) {
         setStepsLines(cleanedStepsLines);
-        console.log('Cleaned up excessive drawing lines');
       }
     } catch (error) {
       console.error('Failed to cleanup excessive lines:', error);
@@ -112,10 +111,6 @@ export const useMemoryOptimization = (
         keysToDelete.forEach(key => {
           localStorage.removeItem(key);
         });
-
-        console.log(
-          `Cleaned up ${keysToDelete.length} old localStorage entries`
-        );
       }
 
       // 임시 데이터 정리 (1시간 이상 된 것)
@@ -146,7 +141,6 @@ export const useMemoryOptimization = (
       // 브라우저가 gc를 지원하는 경우 호출
       if ('gc' in window && typeof (window as any).gc === 'function') {
         (window as any).gc();
-        console.log('Manual garbage collection triggered');
       }
 
       // 메모리 압박 시뮬레이션 (브라우저 최적화 유도)
@@ -171,8 +165,6 @@ export const useMemoryOptimization = (
     if (now - lastCleanupRef.current < 5 * 60 * 1000) {
       return;
     }
-
-    console.log('Performing memory cleanup...');
 
     cleanupExcessiveLines();
     cleanupLocalStorage();

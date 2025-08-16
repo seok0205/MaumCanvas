@@ -31,10 +31,6 @@ export const useAgoraClient = () => {
 
     // 사용자 채널 참여 이벤트
     client.on('user-joined', (user: IAgoraRTCRemoteUser) => {
-      console.log(
-        '✅ [useAgoraClient] 사용자가 채널에 참여했습니다:',
-        user.uid
-      );
       setState(prev => {
         const newUsers = new Map(prev.remoteUsers);
         const remoteUserWithState: IAgoraRTCRemoteUser & RemoteUserState = {
@@ -129,9 +125,6 @@ export const useAgoraClient = () => {
     });
 
     client.on('user-unpublished', (user, mediaType) => {
-      console.log(
-        `📤 [useAgoraClient] 사용자 ${user.uid}가 ${mediaType} 발행을 중단했습니다`
-      );
 
       setState(prev => {
         const newUsers = new Map(prev.remoteUsers);
@@ -156,7 +149,6 @@ export const useAgoraClient = () => {
     });
 
     client.on('user-left', (user: IAgoraRTCRemoteUser) => {
-      console.log('👋 [useAgoraClient] 사용자가 채널을 떠났습니다:', user.uid);
       setState(prev => {
         const newUsers = new Map(prev.remoteUsers);
         newUsers.delete(user.uid.toString());
@@ -193,10 +185,7 @@ export const useAgoraClient = () => {
     });
 
     // 연결 상태 변화 이벤트 리스너
-    client.on('connection-state-change', (curState, revState, reason) => {
-      console.log(
-        `🔄 [useAgoraClient] 연결 상태 변화: ${revState} -> ${curState}, 이유: ${reason}`
-      );
+    client.on('connection-state-change', (curState, _revState, reason) => {
 
       if (curState === 'CONNECTED') {
         setState(prev => ({
@@ -286,7 +275,6 @@ export const useAgoraClient = () => {
   }, []);
 
   const join = useCallback(async (config: AgoraConfig) => {
-    console.log('🚀 [useAgoraClient] join 함수 시작:', config);
 
     if (!clientRef.current || isLeavingRef.current) {
       console.error(
@@ -323,7 +311,6 @@ export const useAgoraClient = () => {
           }),
           AgoraRTC.createCameraVideoTrack(),
         ]);
-        console.log('✅ [useAgoraClient] 미디어 트랙 생성 성공');
 
         try {
           // 채널 참여
@@ -333,11 +320,9 @@ export const useAgoraClient = () => {
             config.token ?? null,
             config.uid ?? null
           );
-          console.log('✅ [useAgoraClient] 채널 참여 성공');
 
           // 미디어 스트림 발행
           await clientRef.current!.publish([audioTrack, videoTrack]);
-          console.log('✅ [useAgoraClient] 미디어 스트림 발행 성공');
 
           setState(prev => ({
             ...prev,
@@ -350,16 +335,11 @@ export const useAgoraClient = () => {
             isVideoEnabled: true,
           }));
 
-          console.log('✅ [useAgoraClient] 화상 통화 연결 성공');
         } catch (joinError) {
           // Join 실패 시 생성된 tracks 즉시 정리 (리소스 waste 방지)
-          console.log(
-            '🧹 [useAgoraClient] Join 실패, 생성된 tracks 정리 중...'
-          );
           try {
             audioTrack?.close();
             videoTrack?.close();
-            console.log('✅ [useAgoraClient] Tracks 정리 완료');
           } catch (cleanupError) {
             console.warn(
               '⚠️ [useAgoraClient] Tracks 정리 중 오류:',
@@ -427,8 +407,6 @@ export const useAgoraClient = () => {
     isLeavingRef.current = true;
 
     try {
-      console.log('🔌 [useAgoraClient] 화상 통화 연결 해제 시작...');
-
       // 현재 상태 가져오기
       const currentState = state;
 
@@ -445,9 +423,6 @@ export const useAgoraClient = () => {
         if (tracksToUnpublish.length > 0) {
           try {
             await clientRef.current.unpublish(tracksToUnpublish);
-            console.log(
-              '📤 [useAgoraClient] 로컬 미디어 스트림 발행 중단 완료'
-            );
           } catch (unpublishError) {
             // unpublish 실패는 로그만 남기고 계속 진행 (채널 나가기는 수행)
             console.warn(
@@ -460,17 +435,14 @@ export const useAgoraClient = () => {
 
       // 2. 채널 떠나기
       await clientRef.current.leave();
-      console.log('👋 [useAgoraClient] 채널 나가기 완료');
 
       // 3. 트랙 정리
       if (currentState.localAudioTrack) {
         currentState.localAudioTrack.close();
-        console.log('🎤 [useAgoraClient] 오디오 트랙 정리 완료');
       }
 
       if (currentState.localVideoTrack) {
         currentState.localVideoTrack.close();
-        console.log('� [useAgoraClient] 비디오 트랙 정리 완료');
       }
 
       // 4. 상태 초기화
@@ -486,7 +458,6 @@ export const useAgoraClient = () => {
         isVideoEnabled: true,
       });
 
-      console.log('✅ [useAgoraClient] 화상 통화 연결 해제 완료');
     } catch (error) {
       console.error('❌ [useAgoraClient] 연결 해제 중 오류:', error);
     } finally {

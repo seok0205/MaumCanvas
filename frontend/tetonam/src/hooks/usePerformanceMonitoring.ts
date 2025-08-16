@@ -135,13 +135,6 @@ export const usePerformanceMonitoring = () => {
       console.warn('Performance issues detected:', warnings);
 
       // 태블릿 환경에서 성능 최적화 제안
-      if (metrics.memoryUsage > 80) {
-        console.log('Consider: Reduce drawing history or clear old data');
-      }
-
-      if (metrics.fps < 20) {
-        console.log('Consider: Lower drawing quality or reduce brush size');
-      }
     }
 
     return warnings;

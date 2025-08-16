@@ -145,11 +145,9 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
   // 오류 발생 시 자동으로 방 나가기 (useEffect 추가)
   useEffect(() => {
     if (error) {
-      console.log('❌ [VideoCall] 오류 감지, 3초 후 자동으로 화면을 나갑니다:', error);
 
       // 3초 후 자동으로 화면 나가기
       const autoExitTimeout = setTimeout(() => {
-        console.log('🚪 [VideoCall] 오류로 인한 자동 퇴장 실행');
         handleEndCall();
       }, 3000);
 

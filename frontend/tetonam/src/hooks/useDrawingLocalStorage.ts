@@ -270,7 +270,6 @@ export const useDrawingLocalStorage = (
 
       // 백그라운드 정리 작업 - 토스트 표시하지 않음
       // 사용자에게 불필요한 알림을 줄이기 위해 조용히 처리
-      console.log('Drawing data cleanup completed'); // 개발자용 로그
     } catch (error) {
       console.warn('Failed to clear all drawings:', error);
       // 에러가 발생한 경우에만 사용자에게 알림

@@ -147,14 +147,7 @@ export const CommunityPostDetail = () => {
   // 현재 사용자가 작성자인지 확인 - useMemo로 최적화
   const isAuthor = useMemo(() => {
     const result = user && post && post.isAuthor;
-    // 개발 모드에서만 디버깅 정보 출력 (React Best Practice)
-    if (import.meta.env.DEV) {
-      console.log('🔍 isAuthor 디버깅:', {
-        user: user ? { id: user.id, nickname: user.nickname } : null,
-        post: post ? { id: post.id, isAuthor: post.isAuthor } : null,
-        result,
-      });
-    }
+
     return result;
   }, [user, post]);
 
@@ -358,16 +351,7 @@ export const CommunityPostDetail = () => {
                   const isOwner =
                     user && user.nickname && user.nickname === c.nickname;
 
-                  // 개발 모드에서만 디버깅 정보 출력 (React Best Practice)
-                  if (import.meta.env.DEV) {
-                    console.log('🔍 isOwner 디버깅 (댓글 ID: ' + c.id + '):', {
-                      user: user
-                        ? { id: user.id, nickname: user.nickname }
-                        : null,
-                      comment: { id: c.id, nickname: c.nickname },
-                      isOwner,
-                    });
-                  }
+
                   return (
                     <div
                       key={c.id}

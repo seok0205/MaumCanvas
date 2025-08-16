@@ -87,11 +87,6 @@ export const usePointerDrawingHandlers = () => {
 
       // 터치 거부 확인
       if (shouldRejectPointer(pointerData)) {
-        console.log(
-          'Pointer rejected:',
-          pointerData.pointerType,
-          pointerData.pointerId
-        );
         return;
       }
 

@@ -86,7 +86,6 @@ export const useQuestionnaireResults = () => {
   const getCategoryResults = useCallback(
     (category: QuestionnaireCategoryKey): QuestionnaireResult[] => {
       const results = allResults?.[category] || [];
-      console.log(`🔍 getCategoryResults (${category}):`, results);
       return results;
     },
     [allResults]
@@ -94,7 +93,6 @@ export const useQuestionnaireResults = () => {
 
   const getSelectedCategoryResults = useCallback((): QuestionnaireResult[] => {
     const results = getCategoryResults(selectedCategory);
-    console.log(`🎯 getSelectedCategoryResults (${selectedCategory}):`, results);
     return results;
   }, [getCategoryResults, selectedCategory]);
 
