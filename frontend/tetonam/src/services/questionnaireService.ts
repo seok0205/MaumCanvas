@@ -8,6 +8,7 @@ import type {
   QuestionnaireResult,
   QuestionnaireSubmission,
 } from '@/types/questionnaire';
+import { convertLocalDateTimeArrayToISO } from '@/types/api';
 import { apiClient } from './apiClient';
 
 // 백엔드 DTO와 일치하는 타입 정의
@@ -19,7 +20,7 @@ interface ShowAllQuestionnaireDto {
 interface ShowCategoryQuestionnaireDto {
   category: QuestionnaireCategory;
   score: string;
-  createdDate: string; // LocalDateTime은 ISO string으로 전송됨
+  createdDate: string | number[]; // LocalDateTime은 ISO string 또는 배열로 전송됨
 }
 
 interface QuestionnaireApiResponse {
@@ -125,8 +126,8 @@ const getAllCategoriesQuestionnaireResults = async (
     // 실제 API 구현 시에는 각 카테고리별로 API 호출
     for (const category of categories) {
       try {
-        // ✅ 영어 카테고리를 한글로 변환하여 API 호출
-        const koreanCategory = getCategoryKoreanName(String(category));
+        // ✅ 이미 한글 카테고리이므로 getCategoryKoreanName 변환 불필요
+        const koreanCategory = String(category); // 한글 카테고리 그대로 사용
 
         const response = await apiClient.get<{
           isSuccess: boolean;
@@ -142,21 +143,23 @@ const getAllCategoriesQuestionnaireResults = async (
             score: isNaN(parseInt(item.score, 10))
               ? item.score
               : parseInt(item.score, 10), // 자살위험성은 문자열, 나머지는 숫자
-            createdDate: item.createdDate, // ISO 형식 날짜 문자열 유지
+            createdDate: Array.isArray(item.createdDate)
+              ? convertLocalDateTimeArrayToISO(item.createdDate)
+              : item.createdDate, // 배열이면 ISO 문자열로 변환, 아니면 그대로 사용
           }));
         } else {
           results[koreanCategory] = [];
         }
       } catch (error) {
-        const koreanCategory = getCategoryKoreanName(String(category));
-        console.error(`${koreanCategory} 설문 결과 조회 실패:`, error);
+        const koreanCategory = String(category); // 한글 카테고리 그대로 사용
+        console.error(`❌ API 호출 실패 (${koreanCategory}):`, error);
         results[koreanCategory] = [];
       }
     }
 
     return results;
   } catch (error) {
-    console.error('설문 결과 조회 실패:', error);
+    console.error('❌ 설문 결과 조회 실패:', error);
     throw new Error('설문 결과를 가져오는데 실패했습니다.');
   }
 };

@@ -22,7 +22,6 @@ export const useQuestionnaireResults = () => {
     '스트레스',
     '우울',
     '불안',
-    '자살',
   ];
 
   const {
@@ -86,13 +85,17 @@ export const useQuestionnaireResults = () => {
 
   const getCategoryResults = useCallback(
     (category: QuestionnaireCategoryKey): QuestionnaireResult[] => {
-      return allResults?.[category] || [];
+      const results = allResults?.[category] || [];
+      console.log(`🔍 getCategoryResults (${category}):`, results);
+      return results;
     },
     [allResults]
   );
 
   const getSelectedCategoryResults = useCallback((): QuestionnaireResult[] => {
-    return getCategoryResults(selectedCategory);
+    const results = getCategoryResults(selectedCategory);
+    console.log(`🎯 getSelectedCategoryResults (${selectedCategory}):`, results);
+    return results;
   }, [getCategoryResults, selectedCategory]);
 
   const hasAnyResults = useCallback((): boolean => {

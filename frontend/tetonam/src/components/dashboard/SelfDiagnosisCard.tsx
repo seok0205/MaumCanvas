@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/layout/card';
 import { useQuestionnaireResults } from '@/hooks/useQuestionnaireResults';
 import type { QuestionnaireCategory } from '@/types/api';
 import { AlertCircle, RefreshCw, TrendingUp } from 'lucide-react';
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { QuestionnaireChart } from './QuestionnaireChart';
 
 // Props 인터페이스 정의 - TanStack Query Best Practice
@@ -14,7 +14,7 @@ interface SelfDiagnosisCardProps {
 }
 
 export const SelfDiagnosisCard = memo<SelfDiagnosisCardProps>(({ 
-  questionnaireData = null,
+  questionnaireData,
   isLoading: propsIsLoading = false,
   isFetching: propsIsFetching = false 
 }) => {
@@ -22,12 +22,31 @@ export const SelfDiagnosisCard = memo<SelfDiagnosisCardProps>(({
   const queryResult = useQuestionnaireResults();
   
   // Props에서 데이터가 제공되면 사용, 없으면 개별 쿼리 결과 사용
-  const shouldUseProps = questionnaireData !== undefined;
-  
-  const {
+  const shouldUseProps = questionnaireData !== undefined && questionnaireData !== null;
+
+  // 성능 최적화: 자살 카테고리를 제외한 카테고리 필터링을 메모이제이션
+  const filteredCategories = useMemo(() => {
+    const allCategories = shouldUseProps 
+      ? Object.keys(questionnaireData || {})
+      : queryResult.categories;
+    
+    // 자살 카테고리 제외
+    return allCategories.filter(category => category !== '자살');
+  }, [shouldUseProps, questionnaireData, queryResult.categories]);
+
+  // 로컬 카테고리 선택 상태 (props 사용 시에도 카테고리 변경 가능하도록)
+  const [localSelectedCategory, setLocalSelectedCategory] = useState<string>(
+    filteredCategories[0] || '스트레스'
+  );
+
+  // filteredCategories가 변경되면 localSelectedCategory도 업데이트
+  useMemo(() => {
+    if (filteredCategories.length > 0 && !filteredCategories.includes(localSelectedCategory)) {
+      setLocalSelectedCategory(filteredCategories[0] || '스트레스');
+    }
+  }, [filteredCategories, localSelectedCategory]);  const {
     selectedCategory,
     setSelectedCategory,
-    categories,
     error,
     retryCount,
     maxRetries,
@@ -39,19 +58,19 @@ export const SelfDiagnosisCard = memo<SelfDiagnosisCardProps>(({
     showSkeleton,
     isBackgroundFetching,
   } = shouldUseProps ? {
-    // Props 기반 데이터 사용 시 간소화된 인터페이스
-    selectedCategory: Object.keys(questionnaireData || {})[0] || '스트레스',
-    setSelectedCategory: () => {},
-    categories: Object.keys(questionnaireData || {}),
+    // Props 기반 데이터 사용 시 로컬 상태로 카테고리 관리
+    selectedCategory: localSelectedCategory,
+    setSelectedCategory: setLocalSelectedCategory,
     error: null,
     retryCount: 0,
     maxRetries: 3,
     refetch: async () => {},
     getSelectedCategoryResults: () => {
-      const key = Object.keys(questionnaireData || {})[0];
-      return key && questionnaireData ? questionnaireData[key] || [] : [];
+      return questionnaireData && localSelectedCategory 
+        ? questionnaireData[localSelectedCategory] || [] 
+        : [];
     },
-    hasAnyResults: () => Object.keys(questionnaireData || {}).length > 0,
+    hasAnyResults: () => filteredCategories.length > 0,
     getCategoryDisplayName: (cat: any) => String(cat),
     showSkeleton: propsIsLoading,
     isBackgroundFetching: propsIsFetching,
@@ -80,7 +99,7 @@ export const SelfDiagnosisCard = memo<SelfDiagnosisCardProps>(({
         <div className='space-y-4'>
           {/* 카테고리 선택 스켈레톤 */}
           <div className='flex space-x-2'>
-            {[1, 2, 3, 4].map(i => (
+            {[1, 2, 3].map(i => (
               <div
                 key={i}
                 className='h-8 bg-gray-200 rounded animate-pulse flex-1'
@@ -195,7 +214,7 @@ export const SelfDiagnosisCard = memo<SelfDiagnosisCardProps>(({
 
       {/* 카테고리 선택 버튼들 */}
       <div className='flex flex-wrap gap-2 mb-6'>
-        {categories.map(category => (
+        {filteredCategories.map((category: string) => (
           <Button
             key={category}
             variant={selectedCategory === category ? 'default' : 'outline'}
