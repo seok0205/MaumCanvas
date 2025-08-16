@@ -1,4 +1,4 @@
-import { Clock, Edit3, FileText, MessageCircle, Search, User } from 'lucide-react';
+import { CheckCircle, Clock, Edit3, FileText, Info, MessageCircle, Search, User } from 'lucide-react';
 import React, {
   useCallback,
   useEffect,
@@ -151,7 +151,7 @@ export const CommunityPage = ({}: CommunityPageProps) => {
                       className='hover:bg-orange-50 focus:bg-orange-50 cursor-pointer py-2.5 px-4 transition-colors'
                     >
                       <div className='flex items-center gap-2'>
-                        <span className='text-lg'>👤</span>
+                        <User className='w-4 h-4 text-slate-600' />
                         <span className='font-medium'>닉네임</span>
                       </div>
                     </SelectItem>
@@ -160,7 +160,7 @@ export const CommunityPage = ({}: CommunityPageProps) => {
                       className='hover:bg-orange-50 focus:bg-orange-50 cursor-pointer py-2.5 px-4 transition-colors'
                     >
                       <div className='flex items-center gap-2'>
-                        <span className='text-lg'>�</span>
+                        <FileText className='w-4 h-4 text-slate-600' />
                         <span className='font-medium'>제목</span>
                       </div>
                     </SelectItem>
@@ -180,7 +180,8 @@ export const CommunityPage = ({}: CommunityPageProps) => {
               </div>
               {searchType === 'title' && (
                 <p className='mt-2 text-xs text-slate-500 flex items-center gap-1'>
-                  💡 제목 검색은 클라이언트에서 실시간으로 필터링됩니다.
+                  <Info className='w-3 h-3' />
+                  제목 검색은 클라이언트에서 실시간으로 필터링됩니다.
                 </p>
               )}
             </div>
@@ -345,9 +346,10 @@ const PostList = React.memo(
             </div>
           )}
           {!isFetchingNextPage && !hasNextPage && filtered.length > 0 && (
-            <span className='text-xs text-slate-400'>
-              모든 게시글을 다 보셨습니다 🎉
-            </span>
+            <div className='text-xs text-slate-400 flex items-center gap-1 justify-center'>
+              <CheckCircle className='w-3 h-3' />
+              <span>모든 게시글을 다 보셨습니다</span>
+            </div>
           )}
         </div>
       </div>
