@@ -169,8 +169,8 @@ export const CommunityEditPost = () => {
         </div>
 
         {/* 폼 카드 */}
-        <Card className='border border-slate-100 shadow-xl bg-white/98 backdrop-blur-sm'>
-          <CardHeader className='pb-6 border-b border-slate-100'>
+        <Card className='border-2 border-slate-200 shadow-2xl bg-white'>
+          <CardHeader className='pb-6 border-b-2 border-slate-150'>
             <div className='space-y-4'>
               {/* 카테고리 표시 (읽기 전용) */}
               <div className='space-y-2'>

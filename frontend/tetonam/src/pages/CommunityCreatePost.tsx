@@ -116,7 +116,7 @@ export const CommunityCreatePost = () => {
         </div>
 
         {/* 게시글 작성 폼 */}
-        <Card className='border-0 shadow-lg bg-white/90 backdrop-blur-sm'>
+        <Card className='border-2 border-slate-200 shadow-2xl bg-white'>
           <CardHeader>
             <CardTitle className='text-2xl font-bold text-slate-800'>
               새 글 작성

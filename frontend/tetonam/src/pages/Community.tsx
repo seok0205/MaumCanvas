@@ -1,4 +1,4 @@
-import { Clock, MessageCircle, PlusCircle, Search, User } from 'lucide-react';
+import { Clock, Edit3, FileText, MessageCircle, Search, User } from 'lucide-react';
 import React, {
   useCallback,
   useEffect,
@@ -14,6 +14,13 @@ import { Badge } from '@/components/ui/data-display/badge';
 import { Alert, AlertDescription } from '@/components/ui/feedback/alert';
 import { LoadingSpinner } from '@/components/ui/feedback/loading-spinner';
 import { Input } from '@/components/ui/forms/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/forms/select';
 import { Button } from '@/components/ui/interactive/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/layout/card';
 import {
@@ -122,41 +129,58 @@ export const CommunityPage = ({}: CommunityPageProps) => {
 
   return layoutShell(
     <>
-      <Card className='mb-4 border border-orange-100/50 shadow-xl bg-orange-50/90 backdrop-blur-sm'>
+      <Card className='mb-4 border-2 border-orange-200 shadow-2xl bg-white'>
         <CardHeader className='pb-4'>
           <div className='flex flex-col gap-4'>
             <div className='flex-1'>
-              <div className='flex items-center gap-2 mb-2'>
-                <Search className='w-4 h-4 text-slate-600' />
-                <span className='text-sm font-medium text-slate-700'>검색</span>
+              <div className='flex items-center gap-2 mb-3'>
+                <Search className='w-5 h-5 text-orange-500' />
+                <span className='text-base font-semibold text-slate-800'>검색</span>
               </div>
-              <div className='flex gap-2'>
-                <select
+              <div className='flex gap-3'>
+                <Select
                   value={searchType}
-                  onChange={e =>
-                    setSearchType(e.target.value as 'nickname' | 'title')
-                  }
-                  className='w-28 rounded-md border border-slate-200 bg-white px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400/40 shadow-sm'
-                  aria-label='검색 유형'
+                  onValueChange={(value: 'nickname' | 'title') => setSearchType(value)}
                 >
-                  <option value='nickname'>닉네임</option>
-                  <option value='title'>제목</option>
-                </select>
+                  <SelectTrigger className='w-36 border-2 border-slate-200 bg-white hover:border-slate-300 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 rounded-lg shadow-sm transition-colors'>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className='border-2 border-slate-200 bg-white shadow-xl rounded-lg overflow-hidden'>
+                    <SelectItem
+                      value='nickname'
+                      className='hover:bg-orange-50 focus:bg-orange-50 cursor-pointer py-2.5 px-4 transition-colors'
+                    >
+                      <div className='flex items-center gap-2'>
+                        <span className='text-lg'>👤</span>
+                        <span className='font-medium'>닉네임</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem
+                      value='title'
+                      className='hover:bg-orange-50 focus:bg-orange-50 cursor-pointer py-2.5 px-4 transition-colors'
+                    >
+                      <div className='flex items-center gap-2'>
+                        <span className='text-lg'>�</span>
+                        <span className='font-medium'>제목</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
                 <Input
                   placeholder={
                     searchType === 'nickname'
-                      ? '닉네임으로 검색'
-                      : '제목으로 검색'
+                      ? '닉네임으로 검색해보세요...'
+                      : '제목으로 검색해보세요...'
                   }
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className='border-slate-200 focus:border-orange-400 focus:ring-orange-400/20 flex-1 shadow-sm bg-white'
+                  className='border-2 border-slate-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 flex-1 shadow-sm bg-white rounded-lg py-2.5 text-sm font-medium hover:border-slate-300 transition-colors'
                   aria-label='검색어'
                 />
               </div>
               {searchType === 'title' && (
-                <p className='mt-1 text-[11px] text-slate-500'>
-                  제목 검색은 클라이언트 필터링입니다.
+                <p className='mt-2 text-xs text-slate-500 flex items-center gap-1'>
+                  💡 제목 검색은 클라이언트에서 실시간으로 필터링됩니다.
                 </p>
               )}
             </div>
@@ -164,14 +188,14 @@ export const CommunityPage = ({}: CommunityPageProps) => {
         </CardHeader>
       </Card>
 
-      {/* 검색창과 게시글 목록 사이 영역 - 글 작성 버튼 */}
+      {/* 글 작성 버튼 */}
       {user && (
-        <div className='mb-4 flex justify-end py-3 px-4 bg-white/40 backdrop-blur-sm border-l-4 border-orange-300 rounded-r-lg'>
+        <div className='mb-4 flex justify-end'>
           <Button
             onClick={handleCreatePost}
             className='bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500 text-white font-medium px-6 py-2.5 rounded-lg shadow-lg transition-all hover:shadow-xl hover:scale-105'
           >
-            <PlusCircle className='w-4 h-4 mr-2' />글 작성
+            <Edit3 className='w-4 h-4 mr-2' />글 작성
           </Button>
         </div>
       )}
@@ -227,10 +251,10 @@ const PostList = React.memo(
     if (filtered.length === 0) {
       return (
         <div className='flex-1'>
-          <Card className='border border-slate-200 shadow-lg bg-slate-50/80 backdrop-blur-sm'>
+          <Card className='border-2 border-slate-200 shadow-2xl bg-white'>
             <CardContent className='p-12 text-center'>
               <div className='space-y-4'>
-                <div className='w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto shadow-inner'>
+                <div className='w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto shadow-lg border-2 border-orange-200'>
                   <MessageCircle className='w-8 h-8 text-orange-400' />
                 </div>
                 <div>
@@ -245,7 +269,7 @@ const PostList = React.memo(
                       onClick={onCreatePost}
                       className='bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500 text-white font-medium px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105'
                     >
-                      <PlusCircle className='w-4 h-4 mr-2' />새 글 작성
+                      <Edit3 className='w-4 h-4 mr-2' />새 글 작성
                     </Button>
                   )}
                 </div>
@@ -261,7 +285,7 @@ const PostList = React.memo(
         {filtered.map(post => (
           <Card
             key={post.id}
-            className='border border-slate-100 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/95 backdrop-blur-sm cursor-pointer hover:scale-[1.02] hover:border-orange-200'
+            className='border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all duration-300 bg-white cursor-pointer hover:scale-[1.02] hover:border-orange-300 hover:bg-slate-50'
             onClick={() => onClickPost(post.id)}
           >
             <CardContent className='p-6'>
@@ -293,7 +317,7 @@ const PostList = React.memo(
                     </h3>
                   </div>
                 </div>
-                <div className='flex items-center justify-between pt-3 border-t border-slate-100 text-xs text-slate-500'>
+                <div className='flex items-center justify-between pt-3 border-t-2 border-slate-150 text-xs text-slate-500'>
                   <div className='flex items-center'>
                     <User className='w-4 h-4 mr-1' />
                     <span>{post.nickname}</span>

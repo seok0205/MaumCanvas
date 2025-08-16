@@ -200,8 +200,8 @@ export const CommunityPostDetail = () => {
         </div>
 
         {/* 게시글 카드 */}
-        <Card className='border border-slate-100 shadow-xl bg-white/98 backdrop-blur-sm mb-8'>
-          <CardHeader className='pb-6 border-b border-slate-100'>
+        <Card className='border-2 border-slate-200 shadow-2xl bg-white mb-8'>
+          <CardHeader className='pb-6 border-b-2 border-slate-150'>
             <div className='flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4'>
               <div className='flex-1'>
                 {/* 카테고리 배지 */}
@@ -284,7 +284,7 @@ export const CommunityPostDetail = () => {
         </Card>
 
         {/* 댓글 섹션 */}
-        <Card className='border border-slate-100 shadow-xl bg-white/95 backdrop-blur-sm'>
+        <Card className='border-2 border-slate-200 shadow-2xl bg-white'>
           <CardHeader>
             <div className='flex items-center gap-2'>
               <MessageCircle className='w-5 h-5 text-slate-600' />
@@ -355,7 +355,7 @@ export const CommunityPostDetail = () => {
                   return (
                     <div
                       key={c.id}
-                      className='group rounded-lg border border-slate-200 bg-slate-50/80 hover:bg-white/90 transition p-4 shadow-md hover:shadow-lg'
+                      className='group rounded-lg border-2 border-slate-200 bg-white hover:bg-slate-50 transition p-4 shadow-lg hover:shadow-xl hover:border-orange-200'
                     >
                       <div className='flex justify-between items-start mb-2'>
                         <div className='flex items-center gap-2 text-sm text-slate-600'>
