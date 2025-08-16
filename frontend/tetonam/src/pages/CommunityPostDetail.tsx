@@ -75,11 +75,18 @@ export const CommunityPostDetail = () => {
 
   const handleSubmitComment = useCallback(() => {
     if (!commentContent.trim()) return;
+    
+    // 이미 작성 중인 경우 중복 요청 방지
+    if (createCommentMutation.isPending) return;
+    
     createCommentMutation.mutate(
       { content: commentContent.trim() },
       {
         onSuccess: () => {
           setCommentContent('');
+        },
+        onError: () => {
+          // 에러 시에도 입력 내용은 유지하여 재시도 가능하게 함
         },
       }
     );
@@ -98,11 +105,18 @@ export const CommunityPostDetail = () => {
   const submitEditComment = useCallback(() => {
     if (!editingCommentId) return;
     if (!editingContent.trim()) return;
+    
+    // 이미 수정 중인 경우 중복 요청 방지
+    if (updateCommentMutation.isPending) return;
+    
     updateCommentMutation.mutate(
       { id: editingCommentId, data: { content: editingContent.trim() } },
       {
         onSuccess: () => {
           cancelEditComment();
+        },
+        onError: () => {
+          // 에러 발생 시에도 편집 상태는 유지하여 재시도 가능하게 함
         },
       }
     );
@@ -115,14 +129,129 @@ export const CommunityPostDetail = () => {
 
   const handleDeleteComment = useCallback(
     (id: number) => {
+      // 이미 삭제 중인 경우 중복 요청 방지
+      if (deleteCommentMutation.isPending) return;
+      
       deleteCommentMutation.mutate(id, {
         onSuccess: () => {
           if (editingCommentId === id) cancelEditComment();
+        },
+        onError: () => {
+          // 에러 처리는 hook 내부에서 toast로 처리됨
         },
       });
     },
     [deleteCommentMutation, editingCommentId, cancelEditComment]
   );
+
+  // 댓글 목록 렌더링 최적화 - 의존성 기반 메모이제이션
+  const renderedComments = useMemo(() => {
+    if (!comments) return null;
+    
+    return comments.map(c => {
+      const isEditing = editingCommentId === c.id;
+      // 댓글 작성자 확인 - nickname 비교 (CommentListDto에는 isAuthor 필드 없음)
+      const isOwner = user?.nickname === c.nickname;
+
+      return (
+        <div
+          key={c.id}
+          className='group rounded-lg border-2 border-slate-200 bg-white hover:bg-slate-50 transition p-4 shadow-lg hover:shadow-xl hover:border-orange-200'
+        >
+          <div className='flex justify-between items-start mb-2'>
+            <div className='flex items-center gap-2 text-sm text-slate-600'>
+              <User className='w-4 h-4' />
+              <span className='font-medium'>{c.nickname}</span>
+              <Calendar className='w-4 h-4' />
+              <span>{formatRelativeTime(c.createdDate)}</span>
+            </div>
+            {isOwner && (
+              <div className='flex gap-1'>
+                {/* 댓글 수정/삭제 버튼 - React 조건부 렌더링 (&&) 사용 */}
+                {!isEditing && (
+                  <>
+                    <Button
+                      variant='ghost'
+                      size='sm'
+                      onClick={() => startEditComment(c.id, c.content)}
+                      className='opacity-0 group-hover:opacity-100 transition-opacity text-slate-500 hover:text-orange-500'
+                    >
+                      <Edit className='w-4 h-4' />
+                    </Button>
+                    <Button
+                      variant='ghost'
+                      size='sm'
+                      onClick={() => handleDeleteComment(c.id)}
+                      disabled={deleteCommentMutation.isPending}
+                      className='opacity-0 group-hover:opacity-100 transition-opacity text-slate-500 hover:text-red-500'
+                    >
+                      <Trash2 className='w-4 h-4' />
+                    </Button>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+
+          {isEditing ? (
+            <div className='space-y-3'>
+              <Textarea
+                value={editingContent}
+                onChange={e => setEditingContent(e.target.value)}
+                maxLength={1000}
+                rows={4}
+                className='resize-none focus-visible:ring-orange-400/30'
+              />
+              <div className='flex justify-end gap-2'>
+                <Button
+                  variant='outline'
+                  size='sm'
+                  onClick={cancelEditComment}
+                  disabled={updateCommentMutation.isPending}
+                >
+                  <X className='w-4 h-4 mr-1' />
+                  취소
+                </Button>
+                <Button
+                  size='sm'
+                  onClick={submitEditComment}
+                  disabled={
+                    updateCommentMutation.isPending ||
+                    !editingContent.trim()
+                  }
+                  className='bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500 text-white'
+                >
+                  {updateCommentMutation.isPending ? (
+                    '저장 중...'
+                  ) : (
+                    <>
+                      <Check className='w-4 h-4 mr-1' />
+                      저장
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className='text-slate-700 leading-relaxed whitespace-pre-wrap'>
+              {c.content}
+            </div>
+          )}
+        </div>
+      );
+    });
+  }, [
+    comments,
+    editingCommentId,
+    editingContent,
+    user?.nickname,
+    updateCommentMutation.isPending,
+    deleteCommentMutation.isPending,
+    startEditComment,
+    handleDeleteComment,
+    cancelEditComment,
+    submitEditComment,
+  ]);
 
   const deletePostMutation = useDeletePost();
 
@@ -352,97 +481,8 @@ export const CommunityPostDetail = () => {
                   첫 댓글을 남겨보세요.
                 </div>
               )}
-              {comments &&
-                comments.map(c => {
-                  const isEditing = editingCommentId === c.id;
-                  // 댓글 작성자 확인 - nickname 비교 (CommentListDto에는 isAuthor 필드 없음)
-                  const isOwner = user?.nickname === c.nickname;
-
-
-                  return (
-                    <div
-                      key={c.id}
-                      className='group rounded-lg border-2 border-slate-200 bg-white hover:bg-slate-50 transition p-4 shadow-lg hover:shadow-xl hover:border-orange-200'
-                    >
-                      <div className='flex justify-between items-start mb-2'>
-                        <div className='flex items-center gap-2 text-sm text-slate-600'>
-                          <User className='w-4 h-4' />
-                          <span className='font-medium'>{c.nickname}</span>
-                          <span className='text-slate-400'>
-                            • {safeRelativeTime(c.createdDate) || ''}
-                          </span>
-                        </div>
-                        {/* 댓글 수정/삭제 버튼 - React 조건부 렌더링 (&&) 사용 */}
-                        {Boolean(isOwner && !isEditing) && (
-                          <div className='flex gap-1 opacity-0 group-hover:opacity-100 transition'>
-                            <Button
-                              variant='ghost'
-                              size='icon'
-                              className='h-7 w-7'
-                              onClick={() => startEditComment(c.id, c.content)}
-                            >
-                              <Edit className='w-3 h-3' />
-                            </Button>
-                            <Button
-                              variant='ghost'
-                              size='icon'
-                              className='h-7 w-7 text-red-500 hover:text-red-600'
-                              onClick={() => handleDeleteComment(c.id)}
-                              disabled={deleteCommentMutation.isPending}
-                            >
-                              <Trash2 className='w-3 h-3' />
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                      {!isEditing && (
-                        <p className='text-sm whitespace-pre-wrap text-slate-700 leading-relaxed'>
-                          {c.content}
-                        </p>
-                      )}
-                      {isEditing && (
-                        <div className='space-y-2'>
-                          <Textarea
-                            value={editingContent}
-                            onChange={e => setEditingContent(e.target.value)}
-                            rows={4}
-                            maxLength={1000}
-                            className='resize-none focus-visible:ring-orange-400/30'
-                          />
-                          <div className='flex justify-end gap-2'>
-                            <Button
-                              variant='outline'
-                              size='sm'
-                              onClick={cancelEditComment}
-                              disabled={updateCommentMutation.isPending}
-                            >
-                              <X className='w-4 h-4 mr-1' />
-                              취소
-                            </Button>
-                            <Button
-                              size='sm'
-                              onClick={submitEditComment}
-                              disabled={
-                                updateCommentMutation.isPending ||
-                                !editingContent.trim()
-                              }
-                              className='bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500 text-white'
-                            >
-                              {updateCommentMutation.isPending ? (
-                                '저장 중...'
-                              ) : (
-                                <>
-                                  <Check className='w-4 h-4 mr-1' />
-                                  저장
-                                </>
-                              )}
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+              {/* 메모이제이션된 댓글 목록 렌더링 */}
+              {renderedComments}
             </div>
           </CardContent>
         </Card>
