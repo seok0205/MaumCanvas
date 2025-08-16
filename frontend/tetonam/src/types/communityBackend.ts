@@ -40,6 +40,7 @@ export interface PostPageDto {
   title: string;
   nickname: string;
   category: CommunityCategory;
+  viewCount: number; // 백엔드 DTO에 있는 viewCount 필드 추가
   createdDate: number[] | string; // LocalDateTime 배열 또는 이미 변환된 문자열
 }
 

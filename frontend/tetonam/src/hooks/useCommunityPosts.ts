@@ -46,7 +46,10 @@ export const useCommunityPosts = ({
         hasNextPage: lastPage?.hasNext ?? false,
       };
     },
-    staleTime: 1000 * 60 * 5, // 5분
-    gcTime: 1000 * 60 * 10, // 10분
+    staleTime: 1000 * 60 * 5, // 5분 - 커뮤니티 게시글은 자주 변경되므로 적절한 staleTime 설정
+    gcTime: 1000 * 60 * 10, // 10분 - 메모리 효율성을 위한 가비지 컬렉션 시간
+    refetchOnWindowFocus: false, // 윈도우 포커스 시 자동 재페칭 비활성화 (성능 최적화)
+    retry: 3, // 실패 시 3번까지 재시도
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000), // 지수 백오프
   });
 };

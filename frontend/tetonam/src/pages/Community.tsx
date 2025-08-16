@@ -11,8 +11,9 @@ import { useNavigate } from 'react-router-dom';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { CommonHeader } from '@/components/layout/CommonHeader';
 import { Badge } from '@/components/ui/data-display/badge';
-import { Alert, AlertDescription } from '@/components/ui/feedback/alert';
 import { LoadingSpinner } from '@/components/ui/feedback/loading-spinner';
+import { LoadingAnimation } from '@/components/ui/LoadingAnimation';
+import { GlobalLoadingIndicator } from '@/components/ui/GlobalLoadingIndicator';
 import { Input } from '@/components/ui/forms/input';
 import {
   Select,
@@ -91,7 +92,8 @@ export const CommunityPage = ({}: CommunityPageProps) => {
     [navigate]
   );
 
-  const layoutShell = (content: React.ReactNode) => (
+  // 레이아웃 구조 (항상 렌더링)
+  return (
     <SidebarProvider>
       <div className='flex min-h-screen w-full bg-gradient-to-b from-orange-50 via-orange-25 to-slate-50'>
         <AppSidebar />
@@ -101,127 +103,199 @@ export const CommunityPage = ({}: CommunityPageProps) => {
             user={(user as any) || { roles: [] }}
           />
           <div className='container mx-auto px-4 py-8 flex flex-col gap-6'>
-            {content}
+            {/* 검색 및 작성 버튼 영역 - 항상 표시 */}
+            <Card className='mb-4 border-2 border-orange-200 shadow-2xl bg-white'>
+              <CardHeader className='pb-4'>
+                <div className='flex flex-col gap-4'>
+                  <div className='flex-1'>
+                    <div className='flex items-center gap-2 mb-3'>
+                      <Search className='w-5 h-5 text-orange-500' />
+                      <span className='text-base font-semibold text-slate-800'>검색</span>
+                    </div>
+                    <div className='flex gap-3'>
+                      <Select
+                        value={searchType}
+                        onValueChange={(value: 'nickname' | 'title') => setSearchType(value)}
+                      >
+                        <SelectTrigger className='w-36 h-12 px-4 border-2 border-slate-200 bg-white hover:border-slate-300 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 rounded-xl shadow-sm transition-colors'>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className='border-2 border-slate-200 bg-white shadow-xl rounded-lg overflow-hidden'>
+                          <SelectItem
+                            value='nickname'
+                            className='hover:bg-orange-50 focus:bg-orange-50 cursor-pointer py-2.5 px-4 transition-colors'
+                          >
+                            <div className='flex items-center gap-2'>
+                              <User className='w-4 h-4 text-slate-600' />
+                              <span className='font-medium'>닉네임</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem
+                            value='title'
+                            className='hover:bg-orange-50 focus:bg-orange-50 cursor-pointer py-2.5 px-4 transition-colors'
+                          >
+                            <div className='flex items-center gap-2'>
+                              <FileText className='w-4 h-4 text-slate-600' />
+                              <span className='font-medium'>제목</span>
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        placeholder={
+                          searchType === 'nickname'
+                            ? '닉네임으로 검색해보세요...'
+                            : '제목으로 검색해보세요...'
+                        }
+                        value={searchQuery}
+                        onChange={e => setSearchQuery(e.target.value)}
+                        className='border-2 border-slate-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 flex-1 shadow-sm bg-white rounded-xl text-sm font-medium hover:border-slate-300 transition-colors'
+                        aria-label='검색어'
+                      />
+                    </div>
+                    {searchType === 'title' && (
+                      <p className='mt-2 text-xs text-slate-500 flex items-center gap-1'>
+                        <Info className='w-3 h-3' />
+                        제목 검색은 클라이언트에서 실시간으로 필터링됩니다.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+
+            {/* 글 작성 버튼 */}
+            {user && (
+              <div className='mb-4 flex justify-end'>
+                <Button
+                  onClick={handleCreatePost}
+                  className='bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500 text-white font-medium px-6 py-2.5 rounded-lg shadow-lg transition-all hover:shadow-xl hover:scale-105'
+                >
+                  <Edit3 className='w-4 h-4 mr-2' />글 작성
+                </Button>
+              </div>
+            )}
+
+            {/* 게시글 목록 영역 - 여기서만 로딩/에러 처리 */}
+            <PostListContainer
+              posts={posts}
+              isLoading={isLoading}
+              isError={isError}
+              error={error}
+              searchType={searchType}
+              searchValue={debouncedSearch}
+              isFetchingNextPage={isFetchingNextPage}
+              hasNextPage={hasNextPage}
+              sentinelRef={sentinelRef}
+              onClickPost={handlePostClick}
+              userLoggedIn={!!user}
+              onCreatePost={handleCreatePost}
+            />
           </div>
         </div>
         <MobileSidebarToggle />
       </div>
+      
+      {/* 글로벌 로딩 인디케이터 */}
+      <GlobalLoadingIndicator />
     </SidebarProvider>
   );
+};
 
+interface PostListContainerProps {
+  posts: { posts: PostPageItem[] } | undefined;
+  isLoading: boolean;
+  isError: boolean;
+  error: unknown;
+  searchType: 'nickname' | 'title';
+  searchValue: string;
+  isFetchingNextPage: boolean;
+  hasNextPage?: boolean;
+  sentinelRef: React.RefObject<HTMLDivElement | null>;
+  onClickPost: (id: number) => void;
+  userLoggedIn: boolean;
+  onCreatePost: () => void;
+}
+
+const PostListContainer = React.memo(({
+  posts,
+  isLoading,
+  isError,
+  error,
+  searchType,
+  searchValue,
+  isFetchingNextPage,
+  hasNextPage,
+  sentinelRef,
+  onClickPost,
+  userLoggedIn,
+  onCreatePost,
+}: PostListContainerProps) => {
   if (isLoading) {
-    return layoutShell(
-      <div className='flex items-center justify-center h-64'>
-        <LoadingSpinner size='lg' />
+    return (
+      <div className='flex items-center justify-center h-96'>
+        <LoadingAnimation
+          size="md"
+          title="게시글 불러오는 중... ✨"
+          message="커뮤니티 게시글을 가져오고 있어요 🌈"
+          showLoadingDots={true}
+        />
       </div>
     );
   }
 
   if (isError) {
-    return layoutShell(
-      <Alert variant='destructive'>
-        <AlertDescription>
-          게시글을 불러오는 중 오류가 발생했습니다. {(error as any)?.message}
-        </AlertDescription>
-      </Alert>
+    return (
+      <Card className='border-2 border-red-200 shadow-2xl bg-white'>
+        <CardContent className='p-12 text-center'>
+          <div className='space-y-4'>
+            <div className='w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto shadow-lg border-2 border-red-200'>
+              <MessageCircle className='w-8 h-8 text-red-400' />
+            </div>
+            <div>
+              <h3 className='text-lg font-medium text-slate-800 mb-2'>
+                오류가 발생했습니다
+              </h3>
+              <p className='text-slate-600 mb-6'>
+                게시글을 불러오는 중 문제가 발생했습니다. {(error as any)?.message}
+              </p>
+              <Button
+                onClick={() => window.location.reload()}
+                className='bg-gradient-to-r from-red-400 to-pink-400 hover:from-red-500 hover:to-pink-500 text-white font-medium px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105'
+              >
+                새로고침
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
-  return layoutShell(
-    <>
-      <Card className='mb-4 border-2 border-orange-200 shadow-2xl bg-white'>
-        <CardHeader className='pb-4'>
-          <div className='flex flex-col gap-4'>
-            <div className='flex-1'>
-              <div className='flex items-center gap-2 mb-3'>
-                <Search className='w-5 h-5 text-orange-500' />
-                <span className='text-base font-semibold text-slate-800'>검색</span>
-              </div>
-              <div className='flex gap-3'>
-                <Select
-                  value={searchType}
-                  onValueChange={(value: 'nickname' | 'title') => setSearchType(value)}
-                >
-                  <SelectTrigger className='w-36 h-12 px-4 border-2 border-slate-200 bg-white hover:border-slate-300 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 rounded-xl shadow-sm transition-colors'>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className='border-2 border-slate-200 bg-white shadow-xl rounded-lg overflow-hidden'>
-                    <SelectItem
-                      value='nickname'
-                      className='hover:bg-orange-50 focus:bg-orange-50 cursor-pointer py-2.5 px-4 transition-colors'
-                    >
-                      <div className='flex items-center gap-2'>
-                        <User className='w-4 h-4 text-slate-600' />
-                        <span className='font-medium'>닉네임</span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem
-                      value='title'
-                      className='hover:bg-orange-50 focus:bg-orange-50 cursor-pointer py-2.5 px-4 transition-colors'
-                    >
-                      <div className='flex items-center gap-2'>
-                        <FileText className='w-4 h-4 text-slate-600' />
-                        <span className='font-medium'>제목</span>
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <Input
-                  placeholder={
-                    searchType === 'nickname'
-                      ? '닉네임으로 검색해보세요...'
-                      : '제목으로 검색해보세요...'
-                  }
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  className='border-2 border-slate-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 flex-1 shadow-sm bg-white rounded-xl text-sm font-medium hover:border-slate-300 transition-colors'
-                  aria-label='검색어'
-                />
-              </div>
-              {searchType === 'title' && (
-                <p className='mt-2 text-xs text-slate-500 flex items-center gap-1'>
-                  <Info className='w-3 h-3' />
-                  제목 검색은 클라이언트에서 실시간으로 필터링됩니다.
-                </p>
-              )}
-            </div>
-          </div>
-        </CardHeader>
-      </Card>
-
-      {/* 글 작성 버튼 */}
-      {user && (
-        <div className='mb-4 flex justify-end'>
-          <Button
-            onClick={handleCreatePost}
-            className='bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500 text-white font-medium px-6 py-2.5 rounded-lg shadow-lg transition-all hover:shadow-xl hover:scale-105'
-          >
-            <Edit3 className='w-4 h-4 mr-2' />글 작성
-          </Button>
-        </div>
-      )}
-      <PostList
-        rawPosts={posts?.posts || []}
-        searchType={searchType}
-        searchValue={debouncedSearch}
-        isFetchingNextPage={isFetchingNextPage}
-        hasNextPage={hasNextPage}
-        sentinelRef={sentinelRef}
-        onLoadMore={fetchNextPage}
-        onClickPost={handlePostClick}
-        userLoggedIn={!!user}
-        onCreatePost={handleCreatePost}
-      />
-    </>
+  return (
+    <PostList
+      rawPosts={posts?.posts || []}
+      searchType={searchType}
+      searchValue={searchValue}
+      isFetchingNextPage={isFetchingNextPage}
+      hasNextPage={hasNextPage}
+      sentinelRef={sentinelRef}
+      onLoadMore={() => {}} // 실제로는 사용되지 않음
+      onClickPost={onClickPost}
+      userLoggedIn={userLoggedIn}
+      onCreatePost={onCreatePost}
+    />
   );
-};
+});
+
+PostListContainer.displayName = 'PostListContainer';
 
 interface PostListProps {
   rawPosts: PostPageItem[];
   searchType: 'nickname' | 'title';
   searchValue: string;
   isFetchingNextPage: boolean;
-  hasNextPage?: boolean;
+  hasNextPage: boolean | undefined; // undefined를 허용하도록 수정
   sentinelRef: React.RefObject<HTMLDivElement | null>;
   onLoadMore: () => void; // reserved
   onClickPost: (id: number) => void;
