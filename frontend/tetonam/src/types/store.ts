@@ -13,6 +13,7 @@ export interface AuthState {
 
   // Actions
   setUser: (user: User) => void;
+  updateUserProfile: (profileData: { name?: string; nickname?: string; id?: string }) => void;
   clearUser: () => void;
   // setCompletedOnboarding 제거
   setSelectedUserRole: (type: UserRole) => void;
