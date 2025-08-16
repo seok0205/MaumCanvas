@@ -23,6 +23,7 @@ import {
   CardTitle,
 } from '@/components/ui/layout/card';
 import { useCreatePost } from '@/hooks/useCommunityMutations';
+import { useAuthStore } from '@/stores/useAuthStore';
 import type { CommunityCategory, PostWriteRequest } from '@/types/community';
 import { CATEGORY_LABELS, COMMUNITY_LIMITS } from '@/types/community';
 // 상담 유형 선택 기능 제거 (요청 반영)
@@ -30,6 +31,7 @@ import { CATEGORY_LABELS, COMMUNITY_LIMITS } from '@/types/community';
 export const CommunityCreatePost = () => {
   const navigate = useNavigate();
   const createPostMutation = useCreatePost();
+  const { user } = useAuthStore();
 
   // 폼 상태
   const [formData, setFormData] = useState({
@@ -96,7 +98,7 @@ export const CommunityCreatePost = () => {
   return (
     <div className='min-h-screen bg-warm-gradient'>
       <CommonHeader
-        user={{ roles: [] }}
+        user={user || { roles: [] }}
         showBackButton
         title='새 글 작성'
       />
@@ -191,9 +193,15 @@ export const CommunityCreatePost = () => {
                 maxLength={COMMUNITY_LIMITS.CONTENT_MAX_LENGTH}
                 height={360}
               />
-              {errors['content'] && (
-                <p className='text-sm text-red-600'>{errors['content']}</p>
-              )}
+              <div className='flex justify-between items-center'>
+                {errors['content'] && (
+                  <p className='text-sm text-red-600'>{errors['content']}</p>
+                )}
+                <p className='text-xs text-slate-500 ml-auto'>
+                  {formData.content.length}/
+                  {COMMUNITY_LIMITS.CONTENT_MAX_LENGTH}
+                </p>
+              </div>
             </div>
 
             {/* 작성 안내 */}

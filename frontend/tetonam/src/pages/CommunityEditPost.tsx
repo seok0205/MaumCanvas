@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/interactive/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/layout/card';
 import { useUpdatePost } from '@/hooks/useCommunityMutations';
 import { useCommunityPost } from '@/hooks/useCommunityPost';
-import { useUserHomeInfo } from '@/hooks/useUserHomeInfo';
+import { useAuthStore } from '@/stores/useAuthStore';
 import type { CommunityCategory, PostUpdateRequest } from '@/types/community';
 import { CATEGORY_LABELS, COMMUNITY_LIMITS } from '@/types/community';
 import { cn } from '@/utils/cn';
@@ -20,7 +20,7 @@ import { cn } from '@/utils/cn';
 export const CommunityEditPost = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { data: user } = useUserHomeInfo();
+  const { user } = useAuthStore();
 
   const postId = id ? parseInt(id, 10) : 0;
 
@@ -137,7 +137,7 @@ export const CommunityEditPost = () => {
 
   return (
     <div className='min-h-screen bg-gradient-to-b from-orange-50 via-orange-25 to-slate-50'>
-      <CommonHeader user={{ roles: [] }} title='게시글 수정' />
+      <CommonHeader user={user || { roles: [] }} title='게시글 수정' />
       <div className='container mx-auto px-4 py-6 max-w-4xl'>
         {/* 상단 네비게이션 */}
         <div className='mb-6 flex items-center justify-between'>
@@ -242,9 +242,23 @@ export const CommunityEditPost = () => {
           <CardContent className='pt-6'>
             {/* 내용 편집기 */}
             <div className='space-y-2 mb-6'>
-              <label className='block text-sm font-medium text-slate-700'>
-                내용 *
-              </label>
+              <div className='flex items-center justify-between'>
+                <label className='block text-sm font-medium text-slate-700'>
+                  내용 *
+                </label>
+                <span
+                  className={cn(
+                    'text-xs',
+                    formData.content.length >
+                      COMMUNITY_LIMITS.CONTENT_MAX_LENGTH * 0.8
+                      ? 'text-orange-600'
+                      : 'text-slate-500'
+                  )}
+                >
+                  {formData.content.length}/
+                  {COMMUNITY_LIMITS.CONTENT_MAX_LENGTH}
+                </span>
+              </div>
               <div className='border border-slate-200 rounded-lg overflow-hidden'>
                 <MarkdownEditor
                   value={formData.content}
