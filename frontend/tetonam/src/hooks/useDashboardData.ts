@@ -5,7 +5,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import type { MainMyInfoResponse, UpcomingCounseling } from '@/types/api';
 import type { QuestionnaireCategory } from '@/types/api';
 import { useQueries, keepPreviousData } from '@tanstack/react-query';
-import { useMemo, useEffect } from 'react';
+import { useMemo } from 'react';
 
 // 쿼리 키 상수
 const DASHBOARD_QUERY_KEYS = {
@@ -54,7 +54,7 @@ interface DashboardState {
  * - 통일된 로딩 상태 관리
  */
 export const useDashboardData = (): DashboardState => {
-  const { isAuthenticated, user, updateUserProfile } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
 
   // useQueries를 사용한 병렬 데이터 페칭
   const queries = useMemo(() => [
@@ -126,19 +126,6 @@ export const useDashboardData = (): DashboardState => {
       const userQuery = results[0];
       const counselingQuery = results[1];
       const questionnaireQuery = results[2];
-      
-      // 🎯 TanStack Query 결과를 authStore에 동기화
-      if (userQuery?.data && userQuery.isSuccess) {
-        const userInfo = userQuery.data as MainMyInfoResponse;
-        updateUserProfile({
-          name: userInfo.name || '',
-          nickname: userInfo.nickname || '',
-          // ✅ 기존 ID가 있으면 유지, 없을 때만 새로 설정
-          ...((!user?.id || user.id === '') && {
-            id: userInfo.id?.toString() || userInfo.userId?.toString() || '',
-          }),
-        });
-      }
       
       return {
         data: {

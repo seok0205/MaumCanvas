@@ -21,24 +21,6 @@ export const useAuthStore = create<AuthState>()(
 
         setUser: user => set({ user, isAuthenticated: true, error: null }),
 
-        // 사용자 프로필 정보 업데이트 (name, nickname 등)
-        updateUserProfile: (profileData: { name?: string; nickname?: string; id?: string }) =>
-          set(state => {
-            if (!state.user) return state;
-            
-            const updatedUser = {
-              ...state.user,
-              ...(profileData.name && { name: profileData.name.trim() }),
-              ...(profileData.nickname && { nickname: profileData.nickname.trim() }),
-              ...(profileData.id && { id: profileData.id }),
-            };
-            
-            return { 
-              user: updatedUser,
-              error: null 
-            };
-          }),
-
         clearUser: () =>
           set({ user: null, isAuthenticated: false, error: null }),
 
@@ -76,26 +58,25 @@ export const useAuthStore = create<AuthState>()(
             const validatedRoles =
               finalRoles.length > 0 ? finalRoles : (['USER'] as UserRole[]);
 
-            // 🎯 하이브리드 접근법: ID는 즉시 가져오기 (핵심 기능 보장)
-            // name, nickname은 TanStack Query에서 동기화
-            let userId = '';
+            // 로그인 시에는 role 정보만 설정하고, 나머지 정보는 필요시 별도 API로 가져옴
+            // 로그인 직후 서버에서 numeric userId를 조회
+            let numericUserId = '';
             try {
               const myInfo = await userService.getHomeMyInfo();
               const idCandidate =
-                myInfo?.id ?? myInfo?.userId;
+                (myInfo as any)?.userId ?? (myInfo as any)?.id;
               if (typeof idCandidate === 'number' && idCandidate > 0) {
-                userId = String(idCandidate);
+                numericUserId = String(idCandidate);
               }
-            } catch (error) {
-              // ID 조회 실패해도 로그인은 성공으로 처리
-              console.warn('사용자 ID 조회 실패, 나중에 동기화 예정:', error);
+            } catch {
+              // 조회 실패 시 임시 문자열 유지
             }
 
             const user: User = {
-              id: userId, // ✅ 핵심 기능을 위한 ID는 보장
+              id: numericUserId,
               email: email,
-              name: '', // TanStack Query에서 동기화
-              nickname: '', // TanStack Query에서 동기화
+              name: '',
+              nickname: '',
               gender: '',
               phone: '',
               school: '',
