@@ -1,5 +1,4 @@
 import { queryClient } from '@/config/queryClient';
-import type { UserRole } from '@/constants/userRoles';
 import { authService } from '@/services/authService';
 import type { AuthError } from '@/types/auth';
 import type { AuthState } from '@/types/store';
@@ -95,9 +94,9 @@ export const useAuthStore = create<AuthState>()(
             await authService.register(userData);
 
             // 회원가입 성공 시 - token이 있다면 저장, 없다면 등록 완료만 표시
-            set({ 
+            set({
               isAuthenticated: false, // 회원가입 후 로그인 필요
-              isLoading: false 
+              isLoading: false
             });
             return true;
           } catch (error) {
