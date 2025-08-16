@@ -12,6 +12,7 @@ import { getPrimaryRole } from '@/utils/userRoleMapping';
 import { UpcomingCounselingCard } from './UpcomingCounselingCard';
 // NOTE: 상담사 전용 개별 Hook 활성화
 import { useCounselorUpcomingCounseling } from '@/hooks/useCounselorUpcomingCounseling';
+import { useUserHomeInfo } from '@/hooks/useUserHomeInfo';
 import { CommunityGuidelinesCard } from './CommunityGuidelinesCard';
 import { DailyTips } from './DailyTips';
 import { QuickStartSection } from './QuickStartSection';
@@ -26,6 +27,9 @@ export const CounselorDashboard = ({ user }: CounselorDashboardProps) => {
   const { state } = useSidebar();
   const primaryRole = getPrimaryRole(user.roles);
 
+  // 🔥 NEW: 사용자 정보 조회 (WelcomeSection에 전달하기 위함)
+  const { userName, isLoading: isUserInfoLoading } = useUserHomeInfo();
+
   // 상담사 전용 다가오는 상담 데이터 조회 - TanStack Query Best Practice 적용
   const {
     upcoming: counselorUpcoming,
@@ -39,9 +43,13 @@ export const CounselorDashboard = ({ user }: CounselorDashboardProps) => {
 
   return (
     <div className={`${paddingClass} space-y-8`}>
-      {/* 환영 메시지 */}
+      {/* 환영 메시지 - 사용자 정보 props 전달 */}
       <div>
-        <WelcomeSection userRole={primaryRole} />
+        <WelcomeSection 
+          userRole={primaryRole} 
+          {...(userName && { userName })}
+          isLoading={isUserInfoLoading}
+        />
       </div>
 
       {/* 퀵 시작 섹션 */}

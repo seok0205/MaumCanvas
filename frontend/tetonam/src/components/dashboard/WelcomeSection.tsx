@@ -1,6 +1,6 @@
 import { WelcomeMessageSkeleton } from '@/components/ui/layout/skeleton';
 import type { UserRole } from '@/constants/userRoles';
-import { useDashboardData } from '@/hooks/useDashboardData';
+import { useUserHomeInfo } from '@/hooks/useUserHomeInfo';
 import { memo, useMemo } from 'react';
 
 interface WelcomeSectionProps {
@@ -14,10 +14,12 @@ export const WelcomeSection = memo<WelcomeSectionProps>(({
   userName: propUserName, 
   isLoading: propIsLoading 
 }) => {
-  // 🔥 병렬 로딩: props로 받은 데이터 우선 사용, 없으면 개별 hook 사용
-  const { data, isLoading } = useDashboardData();
-  const userName = propUserName ?? data.userInfo?.name;
-  const isUserInfoLoading = propIsLoading ?? (isLoading && !data.userInfo);
+  // 🔥 조건부 로딩: props로 userName이 전달되지 않은 경우에만 API 호출
+  const { userName: hookUserName, isLoading } = useUserHomeInfo({
+    enabled: !propUserName, // userName이 props로 전달되면 API 호출 비활성화
+  });
+  const userName = propUserName ?? hookUserName;
+  const isUserInfoLoading = propIsLoading ?? isLoading;
 
   // 메시지들을 useMemo로 메모이제이션하여 불필요한 재계산 방지
   const welcomeMessage = useMemo(() => {
