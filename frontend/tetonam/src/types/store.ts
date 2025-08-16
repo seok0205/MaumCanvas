@@ -1,21 +1,17 @@
 import type { UserRole } from '@/constants/userRoles';
 import type { RegisterCredentials } from './api';
-import type { User } from './user';
 
-// Store 타입
+// Store 타입 - 순수 인증 상태만 관리
 export interface AuthState {
-  user: User | null;
+  token: string | null;
   isAuthenticated: boolean;
-  // hasCompletedOnboarding 제거 - 항상 온보딩 페이지를 시작점으로 사용
   selectedUserRole: UserRole | null;
   error: string | null;
   isLoading: boolean;
 
   // Actions
-  setUser: (user: User) => void;
-  updateUserProfile: (profileData: { name?: string; nickname?: string; id?: string }) => void;
-  clearUser: () => void;
-  // setCompletedOnboarding 제거
+  setToken: (token: string | null) => void;
+  clearAuth: () => void;
   setSelectedUserRole: (type: UserRole) => void;
   clearError: () => void;
   login: (email: string, password: string) => Promise<boolean>;
