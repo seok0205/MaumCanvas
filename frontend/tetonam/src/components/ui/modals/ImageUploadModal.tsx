@@ -12,9 +12,11 @@ import {
   DialogTitle,
 } from '@/components/ui/overlay/dialog';
 import { DRAWING_CONFIG } from '@/constants/drawing';
+import { TOAST_MESSAGES, TOAST_IDS } from '@/constants/toastMessages';
 import { drawingService } from '@/services/drawingService';
 import type { HTPImageFiles } from '@/types/drawing';
 import { cn } from '@/utils/cn';
+import { toastManager } from '@/utils/toastManager';
 
 interface ImageUploadModalProps {
   isOpen: boolean;
@@ -224,22 +226,33 @@ export const ImageUploadModal = ({
         onClose();
       } catch (error) {
         console.error('Upload failed:', error);
-        // 백엔드 에러 코드에 따른 구체적 에러 처리
+        
+        // 개선된 에러 처리 - 토스트 활성화
         if (error instanceof Error) {
-          // TODO: toast.error 추가하려면 import 필요
-          // if (error.message.includes('IMAGE4000')) {
-          //   toast.error('파일 형식이 올바르지 않습니다', {
-          //     description: '이미지 파일(JPEG, PNG, GIF)만 업로드 가능합니다.'
-          //   });
-          // } else if (error.message.includes('IMAGE5000')) {
-          //   toast.error('이미지 저장에 실패했습니다', {
-          //     description: '서버 오류입니다. 잠시 후 다시 시도해주세요.'
-          //   });
-          // } else {
-          //   toast.error(error.message || '업로드에 실패했습니다.');
-          // }
+          if (error.message.includes('IMAGE4000')) {
+            toastManager.preventDuplicate.error(
+              TOAST_MESSAGES.ERRORS.UPLOAD_FILE_TYPE,
+              TOAST_IDS.ERROR_DISPLAY,
+              { description: '이미지 파일(JPEG, PNG, GIF)만 업로드 가능합니다.' }
+            );
+          } else if (error.message.includes('IMAGE5000')) {
+            toastManager.preventDuplicate.error(
+              '이미지 저장에 실패했습니다',
+              TOAST_IDS.ERROR_DISPLAY,
+              { description: '서버 오류입니다. 잠시 후 다시 시도해주세요.' }
+            );
+          } else {
+            toastManager.preventDuplicate.error(
+              error.message || TOAST_MESSAGES.ERRORS.UPLOAD_FAILED,
+              TOAST_IDS.ERROR_DISPLAY
+            );
+          }
         } else {
-          // toast.error('업로드에 실패했습니다. 다시 시도해주세요.');
+          toastManager.preventDuplicate.error(
+            TOAST_MESSAGES.ERRORS.UPLOAD_FAILED,
+            TOAST_IDS.ERROR_DISPLAY,
+            { description: '다시 시도해주세요.' }
+          );
         }
       } finally {
         setIsSubmitting(false);

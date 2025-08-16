@@ -1,6 +1,5 @@
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
 
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { CommonHeader } from '@/components/layout/CommonHeader';
@@ -12,6 +11,8 @@ import {
   MobileSidebarToggle,
   SidebarProvider,
 } from '@/components/ui/navigation/sidebar';
+import { TOAST_MESSAGES, TOAST_IDS } from '@/constants/toastMessages';
+import { toastManager } from '@/utils/toastManager';
 import { useAuthStore } from '@/stores/useAuthStore';
 
 export const DrawingDiagnosis = () => {
@@ -29,9 +30,11 @@ export const DrawingDiagnosis = () => {
   }, []);
 
   const handleUploadSuccess = useCallback(() => {
-    toast.success('그림이 성공적으로 업로드되었습니다!', {
-      description: 'AI 분석이 시작됩니다. 잠시만 기다려주세요.',
-    });
+    // 업로드 완료 토스트 - 제출과 구분되는 메시지
+    toastManager.preventDuplicate.success(
+      TOAST_MESSAGES.DRAWING.UPLOAD_SUCCESS,
+      TOAST_IDS.DRAWING_UPLOAD
+    );
     // TODO: 결과 페이지로 이동하거나 추가 작업 수행
     // navigate('/diagnosis/results');
   }, []);

@@ -1,8 +1,8 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
-
 import { CANVAS_CONFIG, DRAWING_STEPS } from '@/constants/drawing';
+import { TOAST_MESSAGES, TOAST_IDS } from '@/constants/toastMessages';
+import { toastManager } from '@/utils/toastManager';
 import { useDrawingLocalStorage } from '@/hooks/useDrawingLocalStorage';
 import { drawingService } from '@/services/drawingService';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -12,7 +12,7 @@ import type { DrawingCategory, HTPImageFiles } from '@/types/drawing';
 
 /**
  * 그림 제출 관련 로직을 관리하는 커스텀 훅
- * 
+ *
  * @param stageRef - Konva Stage 참조
  * @returns 제출 관련 함수들과 상태
  */
@@ -57,12 +57,18 @@ export const useDrawingSubmit = (stageRef: React.RefObject<any>) => {
   const handleSubmit = useCallback(async () => {
     // 가드 클로즈 패턴으로 조기 검증
     if (!stageRef.current) {
-      toast.error('캔버스를 찾을 수 없습니다.');
+      toastManager.preventDuplicate.error(
+        TOAST_MESSAGES.ERRORS.CANVAS_ERROR,
+        TOAST_IDS.ERROR_DISPLAY
+      );
       return;
     }
 
     if (!user?.id) {
-      toast.error('사용자 정보를 찾을 수 없습니다. 로그인을 확인해주세요.');
+      toastManager.preventDuplicate.error(
+        TOAST_MESSAGES.ERRORS.SUBMIT_AUTH,
+        TOAST_IDS.ERROR_DISPLAY
+      );
       return;
     }
 
@@ -71,9 +77,18 @@ export const useDrawingSubmit = (stageRef: React.RefObject<any>) => {
       (lines: readonly any[]) => lines.length === 0
     );
     if (hasEmptyStep) {
-      toast.error('모든 단계의 그림을 완성해주세요.');
+      toastManager.preventDuplicate.error(
+        TOAST_MESSAGES.ERRORS.SUBMIT_VALIDATION,
+        TOAST_IDS.ERROR_DISPLAY
+      );
       return;
     }
+
+    // 프로그레시브 토스트 시작
+    toastManager.progressive.start(
+      TOAST_MESSAGES.DRAWING.SUBMIT_START,
+      { id: TOAST_IDS.DRAWING_SUBMIT }
+    );
 
     setIsSubmitting(true);
 
@@ -154,12 +169,14 @@ export const useDrawingSubmit = (stageRef: React.RefObject<any>) => {
       // API 호출
       await drawingService.createDrawing(files as HTPImageFiles);
 
-      toast.success('그림이 성공적으로 제출되었습니다!', {
-        description: 'AI 분석이 시작됩니다. 잠시만 기다려주세요.',
-      });
+      // 프로그레시브 토스트 성공으로 업데이트
+      toastManager.progressive.success(
+        TOAST_MESSAGES.DRAWING.SUBMIT_SUCCESS,
+        { id: TOAST_IDS.DRAWING_SUBMIT }
+      );
 
       // 제출 성공 후 모든 데이터 정리 (순서 중요)
-      clearAllDrawings(); // localStorage에서 모든 임시저장 데이터 삭제
+      clearAllDrawings(); // localStorage에서 모든 임시저장 데이터 삭제 (조용히 처리)
       resetDrawingState(); // 앱 상태 초기화
 
       // 결과 페이지로 이동
@@ -167,12 +184,20 @@ export const useDrawingSubmit = (stageRef: React.RefObject<any>) => {
     } catch (error) {
       console.error('Submit error:', error);
 
-      // 타입 안전한 에러 처리
+      // 프로그레시브 토스트 에러로 업데이트
       if (error instanceof AuthenticationError) {
-        toast.error(error.message);
+        toastManager.progressive.error(
+          error.message,
+          { id: TOAST_IDS.DRAWING_SUBMIT }
+        );
       } else {
-        // 일반적인 에러 처리
-        toast.error('그림 제출 중 오류가 발생했습니다. 다시 시도해주세요.');
+        toastManager.progressive.error(
+          TOAST_MESSAGES.ERRORS.SUBMIT_FAILED,
+          {
+            id: TOAST_IDS.DRAWING_SUBMIT,
+            description: '다시 시도해주세요.'
+          }
+        );
       }
     } finally {
       setIsSubmitting(false);

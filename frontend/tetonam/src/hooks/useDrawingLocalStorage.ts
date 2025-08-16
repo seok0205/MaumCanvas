@@ -268,10 +268,13 @@ export const useDrawingLocalStorage = (
         }
       );
 
-      toast.success('모든 임시저장 데이터가 삭제되었습니다.');
+      // 백그라운드 정리 작업 - 토스트 표시하지 않음
+      // 사용자에게 불필요한 알림을 줄이기 위해 조용히 처리
+      console.log('Drawing data cleanup completed'); // 개발자용 로그
     } catch (error) {
       console.warn('Failed to clear all drawings:', error);
-      toast.error('임시저장 데이터 삭제 중 오류가 발생했습니다.');
+      // 에러가 발생한 경우에만 사용자에게 알림
+      toast.error('데이터 정리 중 오류가 발생했습니다.');
     }
   }, [userId, isLocalStorageAvailable, updateSaveState]);
 
