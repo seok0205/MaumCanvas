@@ -11,7 +11,7 @@ import {
   User,
   X,
 } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { CommonHeader } from '@/components/layout/CommonHeader';
@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/feedback/alert-dialog';
 import { LoadingSpinner } from '@/components/ui/feedback/loading-spinner';
 import { Textarea } from '@/components/ui/forms/textarea';
+import { ApiButton } from '@/components/ui/ApiButton';
 import { Button } from '@/components/ui/interactive/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/layout/card';
 import {
@@ -73,24 +74,66 @@ export const CommunityPostDetail = () => {
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
   const [editingContent, setEditingContent] = useState('');
 
+  // 중복 요청 방지를 위한 ref들
+  const isSubmittingRef = useRef(false);
+  const lastSubmitTimeRef = useRef(0);
+
   const handleSubmitComment = useCallback(() => {
     if (!commentContent.trim()) return;
     
-    // 이미 작성 중인 경우 중복 요청 방지
-    if (createCommentMutation.isPending) return;
+    // 사용자 데이터가 로딩되지 않은 경우 대기
+    if (!user || !user.nickname) {
+      console.log('🚫 중복 방지: 사용자 데이터 로딩 중');
+      return;
+    }
+    
+    const now = Date.now();
+    
+    // 다중 레벨 중복 방지 체크
+    // 1. TanStack Query isPending 체크
+    if (createCommentMutation.isPending) {
+      console.log('🚫 중복 방지: TanStack Query isPending');
+      return;
+    }
+    
+    // 2. ref를 통한 실행 중 체크
+    if (isSubmittingRef.current) {
+      console.log('🚫 중복 방지: isSubmittingRef');
+      return;
+    }
+    
+    // 3. 시간 기반 중복 방지 (500ms 내 재실행 방지)
+    if (now - lastSubmitTimeRef.current < 500) {
+      console.log('🚫 중복 방지: 시간 기반 방지', now - lastSubmitTimeRef.current, 'ms');
+      return;
+    }
+    
+    // 실행 플래그 설정
+    isSubmittingRef.current = true;
+    lastSubmitTimeRef.current = now;
+    
+    console.log('✅ 댓글 작성 시작:', commentContent.trim(), '사용자:', user.nickname);
     
     createCommentMutation.mutate(
       { content: commentContent.trim() },
       {
         onSuccess: () => {
           setCommentContent('');
+          isSubmittingRef.current = false;
+          console.log('✅ 댓글 작성 성공');
         },
-        onError: () => {
+        onError: (error) => {
+          isSubmittingRef.current = false;
+          console.log('❌ 댓글 작성 실패:', error);
           // 에러 시에도 입력 내용은 유지하여 재시도 가능하게 함
+        },
+        onSettled: () => {
+          // 무조건 실행되는 cleanup
+          isSubmittingRef.current = false;
         },
       }
     );
-  }, [commentContent, createCommentMutation]);
+  }, [commentContent, createCommentMutation, user]);
 
   const startEditComment = useCallback((id: number, existing: string) => {
     setEditingCommentId(id);
@@ -448,23 +491,22 @@ export const CommunityPostDetail = () => {
                   <span className='text-xs text-slate-500'>
                     {commentContent.length}/1000
                   </span>
-                  <Button
+                  <ApiButton
                     onClick={handleSubmitComment}
+                    isLoading={createCommentMutation.isPending}
+                    loadingText='작성 중...'
                     disabled={
-                      createCommentMutation.isPending || !commentContent.trim()
+                      createCommentMutation.isPending || 
+                      !commentContent.trim() ||
+                      !user?.nickname ||
+                      isSubmittingRef.current
                     }
                     className='bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500 text-white'
                     size='sm'
                   >
-                    {createCommentMutation.isPending ? (
-                      '작성 중...'
-                    ) : (
-                      <>
-                        <Send className='w-4 h-4 mr-1' />
-                        작성
-                      </>
-                    )}
-                  </Button>
+                    <Send className='w-4 h-4 mr-1' />
+                    작성
+                  </ApiButton>
                 </div>
               </div>
             )}

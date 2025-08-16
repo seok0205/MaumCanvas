@@ -519,8 +519,8 @@ export const communityService = {
     signal?: AbortSignal
   ): Promise<Comment> => {
     try {
-      // 백엔드가 @RequestBody String commentBody를 기대하므로 순수 텍스트로 전송
-      const response = await apiClient.post<ApiResponse<CommentDto>>(
+      // 백엔드가 실제로 보내는 응답 구조: {content: string, nickname: string}
+      const response = await apiClient.post<ApiResponse<{content: string, nickname: string}>>(
         COMMUNITY_ENDPOINTS.CREATE_COMMENT(communityId),
         data.content,
         {
@@ -540,14 +540,24 @@ export const communityService = {
 
       const raw = response.data.result;
 
-      // CommentDto를 Comment 타입으로 변환
+      // 디버깅: raw response 로깅
+      console.log('🔍 createComment raw response:', raw);
+      console.log('🔍 createComment full response:', response.data);
+
+      // 백엔드 실제 응답 구조: {content, nickname}
+      // Comment 타입으로 변환하여 일관성 유지
       const normalized: Comment = {
-        id: raw.id,
+        id: Date.now(), // 임시 ID (실제로는 백엔드에서 제공되어야 함)
         content: raw.content,
-        author: raw.author,
-        communityId: raw.communityId,
-        createdAt: safeConvertDateTime(raw.createdAt),
-        updatedAt: safeConvertDateTime(raw.updatedAt),
+        author: {
+          id: 0, // 임시 ID
+          nickname: raw.nickname || '사용자',
+          name: '', // 백엔드에서 제공하지 않음
+          email: '', // 백엔드에서 제공하지 않음
+        },
+        communityId: communityId, // 파라미터로 받은 값 사용
+        createdAt: new Date().toISOString(), // 현재 시간 사용
+        updatedAt: new Date().toISOString(),
       };
 
       return normalized;

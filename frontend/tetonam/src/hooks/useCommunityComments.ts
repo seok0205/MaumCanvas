@@ -23,22 +23,27 @@ export const useCreateComment = (postId: number) => {
     mutationFn: (data: CommentWriteRequest) =>
       communityService.createComment(postId, data),
 
+    // TanStack Query Mutation Scope를 사용하여 동일한 postId에 대한 댓글 작성을 순차적으로 처리
+    scope: {
+      id: `comment-create-${postId}`,
+    },
+
     // Optimistic Update for comment creation
     onMutate: async (data) => {
-      // 중복 요청 방지
+      // 중복 요청 방지: 진행 중인 댓글 쿼리들을 취소
       await queryClient.cancelQueries({
         queryKey: ['community', 'comments', postId],
       });
 
-      // 이전 댓글 목록 저장
+      // 이전 댓글 목록 저장 (롤백용)
       const previousComments = queryClient.getQueryData<CommentListResponse[]>([
         'community',
         'comments',
         postId,
       ]);
 
-      // 임시 ID로 optimistic comment 생성
-      const tempId = Date.now(); // 임시 ID
+      // 안전한 임시 ID 생성 (Date.now() + 랜덤값으로 충돌 방지)
+      const tempId = Date.now() + Math.random() * 1000;
       const optimisticComment: CommentListResponse = {
         id: tempId,
         content: data.content,
@@ -59,11 +64,36 @@ export const useCreateComment = (postId: number) => {
     },
 
     onSuccess: (newComment, _variables, context) => {
+      // 방어적 프로그래밍: author 정보가 없는 경우 처리
+      console.log('🔍 댓글 생성 응답:', newComment);
+      
+      if (!newComment || !newComment.author) {
+        console.error('❌ 댓글 생성 응답에 author 정보가 없습니다:', newComment);
+        // author 정보가 없어도 기본값으로 처리
+        const fallbackComment: CommentListResponse = {
+          id: newComment?.id || Date.now(),
+          content: newComment?.content || _variables.content,
+          nickname: '사용자', // fallback 닉네임
+          createdDate: new Date().toISOString(),
+        };
+        
+        queryClient.setQueryData<CommentListResponse[]>(
+          ['community', 'comments', postId],
+          (old) => {
+            if (!old) return [fallbackComment];
+            return old.map((comment) =>
+              comment.id === context?.tempId ? fallbackComment : comment
+            );
+          }
+        );
+        return;
+      }
+
       // Comment 타입을 CommentListResponse 타입으로 변환
       const convertedComment: CommentListResponse = {
         id: newComment.id,
         content: newComment.content,
-        nickname: newComment.author.nickname,
+        nickname: newComment.author?.nickname || '사용자', // 안전한 접근
         createdDate: newComment.createdAt,
       };
 
@@ -79,14 +109,14 @@ export const useCreateComment = (postId: number) => {
         }
       );
 
-      // 게시글 상세 정보도 무효화 (댓글 수 업데이트 등)
-      queryClient.invalidateQueries({
-        queryKey: ['community', 'post', postId],
-      });
+      // 게시글 무효화 제거: 댓글 작성만으로는 게시글 정보가 변경되지 않음
+      // 댓글 수 등이 실시간 업데이트가 필요하다면 별도 처리
       toast.success('댓글이 작성되었습니다.');
     },
 
     onError: (err: any, _variables, context) => {
+      console.error('❌ 댓글 작성 API 에러:', err);
+      
       // 실패 시 이전 상태로 롤백
       if (context?.previousComments) {
         queryClient.setQueryData(
@@ -94,17 +124,25 @@ export const useCreateComment = (postId: number) => {
           context.previousComments
         );
       }
-      toast.error(err?.message || '댓글 작성 실패');
+      
+      // 에러 메시지 표시 (네트워크 에러와 일반 에러 구분)
+      const errorMessage = err?.name === 'AbortError' 
+        ? '요청이 취소되었습니다.' 
+        : err?.message || '댓글 작성에 실패했습니다.';
+      
+      toast.error(errorMessage);
     },
 
     onSettled: () => {
-      // 최종 서버 상태와 동기화
-      queryClient.invalidateQueries({
-        queryKey: ['community', 'comments', postId],
-      });
+      // onSuccess에서 이미 적절히 처리했으므로 추가 무효화 불필요
+      // 에러 시에는 onError에서 rollback 처리됨
     },
 
-    retry: 1, // 댓글 작성은 1번만 재시도
+    // 중복 방지를 위한 retry 설정: 댓글 작성은 재시도하지 않음
+    retry: false,
+    
+    // 네트워크 모드 설정: 오프라인에서도 optimistic update 동작
+    networkMode: 'offlineFirst',
   });
 };
 
@@ -113,6 +151,11 @@ export const useUpdateComment = (postId: number) => {
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: CommentWriteRequest }) =>
       communityService.updateComment(postId, id, data),
+    
+    // TanStack Query Mutation Scope를 사용하여 동일한 댓글의 중복 수정 방지
+    scope: {
+      id: `comment-update-${postId}`,
+    },
     
     // Optimistic Update: 즉시 UI 업데이트
     onMutate: async ({ id, data }) => {
@@ -194,6 +237,11 @@ export const useDeleteComment = (postId: number) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => communityService.deleteComment(postId, id),
+
+    // TanStack Query Mutation Scope를 사용하여 동일한 댓글의 중복 삭제 방지
+    scope: {
+      id: `comment-delete-${postId}`,
+    },
 
     // Optimistic Update for comment deletion
     onMutate: async (commentId) => {
