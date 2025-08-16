@@ -45,6 +45,7 @@ import {
 } from '@/hooks/useCommunityComments';
 import { useDeletePost } from '@/hooks/useCommunityMutations';
 import { useCommunityPost } from '@/hooks/useCommunityPost';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { CATEGORY_LABELS } from '@/types/community';
 import { cn } from '@/utils/cn';
@@ -53,7 +54,8 @@ import { formatRelativeTime } from '@/utils/communityUtils';
 export const CommunityPostDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { user } = useAuthStore();
+  const { data: user } = useUserProfile();
+  const { isAuthenticated } = useAuthStore();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const postId = id ? parseInt(id, 10) : 0;
@@ -144,12 +146,18 @@ export const CommunityPostDetail = () => {
     });
   }, [deletePostMutation, postId, navigate]);
 
-  // 현재 사용자가 작성자인지 확인 - useMemo로 최적화
+  // 현재 사용자가 작성자인지 확인 - 백엔드 isAuthor가 잘못 계산되므로 프론트에서 비교
   const isAuthor = useMemo(() => {
-    const result = user && post && post.isAuthor;
-
-    return result;
-  }, [user, post]);
+    console.log('🔍 현재 로그인한 사용자:', user?.nickname);
+    console.log('🔍 게시글 작성자:', post?.nickname);
+    console.log('🔍 백엔드에서 계산된 isAuthor:', post?.isAuthor);
+    
+    // 백엔드 isAuthor가 잘못 계산되므로 프론트엔드에서 닉네임 비교
+    const calculatedIsAuthor = user?.nickname === post?.nickname;
+    console.log('🔍 프론트엔드에서 계산된 isAuthor:', calculatedIsAuthor);
+    
+    return calculatedIsAuthor;
+  }, [post, user]);
 
   // 시간 포맷팅 함수 - useCallback으로 최적화
   const safeRelativeTime = useCallback(
@@ -186,7 +194,7 @@ export const CommunityPostDetail = () => {
 
   return (
     <div className='min-h-screen bg-gradient-to-b from-orange-50 via-orange-25 to-slate-50'>
-      <CommonHeader user={user || { roles: [] }} title='게시글 상세' />
+      <CommonHeader user={{ roles: [] }} title='게시글 상세' />
       <div className='container mx-auto px-4 py-6 max-w-4xl'>
         {/* 상단 네비게이션 */}
         <div className='mb-2'>
@@ -297,7 +305,7 @@ export const CommunityPostDetail = () => {
 
           <CardContent className='space-y-6'>
             {/* 작성 폼 */}
-            {user && (
+            {isAuthenticated && (
               <div className='space-y-2'>
                 <Textarea
                   placeholder='댓글을 입력하세요'
@@ -348,8 +356,7 @@ export const CommunityPostDetail = () => {
                 comments.map(c => {
                   const isEditing = editingCommentId === c.id;
                   // 댓글 작성자 확인 - nickname 비교 (CommentListDto에는 isAuthor 필드 없음)
-                  const isOwner =
-                    user && user.nickname && user.nickname === c.nickname;
+                  const isOwner = user?.nickname === c.nickname;
 
 
                   return (
