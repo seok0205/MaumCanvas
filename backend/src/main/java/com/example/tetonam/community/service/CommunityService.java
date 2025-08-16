@@ -2,6 +2,7 @@ package com.example.tetonam.community.service;
 
 import com.example.tetonam.community.dto.PostListDto;
 import com.example.tetonam.community.domain.Community;
+import com.example.tetonam.community.domain.Comment;
 import com.example.tetonam.community.dto.PostPageDto;
 import com.example.tetonam.community.dto.PostUpdateDto;
 import com.example.tetonam.community.dto.PostWriteDto;
@@ -101,6 +102,14 @@ public class CommunityService {
         if(!user.equals(community.getAuthor())){
             throw new BoardHandler(ErrorStatus.USER_NOT_MATCH);
         }
+        
+        // First, delete all comments associated with this community post
+        List<Comment> comments = commentRepository.findByCommunity_id(id);
+        if (!comments.isEmpty()) {
+            commentRepository.deleteAll(comments);
+        }
+        
+        // Then delete the community post
         communityRepository.deleteById(id);
     }
 
