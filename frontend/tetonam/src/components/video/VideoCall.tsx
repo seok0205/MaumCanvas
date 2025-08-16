@@ -5,6 +5,7 @@ import { CounselingDetailContent } from '@/components/counseling/CounselingDetai
 import { useAgoraClient } from '@/hooks/useAgoraClient';
 import { agoraService } from '@/services/agoraService';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useUserHomeInfo } from '@/hooks/useUserHomeInfo';
 import AgoraRTC from 'agora-rtc-sdk-ng';
 import { Loader2, Mic, MicOff, PhoneOff, Video, VideoOff, X } from 'lucide-react';
 import { useEffect, useRef, useState, useCallback } from 'react';
@@ -38,6 +39,7 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
     toggleVideo,
   } = useAgoraClient();
   const { user } = useAuthStore();
+  const { data: userHomeInfo } = useUserHomeInfo(); // MainMyInfoResponse에서 id 가져오기
 
   // 상대방 정보 상태 관리
   const remoteUser = Array.from(remoteUsers.values())[0];
@@ -61,16 +63,26 @@ export const VideoCall = ({ appointmentId, onEnd, isCounselor = false }: VideoCa
           );
         }
 
-        // uid 결정: 존재하면 사용, 없으면 양수 랜덤 생성(1..2^31-1)
+        // uid 결정: userHomeInfo에서 id를 가져오거나, 없으면 랜덤 생성
         if (uidRef.current == null) {
-          const fromStore = Number(user?.id ?? '0');
-          uidRef.current =
-            Number.isFinite(fromStore) && fromStore > 0
-              ? Math.floor(fromStore)
-              : null;
-          if (uidRef.current == null) {
-            throw new Error('로그인 사용자 numeric userId를 찾을 수 없습니다.');
+          // 1. userHomeInfo에서 id 시도
+          const userIdFromHome = userHomeInfo?.id;
+          // 2. user 객체에서 id 시도 (fallback)
+          const userIdFromStore = Number(user?.id ?? '0');
+          
+          let candidateUid: number | null = null;
+          
+          if (userIdFromHome && Number.isFinite(userIdFromHome) && userIdFromHome > 0) {
+            candidateUid = Math.floor(userIdFromHome);
+          } else if (Number.isFinite(userIdFromStore) && userIdFromStore > 0) {
+            candidateUid = Math.floor(userIdFromStore);
+          } else {
+            // 3. 마지막 fallback: 안전한 랜덤 UID 생성 (1 ~ 2147483647)
+            candidateUid = Math.floor(Math.random() * 2147483647) + 1;
+            console.warn('⚠️ 사용자 ID를 찾을 수 없어 랜덤 UID를 생성했습니다:', candidateUid);
           }
+          
+          uidRef.current = candidateUid;
         }
 
         const tokenData = await agoraService.getToken(

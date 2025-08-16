@@ -22,11 +22,11 @@ export const useAuthStore = create<AuthState>()(
         setUser: user => set({ user }),
 
         clearAuth: () =>
-          set({ 
-            token: null, 
-            isAuthenticated: false, 
-            user: null, 
-            error: null 
+          set({
+            token: null,
+            isAuthenticated: false,
+            user: null,
+            error: null
           }),
 
         setSelectedUserRole: type => set({ selectedUserRole: type }),
@@ -65,6 +65,15 @@ export const useAuthStore = create<AuthState>()(
 
             // 인증 완료 후 약간의 지연을 두어 토큰이 완전히 설정되도록 함
             await new Promise(resolve => setTimeout(resolve, 100));
+
+            // FIX: 실제 사용자 정보를 가져와서 user 업데이트
+            try {
+              const userInfo = await authService.getMyInfo();
+              set({ user: { ...user, ...userInfo } });
+            } catch (userInfoError) {
+              console.warn('사용자 정보 가져오기 실패:', userInfoError);
+              // 사용자 정보 가져오기 실패해도 로그인은 성공으로 처리
+            }
 
             return true;
           } catch (error) {
