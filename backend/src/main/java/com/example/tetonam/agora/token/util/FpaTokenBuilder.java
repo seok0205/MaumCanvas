@@ -1,0 +1,30 @@
+package com.example.tetonam.agora.token.util;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+public class FpaTokenBuilder {
+    /**
+     * Build the FPA token.
+     *
+     * @param appId:          The App ID issued to you by Agora. Apply for a new App ID from
+     *                        Agora Dashboard if it is missing from your kit. See Get an App ID.
+     * @param appCertificate: Certificate of the application that you registered in
+     *                        the Agora Dashboard. See Get an App Certificate.
+     * @return The FPA token.
+     */
+    public String buildToken(String appId, String appCertificate) {
+        AccessToken2 accessToken = new AccessToken2(appId, appCertificate, 24 * 3600);
+        AccessToken2.Service serviceFpa = new AccessToken2.ServiceFpa();
+
+        serviceFpa.addPrivilegeFpa(AccessToken2.PrivilegeFpa.PRIVILEGE_LOGIN, 0);
+        accessToken.addService(serviceFpa);
+
+        try {
+            return accessToken.build();
+        } catch (Exception e) {
+            log.error("아고라 토큰발급 에러");
+            return "";
+        }
+    }
+}

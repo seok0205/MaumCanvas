@@ -2,7 +2,7 @@ package com.example.tetonam.user.token;
 
 
 import com.example.tetonam.exception.handler.TokenHandler;
-import com.example.tetonam.user.domain.JwtToken;
+import com.example.tetonam.user.dto.JwtToken;
 import com.example.tetonam.response.code.status.ErrorStatus;
 import com.example.tetonam.user.domain.enums.Role;
 import lombok.extern.slf4j.Slf4j;
@@ -35,8 +35,8 @@ import java.util.stream.Collectors;
 public class JwtTokenProvider {
     private final Key key;
     private static final long REFRESH_TOKEN_EXPIRE_TIME = 7 * 24 * 60 * 60 * 1000L;
-    private static final long ACCESS_TOKEN_EXPIRE_TIME = 30 * 60 * 1000L;
-//    private static final long ACCESS_TOKEN_EXPIRE_TIME = 30 * 10 ;
+    private static final long ACCESS_TOKEN_EXPIRE_TIME = 30 * 60 * 1000L *100000;
+//    private static final long ACCESS_TOKEN_EXPIRE_TIME = 30 * 60 * 1000L ;
 
     // application.yml에서 secret 값 가져와서 key에 저장
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey) {

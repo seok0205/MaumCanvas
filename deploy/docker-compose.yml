@@ -1,0 +1,116 @@
+version: '3.8'
+
+services:
+  # --- MySQL ---
+  db:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tetonam-network    
+
+  # --- Redis ---
+  redis:
+    image: redis:7
+    container_name: redis
+    expose:   # 외부 포트로 접근 불가
+      - "6379"
+    volumes:
+      - redis_data:/data
+    restart: always
+    networks:
+      - tetonam-network    
+
+  # --- Backend ---
+  backend:
+    build:
+      context: ../backend
+    container_name: backend
+    ports:
+      - "8080:8080"  # 필요시 생략 가능
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE}?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_REDIS_HOST: redis
+      JWT_SECRET: ${JWT_SECRET}
+      CLOUD_AWS_CREDENTIALS_ACCESS_KEY: ${CLOUD_AWS_CREDENTIALS_ACCESS_KEY}
+      CLOUD_AWS_CREDENTIALS_SECRET_KEY: ${CLOUD_AWS_CREDENTIALS_SECRET_KEY}
+      CLOUD_AWS_REGION_STATIC: ${CLOUD_AWS_REGION_STATIC}
+      S3_URL: ${S3_URL}
+      AGORA_APP_ID : ${AGORA_APP_ID}
+      AGORA_APP_CERTIFICATE : ${AGORA_APP_CERTIFICATE}
+    env_file:
+      - ../deploy/.env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - tetonam-network
+  
+  # --- Frontend ---
+  frontend:
+    build:
+      context: ../frontend/tetonam
+      args:
+        VITE_API_URL: ${VITE_API_URL}
+        VITE_AGORA_APP_ID: ${VITE_AGORA_APP_ID}
+    container_name: tetonam-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"  # Nginx 사용하는 경우 생략 가능
+    env_file:
+      - ../deploy/.env
+    networks:
+      - tetonam-network
+
+  # --- AI ---
+  ai:
+    build:
+      context: ../AI
+    container_name: ai-fastapi
+    restart: always
+    ports:
+      - "8000:8000"
+    networks:
+      - tetonam-network
+
+  nginx:
+    image: nginx:stable
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /etc/nginx/conf.d:/etc/nginx/conf.d:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      - frontend
+      - backend
+      - ai
+    networks:
+      - tetonam-network
+
+volumes:
+  mysql_data:
+    external: true
+  redis_data:
+    external: true
+
+networks:   # 도커 간 같은 네트워크 사용
+  tetonam-network:
+    external: true

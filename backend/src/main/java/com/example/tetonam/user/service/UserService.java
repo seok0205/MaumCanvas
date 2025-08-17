@@ -3,7 +3,7 @@ package com.example.tetonam.user.service;
 
 import com.example.tetonam.exception.handler.UserHandler;
 import com.example.tetonam.exception.handler.TokenHandler;
-import com.example.tetonam.user.domain.JwtToken;
+import com.example.tetonam.user.dto.JwtToken;
 import com.example.tetonam.user.domain.School;
 import com.example.tetonam.user.domain.User;
 import com.example.tetonam.user.dto.*;
@@ -22,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -47,6 +48,7 @@ public class UserService {
             Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
             // 3. 인증 정보를 기반으로 JWT 토큰 생성
+//            JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
             JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
 
             // Refresh Token을 Redis에 저장
@@ -84,6 +86,7 @@ public class UserService {
         return userDto;
     }
 
+    @Transactional
     public JwtToken reissue(ReissueDto reissueDto) {
         log.info("[reissue] 토큰 갱신 요청: accessToken = {}", reissueDto.getAccessToken());
 
@@ -142,16 +145,65 @@ public class UserService {
 
     @Transactional
     public String resetPassword(ResetPasswordDto resetPasswordDto) {
-      User user=userRepository.findByEmail(resetPasswordDto.getEmail())
-              .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
-        String uuid = (String) redisTemplate.opsForValue().get("UUID:" + resetPasswordDto.getUuid());
-        if(uuid==null||!uuid.equals(resetPasswordDto.getEmail())){
+        User user = userRepository.findByEmail(resetPasswordDto.getEmail())
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+        String uuid = (String) redisTemplate.opsForValue().get("UUID:" + resetPasswordDto.getEmail());
+        if (uuid == null || !uuid.equals(resetPasswordDto.getUuid())) {
             throw new UserHandler(ErrorStatus.USER_NOT_AUTHORITY);
         }
         String encodedPassword = passwordEncoder.encode(resetPasswordDto.getPassword());
         user.setPassword(encodedPassword);
 
         redisTemplate.delete("UUID:" + resetPasswordDto.getUuid());
-      return "비밀번호가 변경되었습니다.";
+        return "비밀번호가 변경되었습니다.";
+    }
+
+    @Transactional
+    public String mypageResetPassword(String email, String password) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+        String encodedPassword = passwordEncoder.encode(password);
+        user.setPassword(encodedPassword);
+        return "비밀번호가 변경되었습니다";
+    }
+
+    /**
+     * 닉네임 변경
+     *
+     * @param email
+     * @param nickname
+     * @return
+     */
+
+    @Transactional
+    public String mypageResetNickname(String email, String nickname) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+        if (userRepository.existsByNickname(nickname)) {
+            throw new UserHandler(ErrorStatus.USER_NICKNAME_IN_USE);
+        }
+        user.setNickname(nickname);
+
+        return "닉네임이 변경되었습니다";
+    }
+
+    public MyInfoResponseDto myInfo(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+        return MyInfoResponseDto.toDto(user);
+    }
+
+    public List<School> schoolList() {
+        return schoolRepository.findAll();
+    }
+
+    public List<School> schoolSearch(String name) {
+        return schoolRepository.findByNameContaining(name);
+    }
+
+    public MainMyInfoResponseDto mainPageMyInfo(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+        return MainMyInfoResponseDto.toDto(user);
     }
 }

@@ -23,7 +23,7 @@ public class Survey extends BaseTime {
     private long id;
 
     @Column(nullable = false)
-    private int score;
+    private String score;
 
     @JoinColumn(name="user_id")
     @ManyToOne(fetch = FetchType.LAZY)

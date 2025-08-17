@@ -1,6 +1,7 @@
 package com.example.tetonam.image.domain;
 
 import com.example.tetonam.diagnosis.domain.enums.Category;
+import com.example.tetonam.image.service.enums.DrawingCategory;
 import com.example.tetonam.user.domain.User;
 import com.example.tetonam.util.BaseTime;
 import jakarta.persistence.*;
@@ -8,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -22,22 +25,19 @@ public class Drawing extends BaseTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false)
-    private String homeImageUrl;
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String imageUrl;
 
     @Column(nullable = false)
-    private String treeImageUrl;
+    private DrawingCategory drawingCategory;
 
-    @Column(nullable = false)
-    private String humanImageFirstUrl;
 
-    @Column(nullable = false)
-    private String humanImageSecondUrl;
-
-    @JoinColumn(name="user_id")
+    @JoinColumn(name="drawing_list")
     @ManyToOne(fetch = FetchType.LAZY)
-    private User user;
+    private DrawingList drawingList;
 
+    @OneToOne(mappedBy = "drawing", cascade = CascadeType.ALL, orphanRemoval = true)
+    private DrawingRagResult drawingRagResult;
 
 
 }

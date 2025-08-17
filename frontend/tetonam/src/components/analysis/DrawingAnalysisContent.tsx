@@ -1,0 +1,277 @@
+import { memo } from 'react';
+
+import { DrawingImage } from '@/components/ui/drawing/DrawingImage';
+import { LoadingAnimation } from '@/components/ui/LoadingAnimation';
+import { Button } from '@/components/ui/interactive/button';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/layout/card';
+import { Separator } from '@/components/ui/layout/separator';
+import { useDrawingAnalysis } from '@/hooks/useDrawingAnalysis';
+
+// TypeScript 인터페이스 정의
+interface DrawingAnalysisContentProps {
+  drawingId: string | null;
+  imageUrl?: string;
+  category?: string;
+  compact?: boolean;
+  className?: string;
+  autoFetch?: boolean;
+  showImage?: boolean;
+  inVideoCall?: boolean; // 화상상담 중인지 여부
+  onSubmitSuccess?: () => void;
+  onSubmitError?: (error: Error) => void;
+}
+
+/**
+ * 그림 분석 결과를 표시하는 공통 컴포넌트
+ *
+ * @description AI 분석 결과와 RAG 결과를 표시하며, 상담사의 경우 프롬프트 입력 기능도 제공합니다.
+ * 비즈니스 로직은 useDrawingAnalysis 훅에 위임하고, UI 렌더링만 담당합니다.
+ *
+ * @param props 컴포넌트 속성
+ */
+export const DrawingAnalysisContent = memo<DrawingAnalysisContentProps>(({
+  drawingId,
+  imageUrl,
+  category,
+  compact = false,
+  className = '',
+  autoFetch = true,
+  showImage = true,
+  inVideoCall = false,
+  onSubmitSuccess,
+  onSubmitError,
+}) => {
+  // 커스텀 훅으로 비즈니스 로직 분리
+  const {
+    aiText,
+    ragText,
+    ragHtml,
+    ragError,
+    prompt,
+    loadingAI,
+    loadingRAG,
+    submitting,
+    isPollingAfterPrompt,
+    setPrompt,
+    submitPrompt,
+    isCounselor,
+  } = useDrawingAnalysis({
+    drawingId,
+    autoFetch,
+  });
+
+  // 프롬프트 제출 핸들러 (에러 처리 포함)
+  const handleSubmitPrompt = async () => {
+    try {
+      await submitPrompt();
+      onSubmitSuccess?.();
+    } catch (error) {
+      console.error('❌ [DrawingAnalysisContent] 프롬프트 제출 실패:', error);
+      onSubmitError?.(error as Error);
+    }
+  };
+
+  // drawingId가 없으면 아무것도 렌더링하지 않음
+  if (!drawingId) {
+    return (
+      <div className={`text-center ${className}`}>
+        <p className={`${compact ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
+          그림을 선택해주세요.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`space-y-${compact ? '3' : '4'} ${className}`}>
+      {/* 그림 표시 영역 */}
+      {showImage && imageUrl && (
+        <div className="mb-6">
+          <DrawingImage
+            imageUrl={imageUrl}
+            category={category}
+            className=""
+          />
+        </div>
+      )}
+
+      {/* 상담사용 객체 탐지 결과 */}
+      {isCounselor && (
+        <Card className={compact ? 'p-3' : ''}>
+          <CardHeader className={compact ? 'p-0 pb-2' : ''}>
+            <CardTitle className={compact ? 'text-sm' : 'text-base'}>
+              객체 탐지 결과
+            </CardTitle>
+          </CardHeader>
+          {/* 구분선 */}
+          <Separator />
+          <CardContent className={compact ? 'p-0 pt-3' : 'pt-6'}>
+            {/* CLS 최적화: 로딩 상태에서도 일정한 높이 유지 */}
+            <div 
+              className="min-h-[200px] flex flex-col justify-center"
+              style={{ minHeight: compact ? '150px' : '200px' }}
+            >
+              {loadingAI ? (
+                <div className="flex flex-col items-center justify-center py-6">
+                  <LoadingAnimation
+                    size={compact ? "sm" : "md"}
+                    title="객체 탐지 중 🔍"
+                    message="그림 속 요소들을 분석하고 있어요..."
+                    showLoadingDots={true}
+                    className={compact ? "scale-75" : "scale-90"}
+                  />
+                </div>
+              ) : aiText ? (
+                <div
+                  className={`prose prose-slate max-w-none font-sans leading-relaxed whitespace-pre-wrap ${compact ? 'text-xs prose-sm' : 'text-sm'} text-foreground`}
+                  style={{
+                    fontFamily: "'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif",
+                    fontSize: 'inherit',
+                    lineHeight: '1.7',
+                    color: 'hsl(var(--foreground))',
+                  }}
+                >
+                  {aiText.replace(/"/g, '')}
+                </div>
+              ) : (
+                <div className={`${compact ? 'text-xs' : 'text-sm'} text-muted-foreground text-center`}>
+                  객체 탐지 결과가 없습니다.
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 분석 결과 */}
+      <Card className={compact ? 'p-3' : ''}>
+        <CardHeader className={compact ? 'p-0 pb-2' : ''}>
+          <CardTitle className={compact ? 'text-sm' : 'text-base'}>
+            {isCounselor ? 'AI 분석 결과' : '분석 결과'}
+          </CardTitle>
+        </CardHeader>
+        {/* 구분선 */}
+        <Separator />
+        <CardContent className={`space-y-${compact ? '3' : '4'} ${compact ? 'p-0 pt-3' : 'pt-6'}`}>
+          {/* CLS 최적화: 분석 결과 영역의 최소 높이 설정 */}
+          <div 
+            className="min-h-[300px] flex flex-col justify-center"
+            style={{ minHeight: compact ? '250px' : '300px' }}
+          >
+            {/* 분석 결과 표시 */}
+            {loadingRAG || isPollingAfterPrompt ? (
+              <div className="flex flex-col items-center justify-center py-8">
+                <LoadingAnimation
+                  size={compact ? "sm" : "md"}
+                  title={isPollingAfterPrompt ? "분석 처리 중 🧠✨" : "AI 분석 중 💫"}
+                  message={
+                    isPollingAfterPrompt
+                      ? "작성해주신 관찰 내용을 바탕으로 심층 분석을 진행하고 있어요... 🎨🔍"
+                      : "창의적인 마음을 깊이 들여다보고 있어요... ✨"
+                  }
+                  showLoadingDots={true}
+                  className={compact ? "scale-75" : ""}
+                />
+                {isPollingAfterPrompt && (
+                  <div className="mt-4 text-center">
+                    <p className={`${compact ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
+                      💡 분석이 완료되면 자동으로 결과가 표시됩니다
+                    </p>
+                    <p className={`${compact ? 'text-xs' : 'text-sm'} text-muted-foreground mt-1`}>
+                      ⏱️ 보통 30초 ~ 1분 정도 소요됩니다
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : submitting ? (
+              <div className="flex flex-col items-center justify-center py-6">
+                <LoadingAnimation
+                  size="sm"
+                  title="제출 중 📝"
+                  message="관찰 내용을 전송하고 있어요..."
+                  showLoadingDots={true}
+                  className="scale-75"
+                />
+              </div>
+            ) : ragError ? (
+              <div className={`${compact ? 'text-xs' : 'text-sm'} text-red-600 text-center`}>
+                {ragError === 'UNAUTHORIZED'
+                  ? '분석 결과를 확인할 권한이 없습니다.'
+                  : ragError === 'NOT_FOUND'
+                    ? '아직 분석 결과가 없습니다.'
+                    : ragError === 'RAG_NOT_READY'
+                      ? isCounselor
+                        ? '아직 분석을 시작하지 않았습니다. 예시를 참고하여 구체적으로 기술해주시면 더 정확한 분석이 가능합니다.'
+                        : '아직 그림 분석이 진행되지 않았습니다. 분석이 완료되면 결과를 확인할 수 있습니다.'
+                      : ragError === 'TIMEOUT'
+                      ? '분석 시간이 초과되었습니다. 다시 시도해주세요.'
+                      : ragError === 'NETWORK'
+                        ? '네트워크 오류로 결과를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.'
+                        : '알 수 없는 오류가 발생했습니다.'}
+              </div>
+            ) : ragText && ragHtml ? (
+              <div
+                className={`prose prose-slate max-w-none font-sans leading-relaxed ${compact ? 'text-xs prose-sm' : 'text-sm'}`}
+                style={{
+                  fontFamily: "'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif",
+                  fontSize: 'inherit',
+                  lineHeight: '1.7',
+                  color: 'hsl(var(--foreground))',
+                }}
+                dangerouslySetInnerHTML={{ __html: ragHtml }}
+              />
+            ) : (
+                <div className={`${compact ? 'text-xs' : 'text-sm'} text-muted-foreground text-center`}>
+                {isCounselor
+                ? '프롬프트를 입력하시면 답변 드립니다.'
+                : '아직 결과가 없습니다.'}
+              </div>
+            )}
+          </div>
+
+          {/* 상담사용 프롬프트 입력 - 화상상담 중에는 숨김 */}
+          {isCounselor && !inVideoCall && (
+            <div className={`${compact ? 'space-y-2' : 'space-y-3'}`}>
+              {!compact && (
+                <div className='text-sm text-muted-foreground bg-muted/50 p-4 rounded-md'>
+                  <div className='font-medium mb-2 text-base'>예시:</div>
+                  집의 크기는 적절하다. 지붕이 존재하나, 굴뚝이 존재하지 않는다. 창문의 개수는 2개이며 집의 크기에 비해 작은 편이다.
+                </div>
+              )}
+              <div className={`${compact ? 'space-y-2' : 'space-y-3'}`}>
+                <input
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  placeholder='최소 4가지 특징에 대해서 묘사해주세요.'
+                  disabled={submitting}
+                  className={`w-full ${compact ? 'text-xs h-8 px-2' : 'text-sm h-12 px-4'} rounded-md border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey && prompt.trim() && !submitting) {
+                      e.preventDefault();
+                      handleSubmitPrompt();
+                    }
+                  }}
+                />
+                <Button
+                  onClick={handleSubmitPrompt}
+                  disabled={submitting || !prompt.trim()}
+                  size={compact ? 'sm' : 'default'}
+                  className={`w-full ${compact ? 'h-8' : 'h-12'}`}
+                >
+                  {submitting ? '제출 중...' : '제출'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+});
+
+DrawingAnalysisContent.displayName = 'DrawingAnalysisContent';

@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class ShowCategoryQuestionnaireDto {
 
   private Category category;
-  private int score;
+  private String score;
   private LocalDateTime createdDate;
 
   public static ShowCategoryQuestionnaireDto toDto(Survey survey){

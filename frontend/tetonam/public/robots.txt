@@ -1,0 +1,18 @@
+# Robots.txt for MaumCanvas
+# 마음캔버스 - AI 기반 심리 진단 및 상담 서비스
+
+# 모든 검색엔진 크롤러 허용
+User-agent: *
+Allow: /
+
+# 민감한 경로 차단 (필요시)
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /assets/
+
+# 크롤링 속도 제한 (선택사항)
+Crawl-delay: 1
+
+# 사이트맵 위치 (향후 추가 예정)
+# Sitemap: https://i13e108.p.ssafy.io/sitemap.xml

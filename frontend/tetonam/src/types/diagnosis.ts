@@ -1,0 +1,31 @@
+import { ReactNode } from 'react';
+
+export interface DiagnosisCategory {
+  id: string;
+  title: string;
+  description: string;
+  icon: ReactNode;
+  color: string;
+  path: string;
+}
+
+export interface DiagnosisCardProps {
+  category: DiagnosisCategory;
+  onStartDiagnosis: (categoryId: string) => void;
+}
+
+export interface DisclaimerBoxProps {
+  className?: string;
+}
+
+export interface DiagnosisGridProps {
+  categories: DiagnosisCategory[];
+  onStartDiagnosis: (categoryId: string) => void;
+}
+
+export type DiagnosisType =
+  | 'drawing'
+  | 'ptsd'
+  | 'depression'
+  | 'anxiety'
+  | 'suicide-risk';
