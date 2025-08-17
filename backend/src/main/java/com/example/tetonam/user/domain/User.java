@@ -33,7 +33,7 @@ public class User extends BaseTime implements UserDetails {
   @Column(nullable = false)
   private String password;
 
-  @Column(nullable = false)
+  @Column(nullable = false, unique = true)
   private String nickname;
 
   @Column(nullable = false)
@@ -63,8 +63,17 @@ public class User extends BaseTime implements UserDetails {
         .collect(Collectors.toList());
   }
 
+  public void setNickname(String nickname) {
+    this.nickname = nickname;
+  }
+
   public void setPassword(String password) {
     this.password = password;
+  }
+
+  public static boolean hasRole(UserDetails user, Role role) {
+    return user.getAuthorities().stream()
+            .anyMatch(auth -> auth.getAuthority().equals(role.getRoleName()));
   }
 
   @Override

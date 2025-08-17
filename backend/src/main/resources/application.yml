@@ -1,14 +1,14 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://db:3306/${MYSQL_DATABASE}?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    url: jdbc:mysql://db:3306/${MYSQL_DATABASE}?serverTimezone=UTC&characterEncoding=UTF-8
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
 
-  redis:
-    # host: localhost       # localhost
-    host: redis           # EC2
-    port: 6379
+  data:
+    redis:
+      host: redis
+      port: 6379
 
   jpa:
     database-platform: org.hibernate.dialect.MySQL8Dialect
@@ -18,13 +18,42 @@ spring:
       ddl-auto: update
     properties:
       hibernate:
-        globally_quoted_identifiers: true
+
 mail:
-  username: jj99526@gmail.com
-  password: iiyw avuq cqms ezwp
+  username: ${MAIL_USERNAME}
+  password: ${MAIL_PASSWORD}
 
 jwt:
   secret : ${JWT_SECRET}
+
 server:
   address: 0.0.0.0
   port: 8080
+
+cloud:
+  aws:
+    credentials:
+      access-key: ${CLOUD_AWS_CREDENTIALS_ACCESS_KEY}
+      secret-key: ${CLOUD_AWS_CREDENTIALS_SECRET_KEY}
+    region:
+      static: ${CLOUD_AWS_REGION_STATIC}  # 버킷의 리전
+    s3:
+      bucket: tetonam  # 버킷 이름
+    stack:
+      auto: false
+    url: ${S3_URL}
+
+ai:
+  server:
+    url: ${AI_SERVER_URL}
+
+kakao:
+  client_id: ${KAKAO_CLIENT_ID}
+  redirect_uri: ${KAKAO_REDIRECT_URL}
+  receiver_uuids: ${KAKAO_RECEIVER_UUID}
+  template_id: ${KAKAO_TEMPLATE_ID}
+
+agora:
+  app:
+    id: ${AGORA_APP_ID}
+    certificate: ${AGORA_APP_CERTIFICATE}

@@ -1,9 +1,0 @@
-# AI/docker-compose.yml
-version: "3.11"
-
-services:
-  fastapi:
-    build: .
-    ports:
-      - "8000:8000"
-    restart: always

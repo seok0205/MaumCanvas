@@ -1,0 +1,23 @@
+# 커밋 메시지 형식 검증
+# 형식: <domain> <type>: <subject>
+# 예시: <FE> feat: 사용자 로그인 기능 추가
+
+commit_msg=$(cat "$1")
+
+# 정규식 패턴: <도메인> <타입>: <제목>
+pattern='^<(FE|BE|AI|DB)> (feat|fix|docs|style|refactor|test|build|ci|perf|chore): .+$'
+
+if ! echo "$commit_msg" | grep -qE "$pattern"; then
+  echo "❌ 커밋 메시지 형식이 올바르지 않습니다."
+  echo ""
+  echo "올바른 형식: <domain> <type>: <subject>"
+  echo "예시: <FE> feat: 사용자 로그인 기능 추가"
+  echo ""
+  echo "도메인: FE, BE, AI, DB"
+  echo "타입: feat, fix, docs, style, refactor, test, build, ci, perf, chore"
+  echo ""
+  echo "현재 메시지: $commit_msg"
+  exit 1
+fi
+
+echo "✅ 커밋 메시지 형식이 올바릅니다." 

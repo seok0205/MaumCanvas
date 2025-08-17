@@ -31,10 +31,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
                 WHERE c.counselor = u
                   AND c.reservationTime = :time
               )
+              
         """)
+
 List<User> findAvailableCounselors(@Param("school") School school,
                                    @Param("role") Role role,
                                    @Param("time") LocalDateTime time);
 
-
+  @Query("SELECT u.nickname FROM User u WHERE u.email = :email")
+  String findNicknameByEmail(@org.springframework.data.repository.query.Param("email") String email);
 }

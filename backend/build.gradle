@@ -1,7 +1,12 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.4.5'
+//    id 'org.springframework.boot' version '3.4.5'
+    id 'org.springframework.boot' version '3.3.1'
     id 'io.spring.dependency-management' version '1.1.7'
+
+// sonarqube plugin
+    id 'org.sonarqube' version '5.1.0.4882'
+    id "jacoco"
 }
 
 group = 'com.TeToNam'
@@ -26,16 +31,22 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
     implementation 'com.mysql:mysql-connector-j'
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'io.springfox:springfox-swagger2:2.9.2'
-    implementation 'io.springfox:springfox-swagger-ui:2.9.2'
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.3'
+
+//    implementation 'io.springfox:springfox-swagger2:2.9.2'
+//    implementation 'io.springfox:springfox-swagger-ui:2.9.2'
+
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     annotationProcessor 'org.projectlombok:lombok'
@@ -43,10 +54,51 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     implementation 'org.springframework:spring-context-support:5.3.9'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: '2.6.3'
+    implementation 'org.redisson:redisson-spring-boot-starter:3.18.0'
+    implementation("me.paulschwarz:spring-dotenv:3.0.0")
+    implementation('org.springframework.boot:spring-boot-starter-webflux')
+
+    testImplementation 'com.h2database:h2'
+
+
 
 
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+    ignoreFailures = true
+    finalizedBy tasks.jacocoTestReport
+}
+
+jacoco {
+  toolVersion = "0.8.12"
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required.set(true)  // SonarQube가 보는 리포트
+        html.required.set(true)
+        csv.required.set(false)
+    }
+}
+
+sonar {
+  properties {
+    property "sonar.projectKey", "backend_app"
+    property "sonar.projectName", "Backend App"
+    // 컴파일 산출물 경로(정확)
+    property "sonar.java.binaries", "$buildDir/classes/java/main"
+
+    // JaCoCo XML 리포트 경로
+    property "sonar.coverage.jacoco.xmlReportPaths", "$buildDir/reports/jacoco/test/jacocoTestReport.xml"
+
+    // Gradle 5.x 호환/암묵 컴파일 방지
+    property "sonar.gradle.skipCompile", "true"
+    // sonar.host.url, sonar.token(login)은 Jenkins에서 주
+
+    property "sonar.coverage.exclusions",
+      "**/*Application.java, **/*Config.java, **/dto/**, **/vo/**, **/exception/**, **/generated/**"
+  }
 }

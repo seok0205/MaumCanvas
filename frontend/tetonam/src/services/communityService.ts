@@ -1,0 +1,798 @@
+import {
+  COMMUNITY_ENDPOINTS,
+  COMMUNITY_ERROR_MESSAGES,
+} from '@/constants/community';
+import { type ApiResponse } from '@/types/api';
+import { AuthenticationError } from '@/types/auth';
+import {
+  type CommentDto,
+  type CommentListDto,
+  type CommunityDto,
+  type PageResponse,
+  type PostListDto,
+  type PostPageDto,
+  safeConvertDateTime,
+} from '@/types/communityBackend';
+import type {
+  Comment,
+  CommentListResponse,
+  CommentWriteRequest,
+  Community,
+  PostListQuery,
+  PostListResponse,
+  PostPageItem,
+  PostUpdateRequest,
+  PostWriteRequest,
+} from '@/types/community';
+import {
+  handleApiError,
+  handleHttpError,
+  handleNetworkError,
+} from '@/utils/errorHandler';
+import type { AxiosError } from 'axios';
+import { apiClient } from './apiClient';
+
+// 커뮤니티 관련 API 서비스
+export const communityService = {
+  // === 게시글 관련 API ===
+
+  /**
+   * 게시글 목록 조회 (페이지 번호 기반)
+   * 백엔드: GET /community/page/{number} -> Page<PostPageDto> 직렬화된 배열 형태 반환 가능
+   * 프론트 목록 카드에서 author 전체를 요구하지 않도록 최소 필드만 사용합니다.
+   */
+  getPosts: async (
+    query: PostListQuery = {},
+    signal?: AbortSignal
+  ): Promise<PostPageItem[]> => {
+    try {
+      // 페이지 번호는 커서 기반 파라미터 대신 number를 사용 (기본 0페이지)
+      const pageNumber = query.lastId ? Number(query.lastId) : 0;
+      const isSearch = !!query.nickname;
+      const baseUrl = isSearch
+        ? `${COMMUNITY_ENDPOINTS.GET_POSTS_PAGE(pageNumber)}/search`
+        : COMMUNITY_ENDPOINTS.GET_POSTS_PAGE(pageNumber);
+      const response = await apiClient.get<
+        PageResponse<PostPageDto> | PostPageDto[]
+      >(baseUrl, {
+        params: isSearch ? { nickname: query.nickname } : undefined,
+        ...(signal && { signal }),
+      });
+
+      // Spring의 Page 직렬화는 { content: T[], ... } 또는 바로 배열일 수 있음.
+      const data = response.data;
+      const items: PostPageDto[] = Array.isArray(data)
+        ? data
+        : 'content' in data && Array.isArray(data.content)
+          ? data.content
+          : [];
+
+      // PostPageDto는 id,title,nickname,category,createdDate 포함
+      return items.map(
+        (item): PostPageItem => ({
+          id: item.id,
+          title: item.title,
+          category: item.category,
+          nickname: item.nickname,
+          createdDate: safeConvertDateTime(item.createdDate),
+        })
+      );
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new AuthenticationError(
+          'ABORTED',
+          COMMUNITY_ERROR_MESSAGES.REQUEST_CANCELLED
+        );
+      }
+
+      const axiosError = error as AxiosError<ApiResponse<null>>;
+      if (
+        axiosError.code === 'NETWORK_ERROR' ||
+        axiosError.code === 'ERR_NETWORK'
+      ) {
+        throw handleNetworkError(axiosError);
+      }
+
+      if (axiosError.response?.data) {
+        const apiError = axiosError.response.data;
+        if (apiError.code === 'POST_LIST_EMPTY') {
+          // 빈 목록은 UI에서 빈 상태 카드로 처리 (예외 아님)
+          return [];
+        }
+        throw handleApiError(apiError);
+      }
+
+      if (axiosError.response?.status) {
+        throw handleHttpError(axiosError.response.status);
+      }
+
+      throw new AuthenticationError(
+        'POST_FETCH_FAILED',
+        COMMUNITY_ERROR_MESSAGES.POST_FETCH_FAILED
+      );
+    }
+  },
+
+  /**
+   * 게시글 단건 조회
+   */
+  getPostById: async (
+    id: number,
+    signal?: AbortSignal
+  ): Promise<PostListResponse> => {
+    try {
+      const response = await apiClient.get<ApiResponse<PostListDto>>(
+        COMMUNITY_ENDPOINTS.GET_POST_BY_ID(id),
+        {
+          ...(signal && { signal }),
+        }
+      );
+
+      if (!response.data.isSuccess || !response.data.result) {
+        throw new AuthenticationError(
+          response.data.code || 'POST_NOT_FOUND',
+          COMMUNITY_ERROR_MESSAGES.POST_NOT_FOUND
+        );
+      }
+
+      const raw = response.data.result;
+
+      const normalized: PostListResponse = {
+        id: raw.id,
+        title: raw.title,
+        content: raw.content ?? '',
+        category: raw.category,
+        nickname: raw.nickname,
+        viewCount: raw.viewCount ?? 0,
+        commentCount: raw.commentCount ?? 0,
+        createdDate: safeConvertDateTime(raw.createdDate), // 백엔드 필드명 사용
+        isAuthor: raw.isAuthor ?? false, // 누락된 isAuthor 필드 추가
+      };
+
+      return normalized;
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new AuthenticationError(
+          'ABORTED',
+          COMMUNITY_ERROR_MESSAGES.REQUEST_CANCELLED
+        );
+      }
+
+      const axiosError = error as AxiosError<ApiResponse<null>>;
+      if (
+        axiosError.code === 'NETWORK_ERROR' ||
+        axiosError.code === 'ERR_NETWORK'
+      ) {
+        throw handleNetworkError(axiosError);
+      }
+
+      if (axiosError.response?.status === 404) {
+        throw new AuthenticationError(
+          'POST_NOT_FOUND',
+          COMMUNITY_ERROR_MESSAGES.POST_NOT_FOUND
+        );
+      }
+
+      if (axiosError.response?.status) {
+        throw handleHttpError(axiosError.response.status);
+      }
+
+      if (axiosError.response?.data) {
+        throw handleApiError(axiosError.response.data);
+      }
+
+      throw new AuthenticationError(
+        'POST_FETCH_FAILED',
+        COMMUNITY_ERROR_MESSAGES.POST_FETCH_FAILED
+      );
+    }
+  },
+
+  /**
+   * 게시글 작성
+   */
+  createPost: async (
+    data: PostWriteRequest,
+    signal?: AbortSignal
+  ): Promise<Community> => {
+    try {
+      const response = await apiClient.post<ApiResponse<CommunityDto>>(
+        COMMUNITY_ENDPOINTS.CREATE_POST,
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          ...(signal && { signal }),
+        }
+      );
+
+      if (!response.data.isSuccess || !response.data.result) {
+        throw new AuthenticationError(
+          response.data.code || 'POST_CREATE_FAILED',
+          COMMUNITY_ERROR_MESSAGES.POST_CREATE_FAILED
+        );
+      }
+
+      const raw = response.data.result;
+
+      // CommunityDto를 Community 타입으로 변환
+      const normalized: Community = {
+        id: raw.id,
+        title: raw.title,
+        content: raw.content,
+        author: raw.author,
+        category: raw.category,
+        viewCount: raw.viewCount,
+        createdAt: safeConvertDateTime(raw.createdAt),
+        updatedAt: safeConvertDateTime(raw.updatedAt),
+      };
+
+      return normalized;
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new AuthenticationError(
+          'ABORTED',
+          COMMUNITY_ERROR_MESSAGES.REQUEST_CANCELLED
+        );
+      }
+
+      const axiosError = error as AxiosError<ApiResponse<null>>;
+      if (
+        axiosError.code === 'NETWORK_ERROR' ||
+        axiosError.code === 'ERR_NETWORK'
+      ) {
+        throw handleNetworkError(axiosError);
+      }
+
+      if (axiosError.response?.status) {
+        throw handleHttpError(axiosError.response.status);
+      }
+
+      if (axiosError.response?.data) {
+        const apiError = axiosError.response.data;
+        // 특정 에러 코드 처리
+        switch (apiError.code) {
+          case 'COMMON400':
+            throw new AuthenticationError(
+              'VALIDATION_ERROR',
+              '입력 정보를 확인해주세요.'
+            );
+          case 'USER_NOT_MATCH':
+            throw new AuthenticationError(
+              'UNAUTHORIZED',
+              COMMUNITY_ERROR_MESSAGES.UNAUTHORIZED
+            );
+          default:
+            throw handleApiError(apiError);
+        }
+      }
+
+      throw new AuthenticationError(
+        'POST_CREATE_FAILED',
+        COMMUNITY_ERROR_MESSAGES.POST_CREATE_FAILED
+      );
+    }
+  },
+
+  /**
+   * 게시글 수정
+   */
+  updatePost: async (
+    id: number,
+    data: PostUpdateRequest,
+    signal?: AbortSignal
+  ): Promise<Community> => {
+    try {
+      const response = await apiClient.put<ApiResponse<CommunityDto>>(
+        COMMUNITY_ENDPOINTS.UPDATE_POST(id),
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          ...(signal && { signal }),
+        }
+      );
+
+      if (!response.data.isSuccess || !response.data.result) {
+        throw new AuthenticationError(
+          response.data.code || 'POST_UPDATE_FAILED',
+          COMMUNITY_ERROR_MESSAGES.POST_UPDATE_FAILED
+        );
+      }
+
+      const raw = response.data.result;
+
+      // CommunityDto를 Community 타입으로 변환
+      const normalized: Community = {
+        id: raw.id,
+        title: raw.title,
+        content: raw.content,
+        author: raw.author,
+        category: raw.category,
+        viewCount: raw.viewCount,
+        createdAt: safeConvertDateTime(raw.createdAt),
+        updatedAt: safeConvertDateTime(raw.updatedAt),
+      };
+
+      return normalized;
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new AuthenticationError(
+          'ABORTED',
+          COMMUNITY_ERROR_MESSAGES.REQUEST_CANCELLED
+        );
+      }
+
+      const axiosError = error as AxiosError<ApiResponse<null>>;
+      if (
+        axiosError.code === 'NETWORK_ERROR' ||
+        axiosError.code === 'ERR_NETWORK'
+      ) {
+        throw handleNetworkError(axiosError);
+      }
+
+      if (axiosError.response?.status) {
+        throw handleHttpError(axiosError.response.status);
+      }
+
+      if (axiosError.response?.data) {
+        const apiError = axiosError.response.data;
+        switch (apiError.code) {
+          case 'POST_LIST_EMPTY':
+            throw new AuthenticationError(
+              'POST_NOT_FOUND',
+              COMMUNITY_ERROR_MESSAGES.POST_NOT_FOUND
+            );
+          case 'USER_NOT_MATCH':
+            throw new AuthenticationError(
+              'NOT_AUTHOR',
+              COMMUNITY_ERROR_MESSAGES.NOT_AUTHOR
+            );
+          default:
+            throw handleApiError(apiError);
+        }
+      }
+
+      throw new AuthenticationError(
+        'POST_UPDATE_FAILED',
+        COMMUNITY_ERROR_MESSAGES.POST_UPDATE_FAILED
+      );
+    }
+  },
+
+  /**
+   * 게시글 삭제
+   */
+  deletePost: async (id: number, signal?: AbortSignal): Promise<void> => {
+    try {
+      const response = await apiClient.delete(
+        COMMUNITY_ENDPOINTS.DELETE_POST(id),
+        {
+          ...(signal && { signal }),
+        }
+      );
+
+      // 204 No Content는 성공으로 처리
+      if (response.status !== 204) {
+        throw new AuthenticationError(
+          'POST_DELETE_FAILED',
+          COMMUNITY_ERROR_MESSAGES.POST_DELETE_FAILED
+        );
+      }
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new AuthenticationError(
+          'ABORTED',
+          COMMUNITY_ERROR_MESSAGES.REQUEST_CANCELLED
+        );
+      }
+
+      const axiosError = error as AxiosError<ApiResponse<null>>;
+      if (
+        axiosError.code === 'NETWORK_ERROR' ||
+        axiosError.code === 'ERR_NETWORK'
+      ) {
+        throw handleNetworkError(axiosError);
+      }
+
+      if (axiosError.response?.status) {
+        throw handleHttpError(axiosError.response.status);
+      }
+
+      if (axiosError.response?.data) {
+        const apiError = axiosError.response.data;
+        switch (apiError.code) {
+          case 'POST_LIST_EMPTY':
+            throw new AuthenticationError(
+              'POST_NOT_FOUND',
+              COMMUNITY_ERROR_MESSAGES.POST_NOT_FOUND
+            );
+          case 'USER_NOT_MATCH':
+            throw new AuthenticationError(
+              'NOT_AUTHOR',
+              COMMUNITY_ERROR_MESSAGES.NOT_AUTHOR
+            );
+          default:
+            throw handleApiError(apiError);
+        }
+      }
+
+      throw new AuthenticationError(
+        'POST_DELETE_FAILED',
+        COMMUNITY_ERROR_MESSAGES.POST_DELETE_FAILED
+      );
+    }
+  },
+
+  // === 댓글 관련 API ===
+
+  /**
+   * 댓글 목록 조회
+   */
+  getComments: async (
+    communityId: number,
+    signal?: AbortSignal
+  ): Promise<CommentListResponse[]> => {
+    try {
+      const response = await apiClient.get<ApiResponse<CommentListDto[]>>(
+        COMMUNITY_ENDPOINTS.GET_COMMENTS(communityId),
+        {
+          ...(signal && { signal }),
+        }
+      );
+
+      if (!response.data.isSuccess) {
+        throw new AuthenticationError(
+          response.data.code || 'COMMENT_FETCH_FAILED',
+          COMMUNITY_ERROR_MESSAGES.COMMENT_FETCH_FAILED
+        );
+      }
+
+      // 댓글이 없는 경우 빈 배열 반환
+      const raw = response.data.result || [];
+
+      return raw.map(
+        (item): CommentListResponse => ({
+          id: item.id,
+          content: item.content,
+          nickname: item.nickname,
+          createdDate: safeConvertDateTime(item.createdDate), // 백엔드 필드명 사용
+        })
+      );
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new AuthenticationError(
+          'ABORTED',
+          COMMUNITY_ERROR_MESSAGES.REQUEST_CANCELLED
+        );
+      }
+
+      const axiosError = error as AxiosError<ApiResponse<null>>;
+      if (
+        axiosError.code === 'NETWORK_ERROR' ||
+        axiosError.code === 'ERR_NETWORK'
+      ) {
+        throw handleNetworkError(axiosError);
+      }
+
+      if (axiosError.response?.status) {
+        throw handleHttpError(axiosError.response.status);
+      }
+
+      if (axiosError.response?.data) {
+        throw handleApiError(axiosError.response.data);
+      }
+
+      throw new AuthenticationError(
+        'COMMENT_FETCH_FAILED',
+        COMMUNITY_ERROR_MESSAGES.COMMENT_FETCH_FAILED
+      );
+    }
+  },
+
+  /**
+   * 댓글 작성
+   */
+  createComment: async (
+    communityId: number,
+    data: CommentWriteRequest,
+    signal?: AbortSignal
+  ): Promise<Comment> => {
+    try {
+      // 백엔드가 실제로 보내는 응답 구조: {content: string, nickname: string}
+      const response = await apiClient.post<ApiResponse<{content: string, nickname: string}>>(
+        COMMUNITY_ENDPOINTS.CREATE_COMMENT(communityId),
+        data.content,
+        {
+          headers: {
+            'Content-Type': 'text/plain; charset=utf-8',
+          },
+          ...(signal && { signal }),
+        }
+      );
+
+      if (!response.data.isSuccess || !response.data.result) {
+        throw new AuthenticationError(
+          response.data.code || 'COMMENT_CREATE_FAILED',
+          COMMUNITY_ERROR_MESSAGES.COMMENT_CREATE_FAILED
+        );
+      }
+
+      const raw = response.data.result;
+
+      // 디버깅: raw response 로깅
+      console.log('🔍 createComment raw response:', raw);
+      console.log('🔍 createComment full response:', response.data);
+
+      // 백엔드 실제 응답 구조: {content, nickname}
+      // Comment 타입으로 변환하여 일관성 유지
+      const normalized: Comment = {
+        id: Date.now(), // 임시 ID (실제로는 백엔드에서 제공되어야 함)
+        content: raw.content,
+        author: {
+          id: 0, // 임시 ID
+          nickname: raw.nickname || '사용자',
+          name: '', // 백엔드에서 제공하지 않음
+          email: '', // 백엔드에서 제공하지 않음
+        },
+        communityId: communityId, // 파라미터로 받은 값 사용
+        createdAt: new Date().toISOString(), // 현재 시간 사용
+        updatedAt: new Date().toISOString(),
+      };
+
+      return normalized;
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new AuthenticationError(
+          'ABORTED',
+          COMMUNITY_ERROR_MESSAGES.REQUEST_CANCELLED
+        );
+      }
+
+      const axiosError = error as AxiosError<ApiResponse<null>>;
+      if (
+        axiosError.code === 'NETWORK_ERROR' ||
+        axiosError.code === 'ERR_NETWORK'
+      ) {
+        throw handleNetworkError(axiosError);
+      }
+
+      if (axiosError.response?.status) {
+        throw handleHttpError(axiosError.response.status);
+      }
+
+      if (axiosError.response?.data) {
+        const apiError = axiosError.response.data;
+        switch (apiError.code) {
+          case 'POST_LIST_EMPTY':
+            throw new AuthenticationError(
+              'POST_NOT_FOUND',
+              COMMUNITY_ERROR_MESSAGES.POST_NOT_FOUND
+            );
+          case 'COMMENT_LIST_EMPTY':
+            throw new AuthenticationError(
+              'COMMENT_NOT_FOUND',
+              COMMUNITY_ERROR_MESSAGES.COMMENT_NOT_FOUND
+            );
+          default:
+            throw handleApiError(apiError);
+        }
+      }
+
+      throw new AuthenticationError(
+        'COMMENT_CREATE_FAILED',
+        COMMUNITY_ERROR_MESSAGES.COMMENT_CREATE_FAILED
+      );
+    }
+  },
+
+  /**
+   * 댓글 수정
+   */
+  updateComment: async (
+    communityId: number,
+    commentId: number,
+    data: CommentWriteRequest,
+    signal?: AbortSignal
+  ): Promise<Comment> => {
+    try {
+      // 백엔드가 @RequestBody CommentWriteDto를 기대하므로 DTO 객체로 전송
+      const response = await apiClient.put<ApiResponse<CommentDto>>(
+        COMMUNITY_ENDPOINTS.UPDATE_COMMENT(communityId, commentId),
+        data, // CommentWriteRequest 객체 전체를 전송
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          ...(signal && { signal }),
+        }
+      );
+
+      // 디버깅을 위한 응답 로깅 (개발 환경에서만)
+      if (import.meta.env.DEV) {
+        console.log('🔍 댓글 수정 응답:', response.status, response.data);
+      }
+
+      // HTTP 상태 코드가 200번대이면 성공으로 간주
+      if (response.status >= 200 && response.status < 300) {
+        // 서버 응답 구조 확인: {content: string, nickname: string} 형태
+        const responseData = response.data as any; // 실제 응답 구조에 맞게 타입 캐스팅
+        
+        // 필수 필드 확인
+        if (!responseData || !responseData.content) {
+          console.error('❌ 서버 응답에 content가 없음:', responseData);
+          throw new AuthenticationError(
+            'INVALID_RESPONSE',
+            COMMUNITY_ERROR_MESSAGES.COMMENT_UPDATE_FAILED
+          );
+        }
+
+        console.log('✅ 처리할 댓글 데이터:', responseData);
+
+        // 서버 응답을 Comment 타입으로 변환
+        const normalized: Comment = {
+          id: commentId, // 요청에 사용한 commentId 사용
+          content: responseData.content,
+          author: {
+            id: 0, // 임시값 (실제로는 기존 author 정보 유지해야 함)
+            nickname: responseData.nickname || '사용자',
+            name: '',
+            email: '',
+          },
+          communityId: communityId, // 요청에 사용한 communityId 사용
+          createdAt: new Date().toISOString(), // 현재 시간 (실제로는 기존값 유지 권장)
+          updatedAt: new Date().toISOString(), // 현재 시간으로 업데이트
+        };
+
+        if (import.meta.env.DEV) {
+          console.log('✅ 정규화된 댓글:', normalized);
+        }
+        return normalized;
+      } else {
+        throw new AuthenticationError(
+          'HTTP_ERROR',
+          `HTTP ${response.status}: ${COMMUNITY_ERROR_MESSAGES.COMMENT_UPDATE_FAILED}`
+        );
+      }
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new AuthenticationError(
+          'ABORTED',
+          COMMUNITY_ERROR_MESSAGES.REQUEST_CANCELLED
+        );
+      }
+
+      const axiosError = error as AxiosError<ApiResponse<null>>;
+      if (
+        axiosError.code === 'NETWORK_ERROR' ||
+        axiosError.code === 'ERR_NETWORK'
+      ) {
+        throw handleNetworkError(axiosError);
+      }
+
+      if (axiosError.response?.status) {
+        throw handleHttpError(axiosError.response.status);
+      }
+
+      if (axiosError.response?.data) {
+        const apiError = axiosError.response.data;
+        switch (apiError.code) {
+          case 'COMMENT_LIST_EMPTY':
+            throw new AuthenticationError(
+              'COMMENT_NOT_FOUND',
+              COMMUNITY_ERROR_MESSAGES.COMMENT_NOT_FOUND
+            );
+          case 'USER_NOT_MATCH':
+            throw new AuthenticationError(
+              'NOT_AUTHOR',
+              COMMUNITY_ERROR_MESSAGES.NOT_AUTHOR
+            );
+          default:
+            throw handleApiError(apiError);
+        }
+      }
+
+      throw new AuthenticationError(
+        'COMMENT_UPDATE_FAILED',
+        COMMUNITY_ERROR_MESSAGES.COMMENT_UPDATE_FAILED
+      );
+    }
+  },
+
+  /**
+   * 댓글 삭제
+   */
+  deleteComment: async (
+    communityId: number,
+    commentId: number,
+    signal?: AbortSignal
+  ): Promise<void> => {
+    try {
+      const response = await apiClient.delete(
+        COMMUNITY_ENDPOINTS.DELETE_COMMENT(communityId, commentId),
+        {
+          ...(signal && { signal }),
+        }
+      );
+
+      // 204 No Content는 성공으로 처리
+      if (response.status !== 204) {
+        throw new AuthenticationError(
+          'COMMENT_DELETE_FAILED',
+          COMMUNITY_ERROR_MESSAGES.COMMENT_DELETE_FAILED
+        );
+      }
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new AuthenticationError(
+          'ABORTED',
+          COMMUNITY_ERROR_MESSAGES.REQUEST_CANCELLED
+        );
+      }
+
+      const axiosError = error as AxiosError<ApiResponse<null>>;
+      if (
+        axiosError.code === 'NETWORK_ERROR' ||
+        axiosError.code === 'ERR_NETWORK'
+      ) {
+        throw handleNetworkError(axiosError);
+      }
+
+      if (axiosError.response?.status) {
+        throw handleHttpError(axiosError.response.status);
+      }
+
+      if (axiosError.response?.data) {
+        const apiError = axiosError.response.data;
+        switch (apiError.code) {
+          case 'COMMENT_LIST_EMPTY':
+            throw new AuthenticationError(
+              'COMMENT_NOT_FOUND',
+              COMMUNITY_ERROR_MESSAGES.COMMENT_NOT_FOUND
+            );
+          case 'USER_NOT_MATCH':
+            throw new AuthenticationError(
+              'NOT_AUTHOR',
+              COMMUNITY_ERROR_MESSAGES.NOT_AUTHOR
+            );
+          default:
+            throw handleApiError(apiError);
+        }
+      }
+
+      throw new AuthenticationError(
+        'COMMENT_DELETE_FAILED',
+        COMMUNITY_ERROR_MESSAGES.COMMENT_DELETE_FAILED
+      );
+    }
+  },
+};
