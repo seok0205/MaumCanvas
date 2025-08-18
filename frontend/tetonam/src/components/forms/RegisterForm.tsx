@@ -56,9 +56,39 @@ const registerSchema = z
       .regex(FORM_CONSTANTS.VALIDATION.KOREAN_PATTERN, {
         message: FORM_MESSAGES.VALIDATION.NAME_KOREAN_ONLY,
       }),
-    birthDate: z.string().min(1, {
-      message: FORM_MESSAGES.VALIDATION.BIRTH_DATE_REQUIRED,
-    }),
+    birthDate: z
+      .string()
+      .min(1, {
+        message: FORM_MESSAGES.VALIDATION.BIRTH_DATE_REQUIRED,
+      })
+      .refine(
+        value => {
+          if (!value) return true; // 빈 값은 위의 min(1)에서 처리
+
+          const inputDate = new Date(value);
+
+          // 유효한 날짜인지 검사
+          if (isNaN(inputDate.getTime())) {
+            return false;
+          }
+
+          // 미래 날짜 검사
+          const currentDate = new Date();
+          if (inputDate > currentDate) {
+            return false;
+          }
+
+          // 최소 나이 검사 (1900년 이전)
+          if (inputDate.getFullYear() < FORM_CONSTANTS.BIRTH_DATE.MIN_YEAR) {
+            return false;
+          }
+
+          return true;
+        },
+        {
+          message: FORM_MESSAGES.VALIDATION.BIRTH_DATE_INVALID,
+        }
+      ),
     email: z.email({
       message: FORM_MESSAGES.VALIDATION.EMAIL_INVALID,
     }),
@@ -239,33 +269,6 @@ export const RegisterForm = () => {
     },
   });
 
-  // 생년월일 유효성 검사 함수
-  const validateBirthDate = useCallback(
-    (value: string): string | true => {
-      if (!value) return FORM_MESSAGES.VALIDATION.BIRTH_DATE_REQUIRED;
-
-      const inputDate = new Date(value);
-
-      // 유효한 날짜인지 검사
-      if (isNaN(inputDate.getTime())) {
-        return FORM_MESSAGES.VALIDATION.BIRTH_DATE_INVALID;
-      }
-
-      // 미래 날짜 검사
-      if (inputDate > currentDate) {
-        return FORM_MESSAGES.VALIDATION.BIRTH_DATE_INVALID;
-      }
-
-      // 최소 나이 검사 (1900년 이전)
-      if (inputDate.getFullYear() < FORM_CONSTANTS.BIRTH_DATE.MIN_YEAR) {
-        return FORM_MESSAGES.VALIDATION.BIRTH_DATE_INVALID;
-      }
-
-      return true;
-    },
-    [currentDate]
-  );
-
   // 이메일 변경 시 인증 상태 리셋
   useEffect(() => {
     const subscription = form.watch((_value, { name }) => {
@@ -322,12 +325,18 @@ export const RegisterForm = () => {
       }
 
       // 백엔드 구조에 맞게 데이터 준비
+      const genderMapping: Record<string, 'MALE' | 'FEMALE' | 'OTHERS'> = {
+        'male': 'MALE',
+        'female': 'FEMALE',
+        'others': 'OTHERS'
+      };
+
       const registerData = {
         name: data.name,
         email: data.email,
         password: data.password,
         nickname: data.nickname,
-        gender: data.gender.toUpperCase() as 'MALE' | 'FEMALE' | 'OTHERS',
+        gender: genderMapping[data.gender] || data.gender.toUpperCase() as 'MALE' | 'FEMALE' | 'OTHERS',
         phone: data.phone,
         school: {
           name: selectedSchool.name,
@@ -490,11 +499,7 @@ export const RegisterForm = () => {
 
                 <NameField form={form} />
 
-                <BirthDateField
-                  form={form}
-                  currentDate={currentDate}
-                  validateBirthDate={validateBirthDate}
-                />
+                <BirthDateField form={form} currentDate={currentDate} />
 
                 <GenderField form={form} />
 
