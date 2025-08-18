@@ -14,7 +14,7 @@
 |전재욱|BE|
 |김현서|BE,AI|
 |노혜성|FE|
-|박진호|BE,FE|
+|박진호|FE, AI|
 
 ## ERD
 
@@ -26,7 +26,8 @@
 
 ## AI 관련 문서(HTP)
 
-[AI 관련 문서](./docs/HTP%20검사%20해석%20RAG%20pipeline구축.pdf)
+[AI RAG Pipeline 구축](./docs/HTP%20검사%20해석%20RAG%20pipeline구축.pdf)  
+[AI RAG 최종 평가](./docs/HTP%20검사%20해석%20RAG%20최종%20평가.pdf)
 
 ## CI/CD
 
