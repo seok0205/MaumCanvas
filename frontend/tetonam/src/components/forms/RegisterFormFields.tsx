@@ -58,7 +58,6 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 interface RegisterFormFieldsProps {
   form: UseFormReturn<RegisterFormData>;
   currentDate: Date;
-  validateBirthDate: (value: string) => string | true;
 }
 
 export const NameField = ({
@@ -93,7 +92,6 @@ export const NameField = ({
 export const BirthDateField = ({
   form,
   currentDate,
-  validateBirthDate,
 }: RegisterFormFieldsProps) => {
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth() + 1;
@@ -139,13 +137,6 @@ export const BirthDateField = ({
             onChange={e => {
               const value = e.target.value;
               form.setValue('birthDate', value, { shouldValidate: true });
-
-              const error = validateBirthDate(value);
-              if (typeof error === 'string') {
-                form.setError('birthDate', { message: error });
-              } else {
-                form.clearErrors('birthDate');
-              }
             }}
             aria-describedby={
               form.formState.errors['birthDate'] ? 'birthDate-error' : undefined
@@ -232,7 +223,7 @@ export const GenderField = ({
       <SelectContent>
         <SelectItem value='male'>남성</SelectItem>
         <SelectItem value='female'>여성</SelectItem>
-        <SelectItem value='other'>기타</SelectItem>
+        <SelectItem value='others'>기타</SelectItem>
       </SelectContent>
     </Select>
     {form.formState.errors['gender'] && (
