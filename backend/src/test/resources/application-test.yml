@@ -1,13 +1,15 @@
 spring:
+  main:
+    allow-bean-definition-overriding: true
   datasource:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=MYSQL
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=MYSQL;INIT=CREATE DOMAIN IF NOT EXISTS "TEXT" AS CLOB
     username: sa
     password:
 
   data:
     redis:
-      host: test-redis
+      host: localhost
       port: 6379
 
   jpa:
@@ -47,3 +49,14 @@ cloud:
 ai:
   server:
     url: https://dummy-ai-server.com
+
+kakao:
+  client_id: dummy-kakao-client-id
+  redirect_uri: http://localhost:8080/kakao/callback
+  receiver_uuids: dummy-receiver-uuids
+  template_id: dummy-template-id
+
+agora:
+  app:
+    id: dummy-agora-app-id
+    certificate: dummy-agora-app-certificate
