@@ -1,6 +1,7 @@
 package com.example.tetonam.counseling.controller;
 
 import com.example.tetonam.counseling.dto.*;
+import com.example.tetonam.counseling.facade.CounselingFacade;
 import com.example.tetonam.counseling.service.CounselingService;
 import com.example.tetonam.response.ApiResponse;
 import com.example.tetonam.user.token.JwtTokenProvider;
@@ -11,7 +12,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -21,7 +21,7 @@ public class CounselingController {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final CounselingService counselingService;
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
+    private final CounselingFacade counselingFacade;
 
 
     @GetMapping("/check/valid/{id}")
@@ -45,9 +45,7 @@ public class CounselingController {
     public ResponseEntity<?> createCounseling(@RequestHeader("Authorization") String token, @RequestBody CounselingReserveRequestDto counselingReserveRequestDto) {
         String email = jwtTokenProvider.getEmail(token.substring(7));
         System.out.println("프론트에서 어떻게 시간주는지 확인 합니다!!!!"+counselingReserveRequestDto.getTime());
-//        String result=counselingService.createCounseling(email,counselingReserveRequestDto);
-        String lockKey="counselor:" + counselingReserveRequestDto.getCounselorId() + ":time:" + counselingReserveRequestDto.getTime().format(FORMATTER);
-        String result=counselingService.createCounselingWithLock(email,counselingReserveRequestDto,lockKey);
+        String result=counselingFacade.createCounseling(email,counselingReserveRequestDto);
         System.out.println("현재 시간은??" + LocalDateTime.now());
 
         return ResponseEntity.ok().body(ApiResponse.onSuccess(result));

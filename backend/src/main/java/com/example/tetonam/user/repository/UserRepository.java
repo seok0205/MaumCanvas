@@ -30,6 +30,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
                 FROM Counseling c
                 WHERE c.counselor = u
                   AND c.reservationTime = :time
+                  AND c.status = com.example.tetonam.counseling.domain.enums.Status.OPEN
               )
               
         """)

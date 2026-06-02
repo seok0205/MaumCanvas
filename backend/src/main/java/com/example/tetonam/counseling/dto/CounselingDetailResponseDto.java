@@ -26,7 +26,7 @@ public class CounselingDetailResponseDto {
     public static CounselingDetailResponseDto toStudentDto(Counseling counseling){
         return CounselingDetailResponseDto.builder()
                 .name(counseling.getCounselor().getName())
-                .school(counseling.getCounselor().getSchool().getName())
+                .school(counseling.getCounselor().getSchool() != null ? counseling.getCounselor().getSchool().getName() : null)
                 .email(counseling.getCounselor().getEmail())
                 .phone(counseling.getCounselor().getPhone())
                 .time(counseling.getReservationTime())
@@ -38,7 +38,7 @@ public class CounselingDetailResponseDto {
     public static CounselingDetailResponseDto toCounselorDto(Counseling counseling) {
         return CounselingDetailResponseDto.builder()
                 .name(counseling.getStudent().getName())
-                .school(counseling.getStudent().getSchool().getName())
+                .school(counseling.getStudent().getSchool() != null ? counseling.getStudent().getSchool().getName() : null)
                 .email(counseling.getStudent().getEmail())
                 .phone(counseling.getStudent().getPhone())
                 .time(counseling.getReservationTime())

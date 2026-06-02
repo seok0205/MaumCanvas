@@ -25,6 +25,36 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+// @Service
+// @RequiredArgsConstructor
+// public class CounselingService {
+
+//     private final CounselingRepository counselingRepository;
+//     private final CounselingImageRepository counselingImageRepository;
+
+//     @DistributedLock(key = "#lockKey") // Facade에서 호출될 때 프록시가 작동함
+//     @Transactional // 락 안에서 새 트랜잭션이 시작되고, 메서드 종료 시점에 커밋됨
+//     public String createCounselingWithLock(String lockKey, User student, User counselor, CounselingReserveRequestDto dto, DrawingList drawingList) {
+        
+//         // 중복 예약 여부 체크 (트랜잭션 내에서 수행)
+//         boolean isReserved = counselingRepository.existsByCounselorAndCounselingTime(counselor, dto.getTime());
+//         if (isReserved) {
+//             throw new CounselingHandler(ErrorStatus.ALREADY_RESERVED);
+//         }
+
+//         // 엔티티 저장
+//         Counseling counseling = CounselingReserveRequestDto.toEntity(student, counselor, dto);
+//         counselingRepository.save(counseling);
+
+//         counselingImageRepository.save(CounselingImage.builder()
+//                 .counseling(counseling)
+//                 .drawingList(drawingList)
+//                 .build());
+
+//         return "상담이 예약 되었습니다";
+//     }
+// }
+
 @Service
 @RequiredArgsConstructor
 public class CounselingService {
@@ -46,22 +76,8 @@ public class CounselingService {
 
 
     @DistributedLock(key = "#lockKey")
-    public String createCounselingWithLock(String email, CounselingReserveRequestDto dto,String lockKey) {
-        User student = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
-        User counselor = userRepository.findById(dto.getCounselorId())
-                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
-        DrawingList drawingList=drawingListRepository.findFirstByUserOrderByCreatedDateDesc(student)
-                .orElseThrow(()-> new CounselingHandler(ErrorStatus.STUDENT_HAVE_NOT_IMAGE));
-        // 락 키를 상담사ID + 예약시간(분단위로 포맷팅)으로 생성
-
-        // 락 키를 메서드 파라미터로 넘겨서 DistributedLock이 적용되게 함
-        return this.createCounselingInternal(lockKey, student, counselor, dto,drawingList);
-    }
-
-    // 실제 예약 로직 분리
     @Transactional
-    public String createCounselingInternal(String lockKey, User student, User counselor, CounselingReserveRequestDto dto, DrawingList drawingList) {
+    public String createCounselingWithLock(String lockKey, User student, User counselor, CounselingReserveRequestDto dto, DrawingList drawingList) {
         // 이미 예약 여부 체크
         boolean isReserved = counselingRepository.existsByCounselorAndCounselingTime(counselor, dto.getTime());
         if (isReserved) {
@@ -69,12 +85,12 @@ public class CounselingService {
         }
 
         Counseling counseling = CounselingReserveRequestDto.toEntity(student, counselor, dto);
-        Counseling counselingSaved =counselingRepository.save(counseling);
+        counselingRepository.save(counseling);
+
         counselingImageRepository.save(CounselingImage.builder()
                 .counseling(counseling)
-                .drawingList(drawingList).build());
-        System.out.println(counseling.getReservationTime()+"디비 저장전 시간확인");
-        System.out.println(counselingSaved.getReservationTime()+"디비 저장후 시간확인");
+                .drawingList(drawingList)
+                .build());
 
         return "상담이 예약 되었습니다";
     }
@@ -82,14 +98,13 @@ public class CounselingService {
     public List<StudentCounselingListResponseDto> showStudentCounselingList(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
-      return counselingRepository.findByCounselorOrderByReservationTimeAsc(user).stream().map(StudentCounselingListResponseDto::toStudentDto).toList();
+        return counselingRepository.findByStudentOrderByReservationTimeAsc(user).stream().map(StudentCounselingListResponseDto::toStudentDto).toList();
     }
 
     public List<CounselorCounselingListResponseDto> showCounselorCounselingList(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
-        return counselingRepository.findByStudentOrderByReservationTimeAsc(user).stream().map(CounselorCounselingListResponseDto::toDto).toList();
-
+        return counselingRepository.findByCounselorOrderByReservationTimeAsc(user).stream().map(CounselorCounselingListResponseDto::toDto).toList();
     }
 
     public StudentCounselingListResponseDto showMyRecentCounseling(String email) {

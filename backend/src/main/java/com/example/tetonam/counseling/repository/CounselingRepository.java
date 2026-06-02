@@ -15,19 +15,20 @@ public interface CounselingRepository extends JpaRepository<Counseling,Long> {
 
     @Query("SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END " +
             "FROM Counseling c " +
-            "WHERE c.counselor = :counselor AND c.reservationTime = :time")
+            "WHERE c.counselor = :counselor AND c.reservationTime = :time " +
+            "AND c.status = com.example.tetonam.counseling.domain.enums.Status.OPEN")
     boolean existsByCounselorAndCounselingTime(User counselor, LocalDateTime time);
 
     @Query("SELECT COUNT(c) FROM Counseling c WHERE c.counselor = :counselor AND c.reservationTime = :counselingTime")
     long countByCounselorAndCounselingTime(User counselor, LocalDateTime counselingTime);
 
-    //학생의 상담내역 조회
+    //상담사의 상담내역 조회 (counselor 매개변수 기준)
     @Query("SELECT c FROM Counseling c " +
             "WHERE c.counselor = :counselor " +
             "ORDER BY " +
             "CASE WHEN c.status = 'OPEN' THEN 0 ELSE 1 END, " +
             "c.reservationTime ASC")
-    List<Counseling> findByStudentOrderByReservationTimeAsc(User counselor);
+    List<Counseling> findByCounselorOrderByReservationTimeAsc(User counselor);
 
 
     // 다가오는 예약 가져오기 OPEN만 학생
@@ -36,13 +37,13 @@ public interface CounselingRepository extends JpaRepository<Counseling,Long> {
     // 다가오는 예약 가져오기 OPEN만 상담사
     Optional<Counseling> findFirstByCounselorAndStatusOrderByReservationTimeAsc(User user, Status status);
 
-    // 학생의 상담내역 조회
+    // 학생의 상담내역 조회 (student 매개변수 기준)
     @Query("SELECT c FROM Counseling c " +
             "WHERE c.student = :student " +
             "ORDER BY " +
             "CASE WHEN c.status = 'OPEN' THEN 0 ELSE 1 END, " +
             "c.reservationTime ASC")
-    List<Counseling> findByCounselorOrderByReservationTimeAsc(User student);
+    List<Counseling> findByStudentOrderByReservationTimeAsc(User student);
 
     //시간 지난 예약 close처리
     @Query("SELECT c FROM Counseling c WHERE c.status = :status AND c.reservationTime < :now")
